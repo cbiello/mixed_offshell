@@ -1,0 +1,365 @@
+#!/usr/bin/perl -w
+#
+# script to configure mixed-ll. To find out more type
+#
+# ./configure --help 
+#
+#----------------------------------------------------------------------
+
+use Cwd;
+
+sub check_exists_command { 
+    my $checkcmd = `sh -c 'command -v $_[0]'`; 
+    return $checkcmd;
+}
+
+$usage="
+Usage:
+  ./configure --cfgfile=... [FC=...] [FFLAGS='...'] [MPI=...] [CHECKS=...]
+
+To assign environment variables (e.g., FC, FCmpi,...), specify them as
+VAR=VALUE. For compiler flags (FFLAGS), use quotes, i.e. 'VALUE'.
+See below for descriptions of some of the useful variables.
+
+Configuration:
+  -h, --help      display this help message and exit
+
+Features and variables:
+  --cfgfile       mandatory. Chooses configuration options from
+                  a selected input file.
+  FC              sets the fortran (and f90) compiler
+  CXX             sets the C++ compiler
+  FFLAGS          sets the fortran (and f90) compiler options
+                  [e.g. FFLAGS='-O3 -g -Wall']
+  CXXFLAGS        sets the g++ compiler options
+                  [e.g. CXXFLAGS='-O3']
+  MPI             enable MPI build [true,false]
+  CHECKS          configure with checks [true,false]
+";
+
+if ($#ARGV >=0 && ($ARGV[0] eq "-h" || $ARGV[0] eq "--help")) {
+  print "$usage";
+  exit;
+}
+
+$configline=$0." ".join(" ",@ARGV);
+$cfgfile="cfgfile.txt";
+
+foreach $arg (@ARGV) {
+  if    ($arg =~ /^--cfgfile=(.*)/) { $cfgfile= $1;}
+  else {push @args, "\"".$arg."\"";}
+}
+push @args, "--cfgfile=$cfgfile";
+
+open(my $CFGFILE, '<', $cfgfile) or die "Could not open configuration file $cfgfile: $!\n";
+
+#default settings and paths
+my $PYstd  = "python";
+my $FCstd  = "gfortran";
+my $FCmpi  = "mpif90";
+my $FFLAGS = "-O3 -ffree-line-length-1000";
+my $CXX    = "g++";
+my $CXXFLAGS = "-O3";
+my $OPT    = "true";
+my $withMPI    = "true";
+my $withCHECKS = "true";
+my $with2L = "false";
+my $analysis = "dflt";
+
+my $WITHLHAPDF    = "No";
+my $WITHHoppet    = "No";
+my $WITHOpenLoops = "No";
+my $WITHGiNaC     = "No";
+my $WITHChaplin   = "No";
+my $WITHHandyG    = "No";
+my $WITHQCDLoop   = "No";
+my $WITHCollier   = "No";
+
+my $LHAPDFPATH = "/usr/local";
+my $HOPPETPATH = "/usr/local";
+my $OLPATH     = "/usr/local";
+my $GINACPATH  = "/usr/local";
+my $CLNPATH    = "/usr/local";
+my $HANDYGPATH = "/usr/local";
+
+#check if libraries already installed
+my $LHAPDFcheck = (check_exists_command 'lhapdf-config');
+if(length $LHAPDFcheck ne 0){
+    $LHAPDFPATH = qx/lhapdf-config --prefix/;
+}
+
+my $HOPPETcheck = (check_exists_command 'hoppet-config');
+if(length $HOPPETcheck ne 0){
+    $HOPPETPATH = qx/hoppet-config --prefix/;
+}
+
+#read and prepare dependencies and compiler options
+while(<$CFGFILE>){
+    chomp;
+    if($_=~/^PYCMD=/) {
+	my ($key, $value) = split(/=/, $_);
+        $PYstd = $value;
+    }
+    if($_=~/^FC=/) {
+	my ($key, $value) = split(/=/, $_);
+        $FCstd = $value;
+    }    
+    if($_=~/^FCmpi=/) {
+	my ($key, $value) = split(/=/, $_);
+        $FCmpi = $value;
+    }
+    if($_=~/^FFLAGS=/) {
+	my ($key, $value) = split(/='/, $_);
+        $FFLAGS = $value;
+	$FFLAGS =~ tr/'//d;
+    }
+    if($_=~/^OPT=/) {
+	my ($key, $value) = split(/=/, $_);
+        $OPT = $value;
+    }
+    if($_=~/^CXX=/) {
+	my ($key, $value) = split(/=/, $_);
+        $CXX = $value;
+    }
+    if($_=~/^CXXFLAGS=/) {
+	my ($key, $value) = split(/=/, $_);
+        $CXXFLAGS = $value;
+    }
+    if($_=~/^MPI=/) {
+	my ($key, $value) = split(/=/, $_);
+        $withMPI = $value;
+    }
+    if($_=~/^With2L=/) {
+	my ($key, $value) = split(/=/, $_);
+        $with2L = $value;
+    }
+    if($_=~/^analysis=/) {
+	my ($key, $value) = split(/=/, $_);
+        $analysis = $value;
+    }        
+    if($_=~/^CHECKS=/) {
+	my ($key, $value) = split(/=/, $_);
+        $withCHECKS = $value;
+    }
+    if($_=~/^LHAPDF=/) {
+	my ($key, $value) = split(/=/, $_);
+        $LHAPDFPATH = $value;
+	$WITHLHAPDF = "Yes";
+    }
+    if($_=~/^OPENLOOPS=/) {
+	my ($key, $value) = split(/=/, $_);
+        $OLPATH = $value;
+	$WITHOpenLoops = "Yes";
+    }
+    if($_=~/^HOPPET=/) {
+	my ($key, $value) = split(/=/, $_);
+        $HOPPETPATH = $value;
+	$WITHHoppet = "Yes";
+    }
+    if($_=~/^GINAC=/) {
+	my ($key, $value) = split(/=/, $_);
+        $GINACPATH = $value;
+        $CLNPATH   = $value;
+	$WITHGiNaC = "Yes";
+    }
+    if($_=~/^CLN=/) {
+	my ($key, $value) = split(/=/, $_);
+        $CLNPATH   = $value;
+    }
+    if($_=~/^HANDYG=/) {
+	my ($key, $value) = split(/=/, $_);
+        $HANDYGPATH = $value;
+	$WITHHandyG = "Yes";
+    }    
+}
+close($CFGFILE);
+
+#override cfgfile in favour of command line options
+foreach $arg (@ARGV) {
+  # compiler
+  if ($arg =~ /^FC=(.*)/) { $FCstd= $1;}
+  else {push @args, "\"".$arg."\"";}
+  # compiler flags
+  if ($arg =~ /^FFLAGS=(.*)/) {
+      $FFLAGS= $1;
+      $FFLAGS =~ tr/'//d;
+  }
+  else {push @args, "\"".$arg."\"";}
+  # MPI
+  if ($arg =~ /^MPI=(.*)/) { $withMPI= $1;}
+  else {push @args, "\"".$arg."\"";}
+  # CHECKS
+  if ($arg =~ /^CHECKS=(.*)/) { $withCHECKS= $1;}
+  else {push @args, "\"".$arg."\"";}
+}
+
+my $PY = $PYstd;
+
+#check if MPI build required and adapt FC
+my $FC;
+if($withMPI eq "true") {
+    $FC = $FCmpi;
+} else {
+    $FC = $FCstd;
+}
+
+#preprocessor flags
+my $PPflag;
+if($FC eq "ifort") {
+    $PPflag = "-fpp";
+} else {
+    $PPflag = "-cpp";
+}
+
+#compiler flags
+my $FOPTS = "FOPTS=" . $FFLAGS . " " . "-J \$(MODDIR)";
+
+#prepare config.cfg file
+if($withMPI eq "true") {
+    $withMPIvalue = 1;
+} else {
+    $withMPIvalue = 0;
+}
+if($withCHECKS eq "true") {
+    $withCHECKSvalue = 1;
+} else {
+    $withCHECKSvalue = 0;
+}
+if($with2L eq "true") {
+    $with2Lvalue = 1;
+} else {
+    $with2Lvalue = 0;
+    $WITHGiNaC = "No";
+}
+
+my $WITHMPI    = "-D_MPIbuild=" . $withMPIvalue . "\n";
+my $WITHCHECKS = "-D_withchecks=" . $withCHECKSvalue . "\n";
+my $WITH2L     = "-D_with2L=" . $with2Lvalue . "\n";
+my $ANALYSIS   = "-DANALYSIS=" . "\\\"" . $analysis . "\\\"" . "\n";
+
+my $configcfgfile = './config.cfg';
+if(-e $configcfgfile) { unlink $configcfgfile;}
+
+open(CFGF, '>>', $configcfgfile) or die $!;
+
+print CFGF $WITHMPI;
+print CFGF $WITHCHECKS;
+print CFGF $WITH2L;
+print CFGF $ANALYSIS;
+
+close(CFGF);
+
+#print info
+print "--------------------------------------------------------------------------------\n";
+print "Configuration setup\n";
+print "--------------------------------------------------------------------------------\n";
+print "Python..............................: " . $PY . "\n";
+print "Fortran compiler....................: " . $FC . "\n";
+print "Fortran compiler flags..............: " . $FFLAGS . "\n";
+print "C++ compiler........................: " . $CXX . "\n";
+print "C++ compiler flags..................: " . $CXXFLAGS . "\n";
+print "Configuring with MPI................: " . $withMPI . "\n";
+print "Configuring with Checks.............: " . $withCHECKS . "\n";
+print "Configuring with 2L amplitudes......: " . $with2L . "\n";
+print "Using analysis......................: " . $analysis . "\n";
+print "LHAPDF installation path selected...: " . $LHAPDFPATH . "\n";
+print "HOPPET installation path selected...: " . $HOPPETPATH . "\n";
+print "GINAC installation path selected....: " . $GINACPATH . "\n";
+print "CLN installation path selected......: " . $CLNPATH . "\n";
+print "HANDYG installation path selected...: " . $HANDYGPATH . "\n";
+print "OpenLoops installation path selected: " . $OLPATH . "\n";
+
+#prepare makefile.inc
+my $cfgPY       = "PYCMD=" . $PY . "\n";
+my $cfgF95      = "F95=" . $FC . " " . $PPflag . " @\$(ConfigFile) " . $PPflag . " -DGIT_VERSION=\\\"\$(GIT_VERSION)\\\"\n";
+my $cfgFC       = "FC=" . $FC . "\n";
+my $cfgFFLAGS   = "FFLAGS=" . $FFLAGS . "\n";
+my $cfgOPT      = $FOPTS . "\n";
+my $cfgCXX      = "CXX=" . $CXX . "\n";
+my $cfgCXXFLAGS = "CXXFLAGS=" . $CXXFLAGS . "\n\n";
+my $cfgLHAPDF   = "LHAPDF=" . $LHAPDFPATH . "\n";
+my $cfgOL       = "OPENLOOPS=" . $OLPATH . "\n";
+my $cfgGINAC    = "GINAC=" . $GINACPATH . "\n";
+my $cfgCLN      = "CLN=" . $CLNPATH . "\n";
+my $cfgHANDYG   = "HANDYG=" . $HANDYGPATH . "\n";
+my $cfgHOPPET   = "HOPPET=" . $HOPPETPATH . "\n";
+my $cfgHOPPETLIB = "HOPPETLIB=\$(HOPPET)/lib" . "\n";
+my $cfgHOPPETINC = "HOPPETINC=\$(HOPPET)/include/hoppet" . "\n";
+my $cfgANALYSIS = "analysis=" . $analysis . "\n";
+
+my $cfgWithLHAPDF    = "WithLHAPDF=" . $WITHLHAPDF . "\n";
+my $cfgWithHoppet    = "WithHoppet=" . $WITHHoppet . "\n";
+my $cfgWithOpenLoops = "WithOpenLoops=" . $WITHOpenLoops . "\n";
+my $cfgWithHandyG    = "WithHandyG=" . $WITHHandyG . "\n";
+my $cfgWithGiNaC     = "WithGiNaC=" . $WITHGiNaC . "\n";
+#my $cfgWithChaplin   = "WithChaplin=" . $WITHChaplin . "\n";
+#my $cfgWithQCDLoop   = "WithQCDLoop=" . $WITHQCDLoop . "\n";
+#my $cfgWithCollier   = "WithCollier=" . $WITHCollier . "\n";
+
+my $makeincfile = './makefile.inc';
+if(-e $makeincfile) { unlink $makeincfile;}
+
+open(MFI, '>>', $makeincfile) or die $!;
+
+print MFI $cfgPY;
+print MFI $cfgF95;
+print MFI $cfgOPT;
+print MFI $cfgFC;
+print MFI $cfgCXX;
+print MFI $cfgFFLAGS;
+print MFI $cfgCXXFLAGS;
+print MFI $cfgLHAPDF;
+print MFI $cfgOL;
+print MFI $cfgGINAC;
+print MFI $cfgCLN;
+print MFI $cfgHANDYG;
+print MFI $cfgHOPPET;
+print MFI $cfgHOPPETLIB;
+print MFI $cfgHOPPETINC;
+print MFI "\n";
+print MFI $cfgANALYSIS;
+print MFI "\n";
+print MFI $cfgWithLHAPDF;
+print MFI $cfgWithHoppet;
+print MFI $cfgWithOpenLoops;
+print MFI $cfgWithHandyG;
+print MFI $cfgWithGiNaC;
+#print MFI $cfgWithChaplin;
+#print MFI $cfgWithQCDLoop;
+#print MFI $cfgWithCollier;
+
+close(MFI);
+
+# write the correct cut_histo file
+my $cuthistofile = './analysis/mod_cut_histo.f90';
+if(-e $cuthistofile) { unlink $cuthistofile;}
+
+open(CUTHISTO,">>",$cuthistofile) or die "Could not create mod_cut_histo.f90";
+print CUTHISTO "module mod_cut_histo\n";
+print CUTHISTO "  use mod_cut_histo_" . $analysis . "\n";
+print CUTHISTO "end module mod_cut_histo\n";
+close(CUTHISTO);
+
+
+# write a file config.log
+my $configlogfile = './config.log';
+if(-e $configlogfile) { unlink $configlogfile;}
+
+open (LOG,">>",$configlogfile) || die "Could not open config.log";
+print LOG "# the last configure that was run was\n";
+print LOG "$configline\n\n";
+print LOG "PY=" . $PY . "\n";
+print LOG "FC=" . $FC . "\n";
+print LOG "FFLAGS='" . $FFLAGS . "'\n\n";
+print LOG "MPI=" . $withMPI. "\n";
+print LOG "CHECKS=" . $withCHECKS. "\n";
+print LOG "With2L=" . $with2L. "\n\n";
+print LOG "LHAPDF=" . $LHAPDFPATH . "\n";
+print LOG "OPENLOOPS=" . $OLPATH . "\n";
+print LOG "GINAC=" . $GINACPATH . "\n";
+print LOG "CLN=" . $CLNPATH . "\n";
+print LOG "HANDYG=" . $HANDYGPATH . "\n";
+print LOG "HOPPET=" . $HOPPETPATH . "\n\n";
+print LOG "analysis=" . $analysis . "\n\n";
+close LOG;
+print "\nConfiguration setup written to " . $configlogfile . "\n";

@@ -1,0 +1,22 @@
+F95=mpif90 -cpp @$(ConfigFile) -cpp -DGIT_VERSION=\"$(GIT_VERSION)\"
+FOPTS=-O3 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000 -J $(MODDIR)
+FC=mpif90
+CXX=g++
+FFLAGS=-O3 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000
+CXXFLAGS=-O3
+
+LHAPDF=/usr
+OPENLOOPS=/users/ttp/signorile/Desktop/tools/OpenLoops
+GINAC=/usr/local
+CLN=/usr/local
+HANDYG=/users/ttp/signorile/Desktop/tools
+HOPPET=/users/ttp/signorile/Desktop/tools
+HOPPETLIB=$(HOPPET)/lib
+HOPPETINC=$(HOPPET)/include/hoppet
+
+
+WithLHAPDF=Yes
+WithHoppet=Yes
+WithOpenLoops=Yes
+WithHandyG=Yes
+WithGiNaC=No

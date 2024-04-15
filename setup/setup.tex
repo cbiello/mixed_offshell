@@ -1,0 +1,68 @@
+\documentclass[a4paper]{article}
+
+\begin{document}
+
+\section{Setup}
+We use the same setup of the EW papers. In particular:
+\begin{itemize}
+\item $m_Z = 91.1876~{\rm GeV}$, $m_W = 80.398~{\rm GeV}$, $m_H =
+  125~{\rm GeV}$, $m_t = 173.2~{\rm GeV}$; 
+\item $G_F = 1.16639\cdot 10^{-5}~{\rm GeV}^{-2}$;
+\item $\Gamma_W = 2.1054~{\rm GeV}$, $\Gamma_Z = 2.4952~{\rm GeV}$, $\Gamma_H = 4.165~\rm{MeV}$;
+\item  By default, we work in the $G_{\mu}$ scheme. 
+\end{itemize}
+We run at the $\sqrt{s_{\rm had}} = 14~{\rm TeV}$ LHC, and use
+\texttt{NNPDF31\_nnlo\_as\_0118\_luxqed} PDFs.
+We include $b$-quarks and treat them as massless. Diagrams with virtual tops are
+included in the RV amplitudes but not in the VV.
+
+\noindent
+We recombine leptons
+and photons as follows:
+\begin{enumerate}
+\item we look for the $l\gamma$ pair closest in $\Delta R$, where $l$
+  is either lepton or anti-lepton
+\item if the closest pair has $\Delta R \le R_{l\gamma} = 0.1$, we sum the
+  two momenta and call the resulting object a ``dressed lepton''. Otherwise,
+  the dressed leptons are the priginal leptons.
+\end{enumerate}
+For now, we do not require photon-quark isolation nor lepton-lepton isolation.
+We also put a cut
+\begin{equation}
+  300~{\rm GeV} \le m_{l\bar l} \le \sqrt{s_{\rm had}},
+\end{equation}
+which is computed from dressed leptons. Finally, we run with $\mu = m_{l\bar l}/2$, again
+computed from dressed leptons. 
+
+\subsection{RV amplitudes and the complex mass scheme}
+At least for now, we use
+the complex mass scheme for RV only for the $Z$ and $W$ mass, so we set
+$\Gamma_H=\Gamma_t=0$ in the \texttt{OpenLoops} interface. For now, this
+is not yet done at tree-level so we have small inconstencies in tree-level
+amplitudes from our code vs tree-level amplitudes from \texttt{OpenLoops}.
+
+\section{Fiducial volume definition and observables}
+ATLAS: at least two electrons with leading/subleading $p_\perp >
+30/40~\rm{GeV}$, isolated electrons with $116 \le m_{ll} \le
+1500~\rm{GeV}$, $|\Delta y_{ll}| < 3.5$. No such requirement for muons.
+(Muon: different isolation). Keep the lepton rapidity fixed as
+$|y_l| < 2.5$. Never use pseudo-rapidity. 
+
+Plot: $y_l$ and $p_{\perp,l}$ $y_{ee}$, $\Delta y_{ee}$ for $m_{ll}> 116$, for $m_{ll}> 300$. Also in windows $116 - 150$, $150-200$, $200 - 300$, $300-500$,
+$500-1500$ for $y_{ll}$ and $\Delta y_{ll}$. CMS: up to 2 TeV, or better the
+last bin is $1500-3000$.
+
+Ratio at different energies. CMS: same for $y_{ll}$ in $120-200$, $200-1500$. 
+
+Maybe play with isolation.
+
+Our setup: play a bit with $\Delta R$, starting from default 0.1. Use ATLAS
+as baseline for windows, but make sure we have correct under/over flow to
+keep the last 1500-3000 bin. Start from 200 (CMS) [if removing Higgs bubble
+  is a mess, start from 220].
+Run both inclusively and with hard cuts, to
+make sure we don't loose events in the tails. Run with and without $|\Delta y_{ll}|$ cut. Instead of asymmetric cuts use product cuts. But first check
+how much statistics we loose $\to$ two sets of runs, one with ATLAS asym cuts
+and one with product cuts. We then use $\sqrt{p_{\perp,l^+} p_{\perp,l^-}} > 35$ GeV. 
+
+\end{document}

@@ -1,0 +1,319 @@
+#!/bin/bash
+
+if [[ -z $LOGFILE ]]; then
+  exec 2> /dev/null 3>&1
+else
+  exec 3> >(while read TEXT ; do echo $TEXT ; echo $(date +"%d.%m.%Y %H:%M:%S") $TEXT >> $LOGFILE; done)
+  exec 2>> $LOGFILE
+fi
+
+# set -e
+
+printhelp() {
+cat << EOF
+Usage: ./nsc-combine_histos [OPTION]... [VAR=VALUE]...
+
+To assign a variable (e.g., idir, odir...), specify them as
+VAR=VALUE. See below for descriptions of some of the useful variables.
+
+Default [def] and optional [opt] values are specified in brackets.
+
+  --idir=INDIR       extract histrograms from INDIR 
+                     [def: $PWD/histo]
+  --odir=OUTDIR      write histrograms in OUTDIR 
+                     [def: $PWD/histo]
+  --act=ACTION       Action to perform on histograms, e.g. summing, averaging
+                     [def: ad3] [opt: add,avg,ad3]
+  --corr=CORR        select only histrograms for corrections CORR 
+                     [def: all] [opt: lo,nloqcd,nloewk,nnlomix]
+  --ch=CH            combine only histrograms for partonic channel CH
+                     [def: all] [opt: qqb,aa,gq,aq,ag]
+  --splitch=TRUE     split histrograms by partonic channel
+                     [def: true] [opt: true/false]
+  --ananame=ANA      Specify the name of the analysis to process. 
+                     By the default, all the present ones will be processed.
+  --hsum=HSUMPATH    Specify the path to the 'nsc-hsummer' binary
+                     [def: $PWD/bin]
+
+Report bugs to <federico.buccioni@physics.ox.ac.uk>.
+
+EOF
+exit
+}
+
+findprog() {
+    #echo -n "looking for $1... " 1>&3
+    var="$2"
+    set -- ${!var:+"${!var}"} "${@:3}"
+    for prog in "$@" ; do
+        echo "Checking option $prog in path" 1>&2
+        full="`type -P "$prog"`" && {
+            #echo "$full" 1>&3
+            printf -v "CONF_$var" "%q" "$full"
+            return 0
+        }
+    done
+    # echo "no $@ in your path" 1>&3
+    return 1
+}
+
+findhistofile() {
+    if [[ $(ls $INHISTODIR/*$1*histo -A) ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+findanalyses () {
+    findhistofile "_$1" || (echo "Could not find any $3 files. Ignoring request.")
+    delimiter="_$1"
+    if [[ $ANANAME == "unspecified" ]]; then
+        for i in $(ls $INHISTODIR/*_$1_*histo); do
+           filename=${i#*"$INHISTODIR/"}
+           analarr+=( "${filename%%"$delimiter"*}" )
+        done
+        unique_analyses=($(echo "${analarr[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+    else
+        findhistofile ${ANANAME}_$1 || (echo "Could not find $3 $ANANAME files for channel $2. Ignoring request.")
+        unique_analyses=($ANANAME)
+    fi
+}
+
+INHISTODIR=histo
+OUTHISTODIR=histo
+ACTION=ad3
+SELCORR=all
+SELCHAN=all
+SPLITCHAN=true
+ANANAME=unspecified
+HSUMPATH=$PWD/bin
+
+CONF_HSUM=$CC
+
+for arg in "$@" ; do
+    case "$arg" in
+        --idir=*)
+            INHISTODIR="${arg#--idir=}" ;;
+        --odir=*)
+            OUTHISTODIR="${arg#--odir=}" ;;
+        --act=*)
+            ACTION="${arg#--act=}" ;;
+        --corr=*)
+            SELCORR="${arg#--corr=}" ;;
+        --ch=*)
+            SELCHAN="${arg#--ch=}" ;;
+        --splitch=*)
+            SPLITCHAN="${arg#--splitch=}" ;;
+        --ananame=*)
+            ANANAME="${arg#--ananame=}" ;;
+        --hsum=*)
+            HSUMPATH="${arg#--hsum=}" ;;
+        --help )
+            printhelp ;;
+        -*)
+            echo "Warning: $arg is not a valid option." 1>&3
+            printhelp ;;
+        *=*)
+            eval "$arg" ;;
+        *)
+            echo "Warning: $arg is not a valid argument." 1>&3
+            printhelp ;;
+    esac
+done
+
+if [ -d "$OUTHISTODIR" ] 
+then
+    echo "Directory ${OUTHISTODIR} already exists." > /dev/null
+else
+    mkdir $OUTHISTODIR
+fi
+
+#look for hsummer bin
+PATH=$PATH:$HSUMPATH findprog nsc-hsummer HSUM nsc-hsummer || (echo "Did not find nsc-hsummer. Specify the path of nsc-hsummer using the --hsum option, e.g. --hsum=$HOME/local/bin"  && exit 1)
+
+### Select correction
+LOon=false
+NLOQCDon=false
+NLOEWKon=false
+NNLOMIXon=false
+
+if [[ $SELCORR == "all" ]]; then
+    LOon=true
+    NLOQCDon=true
+    NLOEWKon=true
+    NNLOMIXon=true
+elif [[ $SELCORR == "lo" ]]; then
+    LOon=true
+elif [[ $SELCORR == "nloqcd" ]]; then
+    NLOQCDon=true
+elif [[ $SELCORR == "nloewk" ]]; then
+    NLOEWKon=true
+elif [[ $SELCORR == "nnlomix" ]]; then
+    NNLOMIXon=true
+fi
+
+### Select partonic channel
+QQon=false
+AAon=false
+GQon=false
+AQon=false
+AGon=false
+
+if [[ $SELCHAN == "all" ]]; then
+    QQon=true
+    AAon=true
+    GQon=true
+    AQon=true
+    GAon=true
+    channels=(ns aa gq aq ag)
+elif [[ $SELCHAN == "qqb" ]]; then
+    QQon=true
+    channels=(ns)
+elif [[ $SELCHAN == "aa" ]]; then
+    AAon=true
+    channels=(aa)
+elif [[ $SELCHAN == "gq" ]]; then
+    GQon=true
+    channels=(gq)
+elif [[ $SELCHAN == "aq" ]]; then
+    AQon=true
+    channels=(aq)
+elif [[ $SELCHAN == "ga" ]]; then
+    AGon=true
+    channels=(ag)
+fi
+
+### LO histograms
+analarr=()
+if [[ $LOon == "true" ]]; then
+    echo "Combining LO histograms"
+    if [[ $SELCHAN == "all" ]]; then
+        findanalyses lo all LO
+    elif [[ $SELCHAN == "qqb" ]]; then
+        findanalyses lo_ns qqb LO
+    elif [[ $SELCHAN == "aa" ]]; then
+        findanalyses lo_aa aa LO
+    fi
+
+    echo "  Analyses selected at LO:"
+    for val in "${unique_analyses[@]}"; do
+        printf "  - $val\n"
+    done
+
+    for ana in "${unique_analyses[@]}"; do
+        for chn in "${channels[@]}"; do
+            if [[ $(ls $INHISTODIR/${ana}_lo_${chn}*histo -A) ]]; then
+                PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_lo_$chn*.histo $OUTHISTODIR/${ana}_lo_${chn}.histo
+            fi
+        done
+        PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_lo_*.histo $OUTHISTODIR/${ana}_lo.histo
+    done
+fi
+printf "\n"
+
+### NLO-QCD histograms
+analarr=()
+if [[ $NLOQCDon == "true" ]]; then
+    echo "Combining NLO-QCD histograms"
+    if [[ $SELCHAN == "all" ]]; then
+        findanalyses nloqcd all NLO-QCD
+    elif [[ $SELCHAN == "qqb" ]]; then
+        findanalyses nloqcd_ns qqb NLO-QCD
+    elif [[ $SELCHAN == "gq" ]]; then
+        findanalyses nloqcd_gq gq NLO-QCD
+    fi
+
+    echo "  Analyses selected at NLO-QCD:"
+    for val in "${unique_analyses[@]}"; do
+        printf "  - $val\n"
+    done
+
+    for ana in "${unique_analyses[@]}"; do
+        for chn in "${channels[@]}"; do
+            if [[ $(ls $INHISTODIR/${ana}_nloqcd_${chn}*histo -A) ]]; then
+                if [[ $chn == "gq" ]]; then
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nloqcd_qg*.histo $INHISTODIR/${ana}_nloqcd_gq*.histo $OUTHISTODIR/${ana}_nloqcd_${chn}.histo
+                else
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nloqcd_$chn*.histo $OUTHISTODIR/${ana}_nloqcd_${chn}.histo
+                fi
+            fi
+        done
+        PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nloqcd_*.histo $OUTHISTODIR/${ana}_dnloqcd.histo
+    done
+fi
+printf "\n"
+
+### NLO-EWK histograms
+analarr=()
+if [[ $NLOEWKon == "true" ]]; then
+    echo "Combining NLO-EWK histograms"
+    if [[ $SELCHAN == "all" ]]; then
+        findanalyses nloewk all NLO-EWK
+    elif [[ $SELCHAN == "qqb" ]]; then
+        findanalyses nloewk_ns qqb NLO-EWK
+    elif [[ $SELCHAN == "aa" ]]; then
+        findanalyses nloewk_aa aa NLO-EWK
+    elif [[ $SELCHAN == "aq" ]]; then
+        findanalyses nloewk_aq aq NLO-EWK
+    fi
+
+    echo "  Analyses selected at NLO-EWK:"
+    for val in "${unique_analyses[@]}"; do
+        printf "  - $val\n"
+    done
+
+    for ana in "${unique_analyses[@]}"; do
+        for chn in "${channels[@]}"; do
+            if [[ $(ls $INHISTODIR/${ana}_nloewk_${chn}*histo -A) ]]; then
+                if [[ $chn == "aq" ]]; then
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nloewk_qa*.histo $INHISTODIR/${ana}_nloewk_aq*.histo $OUTHISTODIR/${ana}_nloewk_${chn}.histo
+                else
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nloewk_$chn*.histo $OUTHISTODIR/${ana}_nloewk_${chn}.histo
+                fi
+            fi
+        done
+        PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nloewk_*.histo $OUTHISTODIR/${ana}_dnloewk.histo
+    done
+fi
+printf "\n"
+
+### NNLO-MIX histograms
+analarr=()
+if [[ $NNLOMIXon == "true" ]]; then
+    echo "Combining NNLO-MIX histograms"
+    if [[ $SELCHAN == "all" ]]; then
+        findanalyses nnlo all NNLO-MIX
+    elif [[ $SELCHAN == "qqb" ]]; then
+        findanalyses nnlo_ns qqb NNLO-MIX
+    elif [[ $SELCHAN == "gq" ]]; then
+        findanalyses nnlo_gq gq NNLO-MIX
+    elif [[ $SELCHAN == "aq" ]]; then
+        findanalyses nnlo_aq aq NNLO-MIX
+    elif [[ $SELCHAN == "ag" ]]; then
+        findanalyses nnlo_ag ag NNLO-MIX
+    fi
+
+    echo "  Analyses selected at NNLO-MIX:"
+    for val in "${unique_analyses[@]}"; do
+        printf "  - $val\n"
+    done
+
+    for ana in "${unique_analyses[@]}"; do
+        for chn in "${channels[@]}"; do
+            if [[ $(ls $INHISTODIR/${ana}_nnlo_${chn}*histo -A) ]]; then
+                if [[ $chn == "gq" ]]; then
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nnlo_qg*.histo $INHISTODIR/${ana}_nnlo_gq*.histo $OUTHISTODIR/${ana}_nnlo_${chn}.histo
+                elif [[ $chn == "aq" ]]; then
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nnlo_qa*.histo $INHISTODIR/${ana}_nnlo_aq*.histo $OUTHISTODIR/${ana}_nnlo_${chn}.histo
+                elif [[ $chn == "ag" ]]; then
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nnlo_ga*.histo $INHISTODIR/${ana}_nnlo_ag*.histo $OUTHISTODIR/${ana}_nnlo_${chn}.histo
+                else
+                    PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nnlo_$chn*.histo $OUTHISTODIR/${ana}_nnlo_${chn}.histo
+                fi
+            fi
+        done
+        PATH=$PATH:$HSUMPATH nsc-hsummer $ACTION $INHISTODIR/${ana}_nnlo_*.histo $OUTHISTODIR/${ana}_dnnlomix.histo
+    done
+fi
+printf "\n"

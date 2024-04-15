@@ -1,0 +1,572 @@
+module mod_xsects_nloqcd_r
+  use mod_types
+  use mod_consts_dp
+  use mod_parms
+  use mod_proc_parms
+  use mod_kinematics_nlo
+  use mod_process
+  use mod_aux_sectors
+  use mod_histo
+  use mod_cut_histo
+  use mod_amplitudes_tree_ppll
+  use mod_amplitudes_tree_ppnul
+  use mod_splittings_bare
+  implicit none
+  integer, parameter :: nFint  = 3 !-- 6 if full, 3 if use S(C1+C2)-S = 0
+  integer, parameter :: nkin   = 3 !-- 4 if full, 3 if use S(C1+C2)-S = 0
+#if(_withchecks == 1)
+  real(dp), public, save :: FintNLO_HC1C2(3)
+  real(dp), public, save :: FintNLO_HC(2)
+#endif
+
+  private
+
+  public :: xsect_nloqcd_r_is_ns
+  public :: xsect_nloqcd_r_is_gq,xsect_nloqcd_r_is_qg
+
+  !!!!! W xsect
+  public :: xsect_nloqcd_r_is_ns_w
+
+contains
+
+  function xsect_nloqcd_r_is_ns(yRnd,ff,vegasweight)
+    integer :: xsect_nloqcd_r_is_ns
+    real(dp15) :: yRnd(30),ff(1),vegasweight
+    type(KinConfig) :: HardProc,C1Lim,C2Lim
+    !--
+    real(dp)    :: xx(kNLO_max_full)
+    real(dp)    :: FintNLO_ns(nFint),kin(nkin)
+    real(dp)    :: respdf(ipdf)
+    real(dp)    :: res_nlo(2,2),res_lo(2,2)
+    real(dp)    :: z,s5i
+
+    xsect_nloqcd_r_is_ns = 0
+
+    ff(1) = zero
+
+    xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
+    call random_number(xx(kNLO_max_full))
+
+#if (_withchecks == 1)
+    if (override) then
+       xx(1:kNLO_max_full) = yRnd(1:kNLO_max_full)
+       print *, 'overriding input'
+    endif
+#endif
+    
+    if ((xx(xE)*xx(xRHO).lt.buff_r) .or. (xx(xE)*(one-xx(xRHO)).lt.buff_r)) then
+       failed_points = failed_points + 1
+       return
+    endif
+    
+    call open_histo()
+
+    call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
+    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
+    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+
+    !-- Hard
+    call cut_histo(HardProc)
+    if (HardProc%makecut.or.HardProc%flag) then
+
+       kin(1) = zero
+       FintNLO_ns(1) = zero
+
+    else    
+
+       call res_tree_g_qqb(HardProc%AmpMom,res_nlo)
+       call get_respdf(ns_lumi,1,0,HardProc,res_nlo,respdf)
+
+       respdf = respdf*HardProc%wgt
+
+       kin(1) = respdf(1)
+       FintNLO_ns(1) = kin(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !-- C1
+    call cut_histo(C1Lim)
+    
+    if (C1Lim%makecut.or.C1Lim%flag) then
+
+       kin(2) = zero
+       FintNLO_ns(2) = zero
+
+    else
+
+       call res_tree_qqb(C1Lim%AmpMom,res_lo)
+       call get_respdf(ns_lumi,1,0,C1Lim,res_lo,respdf)
+
+       z   = C1Lim%Lim_KinInv(1)
+       s5i = C1Lim%Lim_KinInv(2)
+
+       !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]
+       respdf = (-one)*respdf*(two/s5i)*(Cf*Pqg(z)/(one-z))&
+            * C1Lim%wgt
+
+       FintNLO_ns(2) = respdf(1)
+       kin(2) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !-- C2
+    call cut_histo(C2Lim)
+    
+    if (C2Lim%makecut.or.C2Lim%flag) then
+
+       kin(3) = zero
+       FintNLO_ns(3) = zero
+
+    else
+
+       call res_tree_qqb(C2Lim%AmpMom,res_lo)
+       call get_respdf(ns_lumi,1,0,C2Lim,res_lo,respdf)
+
+       z   = C2Lim%Lim_KinInv(1)
+       s5i = C2Lim%Lim_KinInv(2)
+
+       !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]
+       respdf = (-one)*respdf*(two/s5i)*(Cf*Pqg(z)/(one-z))&
+            * C2Lim%wgt
+
+       FintNLO_ns(3) = respdf(1)
+       kin(3) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+    
+    ff(1) = sum(kin)
+    call close_histo()
+
+    call check_ff(ff,xx,FintNLO_ns)
+    
+#if(_withchecks == 1)
+    FintNLO_HC1C2 = FintNLO_ns
+#endif
+
+  end function xsect_nloqcd_r_is_ns
+
+  function xsect_nloqcd_r_is_gq(yRnd,ff,vegasweight)
+    integer :: xsect_nloqcd_r_is_gq
+    real(dp15) :: yRnd(30),ff(1),vegasweight
+    type(KinConfig) :: HardProc,C1Lim
+    !--
+    real(dp)    :: xx(kNLO_max_full)
+    real(dp)    :: FintNLO_gq(2),kin(2)
+    real(dp)    :: respdf(ipdf)
+    real(dp)    :: res_nlo(2,2),res_lo(2,2)
+    real(dp)    :: z,s5i
+
+    xsect_nloqcd_r_is_gq = 0
+
+    ff(1) = zero
+
+    xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
+    call random_number(xx(kNLO_max_full))
+
+#if (_withchecks == 1)
+    if (override) then
+       xx(1:kNLO_max_full) = yRnd(1:kNLO_max_full)
+       print *, 'overriding input'
+    endif
+#endif
+    
+    if (xx(xE)*xx(xRHO).lt.buff_r) then
+       failed_points = failed_points + 1
+       return
+    endif
+    
+    call open_histo()
+
+    call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,compute_etas=.false.)
+    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
+    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+
+    !-- Hard
+    call cut_histo(HardProc)
+    if (HardProc%makecut.or.HardProc%flag) then
+
+       kin(1) = zero
+       FintNLO_gq(1) = zero
+
+    else    
+
+       call res_tree_g_gq(HardProc%AmpMom,res_nlo)
+       call get_respdf(gq_lumi,1,0,HardProc,res_nlo,respdf)
+
+       respdf = respdf*HardProc%wgt
+
+       kin(1) = respdf(1)
+       FintNLO_gq(1) = kin(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !-- C1
+    call cut_histo(C1Lim)
+    
+    if (C1Lim%makecut.or.C1Lim%flag) then
+
+       kin(2) = zero
+       FintNLO_gq(2) = zero
+
+    else
+
+       call res_tree_qqb(C1Lim%AmpMom,res_lo)
+       call get_respdf(gq_lumi,1,0,C1Lim,res_lo,respdf)
+
+       z   = C1Lim%Lim_KinInv(1)
+       s5i = C1Lim%Lim_KinInv(2)
+
+       !-- use Pgq so that in the soft limit we do not have 1/[1-(1-x)]
+       !-- Tr = Cf * aveqg/aveqq
+       respdf = (-one)*respdf*(two/s5i)*(tr*Pgq_spav(z)/(one-z)) & 
+            * C1Lim%wgt
+
+       FintNLO_gq(2) = respdf(1)
+       kin(2) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+    
+    ff(1) = sum(kin)
+    call close_histo()
+
+    call check_ff(ff,xx,FintNLO_gq)
+    
+#if(_withchecks == 1)
+    FintNLO_HC = FintNLO_gq
+#endif
+
+  end function xsect_nloqcd_r_is_gq
+
+  function xsect_nloqcd_r_is_qg(yRnd,ff,vegasweight)
+    integer :: xsect_nloqcd_r_is_qg
+    real(dp15) :: yRnd(30),ff(1),vegasweight
+    type(KinConfig) :: HardProc,C2Lim
+    !--
+    real(dp)    :: xx(kNLO_max_full)
+    real(dp)    :: FintNLO_qg(2),kin(2)
+    real(dp)    :: respdf(ipdf)
+    real(dp)    :: res_nlo(2,2),res_lo(2,2)
+    real(dp)    :: z,s5i
+
+    xsect_nloqcd_r_is_qg = 0
+
+    ff(1) = zero
+
+    xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
+    call random_number(xx(kNLO_max_full))
+
+#if (_withchecks == 1)
+    if (override) then
+       xx(1:kNLO_max_full) = yRnd(1:kNLO_max_full)
+       print *, 'overriding input'
+    endif
+#endif
+    
+    if (xx(xE)*(one-xx(xRHO)).lt.buff_r) then
+       failed_points = failed_points + 1
+       return
+    endif
+    
+    call open_histo()
+
+    call kinematics_nlo_is(yr=xx,HardProc=HardProc,C2Lim=C2Lim,compute_etas=.false.)
+    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
+    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+
+    !-- Hard
+    call cut_histo(HardProc)
+    if (HardProc%makecut.or.HardProc%flag) then
+
+       kin(1) = zero
+       FintNLO_qg(1) = zero
+
+    else    
+
+       call res_tree_g_qg(HardProc%AmpMom,res_nlo)
+       call get_respdf(qg_lumi,1,0,HardProc,res_nlo,respdf)
+
+       respdf = respdf*HardProc%wgt
+
+       kin(1) = respdf(1)
+       FintNLO_qg(1) = kin(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !-- C2
+    call cut_histo(C2Lim)
+    
+    if (C2Lim%makecut.or.C2Lim%flag) then
+
+       kin(2) = zero
+       FintNLO_qg(2) = zero
+
+    else
+
+       call res_tree_qqb(C2Lim%AmpMom,res_lo)
+       call get_respdf(qg_lumi,1,0,C2Lim,res_lo,respdf)
+
+       z   = C2Lim%Lim_KinInv(1)
+       s5i = C2Lim%Lim_KinInv(2)
+
+       !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]
+       respdf = (-one)*respdf*(two/s5i)*(Tr*Pgq_spav(z)/(one-z))&
+            * C2Lim%wgt
+
+       FintNLO_qg(2) = respdf(1)
+       kin(2) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+    
+    ff(1) = sum(kin)
+    call close_histo()
+
+    call check_ff(ff,xx,FintNLO_qg)
+    
+#if(_withchecks == 1)
+    FintNLO_HC = FintNLO_qg
+#endif
+
+  end function xsect_nloqcd_r_is_qg
+
+
+!!!!!!!!! W exchanged process !!!!!!!!!!!
+
+function xsect_nloqcd_r_is_ns_w(yRnd,ff,vegasweight)
+    integer :: xsect_nloqcd_r_is_ns_w
+    real(dp15) :: yRnd(30),ff(1),vegasweight
+    type(KinConfig) :: HardProc,C1Lim,C2Lim
+    !--
+    real(dp)    :: xx(kNLO_max_full)
+    real(dp)    :: FintNLO_ns(nFint),kin(nkin)
+    real(dp)    :: respdf(ipdf)
+    real(dp)    :: res_nlo(2,2),res_lo(2,2)
+    real(dp)    :: z,s5i
+
+    xsect_nloqcd_r_is_ns_w = 0
+
+    ff(1) = zero
+
+    xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
+    call random_number(xx(kNLO_max_full))
+
+#if (_withchecks == 1)
+    if (override) then
+       xx(1:kNLO_max_full) = yRnd(1:kNLO_max_full)
+       print *, 'overriding input'
+    endif
+#endif
+
+    if ((xx(xE)*xx(xRHO).lt.buff_r) .or. (xx(xE)*(one-xx(xRHO)).lt.buff_r)) then
+       failed_points = failed_points + 1
+       return
+    endif
+
+    call open_histo()
+
+    call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
+    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]  !not sure about the id: we have [nue e+], [-nue e-], [-nue, e-], [nue e+]
+    C1Lim%ids(1:4) = [0,0,id_el,-id_el] !not sure about the id: we have [nue e+], [-nue e-], [-nue, e-], [nue e+]
+    C2Lim%ids(1:4) = [0,0,id_el,-id_el] !not sure about the id: we have [nue e+], [-nue e-], [-nue, e-], [nue e+]
+
+    !-- Hard
+    call cut_histo(HardProc)
+    if (HardProc%makecut.or.HardProc%flag) then
+
+       kin(1) = zero
+       FintNLO_ns(1) = zero
+
+    else
+
+       call res_tree_g_qqb_w(HardProc%AmpMom,res_nlo)
+       call get_respdf(qQpb_lumi_w,1,0,HardProc,res_nlo,respdf)
+
+       !TEST MADGRAPH
+       !HardProc%AmpMom(:,1) = (/0.5000000E+03,  0.0000000E+00,  0.0000000E+00,  0.5000000E+03/)
+       !HardProc%AmpMom(:,2) = (/0.5000000E+03,  0.0000000E+00,  0.0000000E+00,  -0.5000000E+03/)
+       !HardProc%AmpMom(:,3) = (/0.4585788E+03,  0.1694532E+03,  0.3796537E+03,  -0.1935025E+03/)
+       !HardProc%AmpMom(:,4) = (/0.3640666E+03, -0.1832987E+02, -0.3477043E+03,  0.1063496E+03/)
+       !HardProc%AmpMom(:,5) = (/0.1773546E+03, -0.1511234E+03, -0.3194936E+02,  0.8715287E+02/)
+       
+       !call res_tree_g_qqb_w(HardProc%AmpMom,res_nlo)
+
+       !print*, 'NLO amp udx_veepg  ', (0.094835522759998875_dp)**2*res_nlo(1,1)/eesq2*(four*pi*0.11799999999999999_dp) 
+       !print*, 'MG udx_veepg          ', '5.4351126536548684E-007'
+       !print*, '-------'
+       !print*, 'NLO amp dux_vexemg ', (0.094835522759998875_dp)**2*res_nlo(2,1)/eesq2*(four*pi*0.11799999999999999_dp)
+       !print*, 'MG dux_vexemg         ', '2.5707621418480073E-006'
+       !print*, '-------'
+       !print*, 'NLO amp MG uxd_vexemg ', (0.094835522759998875_dp)**2*res_nlo(1,2)/eesq2*(four*pi*0.11799999999999999_dp)
+       !print*, 'MG uxd_vexemg            ', '5.4351126536548684E-007'
+       !print*, '-------'
+       !print*, 'NLO MG dxu_veepg  ', (0.094835522759998875_dp)**2*res_nlo(2,2)/eesq2*(four*pi*0.11799999999999999_dp)
+       !print*, 'MG dxu_veepg         ', '2.5707621418480073E-006'
+       !stop
+
+
+       !print*, 'HardProc%AmpMom(1)', HardProc%AmpMom(:,1)
+       !print*, 'HardProc%AmpMom(2)', HardProc%AmpMom(:,2)
+       !print*, 'HardProc%AmpMom(3)', HardProc%AmpMom(:,3)
+       !print*, 'HardProc%AmpMom(4)', HardProc%AmpMom(:,4)
+       !print*, 'HardProc%AmpMom(5)', HardProc%AmpMom(:,5)
+
+       !print*, 'res_nlo(1,1)= ', res_nlo(1,1)
+       !print*, 'res_nlo(1,2)= ', res_nlo(1,2)
+       !print*, 'res_nlo(2,1)= ', res_nlo(2,1)
+       !print*, 'res_nlo(2,2)= ', res_nlo(2,2)
+
+       !print*, 'HardProc%wgt= ', HardProc%wgt
+
+       respdf = respdf*HardProc%wgt
+
+       kin(1) = respdf(1)
+       FintNLO_ns(1) = kin(1)
+
+       call fill_histo(respdf,vegasweight)
+
+       !print*, 'FintNLO_ns(1)=', FintNLO_ns(1)
+
+    endif
+
+    !-- C1
+    call cut_histo(C1Lim)
+
+    if (C1Lim%makecut.or.C1Lim%flag) then
+
+       kin(2) = zero
+       FintNLO_ns(2) = zero
+
+    else
+
+       call res_tree_qqb_w(C1Lim%AmpMom,res_lo)
+       call get_respdf(qQpb_lumi_w,1,0,C1Lim,res_lo,respdf)
+
+       !print*, ''
+       !print*, ''
+       !print*, 'C1Lim%AmpMom(1)', C1Lim%AmpMom(:,1)
+       !print*, 'C1Lim%AmpMom(2)', C1Lim%AmpMom(:,2)
+       !print*, 'C1Lim%AmpMom(3)', C1Lim%AmpMom(:,3)
+       !print*, 'C1Lim%AmpMom(4)', C1Lim%AmpMom(:,4)
+
+       !print*, 'res_lo(1,1)= ', res_lo(1,1)
+       !print*, 'res_lo(1,2)= ', res_lo(1,2)
+       !print*, 'res_lo(2,1)= ', res_lo(2,1)
+       !print*, 'res_lo(2,2)= ', res_lo(2,2)
+
+       !print*, ''
+       !print*, 'C1Lim%wgt= ', C1Lim%wgt
+
+       z   = C1Lim%Lim_KinInv(1)
+       s5i = C1Lim%Lim_KinInv(2)
+
+       !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]
+       respdf = (-one)*respdf*(two/s5i)*(Cf*Pqg(z)/(one-z))&
+            * C1Lim%wgt
+
+       FintNLO_ns(2) = respdf(1)
+       kin(2) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+       
+       !print*, 'FintNLO_ns(2)=', FintNLO_ns(2)
+
+       !pause 
+
+    endif
+
+    !-- C2
+    call cut_histo(C2Lim)
+
+    if (C2Lim%makecut.or.C2Lim%flag) then
+
+       kin(3) = zero
+       FintNLO_ns(3) = zero
+
+    else
+
+       call res_tree_qqb_w(C2Lim%AmpMom,res_lo)
+       call get_respdf(qQpb_lumi_w,1,0,C2Lim,res_lo,respdf)
+
+       z   = C2Lim%Lim_KinInv(1)
+       s5i = C2Lim%Lim_KinInv(2)
+
+       !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]
+       respdf = (-one)*respdf*(two/s5i)*(Cf*Pqg(z)/(one-z))&
+            * C2Lim%wgt
+
+       FintNLO_ns(3) = respdf(1)
+       kin(3) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+       !print*, 'FintNLO_ns(3)=', FintNLO_ns(3)
+
+       !pause
+
+    endif
+
+    !if (sqrt(HardProc%AmpMom(2,5)**2+HardProc%AmpMom(3,5)**2) .le. 20 ) then
+    !
+    !        !case2: ff(1) = sum(kin)
+    !        !case1:ff(1) = zero
+    !
+    !else
+    !
+    !        !case1: ff(1) = kin(2) + kin(3)
+    !        !case2: ff(1) = kin(1)
+    !
+    !endif
+
+    ff(1) = sum(kin)
+
+    !if (abs(ff(1)) .ge. 10E+6) then 
+    !
+    !print*, 'ff(1)= ', ff(1)
+    !
+    !print*, 'FintNLO_ns(1)=', FintNLO_ns(1)
+    !print*, 'FintNLO_ns(2)=', FintNLO_ns(2)
+    !print*, 'FintNLO_ns(3)=', FintNLO_ns(3)
+    !
+    !print*, ''
+
+    !print*, 'HardProc%AmpMom(1)', HardProc%AmpMom(:,1)
+    !print*, 'HardProc%AmpMom(2)', HardProc%AmpMom(:,2)
+    !print*, 'HardProc%AmpMom(3)', HardProc%AmpMom(:,3)
+    !print*, 'HardProc%AmpMom(4)', HardProc%AmpMom(:,4)
+    !print*, 'HardProc%AmpMom(5)', HardProc%AmpMom(:,5)
+    !
+    !pause
+    !
+    !endif
+
+    call close_histo()
+
+    call check_ff(ff,xx,FintNLO_ns)
+
+#if(_withchecks == 1)
+    FintNLO_HC1C2 = FintNLO_ns
+#endif
+
+  end function xsect_nloqcd_r_is_ns_w
+
+
+
+
+
+
+end module mod_xsects_nloqcd_r
+  

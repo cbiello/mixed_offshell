@@ -1,0 +1,5 @@
+*.log
+*.aux
+*.out
+qq_leptons_NNLO_v5.pdf
+*.toc

@@ -1,0 +1,8 @@
+
+# we require the following libraries ppll ppllj pplla ppllj_ew
+
+# to donwload them do
+    ./openloops libinstall ppll
+    ./openloops libinstall ppllj
+    ./openloops libinstall ppllj_ew
+

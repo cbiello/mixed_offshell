@@ -1,0 +1,186 @@
+!-- amplitudes with extra jet: factor out gs**2 or ee**2 per extra gluon/photon emission
+module mod_amplitudes_tree_ppnul
+  use mod_types
+  use mod_consts_dp
+  use mod_parms
+  use mod_proc_parms
+  use mod_auxfunctions
+  use mod_coupl
+  implicit none
+  private
+
+  !-- res_tree_emitted-particles_initial-state
+  !-- res_tree   --> 0 -> q l nu qb
+  
+  public :: res_tree_qqb_w 
+  public :: res_tree_g_qqb_w
+  
+  !master amplitudes
+  public :: res_tree_j_qcd
+contains
+
+  !----------------------------------------------------------------------
+  !-- 4-point amplitudes
+  !----------------------------------------------------------------------
+
+  !-- f(1) + f(2) --> [W --> nu(3) + eb(4)]
+  !-- summed / averaged
+
+  !-- res(1,1) = u db -> W+ -> nue ep
+  !-- res(1,2) = d ub -> W- -> nueb em
+  !-- res(2,1) = ub d -> W- -> nueb em
+  !-- res(2,2) = db u -> W+ -> nue ep
+
+  subroutine res_tree_qqb_w(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(2,2)
+    real(dp) :: sprod(4,4)
+    complex(dp) :: za(4,4),zb(4,4),coupl(1:2,-1:1,-1:1)
+    complex(dp) :: amp
+    real(dp) :: aa,bb,cc(1:2),dd(1:2)
+    integer  :: i1,i2,i3,i4
+
+    !-- 0 --> q(1) qb(2) [V --> l(3)^- lb(4)]
+    !amp(i1,i2,i3,i4) = two * zb(i2,i4)*za(i3,i1)/sprod(i1,i2)
+
+    !call spinoru(4,(/-p(:,1),-p(:,2),p(:,3),p(:,4)/),za,zb,sprod)
+
+    !call get_coupl(sprod(1,2),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
+    !     [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl,1)
+
+    ! u(1) db(2) -> W+ nue(3) ep(4)
+    !res(1,1) = abs(amp(2,1,3,4)*coupl(1,-1,-1))**2
+
+    ! d(1) ub(2) -> W- nueb(3) em(4)
+    !res(1,2) = abs(amp(1,2,3,4)*coupl(2,-1,-1))**2
+
+    ! ub(1) d(2) -> W- nueb(3) em(4)
+    !res(2,1) = abs(amp(2,1,3,4)*coupl(2,-1,-1))**2
+
+    ! db(1) u(2) -> W+ nue(3) ep(4)
+    !res(2,2) = abs(amp(1,2,3,4)*coupl(1,-1,-1))**2
+
+    !res = res * xn * aveqq
+
+    !-- 0 --> q(1)^- qb(2) [V --> l(3)^- lb(4)]
+    amp(i1,i2,i3,i4) = two * za(i1,i3)*zb(i4,i2)/sprod(i1,i2)
+
+    call spinoru(4,(/-p(:,1),-p(:,2),p(:,3),p(:,4)/),za,zb,sprod)
+
+    call get_coupl(sprod(1,2),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl,1)
+    
+    aa = abs(amp(2,1,3,4))**2
+    bb = abs(amp(1,2,3,4))**2
+    cc(:) = abs(coupl(:,-1,-1))**2 + abs(coupl(:,+1,+1))**2
+    dd(:) = abs(coupl(:,-1,+1))**2 + abs(coupl(:,+1,-1))**2
+
+    res(1,:) = aa * cc(:) + bb * dd(:)
+    res(2,:) = aa * dd(:) + bb * cc(:)
+
+    res = res * xn * eesq2 * aveqq
+
+    return
+
+  end subroutine res_tree_qqb_w
+
+
+  !----------------------------------------------------------------------
+  !-- 5-point amplitudes
+  !----------------------------------------------------------------------
+
+  !-- f(1) + f(2) --> [W --> nu(3) + eb(4)] + g(5)
+  !-- summed / averaged
+  !-- qqb channel
+  !-- q(p1) qb(p2) -> nu(p3) eb(p4) g(p5)
+  !-- res(1,:) = q qb for dn and up
+  !-- res(2,:) = qb q for dn and up
+  subroutine res_tree_g_qqb_w(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(2,2)
+    integer, parameter :: iconf(5,2) = reshape([2,5,1,3,4, 1,5,2,3,4],[5,2])
+
+    call res_tree_j_qcd(p,iconf,aveqq,res)
+
+  end subroutine res_tree_g_qqb_w
+
+
+  !-- master amplitudes below
+
+  !-- generic amplitude for nlo QCD mission
+  !-- iconf(5,:) are the required crossings from 0 -> q g qb l lb [e.g. qqb -> e-e+ g is 2,5,1,3,4]
+  !-- ave is the averaging factor
+  !-- always assume that leptons are 3 and 4, otherwise coupling is wrong
+  subroutine res_tree_j_qcd(p,iconf,ave,res)
+    real(dp), intent(in)  :: p(:,:),ave
+    integer, intent(in)   :: iconf(:,:)
+    real(dp), intent(out) :: res(size(iconf,2),2)
+    integer     :: i,hq,hg,hl
+    real(dp)    :: sprod(5,5)
+    complex(dp) :: za(5,5),zb(5,5),coupl(1:2,-1:1,-1:1),amp(-1:1,-1:1,-1:1)
+
+    res = zero
+
+    call spinoru(5,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5)/),za,zb,sprod)
+    call get_coupl(sprod(3,4),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl,1)
+ 
+ 
+    do i = 1,size(iconf,2)
+
+       amp = master_amp_qgqb_llb(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
+
+       do hl=-1,1,2
+          do hg=-1,1,2
+             do hq=-1,1,2
+                res(i,:) = res(i,:) + abs(amp(hq,hg,hl)*coupl(:,hq,hl))**2
+             enddo
+          enddo
+       enddo
+
+    enddo
+
+    !-- eesq already in coupl
+    res = ave * 8 * xn * Cf * eesq2 * res
+
+  end subroutine res_tree_j_qcd
+
+
+  !---
+
+  !-- master amplitude for 0 -> q[p1] g[p2] qb[p3] l[p4] lb[p5]
+  !-- helicity label: h1,h2,h4
+  !-- amp[-h1,-h2,-h3] = -(amp[h1,h2,h3])^*
+  !-- vertices are all gamma/sqrt2
+  !-- propagator factor for the photon: 1/s45
+  function master_amp_qgqb_llb(i1,i2,i3,i4,i5,za,zb) result(res)
+    complex(dp) :: res(-1:1,-1:1,-1:1)
+    integer, intent(in)     :: i1,i2,i3,i4,i5
+    complex(dp), intent(in) :: za(5,5),zb(5,5)
+    complex(dp) :: dena,denb
+
+    dena = one/(za(i1,i2)*za(i2,i3)*za(i4,i5))
+    denb = one/(zb(i1,i2)*zb(i2,i3)*zb(i5,i4))
+
+    !-- basic amplitudes
+    res(-1,+1,-1) = za(i1,i4)**2*dena
+    res(-1,-1,-1) = zb(i5,i3)**2*denb
+
+    !-- 4 <-> 5
+    res(-1,+1,+1) = -zero*za(i1,i5)**2*dena
+    res(-1,-1,+1) = -zero*zb(i4,i3)**2*denb
+
+    !-- other helicities
+    !-- careful, complex conjugate does not
+    !-- work with crossing
+    res(+1,-1,+1) = zero*zb(i1,i4)**2*denb
+    res(+1,+1,+1) = zero*za(i5,i3)**2*dena
+
+    res(+1,-1,-1) = -zero*zb(i1,i5)**2*denb
+    res(+1,+1,-1) = -zero*za(i4,i3)**2*dena
+
+  end function master_amp_qgqb_llb
+
+
+end module mod_amplitudes_tree_ppnul
+     

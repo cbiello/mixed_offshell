@@ -1,0 +1,894 @@
+\documentclass[a4paper,11pt]{article}
+%% uncomment the following for journal submission
+\pdfoutput=1
+\usepackage[english]{babel}
+\usepackage{jheppub}
+\usepackage{subfigure}
+\usepackage{xspace}
+\usepackage{amsmath,amssymb,textcomp,enumerate,alltt,xspace,multirow}
+\usepackage{slashed}
+\usepackage{multicol}
+
+%% graphics
+\usepackage{graphicx}
+\usepackage{relsize}
+\usepackage{pstricks}
+\usepackage{color}
+\usepackage{xcolor}
+
+\input texmacros.tex
+
+\title{Notes on the construction of a phase space for di-lepton production}
+
+% \author[a]{Federico Buccioni}
+% \emailAdd{federico.buccioni@physics.ox.ac.uk}
+% 
+% \affiliation[a]{
+% Rudolf Peierls Centre for Theoretical Physics, University of Oxford,\\
+% Clarendon Laboratory, Parks Road, Oxford OX1 3PU
+% }
+
+\abstract{
+%
+Notes on phase space
+%
+}
+
+% \keywords{QCD, Collider Physics, NNLO calculations}
+
+%\allowdisplaybreaks[1]
+
+\begin{document}
+\maketitle
+
+\flushbottom
+\section{Introduction}
+
+Test references with \cite{Caola:2017dug}.
+
+\section{Phase space parameterization at LO}
+\label{se:LOparam}
+Let us consider the process defined at leading order (LO) as
+\begin{equation}
+q(p_1) + \bar{q}(p_2) \to \ell^-(p_3) + \ell^+(p_4)\, .
+\end{equation}
+We express the phase space for $2\to n$, with $n=2$ as
+\begin{equation}
+\int \rd\Phi_2 = 
+% \int^1_0 \rd x_1 \rd x_2 
+\int \frac{\rd^4 p_3}{(2\pi)^4} \frac{\rd^4 p_4}{(2\pi)^4} 
+(2\pi) \delta^{+}(p^2_3) (2\pi)\delta^{+}(p^2_4) (2\pi)^4\delta^{(4)}(p_1 + p_2 - p_3 - p_4)\,.
+\end{equation}
+It is convenient to factorise the phase space introducing the decay of the di-lepton system
+\begin{align}
+\int \rd\Phi_2 & = 
+% \int^1_0 \rd x_1 \rd x_2 
+\int \frac{\rd M^2_{\ell\ell}}{2\pi}
+\int\frac{\rd^4 Q}{(2\pi)^4} (2\pi)^4\delta^{(4)}(p_1 + p_2 -Q) (2\pi)\delta^+(M^2_{\ell\ell}-Q^2) \nonumber \\
+\times & \int \frac{\rd^4 p_3}{(2\pi)^4} \frac{\rd^4 p_4}{(2\pi)^4} 
+(2\pi) \delta^{+}(p^2_3) (2\pi)\delta^{+}(p^2_4) (2\pi)^4\delta^{(4)}(Q - p_3 - p_4)\, \nonumber \\
+& = \int \rd \Phi_1(Q) \int \rd \Phi_{1\to2}\, .
+\end{align}
+where $\Phi_{1\to2}$ is interpreted as the phase space of a two-body decay and
+$\Phi_1(Q)$ as the phase space for the production of a particle of momentum $Q$.
+
+\subsection{Two-body decay}
+\label{se:twobodydecay}
+The phase space for a two-body decays reads
+\begin{equation}
+\int\rd\Phi_{1\to2} = \int \frac{\rd^4 p_3}{(2\pi)^4} \frac{\rd^4 p_4}{(2\pi)^4} 
+(2\pi) \delta^{+}(p^2_3) (2\pi)\delta^{+}(p^2_4) (2\pi)^4\delta^{(4)}(Q - p_3 - p_4)\, .
+\end{equation}
+We can perform a straightforward integration over $p_4$ using the momentum conserving 
+$\delta$-function, which gives
+\begin{equation}
+p_4 = Q - p_3,
+\end{equation}
+and for the phase space
+\begin{equation}
+\int \rd \Phi_{1\to 2} = 
+\int \frac{\rd^4 p_3}{(2\pi)^2} \delta^{+}(p^2_3) \delta^{+}((Q-p_3)^2)\,.
+\end{equation}
+We then parametrise the momentum of the lepton $p_3$ 
+and of the decaying system $Q$ as
+\begin{align}
+\label{eq:leptonparametrization}
+p^\mu_3 &= \left(
+E_{T,\ell} \cosh y,
+p_{T,\ell} \cos\varphi,
+p_{T,\ell} \sin\varphi,
+E_{T,\ell} \sinh y
+\right), \\
+%
+Q^\mu &= \left(
+E_{T,\ell\ell} \cosh Y,
+p_{T,\ell\ell} \cos\phi,
+p_{T,\ell\ell} \sin\phi,
+E_{T,\ell\ell} \sinh Y
+\right),
+\end{align}
+so that the integration measure of the lepton becomes
+\begin{equation}
+\rd^4 p_3 = \rd E_{T,\ell} \rd p_{T,\ell} \rd y \rd\varphi \, E_{T,\ell}p_{T,\ell},\, .
+\end{equation}
+As for the arguments of the $\delta$ functions one gets
+\begin{align}
+p^2_3 &= E^2_{T,\ell} - p_{T,\ell}^2,\\
+(Q-p_3)^2 &= (E^2_{T,\ell} - p_{T,\ell}^2) + (E^2_{T,\ell\ell} - p_{T,\ell\ell}^2) 
+\nonumber \\
+-& 2 \cosh(y-Y) E_{T,\ell} E_{T,\ell\ell} + 2\cos(\varphi-\phi) p_{T,\ell} p_{T,\ell\ell}\,,
+\end{align}
+which can be simplied as
+\begin{equation}
+f(y) \equiv (Q-p_3)^2 = Q^2 -2 \cosh(y-Y) E_{T,\ell} E_{T,\ell\ell} + 2\cos(\varphi-\phi) p_{T,\ell} p_{T,\ell\ell}\, .
+\end{equation}
+The constraint $(Q-p_3)^2 = 0$ imposed by the $\delta^+$ function gives in turn
+\begin{equation}
+p_{T,\ell} = \frac{Q^2}{2\left(\cosh(y-Y)E_{T,\ell\ell} - \cos(\varphi-\phi)p_{T,\ell\ell}\right)} \le p^{\max}_{T,\ell}
+\end{equation}
+where we have defined
+\begin{equation}
+\label{eq:leptonmaxpt}
+p^{\max}_{T,\ell} = \frac{Q^2}{2\left(E_{T,\ell\ell} - \cos(\varphi-\phi)p_{T,\ell\ell}\right)}\,
+\end{equation}
+which fixes the upper boundary in the $p_{T,\ell}$ integration. 
+One can also introduce a lower boundary $p^{\min}_{T,\ell}$ which acts as a 
+transverse momentum selection cut.
+The phase space thus becomes
+\begin{equation}
+\int \rd \Phi_{1\to 2} =
+\int^{2\pi}_0 \frac{\rd\varphi}{(2\pi)^2}
+\int^{p^{\max}_{T,\ell}}_{p^{\min}_{T,\ell}} \rd p_{T,\ell}
+\int \rd y
+\int \rd E_{T,\ell}\,
+E_{T\ell} p_{T,\ell} \delta^{+}(E_{T,\ell}^2 - p_{T,\ell}^2)\delta^{+}(f(y)).
+\end{equation}
+We first perform the integration over $E_{T,\ell}$ using the $\delta^{+}$ 
+function, \ie
+\begin{equation}
+\delta^{+}(E_{T,\ell}^2 - p_{T,\ell}^2) = \frac{\delta(E_{T,\ell}-p_{T,\ell})}{2 p_{T,\ell}}
+\end{equation}
+which yields
+\begin{equation}
+\int \rd \Phi_{1\to 2} =
+\int^{2\pi}_0 \frac{\rd\varphi}{2(2\pi)^2}
+\int^{p^{\max}_{T,\ell}}_{p^{\min}_{T,\ell}} \rd p_{T,\ell} p_{T,\ell} 
+\int \rd y\,\delta^{+}(f(y))\, .
+\end{equation}
+We then perform the integration over the rapidity using the last $\delta^{+}$ function
+\begin{equation}
+\delta(f(y)) = 
+\frac{\delta(y-y^+)}{|\partial f(y)/\partial y|_{y=y^+}} +
+\frac{\delta(y-y^-)}{|\partial f(y)/\partial y|_{y=y^-}}
+\end{equation}
+where the solutions $y^\pm$ are given by
+\begin{equation}
+\label{eq:rapiditysols}
+y^\pm = Y \pm \cosh^{-1}\left( \frac{Q^2 + 2\cos(\varphi-\phi)p_{T,\ell}\,p_{T,\ell\ell}}{2 E_{T,\ell\ell} p_{T,\ell}} \right),
+\end{equation}
+and the derivative reads
+\begin{equation}
+\frac{\partial f(y)}{\partial y} = -2\sinh(y-Y) E_{T,\ell\ell} p_{T,\ell}\, .
+\end{equation}
+Combining everything together one is left with
+\begin{equation}
+\int \rd \Phi_{1\to 2} =
+\int^{2\pi}_0 \frac{\rd\varphi}{2(2\pi)^2}
+\int^{p^{\max}_{T,\ell}}_{p^{\min}_{T,\ell}} \rd p_{T,\ell}
+\frac{1}{2E_{T,\ell\ell}|\sinh(y^\pm-Y)|}.
+\end{equation}
+As a last step we can rescale $\varphi$ and $p_{T,\ell}$ and write
+\begin{equation}
+\label{eq:independentleptonvars}
+p_{T,\ell} = p^{\min}_{T,\ell} + (p^{\max}_{T,\ell}-p^{\min}_{T,\ell}) r_3
+\quad\quad
+\varphi = 2\pi r_4,
+\end{equation}
+which allows one to integrate in $[0,1]$, \ie
+\begin{equation}
+\int \rd \Phi_{1\to 2} =
+\int^1_0 \rd r_3 \rd r_4 L(r_3,r_4,r_5),
+\end{equation}
+with the Jacobian
+\begin{equation}
+L(r_3,r_4,r_5) = 
+\frac{(p^{\max}_{T,\ell}-p^{\min}_{T,\ell})}{8\pi E_{T,\ell\ell}|\sinh(y^\pm-Y)|}.
+\end{equation}
+
+\noindent
+\textbf{Summarizing:}
+\begin{enumerate}
+\item Input: $Q^\mu$ and $r_i$ with $i \in {3,4,5}$
+\item evaluate relevant $Q$ variables: $Q^2$, $p_{T,\ell\ell}$, $Y$, $\phi$ and
+$E_{T,\ell\ell} = \sqrt{Q^2 + p_{T,\ell\ell}^2}$
+\item assign lepton azimuthal angle as $\varphi = 2\pi r_4$
+\item evaluate $p^{\max}_{T,\ell}$ as in \refeq{eq:leptonmaxpt} and assign
+lepton transverse momentum as in \refeq{eq:independentleptonvars}
+\item assign $y$ using $r_5$, \eg 
+$y = \theta(r_5 - \frac{1}{2}) y^- + \theta(\frac{1}{2}-r_5) y^+$, where $y^\pm$ is given in \eqref{eq:rapiditysols}.
+This is not strictly speaking an integration variable, so it does not need to be 
+provided by Vegas. Moreover, it should be chosen consistently event-wise.
+\item parametrise lepton momentum as in \refeq{eq:leptonparametrization}\, .
+\end{enumerate}
+
+\subsection{One-particle production}
+\label{se:oneparticleproduction}
+
+We shall now move to the phase space of $Q$.
+\begin{equation}
+\int \rd \Phi_1(Q) = 
+% \int^1_0 \rd x_1 \rd x_2 
+\int \frac{\rd M^2_{\ell\ell}}{2\pi} \int\frac{\rd^4 Q}{(2\pi)^4} (2\pi)^4\delta^{(4)}(p_1 + p_2 -Q) (2\pi)\delta^+(M^2_{\ell\ell}-Q^2)\,.
+\end{equation}
+The integration over $Q$ simply gives
+\begin{equation}
+\label{eq:Qmomentum}
+Q = p_1 + p_2
+\end{equation}
+so one is simply left with
+\begin{equation}
+\int \rd \Phi_1 (Q) = 
+% \int^1_0 \rd x_1 \rd x_2
+\int \rd M^2_{\ell\ell} \delta^+(M^2_{\ell\ell}-s_{12}).
+\end{equation}
+Eventually we will be interested in the integration over the partonic
+momentum fractions as well so 
+\begin{equation}
+\int^1_0 \rd x_1 \rd x_2 \int \rd \Phi_1 (Q) = 
+\int^1_0 \rd x_1 \rd x_2 
+\int \rd M^2_{\ell\ell} \delta^+(M^2_{\ell\ell}-x_1 x_2 S),
+\end{equation}
+where $S$ is the centre of mass energy squared of the hadronic system and we
+have used $s_{12} = x_1 x_2 S$.
+We can introduce back the rapidity of the di-lepton system $Y$ via an extra
+$\delta$ function which follows from \refeq{eq:Qmomentum},
+\begin{equation}
+\int^1_0 \rd x_1 \rd x_2 
+\int \rd \tau \, \delta^+(\tau - x_1 x_2)
+\int^{Y_{\max}}_{-Y_{\max}} \rd Y \delta\left(Y- \frac{1}{2}\log\left(\frac{x_1}{x_2}\right)\right),
+\end{equation}
+with the integration boundaries given by
+\begin{equation}
+\label{eq:maxrapidity}
+Y_{\max} = -\frac{1}{2} \log\tau\, ,
+\end{equation}
+where we have introduced
+\begin{equation}
+\tau = \frac{M^2_{\ell\ell}}{S}\,.
+\end{equation}
+We can integrate over $x_1$ and $x_2$ using the $\delta$ functions,
+which are solved by
+\begin{equation}
+x_{1,2} = e^{\pm Y} \sqrt{\tau}\, .
+\end{equation}
+% \begin{equation}
+% \delta\left(Y- \frac{1}{2}\log\left(\frac{x_1}{x_2}\right)\right) = 
+% 2 x_2 e^{2 Y} \delta\left( x_1 - x_2 e^{2 Y}\right)
+% \end{equation}
+% which replaced into the second $\delta$ function gives
+% \begin{equation}
+% \delta(M^2_{\ell\ell}-x_1 x_2 S) = 
+% \delta(M^2_{\ell\ell}- x_2^2 S e^{2 Y}) = 
+% \frac{e^{-2Y}}{2 S x_2}\delta\left(x_2 - e^{-Y}\sqrt{\tau}\right)\, .
+% \end{equation}
+Plugging both results into the phase space yields
+\begin{equation}
+\int \rd \tau \int^{Y_{\max}}_{-Y_{\max}} \rd Y
+\end{equation}
+where the partonic fractions $x_{1,2}$ are given by
+\begin{equation}
+x_{1,2} = e^{\pm Y} \sqrt{\tau}\, .
+\end{equation}
+Moreover, we can rescale the rapidity and define
+\begin{equation}
+\label{eq:rapidityrescale}
+Y = (2 r_2 - 1) Y_{\max}
+\end{equation}
+and we parametrise $\tau = \tau(r_1)$ we get for the phase space
+\begin{equation}
+\int^1_0 \rd x_1 \rd x_2 \int \rd \Phi_1 (Q) =
+\int^{1}_0 \rd r_1 \rd r_2 \, K(r_1)
+\end{equation}
+where we have introduced
+\begin{equation}
+K(r) = 2 Y_{\max} \frac{\rd\tau(r)}{\rd r}.
+\end{equation}
+The specific form of $K(r)$ depends on the parameterization chosen
+for the invariant mass of the dilepton system.
+%
+%
+\subsubsection{Parameterization of the invariant mass}
+If we are around the $V$ resonance, $V=W,Z$,
+we can improve the convergence in the integration flattening out the peak 
+by means of a Breit-Wigner distribution, \ie
+\begin{equation}
+\tau(r) = 
+\frac{M^2_V}{S} + \frac{M_V \Gamma_V}{S} \tan\left(\xi_{\min} + (\xi_{\max}-\xi_{\min})r\right) 
+\end{equation}
+and we define
+\begin{equation}
+\xi_{\min,\max} = \arctan\left(\frac{\tau_{\min,\max}S -M^2_V}{M_V \Gamma_V}\right)\,.
+\end{equation}
+The Jacobian of the transformation thus reads
+\begin{equation}
+\frac{\rd \tau(r)}{\rd r} = 
+(\xi_{\max}-\xi_{\min})\frac{S}{M_V \Gamma_V}
+\left(\left(\tau(r)-\frac{M^2_V}{S}\right)^2 + \frac{M^2_V \Gamma^2_V}{S^2}\right)\, .
+\end{equation}
+If we are in the far off-shell region (or anyway beyond the resonance),
+we could use a parameterization of the type
+\begin{equation}
+\tau(r) = \left[
+r\left(\tau_{\max}-\frac{M^2_V}{S}\right)^{1-\nu} + 
+(1-r)\left(\tau_{\min}-\frac{M^2_V}{S}\right)^{1-\nu}
+\right]^{\frac{1}{1-\nu}} + \frac{M^2_V}{S},
+\end{equation}
+with $\nu\neq 1$ which gives for the Jacobian
+\begin{equation}
+\frac{\rd \tau(r)}{\rd r} =
+\frac{1}{1-\nu}
+\left(\tau(r) - \frac{M^2_V}{S}\right)^\nu
+\left[\left(\tau_{\max}-\frac{M^2_V}{S}\right)^{1-\nu}-
+\left(\tau_{\min}-\frac{M^2_V}{S}\right)^{1-\nu}\right]\,.
+\end{equation}
+Another one is
+\begin{equation}
+\tau(r) = \frac{\tau_{\min}}{1-(1-\tau_{\min}/\tau_{\max})r^2},
+\end{equation}
+with Jacobian
+\begin{equation}
+\frac{\rd \tau(r)}{\rd r} = \frac{2}{\tau_{\min}}\tau(r)^2
+\left(1-\frac{\tau_{\min}}{\tau_{\max}}\right)r\,.
+\end{equation}
+%
+%
+%
+\section{Phase space parameterization at NLO EW}
+\label{se:NLOEWparam}
+The process we are interested in is
+\begin{equation}
+q(p_1) + \bar{q}(p_2) \to \ell^-(p_3) + \ell^+(p_4) + \gamma(p_5)\, .
+\end{equation}
+Now the phase space contains one extra particle so it is given by:
+\begin{equation}
+\int \rd\Phi_{3} = 
+\int \frac{\rd^d p_3}{(2\pi)^{d-1}} \frac{\rd^d p_4}{(2\pi)^{d-1}}
+\left[\rd p_5\right]
+\delta^{+}(p^2_3) \delta^{+}(p^2_4) (2\pi)^d \delta^{(d)}(p_1 + p_2 -p_3-p_4-p_5),
+\end{equation}
+where the integration measure over the extra radiation is defined as
+\begin{equation}
+\left[\rd p_5\right] = \frac{\rd^d p_5}{(2\pi)^{d-1}} \delta^{+}(p^2_5) \theta(E_5-E_{\max})\, .
+\end{equation}
+We want to separate the regions of phase space where the photon becomes collinear 
+to one of partons, \ie $p_5 \parallel p_i$ with $i=1,\ldots,4$.
+We can achieve this by introducing a partition of unity as
+\begin{equation}
+1 = \sum_{i=1}^4 \omega_{i5}\, ,
+\end{equation}
+where we introduced the \textit{damping functions} $w_{5i}$ defined as
+\begin{equation}
+\omega_{5i} = \frac{1}{\calN \rho_{5i}}, \quad\quad
+\calN = \sum_{i=1}^4 \frac{1}{\rho_{5i}}, \quad\quad
+\rho_{5i} = 1 - \hat{n}_i \cdot \hat{n}_5,
+\end{equation}
+where $\hat{n}_{i}$ is a $(d-1)$-dimensional unit vector in the direction
+of the spatial momentum of particle $i$. The action of the collinear operators is such that
+\begin{equation}
+C_{5i} \omega_{j5} = \delta_{ij},
+\end{equation}
+so they could be used to partition the phase space.
+
+\subsection{Initial-state single emission}
+\label{se:ISNLO}
+Let us first consider the partitions $\omega_{15}$ and $\omega_{25}$
+which correspond to initial-state collinear configurations.
+For definiteness we focus on the partition $\omega_{15}$, 
+and $\omega_{25}$ will undergo a similar treatment.
+Here it is convenient to separate the phase space as done at LO where 
+one introduces a two-body leptonic decay, \ie
+\begin{equation}
+\int \omega_{15} \rd\Phi_3 = 
+\int \rd\Phi_{1\to2} \times \omega_{15} \int \rd \Phi_{2}(Q)
+\end{equation}
+where
+\begin{align}
+\int \rd \Phi_{2}(Q) = 
+\int \frac{\rd M^2_{\ell\ell}}{2\pi} (2\pi)\delta^+(M^2_{\ell\ell}-Q^2)
+\int\frac{\rd^d Q}{(2\pi)^d} 
+\left[ \rd p_5\right]
+(2\pi)^d\delta^{(d)}(p_1 + p_2 -Q-p_5)\, .
+\end{align}
+The two-body decay phase space has been treated in full generality before,
+so we now focus on the production side.
+The integration measure over the photon can be cast as
+\begin{equation}
+\int \left[ \rd p_5\right] =
+\int \frac{\rd \Omega^{(d-1)}_5}{2(2\pi)^{d-1}} \rd E_5 E^{d-3}_5 = 
+E^{d-2}_{\max} \int\frac{\rd \Omega^{(d-1)}_5}{2(2\pi)^{d-1}} \int^1_0\rd x_1 x_1^{d-3}\,.
+\end{equation}
+The maximum energy allowed to the photon is
+\begin{equation}
+E_{\max} = \frac{\sqrt{s}}{2} = \sqrt{\xi_1 \xi_2}\frac{\sqrt{S}}{2},
+\end{equation}
+so we can choose this as upper bound.
+We can parametrise the angle between $\vec{p}_5$ and the $z$ axis so that 
+the angular part can be decomposed as
+\begin{equation}
+\rd \Omega^{(d-1)}_5 = \rd \Omega^{(d-2)}_5 \rd\cos\theta_5 (\sin\theta_5)^{d-4},
+\end{equation}
+and further simplified replacing $\cos \theta_5 = 1 - 2 x_2$, yielding
+\begin{equation}
+\int\left[\rd p_5\right] = 
+(\xi_1 \xi_2 S)^{\frac{d-2}{2}}
+\int \frac{\rd\Omega^{d-2}_5}{4(2\pi)^{d-1}}
+\int^1_0 \rd x_1 \rd x_2 \, x_1^{d-3} \left(x_2(1-x_2)\right)^{(d-4)/2}\, .
+\end{equation}
+% In this parameterization the soft singularity is recovered for $t_1 \to 0$ and
+% the collinear $p_1 \parallel p_5$ configuration as $t_2 \to 0$. 
+% Indeed, if we take 
+% \begin{equation}
+% p_1 = E_1 (1,\vec{0}^{d-2},1),
+% \end{equation}
+% the collinear propagator becomes
+% \begin{equation}
+% \frac{1}{(p_1-p_5)^2} = \frac{1}{4 E_1 E_{\max} t_1 t_2}\, .
+% \end{equation}
+As for the azimuth, in $d=4$ we can write
+\begin{equation}
+\int \frac{\rd\Omega^{d-2}_5}{4(2\pi)^{d-1}} \to
+\frac{1}{16\pi^2}\int^{1}_0 \rd x_3, \quad\quad
+x_3 = \frac{\varphi_5}{2\pi}
+\end{equation}
+therefore, $x_1$,$x_2$ and $x_3$ constitute the three variables
+for Vegas.\footnote{$t_3$ is not really an integration variable, it is just a random variable.}
+
+We now move to $Q$. We can eliminate one integration using the momentum conserving
+$\delta$-function, so that we have
+\begin{equation}
+Q = p_1 + p_2 - p_5\, .
+\end{equation}
+Let us now include the integration over the partonic fractions $\xi_i$. 
+We would have to perform an integral of the type
+\begin{equation}
+\label{eq:phasespacenloQ}
+\int^1_0 \rd \xi_1 \rd \xi_2 
+\int \rd M^2_{\ell\ell} \delta^+(M^2_{\ell\ell}-(p_1 + p_2 - p_5)^2),
+\end{equation}
+which is explicitly given by
+\begin{equation}
+\label{eq:integpartfracts}
+\int^1_0 \rd \xi_1 \rd \xi_2 
+\int \rd M^2_{\ell\ell} \delta^+(M^2_{\ell\ell} - (1- x_1)\xi_1 \xi_2 S)\,.
+\end{equation}
+For the rapidity of the di-lepton system in the lab frame we have
+\begin{equation}
+Y = Y_{\mathrm{lab}} + Y_{\ell\ell,\mathrm{com}},
+\end{equation}
+where $Y_{\mathrm{com}}$ is given by
+\begin{equation}
+Y_{\mathrm{com}} = \frac{1}{2}\log\left(\frac{\xi_1}{\xi_2}\right),
+\end{equation}
+and the rapidity of the di-lepton system in the com frame reads
+\begin{equation}
+Y_{\ell\ell,\mathrm{com}} = \frac{1}{2}
+\log\upsilon , \quad\quad \mathrm{with}\quad\quad
+\upsilon  = \frac{E_{\tilde{Q}}-p_{z_{\tilde{Q}}}}{E_{\tilde{Q}}+p_{z_{\tilde{Q}}}}\, .
+\end{equation}
+Therefore we can impose another $\delta$ function which yields for
+\refeq{eq:integpartfracts},
+\begin{equation}
+\int^1_0 \rd \xi_1 \rd \xi_2 
+\int \rd \tau \delta^+(\tau - (1- x_1)\xi_1 \xi_2)
+\int^{Y_{\max}}_{-Y_{\max}} \rd Y 
+\delta\left( Y - Y_{\mathrm{com}} - Y_{\ell\ell,\mathrm{com}} \right)\,
+\end{equation}
+with the maximum value of the rapidity given by \refeq{eq:maxrapidity}.
+The $\delta$ constraints are solved by
+\begin{equation}
+\xi_1 = \sqrt{\frac{\tau}{1-t_1}}\sqrt{\upsilon} e^{Y}, \quad \quad
+%
+\xi_2 = \sqrt{\frac{\tau}{1-t_1}}\frac{1}{\sqrt{\upsilon}} e^{-Y}\,.
+\end{equation}
+After rescaling the rapidity as in \refeq{eq:rapidityrescale} we get for \refeq{eq:integpartfracts}
+\begin{equation}
+\int \rd \tau \int^1_0 \rd r_2 \frac{4 Y_{\max}}{1-t_1},
+\end{equation}
+As far as the invariant mass is concerned, one can treat it as done in \refse{se:LOparam}. Putting all pieces together we finally have
+\begin{align}
+\int \omega_{15} &\rd\Phi_3 = 
+\int \rd\Phi_{1\to 2} \times \omega_{15} \nonumber \\
+&\times 4 Y_{\max} \int\rd \tau
+%
+\int^1_0 \rd r_2 \rd x_1 \rd x_2\,
+s^{1-\epsilon}
+\frac{x_1}{1-x_1} \left(x_1^2 x_2 (1-x_2)\right)^{-\epsilon}
+\int \frac{\rd\Omega^{(2-2\epsilon)}_5}{4(2\pi)^{3-2\epsilon}}.
+\end{align}
+Since we will be integrating in $d=4$, the explicit expression is
+\begin{equation}
+\int \omega_{15} \rd\Phi_3 = \frac{1}{8\pi^2}
+\int \rd\Phi_{1\to 2} \times \omega_{15} \,
+\int\rd \tau \int^1_0 \rd r_2 4Y_{\max}
+\int^1_0 \prod_{i=1}^3 \rd x_i s \frac{x_1}{2(1-x_1)}.
+\end{equation}
+which can also be cast as 
+\begin{equation}
+\int \omega_{15} \rd\Phi_3 = \frac{1}{8\pi^2}
+\int \rd\Phi_{1\to 2} \times \omega_{15} \,
+\int\rd \tau \int^1_0 \rd r_2 2Y_{\max}
+\int^1_0 \prod_{i=1}^3 \rd x_i \frac{s^2}{Q^2} x_1.
+\end{equation}
+
+\subsection{Final-state single emission}
+\label{se:FSNLO}
+
+\begin{equation}
+\int \omega_{35}\rd\Phi_3 = \int\rd\Phi_{1}(Q)\times 
+\omega_{35} \int \rd\Phi_{1\to 3}
+\end{equation}
+
+\begin{equation}
+\int \rd\Phi_{1\to 3} = \int 
+\frac{\rd^d p_3}{(2\pi)^{d-1}} \frac{\rd^d p_4}{(2\pi)^{d-1}} \left[p_5\right]
+\delta^{+}(p^2_3)\delta^{+}(p^2_4) (2\pi)^d (Q-p_3-p_4-p_5)
+\end{equation}
+
+\begin{equation}
+p_4 = Q - p_3 - p_5
+\end{equation}
+
+\begin{equation}
+\int \rd\Phi_{1\to 3} = (2\pi)\int 
+\frac{\rd^d p_3}{(2\pi)^{d-1}} \left[p_5\right]
+\delta^{+}(p^2_3)\delta^{+}((Q-p_3-p_5)^2)
+\end{equation}
+
+\begin{align}
+p^\mu_3 &= E_3(1,\hat{n}_3),\quad\quad
+p^\mu_5 = E_5(1,\hat{n}_5),\quad\quad \\
+\hat{n}_5 &= 
+\cos\theta_{35}\hat{n}_3 + \sin\theta_{35}\cos\varphi\,\hat{a}_1
+ + \sin\theta_{35}\sin\varphi\,\hat{a}_2
+\end{align}
+where $\hat{a}_1$ and $\hat{a}_2$ span the plane orthogonal to $\hat{n}_3$,
+so that $\hat{a}_1\cdot\hat{n}_3 = \hat{a}_2\cdot\hat{n}_3 = \hat{a}_1\cdot\hat{a}_2 = 0$, and $\phi$ is the azimuthal angle around the
+direction defined by $\hat{n}_3$.
+Explicitly, in $d=3$ the unit vectors can be written as
+\begin{align}
+\hat{n}_3 &= 
+(\cos\varphi_3\sin\theta_3,\sin\varphi_3\sin\theta_3,\cos\theta_3) \\
+\hat{a}_1 &= (\cos\varphi_3\cos\theta_3,\sin\varphi_3\cos\theta_3,-\sin\theta_3)\\
+\hat{a}_2 &= (-\sin\varphi_3,\cos\varphi_3,0)\, .
+\end{align}
+%
+The phase space then reads
+\begin{align}
+\int \rd\Phi_{1\to 3} &= 
+(2\pi)\int \frac{\rd\Omega^{(d-2)}_{3}}{2(2\pi)^{d-1}}\int\rd\cos\theta_3 (\sin\theta_3)^{d-4} \int\rd E_3 \, E^{d-3}_3 \delta^{+}((Q-p_3-p_5)^2) 
+\nonumber \\
+&\times
+\int \frac{\rd\Omega^{(d-3)}_{5}}{2(2\pi)^{d-1}}\int\rd\cos\theta_{35} (\sin\theta_{35})^{d-4}\int^{\pi}_0 \rd\varphi(\sin\varphi)^{d-4}
+\int^{E_{\max}}_0 \rd E_5 \, E^{d-3}_5\,,
+\end{align}
+where we leave $E_{\max}$ unspecified for the moment.
+The energy of the radiated particle, its polar angle measured along the $\hat{n}_3$ direction, and $\cos\theta_3$ are parametrised as follows
+\begin{equation}
+E_5 = E_{\max} x_1, \quad\quad
+\cos\theta_{35} = 1 - 2 x_2, \quad\quad
+\cos\theta_{3}  = 1 - 2 x_4,
+\end{equation}
+which in turn yields for the relevant measures
+\begin{align}
+% \int\rd\cos\theta_{3} (\sin\theta_{3})^{-2\epsilon} &= 
+% 2^{1-2\epsilon} \int^1_0 \rd r_1 r_1^{-\epsilon}(1-r_1)^{-\epsilon} \\
+\int\rd\cos\theta_{3} (\sin\theta_{3})^{-2\epsilon} &= 
+2^{1-2\epsilon} \int^1_0 \rd x_4 x_4^{-\epsilon}(1-x_4)^{-\epsilon} \\
+\int\rd\cos\theta_{35} (\sin\theta_{35})^{-2\epsilon} &= 
+2^{1-2\epsilon} \int^1_0 \rd x_2 x_2^{-\epsilon}(1-x_2)^{-\epsilon} \\
+\int^{E_{\max}}_0 \rd E_5 \, E_5^{1-2\epsilon} &= E_{\max}^{2-2\epsilon}
+\int^1_0 \rd x_1 \, x_1^{1-2\epsilon}\, .
+\end{align}
+The on-shell $\delta$ constraint,
+\begin{equation}
+0 = (Q-p_3-p_5)^2 = Q^2 - 2 E_3(Q^0 - \hat{n}_3\cdot \vec{Q}) - 2 Q\cdot p_5 + 4 E_3 E_{\max} x_1 x_2
+\end{equation}
+is solved by
+\begin{equation}
+E_3 = \frac{Q^2 - 2 Q\cdot p_5}{J},
+\end{equation}
+where we have introduced 
+\begin{equation}
+J = 2(Q^0 - \hat{n}_3\cdot \vec{Q}) - 4 E_3 E_{\max} x_1 x_2\, .
+\end{equation}
+The phase space thus reduces to
+\begin{align}
+\int \rd\Phi_{1\to 3} &= 
+(2\pi)^{-4-4\epsilon}\frac{E_{\max}^{2-2\epsilon}}{2}
+\int \rd\Omega^{2-2\epsilon}_{3}
+\int \rd\Omega^{1-2\epsilon}_{5} \nonumber \\
+%
+& \times \int^{1}_0 \prod_{i=1}^4 \rd x_i\,
+\frac{E^{1-2\epsilon}_{3}}{J} x_1 
+\left(x_1^2 x_2 (1-x_2) x_4 (1-x_4) \sin^2(x_3) \right)^{-\epsilon}
+\end{align}
+Finally, in $d=4$ we have
+\begin{equation}
+\int \rd\Phi_{1\to 3} = \frac{1}{(8\pi^2)}
+E_{\max}^{2}
+\int^{1}_0 \prod_{i=1}^5 \rd x_i\,
+\frac{E_{3}}{J} \frac{x_1}{\pi}
+\end{equation}
+where we have performed the change of variable $\varphi_3 = 2\pi x_5$.
+%
+%
+\section{Phase space parameterization at NNLO QCD-EW}
+\label{se:NNLOMIXparam}
+Let us consider the process
+\begin{equation}
+q(p_1) + \bar{q}(p_2) \to \ell^-(p_3) + \ell^+(p_4) + 
+g(p_5) + \gamma(p_6)
+\end{equation}
+Since QCD and QED emission factorise, we can introduce two independent
+partitions of unity for the photon and the gluon. 
+Thus, extending on what has been done at NLO we can write.
+\begin{equation}
+1 = \left(\sum_{i=1}^2 \omega_{i5}\right) 
+\left(\sum_{j=1}^4 \omega_{j6}\right)\, ,
+\end{equation}
+
+\begin{align}
+& \int \rd\Phi_{4} = \nonumber \\ 
+& \int \frac{\rd^d p_3}{(2\pi)^{d-1}} \frac{\rd^d p_4}{(2\pi)^{d-1}}
+\left[\rd p_5\right]\left[\rd p_6\right]
+\delta^{+}(p^2_3) \delta^{+}(p^2_4) (2\pi)^d \delta^{(d)}(p_1 + p_2 -p_3-p_4-p_5-p_6),
+\end{align}
+
+\subsection{Initial-state double emission}
+\label{se:ISNNLO}
+The initial-state double emission is captured by
+\begin{equation}
+\label{eq:partitionISNNLO}
+\left(\sum_{i=1}^2 \omega_{i5}\right) 
+\left(\sum_{j=1}^2 \omega_{j6}\right) = 
+\omega_{15,16} + \omega_{25,26} + \omega_{15,26} + \omega_{25,16}
+\end{equation}
+where $\omega_{i5,j6} = \omega_{i5}\omega_{j6}$ and 
+the sum over the selector functions for the photon 
+takes into account only the initial state.
+The first two terms on the right hand side of \refeq{eq:partitionISNNLO} entail triple-collinear configurations
+whereas the last two do not.
+As suggested in Section~(V.~A) of \cite{Behring:2020cqi} we can
+further decompose the phase space expressing the $\omega_{i5,i6}$ terms as
+\begin{equation}
+\omega_{i5,i6} = \omega_{i5,i6}\left( \Theta_A + \Theta_B \right)
+\end{equation}
+with
+\begin{equation}
+\Theta_A = \theta(\theta_{i5} - \theta_{i6}),\quad\quad
+\Theta_B = \theta(\theta_{i6} - \theta_{i5})\, .
+\end{equation}
+where $\theta(x)$ is the Heaviside step function and $\theta_{ik}$
+is the angle between the emitted particle $k$ and the direction of $i$.
+Let us focus for definiteness on the partition selected by
+$\omega_{15,16}\Theta_A$, and a similar discussion will hold for the
+other triple-collinear sectors.
+We then need to consider the phase space
+\begin{equation}
+\int \rd\Phi_4 \omega_{15,16}\Theta_A= 
+\int \rd\Phi_{1\to2} \times \omega_{15,16}\Theta_A \int \rd \Phi_{3}(Q)
+\end{equation}
+where
+\begin{align}
+& \int \rd \Phi_{3}(Q) = \nonumber \\ 
+& \int \frac{\rd M^2_{\ell\ell}}{2\pi} (2\pi)\delta^+(M^2_{\ell\ell}-Q^2)
+\int\frac{\rd^d Q}{(2\pi)^d} 
+\left[ \rd p_5\right] \left[ \rd p_6\right]
+(2\pi)^d\delta^{(d)}(p_1 + p_2 -Q-p_5-p_6)\, .
+\end{align}
+As usual, the first integration fixes $Q$, so that
+\begin{equation}
+Q = p_1 + p_2 - p_5 - p_6,
+\end{equation}
+and the phase space becomes
+\begin{equation}
+\int \rd \Phi_{3}(Q) = \nonumber \\ 
+\int \rd M^2_{\ell\ell}\delta^+(M^2_{\ell\ell}-(p_1 + p_2 - p_5 - p_6)^2)
+\int \left[ \rd p_5\right] \left[ \rd p_6\right]\,.
+\end{equation}
+Since we do not need energy ordering, 
+we can parametrise the energies independently as 
+\begin{equation}
+E_5 = x_1 \frac{\sqrt{s}}{2}, \quad\quad
+E_6 = x_2 \frac{\sqrt{s}}{2},
+\end{equation}
+yielding
+\begin{equation}
+\int \left[ \rd p_5\right] \left[ \rd p_6\right]= 
+\left(\frac{s}{4}\right)^{d-2}
+\int\frac{\rd \Omega^{(d-1)}_5}{2(2\pi)^{d-1}}
+\int\frac{\rd \Omega^{(d-1)}_6}{2(2\pi)^{d-1}}
+\int^1_0\rd x_1 \rd x_2 x_1^{d-3} x_2^{d-3}\,.
+\end{equation}
+Let us now focus on the parameterization of the angles. We can write
+\begin{align}
+\rd \Omega^{(d-1)}_5 &= \rd \Omega^{(d-2)}_5 \rd\cos\theta_{15} (\sin\theta_{15})^{d-4},\\
+\rd \Omega^{(d-1)}_6 &= \rd \Omega^{(d-3)}_6 \rd\cos\theta_{16} (\sin\theta_{16})^{d-4}\rd\cos\varphi_{56}(\sin\varphi_{56})^{d-5},
+\end{align}
+where $\theta_{15,16}$ are the polar angles wrt the direction of 
+$\vec{p}_1$ and
+$\varphi_{56}$ is the angle between $\vec{p}_5$ and $\vec{p}_6$ in the plane
+orthogonal to $\vec{p}_1$.
+We then perform the change of variables
+\begin{equation}
+\cos\varphi_{56} = \frac{2\sqrt{\eta_5\eta_6(1-\eta_5)(1-\eta_6)}-
+(1-2\lambda)(\eta_5 + \eta_6 - 2\eta_5 \eta_6)}{D},
+\end{equation}
+with 
+$D = \eta_5 + \eta_6 - 2\eta_5 \eta_6 - 2(1-2\lambda)\sqrt{\eta_5\eta_6(1-\eta_5)(1-\eta_6)}$, and
+\begin{equation}
+\cos\theta_5 = 1 -2 \eta_5, \quad\quad
+\cos\theta_6 = 1-2 \eta_6\,,
+\end{equation}
+and the angular ordering imposes $\eta_6 < \eta_5$. 
+The phase space of the emissions then becomes:
+\begin{align}
+\int \left[ \rd p_5\right] \left[ \rd p_6\right] &= 
+s^{2-2\epsilon} 2^{-4-2\epsilon} (2\pi)^{-6+4\epsilon}
+\int\rd \Omega^{(2-2\epsilon)}_5
+\int\rd \Omega^{(1-2\epsilon)}_6 \nonumber \\
+&\times
+\int^1_0\rd x_1 \rd x_2 \rd\eta_5 \rd\eta_6\rd\lambda\,
+x_1^{1-2\epsilon} x_2^{1-2\epsilon}
+\eta_5^{-\epsilon} (1-\eta_5)^{-\epsilon}
+\eta_6^{-\epsilon} (1-\eta_6)^{-\epsilon} \nonumber \\
+&\times
+D^{-1+2\epsilon}(\eta_5-\eta_6)^{1-2\epsilon}
+(1-\lambda)^{-\frac{1}{2}-\epsilon}\lambda^{-\frac{1}{2}-\epsilon}\,.
+\end{align}
+We then perform a further change of variable which respects 
+the angular ordering, \ie
+\begin{equation}
+\eta_5 = x_3, \quad\quad
+\eta_6 = x_3 x_4
+\end{equation}
+which gives for the phase space
+\begin{align}
+\int \left[ \rd p_5\right] \left[ \rd p_6\right] &= 
+s^{2-2\epsilon} 2^{-4-2\epsilon} (2\pi)^{-6+4\epsilon}
+\int\rd \Omega^{(2-2\epsilon)}_5
+\int\rd \Omega^{(1-2\epsilon)}_6 \nonumber \\
+&\times
+\int^1_0\rd x_1 \rd x_2 \rd x_3 \rd x_4\rd\lambda\,
+x_1^{1-2\epsilon} x_2^{1-2\epsilon}
+x_3^{1-2\epsilon} (1-x_3)^{-\epsilon}
+x_4^{-\epsilon}(1-x_3 x_4)^{-\epsilon} \nonumber \\
+&\times
+(1-x_4)^{1-2\epsilon}
+(1-\lambda)^{-\frac{1}{2}-\epsilon}\lambda^{-\frac{1}{2}-\epsilon}
+N(x_3,x_4,\lambda)^{-1+2\epsilon},
+\end{align}
+with
+\begin{equation}
+N(x_3,x_4,\lambda) = 
+1 + x_4 - 2 x_3 x_4 - 2(1-2\lambda)\sqrt{x_4(1-x_3)(1-x_3 x_4)}\,.
+\end{equation}
+The explicit $d=4$ expression reads
+\begin{equation}
+\int_{d=4} \left[ \rd p_5\right] \left[ \rd p_6\right] = 
+S^2\frac{(\xi_1 \xi_2)^2}{8(2\pi)^5}
+\int^1_0\prod_{i=1}^5 \rd x_i\,\rd\lambda\,
+\frac{x_1 x_2 x_3 (1-x_4)}{N(x_3,x_4,\lambda)\sqrt{\lambda(1-\lambda)}},
+\end{equation}
+where $x_5$ parametrise the azimuthal angle of $p_5$, \ie
+$\varphi_5 = 2\pi x_5$.
+We then do a last transformation to improve the integration from Vegas
+\begin{equation}
+\lambda = \sin^2\left(\frac{\pi}{2} x_6\right),
+\end{equation}
+so that
+\begin{equation}
+\int_{d=4} \left[ \rd p_5\right] \left[ \rd p_6\right] = 
+S^2\frac{(\xi_1 \xi_2)^2}{16(2\pi)^4}
+\int^1_0\prod_{i=1}^6 \rd x_i\,
+\frac{x_1 x_2 x_3 (1-x_4)}{N(x_3,x_4,\lambda)}\,.
+\end{equation}
+The integral over the pdf can thus be written as
+\begin{align}
+\label{eq:nnloispdfintegral}
+\int^1_0 \rd \xi_1 \rd \xi_2 \int \rd \Phi_3 (Q) &= 
+\int^1_0 \rd \xi_1 \xi_2 \int^{Y_{\max}}_{-Y_{\max}} 
+\rd Y \delta(Y-Y_{\mathrm{lab}}-Y_{\ell\ell}) \nonumber \\
+&\times \int \rd\tau
+\delta^+(\tau - \calU \xi_1 \xi_2)
+\int \left[ \rd p_5\right] \left[ \rd p_6\right],
+\end{align}
+where the rapidity of the dilepton system in the 
+partonic com frame is given by
+\begin{equation}
+Y_{\ell\ell} = \frac{1}{2}
+\log\upsilon , \quad\quad \mathrm{with}\quad\quad
+\upsilon  = \frac{E_{\tilde{Q}}-p_{z_{\tilde{Q}}}}{E_{\tilde{Q}}+p_{z_{\tilde{Q}}}}
+\end{equation}
+and we define $\calU$ as
+\begin{align}
+\calU = \frac{1}{4}
+\left(\tilde{p}_{1}+\tilde{p}_{2}-\tilde{p}_{5}-\tilde{p}_{6}\right)^2,
+\end{align}
+and a rescaled momentum $\tilde{k}^\mu$ is defined as 
+$\tilde{k}^\mu = (2/\sqrt{s})k^\mu$. 
+Therefore, the initial-state momenta are then simply given by
+\begin{equation}
+\tilde{p}_1 = (1,\vec{0},1), \quad\quad
+\tilde{p}_2 = (1,\vec{0},-1)\,.
+\end{equation}
+The $\delta$ functions in \refeq{eq:nnloispdfintegral} are solved by
+\begin{equation}
+\xi_1 = \sqrt{\frac{\tau}{\calU}} \sqrt{\upsilon} e^{Y}, \quad\quad
+\xi_2 = \sqrt{\frac{\tau}{\calU}} \frac{1}{\sqrt{\upsilon}} e^{-Y},
+\end{equation}
+which in turn gives for the partonic center of mass energy
+\begin{equation}
+\sqrt{s} = \sqrt{\frac{\tau}{\calU}} \sqrt{S}\, .
+\end{equation}
+Taking into account the Jacobian from the invariant mass and rapidity 
+distributions $K(r)$ the expression in $d=4$ reads
+\begin{equation}
+\int^1_0 \rd \xi_1 \xi_2 \int \rd \Phi_3 (Q) = 
+\frac{1}{(8\pi^2)^2}
+\int^{1}_{0} \rd r_1 \rd r_2
+\int^1_0\prod_{i=1}^6 \rd x_i\,
+K(r_1) \calW(\vec{x})
+\end{equation}
+where the phase space weight $\calW(\vec{x})$ is given by
+\begin{equation}
+\calW(\vec{x}) = \left(\frac{S^2 \tau^2}{4\calU^3}\right)
+\calW_s(\vec{x})
+\end{equation}
+where $\calW_s(\vec{x})$ is a sector-dependent weight, in this case
+given by
+\begin{equation}
+\calW_s(\vec{x}) = \frac{x_1 x_2 x_3 (1-x_4)}{N(x_3,x_4,\lambda)}\,.
+\end{equation}
+Finally, if we include the leptons we get
+\begin{equation}
+\int^1_0 \rd \xi_1 \xi_2 \int \rd \Phi_4 (Q) = 
+\frac{1}{(8\pi^2)^2}
+\int^{1}_{0} \rd r_1 \rd r_2
+\int^1_0\prod_{i=1}^9 \rd x_i\,
+K(r_1) L(x_7,x_8,y_2)\calW(\vec{x})
+\end{equation}
+Therefore, in order to fully specify the kinematics, we need 10 integration
+variables, \ie $r_1$,~$r_2$ and $x_i$ 
+with $i \in \lbrace1,\ldots,8\rbrace$, plus 2 random variables $y_1$ and $y_2$.
+To summarize
+\begin{enumerate}
+\item $r_1$: parametrises the invariant mass
+\item $r_2$: parametrises the rapidity
+\item $x_1$: parametrises the energy of the gluon
+\item $x_2$: parametrises the energy of the photon
+\item $x_3$: parametrises the polar angle of the gluon
+\item $x_3$, $x_4$: parametrise the polar angle of the photon
+\item $x_5$: parametrises the azimuthal angle of the gluon
+\item $x_6$: parametrises the angle between the gluon and photon in the $x-y$ plane
+\item $x_7$: parametrises the $p_T$ of the lepton
+\item $x_8$: parametrises the azimuth of the lepton
+\item $y_1$: used to assign the sign of $\sin\varphi_{56}$
+\item $y_2$: used to assign the rapidity of the lepton
+\end{enumerate}
+% Comment from Fabrizio:
+% \begin{enumerate}
+% \item we DO NOT take the limit in the phase space weight for 
+%   the variable that parametrise the triple collinear limit, 
+%   but we do take it in the variable that parametrise the double collinear
+% \end{enumerate}
+%
+%
+%
+%
+%
+%
+\bibliographystyle{JHEP}
+\bibliography{DY_phase_space}
+
+\end{document}

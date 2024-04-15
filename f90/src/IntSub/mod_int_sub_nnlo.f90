@@ -1,0 +1,267 @@
+module mod_int_sub_nnlo
+  use types
+  use consts_dp
+  use mod_parms
+  use mod_proc_parms
+  use mod_auxfunctions
+  implicit none
+  private
+
+  public :: fin_ns_vqcd
+  public :: Pqqbqqb, Pqqbqqb_Lmu
+  public :: calG_QqQl,calG_QqQl_L,calG_CF,calG_Q2
+
+  interface calG_CF
+    module procedure calG_CF_hard, calG_CF_coll
+  end interface
+
+contains
+
+  !!=========================================================================!!
+
+  function fin_ns_vqcd(etasb,Qq,Ql) result(res)
+     implicit none
+     real(dp), intent(in) :: etasb(:)
+     real(dp), intent(in) :: Qq(:),Ql
+     real(dp) :: a(2),res(4)
+     real(dp) :: li2eta13,li2eta14
+     integer  :: i
+
+     li2eta13 = real(dilog2(etasb(1)),kind=dp)
+     li2eta14 = real(dilog2(etasb(2)),kind=dp)
+
+     a(1) = 4*(li2eta13 - li2eta14) - 6*log(etasb(1)/etasb(2))
+     a(2) = 13._dp - 4*zeta2
+
+     res = zero
+     do i = 1, size(Qq)
+       res(i) = res(i) + a(1)*Qq(i)*Ql
+       res(i) = res(i) + a(2)*Ql**2
+     end do
+
+  end function fin_ns_vqcd
+
+  function Pqqbqqb(x) result(res)
+    real(dp), intent(in) :: x
+    real(dp) :: res, xp,xb
+    real(dp) :: lx,lxp,lxb,li2x,li2mx,li3x,li3xb,li3mx
+
+    xb = one-x
+    xp = one+x
+    lx = log(x)
+    lxp = log(xp)
+    lxb = log(xb)
+    li2x = real(dilog2(x),kind=dp) 
+    li2mx = real(dilog2(-x),kind=dp)
+    li3x = trilog(x)
+    li3xb = trilog(xb)
+    li3mx = trilog(-x)
+
+    !-- reg
+    res = 7*x+6*lx*lxb*xb+(8*li2mx+8*lx*lxp)*xp+1._dp+((16*li3mx+18*li3x+12*li3xb-8*li2mx*lx&
+      -10*li2x*lx-lx**3/3+8*li2x*lxb-5*lx**2*lxb+8*lx*lxb**2-4*lx*zeta2-8*lxb*zeta2-&
+      6*zeta3)*(x**2+1._dp))/xb-(lx**2*(2*x-1._dp)*(2*x-5._dp))/(2*xb)+(lx*(-11*x+27*x**2-&
+      6._dp))/xb+4*lxb*(7*x-8._dp)-(2*zeta2*(-6*x+x**2+11._dp))/xb-(2*li2x*(6*x+x**2-13._dp))/xb
+
+  end function Pqqbqqb
+
+  function Pqqbqqb_Lmu(x) result(res)
+    real(dp), intent(in) :: x
+    real(dp) :: res,xb
+    real(dp) :: lx,lxb,li2x
+
+    xb = one-x
+    lx = log(x)
+    lxb = log(xb)
+    li2x = real(dilog2(x),kind=dp)
+
+    !-- reg
+    res = ((-4*li2x+2*lx**2-4*lx*lxb+4*zeta2)*(x**2+1._dp))/xb-(2*lx*(2*x**2-5._dp))/xb-2*(7*x-8._dp)
+
+  end function Pqqbqqb_Lmu
+
+  function calG_QqQl(proc,z,Qcharges,Qlept,icoll)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: z,Qcharges(:),Qlept
+    integer, optional, intent(in) :: icoll
+    real(dp) :: calG_QqQl(size(Qcharges))
+    real(dp) :: EC,E3,E4
+    real(dp) :: etai3,etai4,eta13,eta14,eta23,eta24,eta34,eta34b
+    real(dp) :: logEC3,logEC4,logE34,li213,li214,li223,li224,li234
+    real(dp) :: a,b,c
+
+    EC = proc%Lim_Ei(1)
+    E3 = proc%Lim_Ei(3)
+    E4 = proc%Lim_Ei(4)
+
+    eta13  = proc%Lim_etaij(1,3)
+    eta23  = proc%Lim_etaij(2,3)
+    eta14  = proc%Lim_etaij(1,4)
+    eta24  = proc%Lim_etaij(2,4)
+    eta34  = proc%Lim_etaij(3,4)
+    eta34b = proc%Lim_KinInv(5)
+
+    logEC3 = log(EC/E3)
+    logEC4 = log(EC/E4)
+    logE34 = log(E3/E4)
+
+    li234 = real(dilog2(eta34b),kind=dp)
+    li213 = real(dilog2(one-eta13),kind=dp)
+    li214 = real(dilog2(one-eta14),kind=dp)
+    li223 = real(dilog2(one-eta23),kind=dp)
+    li224 = real(dilog2(one-eta24),kind=dp)
+
+    a = 4*zeta2
+    b = 2*(li213-li214-li223+li224) &
+      + (3._dp + 2*logEC3)*log(eta13/eta23) + (3._dp + 2*logEC4)*log(eta24/eta14)
+    c = 13._dp - 4*zeta2 + logE34**2 + (3._dp + 2*logEC3 + 2*logEC4)*log(eta34) + 2*li234
+
+    if(present(icoll)) then
+      etai3 = proc%Lim_etaij(icoll,3)
+      etai4 = proc%Lim_etaij(icoll,4)
+      b = b - 2*log(z) * log(E3/E4 * etai3/etai4)
+      a = a - 4*zeta2
+    endif
+
+    calG_QqQl = a * Qcharges*Qcharges + b * Qcharges*Qlept + c*Qlept*Qlept 
+
+  end function calG_QqQl
+
+  function calG_QqQl_L(proc,Qcharges,Qlept)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qcharges(:),Qlept
+    real(dp) :: calG_QqQl_L(size(Qcharges))
+    real(dp) :: EC,E3,E4
+    real(dp) :: eta13,eta14,eta23,eta24,eta34,eta34b
+    real(dp) :: logEC3,logEC4,logE34,li213,li214,li223,li224,li234
+    real(dp) :: b,c
+
+    EC = proc%Lim_Ei(1)
+    E3 = proc%Lim_Ei(3)
+    E4 = proc%Lim_Ei(4)
+
+    eta13  = proc%Lim_etaij(1,3)
+    eta23  = proc%Lim_etaij(2,3)
+    eta14  = proc%Lim_etaij(1,4)
+    eta24  = proc%Lim_etaij(2,4)
+    eta34  = proc%Lim_etaij(3,4)
+    eta34b = proc%Lim_KinInv(5)
+
+    logEC3 = log(EC/E3)
+    logEC4 = log(EC/E4)
+    logE34 = log(E3/E4)
+
+    li234 = real(dilog2(eta34b),kind=dp)
+    li213 = real(dilog2(one-eta13),kind=dp)
+    li214 = real(dilog2(one-eta14),kind=dp)
+    li223 = real(dilog2(one-eta23),kind=dp)
+    li224 = real(dilog2(one-eta24),kind=dp)
+
+    b = 2*(li213-li214-li223+li224) &
+      + (3._dp + 2*logEC3)*log(eta13/eta23) + (3._dp + 2*logEC4)*log(eta24/eta14)
+    c = 13._dp - 4*zeta2 + logE34**2 + (3._dp + 2*logEC3 + 2*logEC4)*log(eta34) + 2*li234
+
+    calG_QqQl_L = -3 * (b * Qcharges*Qlept + c*Qlept*Qlept)
+
+  end function calG_QqQl_L
+
+  !-- Eq. (484) of the notes, hard configuration
+  function calG_CF_hard(EC,Ek,etaik,etajk,damp1,damp2)
+  real(dp), intent(in) :: EC,Ek,etaik,etajk,damp1,damp2
+  real(dp) :: calG_CF_hard,logEcEk,li2jk
+
+  logEcEk = log(EC/Ek)
+  li2jk = real(dilog2(one-etajk),kind=dp)
+
+  calG_CF_hard = 13/two - pisq + logEcEk**2 + (3._dp + 2*logEcEk)*log(4*etajk) -&
+    (1.5_dp + 2*logEcEk)*(damp1*log(etaik/(one-etaik)) + &
+    damp2*log(etajk/(one-etajk))) + 2*li2jk
+
+  end function calG_CF_hard
+
+  !-- Eq. (484) of the notes, collinear limit
+  function calG_CF_coll(EC,Ek,etaik,etajk,n)
+  real(dp), intent(in) :: EC,Ek,etaik,etajk
+  integer, intent(in) :: n !-- collinear direction, n=1,2
+  real(dp) :: calG_CF_coll,logEcEk
+
+  logEcEk = log(EC/Ek)
+  calG_CF_coll = 0
+
+  if(n == 1) then
+
+    calG_CF_coll = 13/two - pisq + logEcEk**2 + (3._dp + 2*logEcEk)*log(4._dp) -&
+      (1.5_dp + 2*logEcEk)*log(etaik)
+
+  else if(n == 2) then
+
+    calG_CF_coll = 13/two - 4*zeta2 + logEcEk**2 + (3._dp + 2*logEcEk)*log(4._dp) +&
+      1.5_dp*log(etajk)
+
+  endif
+
+  end function calG_CF_coll
+
+  function calG_Q2(proc,Qcharges,Qlept,icoll,jother,coll_5i)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig), intent(in) :: proc
+    real(dp),        intent(in) :: Qcharges(:),Qlept
+    integer,         intent(in) :: icoll,jother
+    logical,         intent(in) :: coll_5i
+    real(dp) :: calG_Q2(size(Qcharges))
+    real(dp) :: EC,E3,E4,E5
+    real(dp) :: etaj3,etaj4,eta5i,eta5j,eta53,eta54,eta34,eta34b
+    real(dp) :: logEC3,logEC4,logE34,logEC5,li234,li2j3,li2j4,li25j,li253,li254
+    real(dp) :: a,b,c
+
+    EC = proc%Lim_Ei(1)
+    E5 = proc%Lim_Ei(2)
+    E3 = proc%Lim_Ei(3)
+    E4 = proc%Lim_Ei(4)
+
+    eta5i  = proc%Lim_etaij(icoll,5)
+    eta5j  = proc%Lim_etaij(jother,5)
+    etaj3  = proc%Lim_etaij(jother,3)
+    etaj4  = proc%Lim_etaij(jother,4)
+    eta34  = proc%Lim_etaij(3,4)
+    eta53  = proc%Lim_etaij(3,5)
+    eta54  = proc%Lim_etaij(4,5)
+    eta34b = proc%Lim_KinInv(5)
+
+    logEC3 = log(EC/E3)
+    logEC4 = log(EC/E4)
+    logEC5 = log(EC/E5)
+    logE34 = log(E3/E4)
+
+    li2j3 = real(dilog2(one-etaj3),kind=dp)
+    li2j4 = real(dilog2(one-etaj4),kind=dp)
+    li25j = real(dilog2(one-eta5j),kind=dp)
+    li253 = real(dilog2(one-eta53),kind=dp)
+    li254 = real(dilog2(one-eta54),kind=dp)
+    li234 = real(dilog2(eta34b),kind=dp)
+
+    !-- collinear limit 5||i
+    if(coll_5i) then
+      a = 13/two - pisq + logEC5**2 - (1.5_dp + 2*logEC5)*log(eta5i) &
+        + (3._dp + 2*logEC5)*log(4*eta5j) + 2*li25j
+    !-- hard configuration
+    else
+      a = 13/two - pisq + logEC5**2 - (1.5_dp + 2*logEC5)*log(eta5i/(one-eta5i)) &
+        + (3._dp + 2*logEC5)*log(4*eta5j) + 2*li25j
+    endif
+
+    b = 2*(li253-li254-li2j3+li2j4) + 3._dp*(log(eta53/eta54)-log(etaj3/etaj4)) &
+      - 2*logEC3*log(etaj3/eta53) + 2*logEC4*log(etaj4/eta54) &
+      + 2*logEC5*(logE34 + log(eta53/eta54))
+    c = 13._dp - 4*zeta2 + logE34**2 + (3._dp + 2*logEC3 + 2*logEC4)*log(eta34) + 2*li234
+
+    calG_Q2 = a * Qcharges*Qcharges + b * Qcharges*Qlept + c*Qlept*Qlept
+
+  end function calG_Q2
+
+end module mod_int_sub_nnlo

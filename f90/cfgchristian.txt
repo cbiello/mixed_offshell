@@ -1,0 +1,51 @@
+#---------------------------------
+# Optional configuration options.
+# No spaces
+#---------------------------------
+
+# Fortran compiler, e.g.: gfortran, ifort, gcc.
+# Default=gfortran
+FC=gfortran
+
+# If MPI=true is required, the following will be selected as the compiler.
+# Default=mpif90
+FCmpi=mpif90
+
+# Compiler flags.
+# Default='-O3 -ffree-line-length-1000'
+FFLAGS='-O3 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000'
+
+#Configure with checks: true/false. Default=true
+CHECKS=true
+
+#Configure with mpi: true/false. Default=true
+MPI=true
+
+#Include the 2L amplitudes
+With2L=false
+
+#Analysis
+analysis=fb_ATLAS_160601736
+
+#---------------------------------
+# Mandatory configuration options
+# If you have a paht, automatically linked to makefile
+#---------------------------------
+
+# LHAPDF installation path
+LHAPDF=/home/thA361/biello/Packages/lhapdf/lib64
+
+# OpenLoops installation path
+OPENLOOPS=/home/thA361/biello/mixed_lnu/OpenLoops
+
+# Hoppet installation path
+HOPPET=/home/thA361/biello/Packages/hoppet-install
+
+# PolyLogs
+# GINAC=/Users/fabrizio/tools/lib
+HANDYG=/home/thA361/biello/Packages/handyG-install
+
+# Other libraries
+# CHAPLIN=/Users/fabrizio/tools/lib
+# QCDLOOP=/Users/fabrizio/tools/lib
+# COLLIER=/Users/fabrizio/tools/COLLIER-1.2.4

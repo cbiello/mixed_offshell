@@ -1,0 +1,478 @@
+LHAPDF 6.2.3 loading /usr/share/LHAPDF/NNPDF31_nnlo_as_0118_luxqed/NNPDF31_nnlo_as_0118_luxqed_0000.dat
+NNPDF31_nnlo_as_0118_luxqed PDF set, member #0, version 2; LHAPDF ID = 325100
+ ####################################
+ ##  QCD-EW dilepton production   ###
+ ####################################
+ # ./mixed_ll -corr nnlo -ch qg -sec rr5263 -ptlep_cut 20 -ylep_cut 2.5 -vegasNc0 1000000 -vegasNc1 50000000 -vegasIt0 10 -vegasIt1 5
+ # 
+ # -vegasIt0 set to           10
+ # -vegasNc0 set to      1000000
+ # -vegasIt1 set to            5
+ # -vegasNc1 set to     50000000
+ # -ptlep_cut set to    20.000000000000000     
+ # -ylep_cut set to    2.5000000000000000     
+ # -corr set to nnlo
+ # -ch set to qg
+ # -sec set to rr5263
+ #
+ # vegasIt0 =           10
+ # vegasNc0 =      1000000
+ #
+ # vegasIt1 =            5
+ # vegasNc1 =     50000000
+ #
+ # seed =            0
+ #
+ # gridfile = ./grid/test_nnlo_qg_rr5263_dynscale_xMuR_1.00_xMuF_1.00.grid                                        
+ # writegrid =  F
+ # readgrid  =  F
+ #
+ # Using the Gmu scheme
+ #
+ # Input mz =    91.187600000000003     
+ # Input mw =    80.397999999999996     
+ # Input mh =    125.00000000000000     
+ # Input mb =    0.0000000000000000     
+ # Input mt =    173.19999999999999     
+ # Input Gf =    1.1663900000000000E-005
+ # Input gaz =    2.4952000000000001     
+ # Input gaw =    2.1053999999999999     
+ # Input gah =    4.1650000000000003E-003
+ #
+ # Derived vev    246.21845810181634     
+ # Derived 1/aem    132.33843228049895     
+ # Derived gw    0.65306233025595339     
+ # Derived sw2   0.22264585341299614     
+ # Derived cw2   0.77735414658700386     
+ #
+ # Input nup  =            2
+ # Input ndn  =            3
+ # Derived nf =            5
+ #
+ # sqrt(sh) =    14000.000000000000     
+ #
+ # corr = nnlo
+ # sec  = rr5263
+ # ch   = qg
+ #
+ # pdfset = NNPDF31_nnlo_as_0118_luxqed
+ # pdfmem =            0
+ #
+ # using dynamical scale, see cut_histo
+ # xmuR =           1.0000000000000000     
+ # xmuF =           1.0000000000000000     
+ #
+ # alphasPDF(mu) =   0.11800215829284905     
+ #
+ # qmin =    300.00000000000000     
+ # qmax =    14000.000000000000     
+ #
+ # ptlep_cut =    20.000000000000000     
+ # ylep_cut  =    2.5000000000000000     
+ #
+ # R_phot =  0.10000000000000001      # for isolation
+ #
+ # buff =         9.9999999999999998E-013
+ # buff_rr =         9.9999999999999998E-013
+ # buff_rv =         9.9999999999999998E-013
+ # buff_z  =         9.9999999999999998E-013
+ # buff_r  =         9.9999999999999998E-013
+ #
+ # lepton charge =   -1.0000000000000000     
+ # lepton cL =  -0.66668072315649085     
+ # lepton cR =   0.53517749919274349     
+ #
+ # out = ./histo/test_nnlo_qg_rr5263_dynscale_xMuR_1.00_xMuF_1.00.histo                                      
+ #
+ #####################################################################
+ #        ___                                           version beta #
+ #       /   \ ___  ____  _  _  |     __   __  ___   __    ___       #
+ #       |   | |__| |__   |\ |  |    /  \ /  \ |__| /__    __/       #
+ #       \___/ |    |___  | \|  |___ \__/ \__/ |    __/   /__        #
+ #                                                                   #
+ #####################################################################
+ #       You are using OpenLoops 2 to evaluate loop amplitudes       #
+ #                             Authors:                              #
+ #       F. Buccioni, J.-N. Lang, J. Lindert, P. Maierhoefer,        #
+ #                S. Pozzorini, M. Zoller, H. Zhang                  #
+ #                                                                   #
+ #         Please cite Eur.Phys.J. C79 (2019) no.10, 866             #
+ #                     Phys. Rev. Lett. 108 (2012) 111601            #
+ #                     Eur.Phys.J. C78 (2018) no.1, 70               #
+ #                                                                   #
+ #####################################################################
+
+                                                            
+         *******************************************        
+         *              C O L L I E R              *        
+         *                                         *        
+         *        Complex One-Loop Library         *        
+         *      In Extended Regularizations        *        
+         *                                         *        
+         *    by A.Denner, S.Dittmaier, L.Hofer    *        
+         *                                         *        
+         *              version 1.2.4              *        
+         *                                         *        
+         *******************************************        
+                                                            
+ ====================================================
+ ================OpenLoops Parameters================
+ ====================================================
+ install_path: "/users/ttp/signorile/Desktop/tools/OpenLoops"
+ model =sm
+
+ coupling constants
+ alpha_s      =  0.11799999999999999     
+ alpha_qed    =   7.5598868064660511E-003   1/alpha_qed    =   132.27711281929373     
+
+ ew_scheme     =           1
+ alpha_qed_0   =   7.2973525698163148E-003   1/alpha_qed_0   =   137.03599907399999     
+ alpha_qed_MZ  =   7.8125000000000000E-003   1/alpha_qed_MZ  =   128.00000000000000     
+ alpha_qed_Gmu =   7.5598868064660511E-003   1/alpha_qed_Gmu =   132.27711281929373     
+ Gmu           =   1.1663900000000000E-005
+ sw            =       (0.47188111823035794,-9.68042324079749594E-004)   sw2            =       (0.22267085263639186,-9.13601788762133621E-004)
+
+ derived couplings
+ vev          =              (246.19023188189755,-3.7281142650693186)
+
+ particle masses and widths
+ ME =                (0.0000000000000000,0.0000000000000000) rME =   0.0000000000000000      wME =   0.0000000000000000      YE =               (0.0000000000000000,0.0000000000000000)
+ MM =                (0.0000000000000000,0.0000000000000000) rMM =   0.0000000000000000      wMM =   0.0000000000000000      YM =               (0.0000000000000000,0.0000000000000000)
+ ML =                (0.0000000000000000,0.0000000000000000) rML =   0.0000000000000000      wML =   0.0000000000000000      YL =               (0.0000000000000000,0.0000000000000000)
+ MU =                (0.0000000000000000,0.0000000000000000) rMU =   0.0000000000000000      wMU =   0.0000000000000000      YU =               (0.0000000000000000,0.0000000000000000)
+ MD =                (0.0000000000000000,0.0000000000000000) rMD =   0.0000000000000000      wMD =   0.0000000000000000      YD =               (0.0000000000000000,0.0000000000000000)
+ MS =                (0.0000000000000000,0.0000000000000000) rMS =   0.0000000000000000      wMS =   0.0000000000000000      YS =               (0.0000000000000000,0.0000000000000000)
+ MC =                (0.0000000000000000,0.0000000000000000) rMC =   0.0000000000000000      wMC =   0.0000000000000000      YC =               (0.0000000000000000,0.0000000000000000)
+ MB =                (0.0000000000000000,0.0000000000000000) rMB =   0.0000000000000000      wMB =   0.0000000000000000      YB =               (0.0000000000000000,0.0000000000000000)
+ MT =                (173.19999999999999,0.0000000000000000) rMT =   173.19999999999999      wMT =   0.0000000000000000      YT =               (173.19999999999999,0.0000000000000000)
+ MW =               (80.404890344843551,-1.0526097882481313) rMW =   80.397999999999996      wMW =   2.1053999999999999     
+ MZ =               (91.196132638775055,-1.2474832700485456) rMZ =   91.187600000000003      wMZ =   2.4952000000000001     
+ MH =                (125.00000000000000,0.0000000000000000) rMH =   125.00000000000000      wMH =   0.0000000000000000     
+ MX =                (91.187600000000003,0.0000000000000000) rMX =   91.187600000000003      wMX =   0.0000000000000000     
+ MY =                (80.397999999999996,0.0000000000000000) rMY =   80.397999999999996      wMY =   0.0000000000000000     
+
+ ==Technical Parameters==
+ muren              =   100.00000000000000     
+ mureg              =   100.00000000000000     
+ pole1_UV           =   0.0000000000000000     
+ pole1_IR           =   0.0000000000000000     
+ pole2_IR           =   0.0000000000000000     
+ fact_UV            =   1.0000000000000000     
+ fact_IR            =   1.0000000000000000     
+ ew_renorm_scheme   =           1
+ N_quarks           =           6
+ light quarks       =           5
+ nq_nondecoupled    =           0
+ fermion_loops      =           1
+ nonfermion_loops   =           1
+ CT_on              =           1
+ R2_on              =           1
+ IR_on              =           1
+ polecheck          =           0
+ polenorm_swi       =           0
+ i-operator mode    =           0
+ last_switch        =           1
+ se_integral_switch =           1
+ use_coli_cache     =           1
+ use_me_cache       =           1
+ use_bubble_vertex  =           1
+ check_Ward_tree    =           0
+ check_Ward_loop    =           0
+ out_symmetry       =           1
+ psp_tolerance      =   9.9999997171806854E-010
+ hp_mode            =           1
+ hp_loopacc         =   8.0000000000000000     
+ hp_step_thres      =  0.50000000000000000     
+ hp_alloc_mode      =           3
+ sync_qp_kinematics =           1
+ stability_mode         =          11
+ deviation_mode         =           1
+ stability_triggerratio =  0.20000000000000001     
+ stability_unstable     =   1.0000000000000000E-002
+ stability_kill         =   1.0000000000000000     
+ stability_kill2        =   10.000000000000000     
+ redlib1                =           1
+ redlib2                =           7
+ redlib_qp              =           5
+
+ ====================================================
+ # 
+ # number of hisrograms initialised =            6
+ # name, lower bound, upper bound, number of bins
+ # 
+ # mll               100.00000000000000        1000.0000000000000               90
+ # yll              -5.0000000000000000        5.0000000000000000              100
+ # ptlm              10.000000000000000        1000.0000000000000               99
+ # ptlp              10.000000000000000        1000.0000000000000               99
+ # ylm              -5.0000000000000000        5.0000000000000000              100
+ # ylp              -5.0000000000000000        5.0000000000000000              100
+ # 
+
+ Input parameters for vegas: ndim = 10  ncall =   944784.
+                             it =    0  itmx =   10
+                             verb =  0  alph = 1.50
+                             mds =   1  nd =  50
+
+
+************* Integration by Vegas (iteration   1) **************
+*                                                               *
+*  integral  = -.11894482       accum. integral = -.11894482    *
+*  std. dev. = 0.77629680E-01   accum. std. dev = 0.77629680E-01*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  0.000       ****************
+
+
+************* Integration by Vegas (iteration   2) **************
+*                                                               *
+*  integral  = -.13195986       accum. integral = -.13111756    *
+*  std. dev. = 0.20420635E-01   accum. std. dev = 0.19748792E-01*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration = 0.2626E-01   ****************
+
+
+************* Integration by Vegas (iteration   3) **************
+*                                                               *
+*  integral  = -.16478466       accum. integral = -.15512647    *
+*  std. dev. = 0.12525706E-01   accum. std. dev = 0.10577562E-01*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.049       ****************
+
+
+************* Integration by Vegas (iteration   4) **************
+*                                                               *
+*  integral  = -.13234342       accum. integral = -.14198596    *
+*  std. dev. = 0.90609810E-02   accum. std. dev = 0.68813775E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.591       ****************
+
+
+************* Integration by Vegas (iteration   5) **************
+*                                                               *
+*  integral  = -.14749450       accum. integral = -.14456728    *
+*  std. dev. = 0.73279379E-02   accum. std. dev = 0.50163131E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.268       ****************
+
+
+************* Integration by Vegas (iteration   6) **************
+*                                                               *
+*  integral  = -.14064742       accum. integral = -.14362891    *
+*  std. dev. = 0.89415874E-02   accum. std. dev = 0.43748798E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.044       ****************
+
+
+************* Integration by Vegas (iteration   7) **************
+*                                                               *
+*  integral  = -.11988568       accum. integral = -.14074393    *
+*  std. dev. = 0.11763409E-01   accum. std. dev = 0.41004839E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.466       ****************
+
+
+************* Integration by Vegas (iteration   8) **************
+*                                                               *
+*  integral  = -.12955158       accum. integral = -.13870493    *
+*  std. dev. = 0.86879519E-02   accum. std. dev = 0.37082129E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.451       ****************
+
+
+************* Integration by Vegas (iteration   9) **************
+*                                                               *
+*  integral  = -.12982853       accum. integral = -.13670630    *
+*  std. dev. = 0.68789549E-02   accum. std. dev = 0.32641499E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.431       ****************
+
+
+************* Integration by Vegas (iteration  10) **************
+*                                                               *
+*  integral  = -.13390533       accum. integral = -.13621639    *
+*  std. dev. = 0.70894697E-02   accum. std. dev = 0.29649735E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.286       ****************
+
+
+ Input parameters for vegas: ndim = 10  ncall = 48828125.
+                             it =    0  itmx =    5
+                             verb =  0  alph = 1.50
+                             mds =   1  nd =  50
+
+
+************* Integration by Vegas (iteration   1) **************
+*                                                               *
+*  integral  = -.13897878       accum. integral = -.13897878    *
+*  std. dev. = 0.10253833E-02   accum. std. dev = 0.10253833E-02*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  0.000       ****************
+
+ # Histo: mll             Σ  ->   -23.543175597417079      pm   3.8427523179911480     
+ # Histo: yll             Σ  ->   -23.543175597417353      pm   3.6505498614516774     
+ # Histo: ptlm            Σ  ->   -23.543175597417456      pm   3.4526207099950037     
+ # Histo: ptlp            Σ  ->   -23.543175597417829      pm   3.3321563919605550     
+ # Histo: ylm             Σ  ->   -23.543175597417374      pm   3.6777433013604397     
+ # Histo: ylp             Σ  ->   -23.543175597417235      pm   4.0496026130522242     
+
+************* Integration by Vegas (iteration   2) **************
+*                                                               *
+*  integral  = -.13547855       accum. integral = -.13826279    *
+*  std. dev. = 0.20220312E-02   accum. std. dev = 0.91451672E-03*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  2.381       ****************
+
+ # Histo: mll             Σ  ->   -21.448184638918036      pm   1.6983189433655042     
+ # Histo: yll             Σ  ->   -21.376942154293840      pm   1.6431850162775938     
+ # Histo: ptlm            Σ  ->   -21.787443923993862      pm   1.6433344242739949     
+ # Histo: ptlp            Σ  ->   -21.877755626483591      pm   1.5447677002557261     
+ # Histo: ylm             Σ  ->   -20.921379513309596      pm   1.2606184110760139     
+ # Histo: ylp             Σ  ->   -21.397162283937437      pm   1.6514542574686102     
+
+************* Integration by Vegas (iteration   3) **************
+*                                                               *
+*  integral  = -.13788336       accum. integral = -.13818672    *
+*  std. dev. = 0.18262839E-02   accum. std. dev = 0.81772226E-03*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration =  1.208       ****************
+
+ # Histo: mll             Σ  ->   -20.860641210199230      pm   1.3112857581041908     
+ # Histo: yll             Σ  ->   -20.777921081561708      pm   1.0676509948411437     
+ # Histo: ptlm            Σ  ->   -21.430669526774583      pm   1.3235824909397276     
+ # Histo: ptlp            Σ  ->   -21.397610330947323      pm   1.1780124527798679     
+ # Histo: ylm             Σ  ->   -20.319949934021761      pm  0.95091690092555803     
+ # Histo: ylp             Σ  ->   -20.829831784935831      pm   1.3141433813092314     
+
+************* Integration by Vegas (iteration   4) **************
+*                                                               *
+*  integral  = -.13772525       accum. integral = -.13802411    *
+*  std. dev. = 0.11085886E-02   accum. std. dev = 0.65806607E-03*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration = 0.8432       ****************
+
+ # Histo: mll             Σ  ->   -20.698014102071511      pm  0.97399959306174078     
+ # Histo: yll             Σ  ->   -20.381330810450667      pm  0.80192228723321013     
+ # Histo: ptlm            Σ  ->   -20.935840475081420      pm  0.98629184283152649     
+ # Histo: ptlp            Σ  ->   -20.929537372785671      pm  0.88201158639417365     
+ # Histo: ylm             Σ  ->   -20.090749121130695      pm  0.72421523403764099     
+ # Histo: ylp             Σ  ->   -20.339807909813185      pm  0.90919640243437538     
+
+************* Integration by Vegas (iteration   5) **************
+*                                                               *
+*  integral  = -.13873056       accum. integral = -.13822367    *
+*  std. dev. = 0.10487965E-02   accum. std. dev = 0.55742457E-03*
+*   max. wt. =    1.00000                                       *
+*                                                               *
+**************   chi**2/iteration = 0.7138       ****************
+
+ # Histo: mll             Σ  ->   -20.868516990201165      pm  0.86312224811743821     
+ # Histo: yll             Σ  ->   -20.433513026002444      pm  0.68067962548921768     
+ # Histo: ptlm            Σ  ->   -20.715675680375153      pm  0.73614829209611010     
+ # Histo: ptlp            Σ  ->   -20.746804139007963      pm  0.66104353231293000     
+ # Histo: ylm             Σ  ->   -20.189084213561895      pm  0.61272789499453895     
+ # Histo: ylp             Σ  ->   -20.420288005903998      pm  0.75808789224903705     
+Thanks for using LHAPDF 6.2.3. Please make sure to cite the paper:
+  Eur.Phys.J. C75 (2015) 3, 132  (http://arxiv.org/abs/1412.7420)
+ ################################################### 
+ #
+ # ./mixed_ll -corr nnlo -ch qg -sec rr5263 -ptlep_cut 20 -ylep_cut 2.5 -vegasNc0 1000000 -vegasNc1 50000000 -vegasIt0 10 -vegasIt1 5
+ # 
+ # Git version: 5f8ce1600b0be00db9578e137ddd65ab43c02b57
+ # 
+ #
+ # vegasIt0 =           10
+ # vegasNc0 =      1000000
+ #
+ # vegasIt1 =            5
+ # vegasNc1 =     50000000
+ #
+ # seed =            0
+ #
+ # gridfile = ./grid/test_nnlo_qg_rr5263_dynscale_xMuR_1.00_xMuF_1.00.grid                                        
+ # writegrid =  F
+ # readgrid  =  F
+ #
+ # Using the Gmu scheme
+ #
+ # Input mz =    91.187600000000003     
+ # Input mw =    80.397999999999996     
+ # Input mh =    125.00000000000000     
+ # Input mb =    0.0000000000000000     
+ # Input mt =    173.19999999999999     
+ # Input Gf =    1.1663900000000000E-005
+ # Input gaz =    2.4952000000000001     
+ # Input gaw =    2.1053999999999999     
+ # Input gah =    4.1650000000000003E-003
+ #
+ # Derived vev    246.21845810181634     
+ # Derived 1/aem    132.33843228049895     
+ # Derived gw    0.65306233025595339     
+ # Derived sw2   0.22264585341299614     
+ # Derived cw2   0.77735414658700386     
+ #
+ # Input nup  =            2
+ # Input ndn  =            3
+ # Derived nf =            5
+ #
+ # sqrt(sh) =    14000.000000000000     
+ #
+ # corr = nnlo
+ # sec  = rr5263
+ # ch   = qg
+ #
+ # pdfset = NNPDF31_nnlo_as_0118_luxqed
+ # pdfmem =            0
+ #
+ # using dynamical scale, see cut_histo
+ # xmuR =           1.0000000000000000     
+ # xmuF =           1.0000000000000000     
+ #
+ # alphasPDF(mu) =   0.11800215829284905     
+ #
+ # qmin =    300.00000000000000     
+ # qmax =    14000.000000000000     
+ #
+ # ptlep_cut =    20.000000000000000     
+ # ylep_cut  =    2.5000000000000000     
+ #
+ # R_phot =  0.10000000000000001      # for isolation
+ #
+ # buff =         9.9999999999999998E-013
+ # buff_rr =         9.9999999999999998E-013
+ # buff_rv =         9.9999999999999998E-013
+ # buff_z  =         9.9999999999999998E-013
+ # buff_r  =         9.9999999999999998E-013
+ #
+ # lepton charge =   -1.0000000000000000     
+ # lepton cL =  -0.66668072315649085     
+ # lepton cR =   0.53517749919274349     
+ #
+ # out = ./histo/test_nnlo_qg_rr5263_dynscale_xMuR_1.00_xMuF_1.00.histo                                      
+ #
+ ################################################### 
+ # 
+ # Result:          -0.13822367129009319      fb
+ # Error:             5.5742457103337894E-004 fb
+ # Chi2/Iteration:   0.71378137247513074     
+ # 
+ ################################################### 
+ #
+ # Points failing the technical cuts:      1756855
+ #
+ # bad points:            0
+ #
+ # Time =    31714.1309    
+ #
