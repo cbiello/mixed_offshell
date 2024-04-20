@@ -140,17 +140,21 @@ contains
   subroutine help_run_proc_lonlo(idev)
     integer, intent(in) :: idev
 
-    write(idev,*) ' -corr lo -ch ns/aa -sec na'
+    write(idev,*) 'Z: -corr lo -ch ns/aa -sec na'
     write(idev,*) ''
-    write(idev,*) ' -corr nloqcd -ch ns -sec r_is s v'
-    write(idev,*) ' -corr nloqcd -ch gq -sec r_is s'
-    write(idev,*) ' -corr nloqcd -ch qg -sec r_is s'
+    write(idev,*) 'W: -corr lo -ch ns -sec w'
     write(idev,*) ''
-    write(idev,*) ' -corr nloewk -ch ns -sec r_is r_fs_5[3,4] s v'
-    write(idev,*) ' -corr nloewk -ch aq -sec r_is s'
-    write(idev,*) ' -corr nloewk -ch qa -sec r_is s'
+    write(idev,*) 'Z: -corr nloqcd -ch ns -sec r_is s v'
+    write(idev,*) '   -corr nloqcd -ch gq -sec r_is s'
+    write(idev,*) '   -corr nloqcd -ch qg -sec r_is s'
     write(idev,*) ''
-    write(idev,*) ' -corr nloewk -ch aa -sec r_fs_5[3,4] s v'
+    write(idev,*) 'W: -corr nloqcd -ch ns -sec r_is_w'
+    write(idev,*) ''
+    write(idev,*) 'Z: -corr nloewk -ch ns -sec r_is r_fs_5[3,4] s v'
+    write(idev,*) '   -corr nloewk -ch aq -sec r_is s'
+    write(idev,*) '   -corr nloewk -ch qa -sec r_is s'
+    write(idev,*) ''
+    write(idev,*) 'Z: -corr nloewk -ch aa -sec r_fs_5[3,4] s v'
     write(idev,*) ''
     
   end subroutine help_run_proc_lonlo
