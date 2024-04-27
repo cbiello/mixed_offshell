@@ -21,7 +21,7 @@ module mod_aux_sectors
   public :: ns_lumi,aa_lumi
   public :: gq_lumi,qg_lumi
   public :: aq_lumi,qa_lumi
-  public :: qq_lumi,qQp_lumi,qQpb_lumi,qQpb_lumi_w
+  public :: qq_lumi,qQp_lumi,qQpb_lumi,qQpb_lumi_wp, qQpb_lumi_wm
   public :: ga_lumi,ag_lumi
   
   public :: ns_lumi_splitb
@@ -535,25 +535,46 @@ contains
 
   end function qQpb_lumi
 
-  function qQpb_lumi_w(res,f1,f2) result(respdf)
+  function qQpb_lumi_wp(res,f1,f2) result(respdf)
     real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
     real(dp) :: respdf
 
     respdf = zero
 
     ! d(1) ux(2) + s(1) cx(2)
-    respdf = respdf + flag_down*res(2,1)*(f1(1)*f2(-2) + f1(3)*f2(-4))
+    ! respdf = respdf + flag_down*res(2,1)*(f1(1)*f2(-2) + f1(3)*f2(-4))
 
     ! dx(1) u(2) + sx(1) c(2)
-    respdf = respdf + flag_down*res(2,2)*(f1(-1)*f2(2) + f1(-3)*f2(4))
+    respdf = respdf + flag_down*res(1,2)*(f1(-1)*f2(2) + f1(-3)*f2(4))
 
     ! u(1) dx(2) + c(1) sx(2)
     respdf = respdf + flag_down*res(1,1)*(f1(2)*f2(-1) + f1(4)*f2(-3))
 
     ! ux(1) d(2) + cx(1) s(2)
+    ! respdf = respdf + flag_down*res(1,2)*(f1(-2)*f2(1) + f1(-4)*f2(3))
+
+  end function qQpb_lumi_wp
+
+
+  function qQpb_lumi_wm(res,f1,f2) result(respdf)
+    real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
+    real(dp) :: respdf
+
+    respdf = zero
+
+    ! d(1) ux(2) + s(1) cx(2)
+    respdf = respdf + flag_down*res(1,1)*(f1(1)*f2(-2) + f1(3)*f2(-4))
+
+    ! dx(1) u(2) + sx(1) c(2)
+    ! respdf = respdf + flag_down*res(2,2)*(f1(-1)*f2(2) + f1(-3)*f2(4))
+
+    ! u(1) dx(2) + c(1) sx(2)
+    ! respdf = respdf + flag_down*res(1,1)*(f1(2)*f2(-1) + f1(4)*f2(-3))
+
+    ! ux(1) d(2) + cx(1) s(2)
     respdf = respdf + flag_down*res(1,2)*(f1(-2)*f2(1) + f1(-4)*f2(3))
 
-  end function qQpb_lumi_w
+  end function qQpb_lumi_wm
   
   function aa_lumi(res,f1,f2) result(respdf)
     real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
