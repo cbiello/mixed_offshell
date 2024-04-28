@@ -39,11 +39,11 @@ LHAPDF=/usr/local/lib
 OPENLOOPS=/users/ttp/signorile/Desktop/tools/OpenLoops
 
 # Hoppet installation path
-HOPPET=/home/thA361/biello/Packages/hoppet-install/bin
+HOPPET=/users/ttp/signorile/Desktop/tools
 
 # PolyLogs
 # GINAC=/Users/fabrizio/tools/lib
-HANDYG=/home/thA361/biello/Packages/handyG-install/bin
+HANDYG=/users/ttp/signorile/Desktop/tools
 
 # Other libraries
 # CHAPLIN=/Users/fabrizio/tools/lib

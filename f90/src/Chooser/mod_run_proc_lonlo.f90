@@ -29,7 +29,7 @@ contains
     if (corr.eq.'lo') then
 
        if     (ch.eq.'ns' .and. sec.eq.'na') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns,vg_result,vg_error,vg_chi2)
-       elseif (ch.eq.'ns' .and. sec.eq.'w') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns_w,vg_result,vg_error,vg_chi2)
+       elseif (ch.eq.'ns' .and. sec.eq.'w') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns_wp,vg_result,vg_error,vg_chi2)
        elseif (ch.eq.'aa' .and. sec.eq.'na') then; call vegas_integrate(LOdim_vegas,xsect_lo_aa,vg_result,vg_error,vg_chi2)
        else
           print *, 'wrong sector/channel for lo -> -sec na -ch ns,aa'
@@ -42,7 +42,7 @@ contains
           if     (sec.eq.'r_is') then
              call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns,vg_result,vg_error,vg_chi2)
           elseif     (sec.eq.'r_is_w') then
-             call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_w,vg_result,vg_error,vg_chi2)
+             call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_wp,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'s')    then
              call init_xPij_nlo()
              call vegas_integrate(LOdim_vegas,xsect_nloqcd_s_ns,vg_result,vg_error,vg_chi2)
