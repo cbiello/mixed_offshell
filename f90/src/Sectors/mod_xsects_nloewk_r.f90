@@ -107,10 +107,10 @@ contains
 
        call res_tree_a_qqb(HardProc%AmpMom,res_nlo)
 
-       print*, 'NLO amp udx_epvea  ', (0.094835522759998875_dp)**2*res_nlo(1,1)/eesq2*(four*pi)/132.50700000000001_dp
-       print*, 'NLO amp dxu_epvea  ', (0.094835522759998875_dp)**2*res_nlo(1,2)/eesq2*(four*pi)/132.50700000000001_dp
-       print*, 'NLO amp dux_epvea  ', (0.094835522759998875_dp)**2*res_nlo(2,1)/eesq2*(four*pi)/132.50700000000001_dp
-       print*, 'NLO amp uxd_epvea  ', (0.094835522759998875_dp)**2*res_nlo(2,2)/eesq2*(four*pi)/132.50700000000001_dp
+       print*, 'NLO amp(1,1)  ', (0.094835522759998875_dp)**2*res_nlo(1,1)/eesq2*(four*pi)/132.50700000000001_dp
+       print*, 'NLO amp(1,2)  ', (0.094835522759998875_dp)**2*res_nlo(1,2)/eesq2*(four*pi)/132.50700000000001_dp
+       print*, 'NLO amp(2,1)  ', (0.094835522759998875_dp)**2*res_nlo(2,1)/eesq2*(four*pi)/132.50700000000001_dp
+       print*, 'NLO amp(2,2)  ', (0.094835522759998875_dp)**2*res_nlo(2,2)/eesq2*(four*pi)/132.50700000000001_dp
 
        stop
        
