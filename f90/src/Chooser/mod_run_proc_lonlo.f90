@@ -82,6 +82,8 @@ contains
        if (ch.eq.'ns') then
           if     (sec.eq.'r_is') then
              call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_is_ns,vg_result,vg_error,vg_chi2)
+          elseif (sec.eq.'r_is_wp') then
+             call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_is_ns_wp,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'r_fs_53') then
              call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_fs_53_ns,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'r_fs_54') then

@@ -13,6 +13,7 @@ module mod_amplitudes_tree_ppnul
   !-- res_tree   --> 0 -> q l nu qb
   public :: res_tree_qqb_w 
   public :: res_tree_g_qqb_w
+  public :: res_tree_a_qqb_w
   
   !master amplitudes
   public :: res_tree_j_qcd
@@ -98,6 +99,16 @@ contains
 
   end subroutine res_tree_g_qqb_w
 
+  subroutine res_tree_a_qqb_w(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(2,2)
+    integer, parameter :: iconf(5,2) = reshape([2,5,1,4,3, 1,5,2,4,3],[5,2])
+    !CB changed iconf in order to switch nue<->e
+
+    call res_tree_j_qed(p,iconf,aveqq,res)
+
+  end subroutine res_tree_a_qqb_w
+
 
   !-- master amplitudes below
 
@@ -154,12 +165,24 @@ contains
     complex(dp) :: amp_is(-1:1,-1:1,-1:1),amp_fs(-1:1,-1:1,-1:1),amp(2)
     integer :: ismin,ismax,fsmin,fsmax
     logical :: need
+    real(dp) :: Wcorrup, Wcorrdown
+
+    real(dp) :: mwMG, gawMG, mypropsq
+
+    !CB MG settings
+    mwMG = 80.419002445756163_dp
+    gawMG = 2.0476000000000001_dp
+    mypropsq = mwMG**2 - mwMG * gawMG
 
     res = zero
     ismin = -1; ismax = -1
     fsmin = -1; fsmax = -1
 
     call spinoru(5,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5)/),za,zb,sprod)
+
+    !-- W emission as a correction factor of the initial-state emissions
+    Wcorrup = Q_lep*sprod(1,5)/(sprod(1,2)-mypropsq) !since 81 was not appreciated
+    Wcorrdown = -Q_lep*sprod(2,5)/(sprod(1,2)-mypropsq)
 
     do i = 1,size(iconf,2)
 
@@ -168,24 +191,24 @@ contains
        call need_coupl(iconf(4,i),iconf(5,i),ismin,ismax,need)
        if (need) call get_coupl(sprod(ismin,ismax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
          [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_is)
-
+       
        !-- final_state emission
        amp_fs = master_amp_qgqb_llb_afin(iconf(4,i),iconf(2,i),iconf(5,i),iconf(1,i),iconf(3,i),za,zb)
        call need_coupl(iconf(1,i),iconf(3,i),fsmin,fsmax,need)
        if (need) call get_coupl(sprod(fsmin,fsmax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
-         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs)
-
+            [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs)
+       
        do hl=-1,1,2
           do ha=-1,1,2
              do hq=-1,1,2
 
-                amp = [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl) 
+                amp = [Qdn+Wcorrdown,Qup+Wcorrup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
                 res(i,:) = res(i,:) + abs(amp)**2
-
+ 
              enddo
           enddo
        enddo
-       
+
     enddo
 
     res = res * 8._dp * xn * ave * eesq2 ! * ee**2
@@ -267,8 +290,8 @@ contains
 
     !-- basic amplitudes
     !-- I inserted a zero just to switch off the photon radiation from the neutrino
-    res(-1,+1,-1) = zero*za(i1,i4)**2*dena
-    res(-1,-1,-1) = zb(i5,i3)**2*denb
+    res(-1,+1,-1) = za(i1,i4)**2*dena
+    res(-1,-1,-1) = zero*zb(i5,i3)**2*denb
 
     !-- 4 <-> 5
     res(-1,+1,+1) = -zero*za(i1,i5)**2*dena
