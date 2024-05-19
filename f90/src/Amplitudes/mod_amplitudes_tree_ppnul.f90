@@ -140,6 +140,9 @@ contains
           do hg=-1,1,2
              do hq=-1,1,2
                 res(i,:) = res(i,:) + abs(amp(hq,hg,hl)*coupl(:,hq,hl))**2
+
+                print*, 'amp in amps= ', amp(hq,hg,hl)*coupl(:,hq,hl)
+                
              enddo
           enddo
        enddo
@@ -189,20 +192,35 @@ contains
        !-- initial-state emission
        amp_is = master_amp_qgqb_llb(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
        call need_coupl(iconf(4,i),iconf(5,i),ismin,ismax,need)
-       if (need) call get_coupl(sprod(ismin,ismax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
-         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_is)
+       !if (need) call get_coupl(sprod(ismin,ismax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
+       !  [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_is,1)
+       !CB (11May): here we have to put 1 in order to call the coupling for charged bosons
+       if(need) call get_coupl(sprod(ismin,ismax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_is,1)
        
        !-- final_state emission
        amp_fs = master_amp_qgqb_llb_afin(iconf(4,i),iconf(2,i),iconf(5,i),iconf(1,i),iconf(3,i),za,zb)
        call need_coupl(iconf(1,i),iconf(3,i),fsmin,fsmax,need)
-       if (need) call get_coupl(sprod(fsmin,fsmax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
-            [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs)
+       !if (need) call get_coupl(sprod(fsmin,fsmax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
+       !     [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs,1)
+       if (need) call get_coupl(sprod(fsmin,fsmax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs,1)
        
        do hl=-1,1,2
           do ha=-1,1,2
              do hq=-1,1,2
 
-                amp = [Qdn+Wcorrdown,Qup+Wcorrup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
+                !amp = [Qdn+Wcorrdown,Qup+Wcorrup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
+                !amp = [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl)+ Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl) 
+                amp = [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl) 
+                
+                !print*, 'initial amp= ', amp_is(hq,ha,hl)*coupl_is(:,hq,hl)
+                !print*, 'final master= ', amp_fs(hl,ha,hq)
+                !print*, 'final coupli= ', coupl_fs(:,hq,hl)
+                !print*, 'final amp= ', amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
+                print*, 'initial=' , [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl)
+                print*, 'final=', Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
+                
                 res(i,:) = res(i,:) + abs(amp)**2
  
              enddo

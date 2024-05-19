@@ -41,8 +41,10 @@ contains
        if (ch.eq.'ns') then
           if     (sec.eq.'r_is') then
              call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns,vg_result,vg_error,vg_chi2)
-          elseif     (sec.eq.'r_is_w') then
+          elseif     (sec.eq.'r_is_wp') then
              call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_wp,vg_result,vg_error,vg_chi2)
+          elseif     (sec.eq.'r_is_wm') then
+             call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_wm,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'s')    then
              call init_xPij_nlo()
              call vegas_integrate(LOdim_vegas,xsect_nloqcd_s_ns,vg_result,vg_error,vg_chi2)
