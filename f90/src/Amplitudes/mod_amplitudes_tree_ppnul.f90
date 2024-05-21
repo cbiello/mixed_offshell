@@ -6,6 +6,8 @@ module mod_amplitudes_tree_ppnul
   use mod_proc_parms
   use mod_auxfunctions
   use mod_coupl
+  use openloops
+  use mod_ol_interface
   implicit none
   private
 
@@ -26,10 +28,10 @@ contains
   !-- f(1) + f(2) --> [W --> eb(3) + nu(4)]
   !-- summed / averaged
 
-  !-- res(1,1) = u db -> W+ -> ep nue
-  !-- res(1,2) = d ub -> W- -> em nueb
-  !-- res(2,1) = ub d -> W- -> em nueb
-  !-- res(2,2) = db u -> W+ -> ep nue
+  !-- res(1,1)+ = u db -> W+ -> ep nue
+  !-- res(1,2)+ = db u -> W+ -> ep nue
+  !-- res(1,1)- = d ub -> W- -> em nueb
+  !-- res(1,2)- = ub d -> W- -> em nueb
 
   subroutine res_tree_qqb_w(p,res)
     real(dp), intent(in)  :: p(:,:)
@@ -139,10 +141,7 @@ contains
        do hl=-1,1,2
           do hg=-1,1,2
              do hq=-1,1,2
-                res(i,:) = res(i,:) + abs(amp(hq,hg,hl)*coupl(:,hq,hl))**2
-
-                print*, 'amp in amps= ', amp(hq,hg,hl)*coupl(:,hq,hl)
-                
+                res(i,:) = res(i,:) + abs(amp(hq,hg,hl)*coupl(:,hq,hl))**2                
              enddo
           enddo
        enddo
@@ -160,12 +159,13 @@ contains
   !-- ave is the averaging factor
   subroutine res_tree_j_qed(p,iconf,ave,res)
     real(dp), intent(in)  :: p(:,:),ave
+    real(dp15) :: p_ol(4,5)
     integer, intent(in)   :: iconf(:,:)
     real(dp), intent(out) :: res(size(iconf,2),2)
     integer     :: i,hq,ha,hl
     real(dp)    :: sprod(5,5)
     complex(dp) :: za(5,5),zb(5,5),coupl_is(1:2,-1:1,-1:1),coupl_fs(1:2,-1:1,-1:1)
-    complex(dp) :: amp_is(-1:1,-1:1,-1:1),amp_fs(-1:1,-1:1,-1:1),amp(2)
+    complex(dp) :: amp_is1(-1:1,-1:1,-1:1),amp_is2(-1:1,-1:1,-1:1),amp_fs(-1:1,-1:1,-1:1),amp(2)
     integer :: ismin,ismax,fsmin,fsmax
     logical :: need
     real(dp) :: Wcorrup, Wcorrdown
@@ -184,25 +184,22 @@ contains
     call spinoru(5,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5)/),za,zb,sprod)
 
     !-- W emission as a correction factor of the initial-state emissions
-    Wcorrup = Q_lep*sprod(1,5)/(sprod(1,2)-mypropsq) !since 81 was not appreciated
-    Wcorrdown = -Q_lep*sprod(2,5)/(sprod(1,2)-mypropsq)
+    Wcorrup = Q_lep*sprod(1,5)/(sprod(1,2)-mypropsq)
+    Wcorrdown = Q_lep*sprod(2,5)/(sprod(1,2)-mypropsq)
 
     do i = 1,size(iconf,2)
 
        !-- initial-state emission
-       amp_is = master_amp_qgqb_llb(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
+       amp_is1 = master_amp_5pt_firstdiagram(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
+       amp_is2 = master_amp_5pt_seconddiagram(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
        call need_coupl(iconf(4,i),iconf(5,i),ismin,ismax,need)
-       !if (need) call get_coupl(sprod(ismin,ismax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
-       !  [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_is,1)
        !CB (11May): here we have to put 1 in order to call the coupling for charged bosons
        if(need) call get_coupl(sprod(ismin,ismax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
          [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_is,1)
        
        !-- final_state emission
-       amp_fs = master_amp_qgqb_llb_afin(iconf(4,i),iconf(2,i),iconf(5,i),iconf(1,i),iconf(3,i),za,zb)
+       amp_fs = master_amp_5pt_seconddiagram(iconf(4,i),iconf(2,i),iconf(5,i),iconf(1,i),iconf(3,i),za,zb)
        call need_coupl(iconf(1,i),iconf(3,i),fsmin,fsmax,need)
-       !if (need) call get_coupl(sprod(fsmin,fsmax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
-       !     [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs,1)
        if (need) call get_coupl(sprod(fsmin,fsmax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
          [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs,1)
        
@@ -210,27 +207,31 @@ contains
           do ha=-1,1,2
              do hq=-1,1,2
 
-                !amp = [Qdn+Wcorrdown,Qup+Wcorrup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
-                !amp = [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl)+ Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl) 
-                amp = [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl) 
-                
-                !print*, 'initial amp= ', amp_is(hq,ha,hl)*coupl_is(:,hq,hl)
-                !print*, 'final master= ', amp_fs(hl,ha,hq)
-                !print*, 'final coupli= ', coupl_fs(:,hq,hl)
-                !print*, 'final amp= ', amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
-                print*, 'initial=' , [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl)
-                print*, 'final=', Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
-                
+                !amp = [Qdn-Wcorrdown,Qup-Wcorrup]*amp_is1(hq,ha,hl)*coupl_is(:,hq,hl) + [Qup-Wcorrup,Qdn-Wcorrdown]*amp_is2(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
+                amp = (Qdn+Wcorrdown)*amp_is1(hq,ha,hl)*coupl_is(:,hq,hl) + (Qup+Wcorrup)*amp_is2(hq,ha,hl)*coupl_is(:,hq,hl) - Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
+
+                if(i.eq.2) amp = (Qup+Wcorrup)*amp_is1(hq,ha,hl)*coupl_is(:,hq,hl) + (Qdn+Wcorrdown)*amp_is2(hq,ha,hl)*coupl_is(:,hq,hl) - Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl)
+
                 res(i,:) = res(i,:) + abs(amp)**2
  
              enddo
           enddo
        enddo
-
+       
     enddo
 
     res = res * 8._dp * xn * ave * eesq2 ! * ee**2
 
+    
+    !CB: data la disperazione imposto OL
+    p_ol(:,1:5)=p(:,1:5)
+    call evaluate_tree(OL_id(1), p_ol, res(1,1))
+    call evaluate_tree(OL_id(2), p_ol, res(1,2))
+    res(1,1)=res(1,1)/eesq
+    res(1,2)=res(1,2)/eesq
+    !For now we use the OL amplitudes, in this way Chiara can use them for the checks of the subtraction.
+    !Later (soon) I will fix the analytic amplitudes since it is a shame...
+    
   contains
 
     subroutine need_coupl(i1,i2,imin_ref,imax_ref,need)
@@ -271,8 +272,8 @@ contains
     denb = one/(zb(i1,i2)*zb(i2,i3)*zb(i5,i4))
 
     !-- basic amplitudes
-    res(-1,+1,-1) = za(i1,i4)**2*dena
-    res(-1,-1,-1) = zb(i5,i3)**2*denb
+    res(-1,+1,-1) = za(i1,i4)**2*dena  !-- emission from i1
+    res(-1,-1,-1) = zb(i5,i3)**2*denb  !-- emission from i3
 
     !-- 4 <-> 5
     res(-1,+1,+1) = -zero*za(i1,i5)**2*dena
@@ -325,6 +326,62 @@ contains
     res(+1,+1,-1) = -zero*za(i4,i3)**2*dena
 
   end function master_amp_qgqb_llb_afin
+
+  !-- CB (19may24)
+  !-- I realised that, in the derivation of the master amp,
+  !-- there was the hypotesis of same coupling for both initial radiations.
+  !-- Since we don't have ux-u or dx-d but we have fermion lines with different
+  !-- charges (u-dx and dx-u) I have to split the two initial state emisisons.
+  !-- Let me introduce firstdiagram and seconddigram for this purpose.
+  function master_amp_5pt_firstdiagram(i1,i2,i3,i4,i5,za,zb) result(res)
+    complex(dp) :: res(-1:1,-1:1,-1:1)
+    integer, intent(in)     :: i1,i2,i3,i4,i5
+    complex(dp), intent(in) :: za(5,5),zb(5,5)
+    complex(dp) :: dena,denb
+
+    dena = one/(za(i1,i2)*za(i2,i3)*za(i4,i5))
+    denb = one/(zb(i1,i2)*zb(i2,i3)*zb(i5,i4))
+
+    !-- basic amplitudes
+    !-- I inserted a zero just to switch off the photon radiation from the neutrino
+    res(-1,+1,-1) = za(i1,i4)**2*dena
+    res(-1,-1,-1) = zero*zb(i5,i3)**2*denb
+
+    !-- 4 <-> 5
+    res(-1,+1,+1) = -zero
+    res(-1,-1,+1) = -zero
+    res(+1,-1,+1) = zero
+    res(+1,+1,+1) = zero
+    res(+1,-1,-1) = -zero
+    res(+1,+1,-1) = -zero
+
+  end function master_amp_5pt_firstdiagram
+
+  function master_amp_5pt_seconddiagram(i1,i2,i3,i4,i5,za,zb) result(res)
+    complex(dp) :: res(-1:1,-1:1,-1:1)
+    integer, intent(in)     :: i1,i2,i3,i4,i5
+    complex(dp), intent(in) :: za(5,5),zb(5,5)
+    complex(dp) :: dena,denb
+
+    dena = one/(za(i1,i2)*za(i2,i3)*za(i4,i5))
+    denb = one/(zb(i1,i2)*zb(i2,i3)*zb(i5,i4))
+
+    !-- basic amplitudes
+    !-- I inserted a zero just to switch off the photon radiation from the neutrino
+    res(-1,+1,-1) = zero*za(i1,i4)**2*dena
+    res(-1,-1,-1) = zb(i5,i3)**2*denb
+
+    !-- 4 <-> 5
+    res(-1,+1,+1) = -zero
+    res(-1,-1,+1) = -zero
+    res(+1,-1,+1) = zero
+    res(+1,+1,+1) = zero
+    res(+1,-1,-1) = -zero
+    res(+1,+1,-1) = -zero
+
+  end function master_amp_5pt_seconddiagram
+
+  
 
 
 end module mod_amplitudes_tree_ppnul

@@ -36,7 +36,7 @@ analysis=fb_ATLAS_160601736
 LHAPDF=/home/thA361/biello/Packages/lhapdf/lib64
 
 # OpenLoops installation path
-OPENLOOPS=/home/thA361/biello/mixed_lnu/OpenLoops
+OPENLOOPS=/home/thA361/biello/mixed_offshell/OpenLoops
 
 # Hoppet installation path
 HOPPET=/home/thA361/biello/Packages/hoppet-install

@@ -10,6 +10,7 @@ MODDIR = modules
 HISTODIR = histo
 GRIDDIR = grid
 BINDIR = bin
+OPENLOOPS = home/thA361/biello/mixed_offshell/OpenLoops
 
 myOS := $(shell uname -s)
 

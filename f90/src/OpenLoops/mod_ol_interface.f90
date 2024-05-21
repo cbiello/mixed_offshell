@@ -67,15 +67,22 @@ contains
        call set_parameter("alpha_qed_0",real(alpha_0,dp15))
        call set_parameter("alpha_qed_mz",real(alpha_mz,dp15))
     endif
+
     
     !-- initialise only the processes that you are using, for collier chaching 
     !-- register the various amplitudes
     if (corr(1:3).eq.'nlo' .and. ch.eq.'ns') then
 
-       if     (corr.eq.'nloqcd' .and. sec.eq.'v') then
+       if (corr.eq.'nloqcd' .and. sec.eq.'v') then
           call register_red_qcd(1)
        elseif (corr.eq.'nloewk' .and. sec.eq.'v') then
           call register_red_ew(1)
+       elseif (corr.eq.'nloewk' .and. sec .eq.'r_is_wp') then
+          call register_red_ewreal(1)
+       elseif (corr.eq.'nloewk' .and. sec.eq.'r_is_wm') then
+          call register_red_ewreal(-1)
+       elseif (corr.eq.'nloewk' .and. sec.eq.'r_is') then
+          call register_red_ewreal(0)
        endif
 
     elseif (corr.eq.'nloewk' .and. sec.eq.'v' .and. ch.eq.'aa') then
@@ -250,6 +257,26 @@ contains
 
     end subroutine register_red_ew
 
+    !-- q qpb -> l nu [NLO EW]
+    subroutine register_red_ewreal(iw)
+      integer, intent(in) :: iw
+      call set_parameter("order_ew", 3)  !-- tree-level
+      !call set_parameter("order_qcd", 0) !-- tree-level --CB: turned off in order to avoid problem in the process registration
+
+      if(iw.eq.0) then
+         OL_id(1  ) = register_process("1 -1  -> 11 -11 22",11) !-- d db -> e- e+ a
+         OL_id(2  ) = register_process("2 -2  -> 11 -11 22",11) !-- u ub -> e- e+ a
+      elseif(iw.eq.1) then 
+         OL_id(1  ) = register_process("2 -1  -> -11 12 22",11) !-- u db -> e+ nu a
+         OL_id(2  ) = register_process("-1 2  -> -11 12 22",11) !-- db u -> e+ nu a
+      elseif(iw.eq.-1) then
+         OL_id(1  ) = register_process("1 -2  -> 11 -12 22",11) !-- d ub -> e+ nu a
+         OL_id(2  ) = register_process("-2 1  -> 11 -12 22",11) !-- ub d -> e+ nu a    
+      endif
+      
+    end subroutine register_red_ewreal
+
+    
     !-- a a -> e- e+ [NLO EW]
     subroutine register_red_ew_aa(istart)
       integer, intent(in) :: istart
