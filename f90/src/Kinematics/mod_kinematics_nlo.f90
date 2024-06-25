@@ -50,9 +50,9 @@ contains
     phi5 = twopi*yr(kNLO_min+2) !-- 5
 
 
-    !chiara debug
+    !debug CS
     !x1 = 1.0E-10
-    !x2 = 1.0E-10
+    x2 = 1.0E-4
 
     cos5 = one-two*x2
     sin5 = two*sqrt(abs(x2*(one-x2)))

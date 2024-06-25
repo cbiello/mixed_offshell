@@ -222,11 +222,19 @@ contains
 
     res = res * 8._dp * xn * ave * eesq2 ! * ee**2
 
+    !res(:) gives both w+ and w- amplitudes, 
+    !this is set in mod_ol_interface.f90
+    ! --> for both w+ and w- we have only res(1,1) and res(1,2) 
     
     !CB: data la disperazione imposto OL
     p_ol(:,1:5)=p(:,1:5)
     call evaluate_tree(OL_id(1), p_ol, res(1,1))
     call evaluate_tree(OL_id(2), p_ol, res(1,2))
+
+
+    print*, 'OL_id(1)= ', OL_id(1)
+
+
     res(1,1)=res(1,1)/eesq
     res(1,2)=res(1,2)/eesq
     !For now we use the OL amplitudes, in this way Chiara can use them for the checks of the subtraction.
