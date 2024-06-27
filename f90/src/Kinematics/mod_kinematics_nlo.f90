@@ -52,7 +52,8 @@ contains
 
     !debug CS
     !x1 = 1.0E-10
-    x2 = 1.0E-4
+    x2 = 0.001
+
 
     cos5 = one-two*x2
     sin5 = two*sqrt(abs(x2*(one-x2)))

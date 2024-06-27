@@ -235,7 +235,20 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
-    
+   
+    !!!!!!!!!!!!!debug CS
+    if (FintNLO_ns(1) .ne. 0 ) then
+    print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
+    print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), '   ', FintNLO_ns(2)/FintNLO_ns(1)
+
+
+    stop
+
+
+    print*, ''
+
+    endif
+
     ff(1) = sum(kin)
     call close_histo()
 
@@ -862,6 +875,8 @@ contains
     real(dp)    :: damp
 
 
+    print*, 'I AM HERE'
+    
     xsect_nloewk_r_is_ns_wp = 0
 
     ff(1) = zero
