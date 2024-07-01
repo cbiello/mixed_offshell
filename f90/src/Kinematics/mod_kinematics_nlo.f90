@@ -52,7 +52,7 @@ contains
 
     !debug CS
     !x1 = 1.0E-10
-    x2 = 0.001
+    !x2 = 0.001
 
 
     cos5 = one-two*x2

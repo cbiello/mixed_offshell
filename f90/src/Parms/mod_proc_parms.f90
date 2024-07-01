@@ -53,6 +53,9 @@ module mod_proc_parms
   real(dp), public, save :: ptlm_min,ptlm_max,ptlp_min,ptlp_max
   real(dp), public, save :: qmin_rescaling
   real(dp), public, save :: qmax_rescaling
+  
+  real(dp), public, save :: ptmiss_cut,mt_min
+
 
   real(dp), public, save :: R_phot
   logical, public, save :: rec_phot_beam !-- whether collinear photons should be recombined in beam
@@ -98,6 +101,9 @@ contains
     !
     ptlep_cut = real_val_opt('-ptlep_cut',20._dp)
     ylep_cut  = real_val_opt('-ylep_cut',2.5_dp)
+    !
+    ptmiss_cut = real_val_opt('-ptmiss_cut',20._dp)
+    mt_min = real_val_opt('-mt_min',60._dp)
     !
     ptlm_min = real_val_opt('-ptlm_min',ptlep_cut)
     ptlm_max = real_val_opt('-ptlm_max',ecoll)

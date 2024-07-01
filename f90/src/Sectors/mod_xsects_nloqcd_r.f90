@@ -485,13 +485,13 @@ function xsect_nloqcd_r_is_ns_wp(yRnd,ff,vegasweight)
     call close_histo()
 
 
-    if(FintNLO_ns(1) .ne. zero  ) then
-            print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
-            print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), '', FintNLO_ns(2)/FintNLO_ns(1)
-            print*, 'FintNLO_ns(3) = ', FintNLO_ns(3), '', FintNLO_ns(3)/FintNLO_ns(1)
-
-            pause
-    endif
+!    if(FintNLO_ns(1) .ne. zero  ) then
+!            print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
+!            print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), '', FintNLO_ns(2)/FintNLO_ns(1)
+!            print*, 'FintNLO_ns(3) = ', FintNLO_ns(3), '', FintNLO_ns(3)/FintNLO_ns(1)
+!
+!            pause
+!    endif
 
 
     call check_ff(ff,xx,FintNLO_ns)
@@ -633,13 +633,13 @@ function xsect_nloqcd_r_is_ns_wm(yRnd,ff,vegasweight)
     call check_ff(ff,xx,FintNLO_ns)
 
 
-        if(FintNLO_ns(1) .ne. zero  ) then
-            print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
-            print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), '', FintNLO_ns(2)/FintNLO_ns(1)
-            print*, 'FintNLO_ns(3) = ', FintNLO_ns(3), '', FintNLO_ns(3)/FintNLO_ns(1)
-
-            pause
-    endif
+!        if(FintNLO_ns(1) .ne. zero  ) then
+!            print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
+!            print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), '', FintNLO_ns(2)/FintNLO_ns(1)
+!            print*, 'FintNLO_ns(3) = ', FintNLO_ns(3), '', FintNLO_ns(3)/FintNLO_ns(1)
+!
+!            pause
+!    endif
 
 
 #if(_withchecks == 1)

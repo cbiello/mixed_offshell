@@ -50,6 +50,11 @@ contains
              call vegas_integrate(LOdim_vegas,xsect_nloqcd_s_ns,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'v')    then
              call vegas_integrate(LOdim_vegas,xsect_nloqcd_v_ns,vg_result,vg_error,vg_chi2)
+          elseif (sec.eq.'s_wp')    then
+             call init_xPij_nlo()
+             call vegas_integrate(LOdim_vegas,xsect_nloqcd_s_ns_wp,vg_result,vg_error,vg_chi2)
+          elseif (sec.eq.'v_wp')    then
+             call vegas_integrate(LOdim_vegas,xsect_nloqcd_v_ns_wp,vg_result,vg_error,vg_chi2)
           else
              print *, 'wrong sector for nloqcd ns -> -sec r_is,s,v'
              stop
