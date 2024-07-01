@@ -10,7 +10,6 @@ MODDIR = modules
 HISTODIR = histo
 GRIDDIR = grid
 BINDIR = bin
-OPENLOOPS = home/thA361/biello/mixed_offshell/OpenLoops
 
 myOS := $(shell uname -s)
 
@@ -116,6 +115,7 @@ OBJS_amp = \
 	mod_amplitudes_tree_ppnul.o \
 	mod_amplitudes_tree_ppll.o \
 	mod_amplitudes_loop_ppll.o \
+	mod_amplitudes_loop_pplnu.o \
 	mod_amplitudes_twol_nf_ppll.o \
 
 ifeq ($(-D_with2L),1)
