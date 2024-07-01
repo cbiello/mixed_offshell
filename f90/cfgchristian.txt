@@ -25,7 +25,7 @@ MPI=true
 With2L=false
 
 #Analysis
-analysis=fb_ATLAS_160601736
+analysis=w_dflt
 
 #---------------------------------
 # Mandatory configuration options

@@ -19,7 +19,7 @@ contains
 
     !-- name, lower bin, upper bin, bin size
     call new_histo('rate',   0._dp,  1._dp, 0.5_dp)   !-- 1
-    call new_histo('mT',    60._dp,100._dp, 11._dp)   !-- 2
+    call new_histo('mT',    60._dp,100._dp, 0.5_dp)   !-- 2
     call new_histo('yln',   -5._dp,  5._dp, 0.1_dp)   !-- 3
     call new_histo('ptln',   0._dp,100._dp, 1._dp)    !-- 4
     call new_histo('ptl',   30._dp, 50._dp, 0.5_dp)   !-- 5
