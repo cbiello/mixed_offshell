@@ -216,7 +216,7 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf)
-    real(dp)    :: res_lo(2,2)
+    real(dp)    :: res_lo(1,2)
 
     xsect_nloqcd_s_ns_wp = 0
 
@@ -243,7 +243,7 @@ contains
        
     else    
 
-       call res_tree_qqb_w(LOProc%AmpMom,res_lo)
+       call res_tree_qqb_wp(LOProc%AmpMom,res_lo)
 
        call get_respdf_hoppet(xPij,PDFs,qQpb_lumi_wp,1,0,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
        respdf_1 = Cf*respdf_1*LOProc%wgt

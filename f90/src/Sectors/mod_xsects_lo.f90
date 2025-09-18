@@ -174,7 +174,7 @@ contains
        
     else    
        
-       call res_tree_qqb_w(LOProc%AmpMom,res_lo)
+       call res_tree_qqb_wp(LOProc%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wp,0,0,LOProc,res_lo,respdf)
 
        respdf = respdf*LOProc%wgt
@@ -232,7 +232,7 @@ contains
        
     else    
        
-       call res_tree_qqb_w(LOProc%AmpMom,res_lo)
+       call res_tree_qqb_wm(LOProc%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wm,0,0,LOProc,res_lo,respdf)
 
        respdf = respdf*LOProc%wgt

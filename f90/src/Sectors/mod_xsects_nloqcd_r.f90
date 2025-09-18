@@ -409,7 +409,7 @@ function xsect_nloqcd_r_is_ns_wp(yRnd,ff,vegasweight)
        !HardProc%AmpMom(:,4) = (/0.3640666E+03, -0.1832987E+02, -0.3477043E+03,  0.1063496E+03/)
        !HardProc%AmpMom(:,5) = (/0.1773546E+03, -0.1511234E+03, -0.3194936E+02,  0.8715287E+02/)
 
-       call res_tree_g_qqb_w(HardProc%AmpMom,res_nlo)
+       call res_tree_g_qqb_wp(HardProc%AmpMom,res_nlo)
        call get_respdf(qQpb_lumi_wp,1,0,HardProc,res_nlo,respdf)
 
 
@@ -436,7 +436,7 @@ function xsect_nloqcd_r_is_ns_wp(yRnd,ff,vegasweight)
 
     else
 
-       call res_tree_qqb_w(C1Lim%AmpMom,res_lo)
+       call res_tree_qqb_wp(C1Lim%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wp,1,0,C1Lim,res_lo,respdf)
 
        z   = C1Lim%Lim_KinInv(1)
@@ -463,7 +463,7 @@ function xsect_nloqcd_r_is_ns_wp(yRnd,ff,vegasweight)
 
     else
 
-       call res_tree_qqb_w(C2Lim%AmpMom,res_lo)
+       call res_tree_qqb_wp(C2Lim%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wp,1,0,C2Lim,res_lo,respdf)
 
        z   = C2Lim%Lim_KinInv(1)
@@ -560,7 +560,7 @@ function xsect_nloqcd_r_is_ns_wm(yRnd,ff,vegasweight)
        !HardProc%AmpMom(:,4) = (/0.3640666E+03, -0.1832987E+02, -0.3477043E+03,  0.1063496E+03/)
        !HardProc%AmpMom(:,5) = (/0.1773546E+03, -0.1511234E+03, -0.3194936E+02,  0.8715287E+02/)
 
-       call res_tree_g_qqb_w(HardProc%AmpMom,res_nlo)
+       call res_tree_g_qqb_wm(HardProc%AmpMom,res_nlo)
        call get_respdf(qQpb_lumi_wm,1,0,HardProc,res_nlo,respdf)
        
        respdf = respdf*HardProc%wgt
@@ -582,7 +582,7 @@ function xsect_nloqcd_r_is_ns_wm(yRnd,ff,vegasweight)
 
     else
 
-       call res_tree_qqb_w(C1Lim%AmpMom,res_lo)
+       call res_tree_qqb_wm(C1Lim%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wm,1,0,C1Lim,res_lo,respdf)
 
        z   = C1Lim%Lim_KinInv(1)
@@ -609,7 +609,7 @@ function xsect_nloqcd_r_is_ns_wm(yRnd,ff,vegasweight)
 
     else
 
-       call res_tree_qqb_w(C2Lim%AmpMom,res_lo)
+       call res_tree_qqb_wm(C2Lim%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wm,1,0,C2Lim,res_lo,respdf)
 
        z   = C2Lim%Lim_KinInv(1)

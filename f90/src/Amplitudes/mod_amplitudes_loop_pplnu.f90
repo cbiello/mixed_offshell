@@ -27,9 +27,9 @@ contains
   !-- res(2,:) = qb q -> e- e [dn,up]
   subroutine res_qcdloop_qqb_wp(p,res0,res1fin)
     real(dp), intent(in)  :: p(4,4)
-    real(dp), intent(out) :: res0(2,2),res1fin(1,2)
+    real(dp), intent(out) :: res0(1,2),res1fin(1,2)
 
-    call res_tree_qqb_w(p,res0)
+    call res_tree_qqb_wp(p,res0)
     res1fin(1,:) = -8._dp*Cf*res0(1,:)
     
 

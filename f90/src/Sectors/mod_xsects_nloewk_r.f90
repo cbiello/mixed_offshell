@@ -244,9 +244,6 @@ contains
 
     stop
 
-
-    print*, ''
-
     endif
 
     ff(1) = sum(kin)
@@ -920,7 +917,7 @@ contains
        FintNLO_ns(1) = zero
 
     else    
-       call res_tree_a_qqb_w(HardProc%AmpMom,res_nlo)
+       call res_tree_a_qqb_wp(HardProc%AmpMom,res_nlo)
 
        print*, 'res_nlo= ', res_nlo
        res_nlo(1,2) = zero
@@ -967,7 +964,7 @@ contains
 
     else
 
-       call res_tree_qqb_w(C1Lim%AmpMom,res_lo)
+       call res_tree_qqb_wp(C1Lim%AmpMom,res_lo)
        res_lo(1,1) = Qup2 * res_lo(1,1)
        res_lo(1,2) = Qdn2 * res_lo(1,2)
       
@@ -975,9 +972,7 @@ contains
 
        res_lo(1,2) = zero
 
-       print*, 'res_lo = ', res_lo
-       
-       print*, 
+       print*, 'res_lo = ', res_lo 
        
        print*, 'C1Lim%AmpMom(:,1)', C1Lim%AmpMom(:,1)
        print*, 'C1Lim%AmpMom(:,2)', C1Lim%AmpMom(:,2)
@@ -1021,7 +1016,7 @@ contains
 
     else
 
-       call res_tree_qqb_w(C2Lim%AmpMom,res_lo)
+       call res_tree_qqb_wp(C2Lim%AmpMom,res_lo)
        res_lo(1,1) = Qdn2 * res_lo(1,1)
        res_lo(1,2) = Qup2 * res_lo(1,2)
        
@@ -1181,7 +1176,7 @@ contains
        !HardProc%AmpMom(:,4) = (/0.3640666E+03, -0.1832987E+02, -0.3477043E+03,  0.1063496E+03/)
        !HardProc%AmpMom(:,5) = (/0.1773546E+03, -0.1511234E+03, -0.3194936E+02,  0.8715287E+02/)
        
-       call res_tree_a_qqb_w(HardProc%AmpMom,res_nlo)
+       call res_tree_a_qqb_wm(HardProc%AmpMom,res_nlo)
 
        !print*, 'NLO amp udx_epvea  ', (0.094835522759998875_dp)**2*res_nlo(1,1)/eesq2*(four*pi)/132.50700000000001_dp
        !print*, 'NLO amp dxu_epvea  ', (0.094835522759998875_dp)**2*res_nlo(1,2)/eesq2*(four*pi)/132.50700000000001_dp
@@ -1215,7 +1210,7 @@ contains
 
     else
 
-       call res_tree_qqb_w(C1Lim%AmpMom,res_lo)
+       call res_tree_qqb_wm(C1Lim%AmpMom,res_lo)
        res_lo(1,:) = [Qdn2,Qup2] * res_lo(1,:)
        res_lo(2,:) = [Qdn2,Qup2] * res_lo(2,:)
        
@@ -1250,7 +1245,7 @@ contains
 
     else
 
-       call res_tree_qqb_w(C2Lim%AmpMom,res_lo)
+       call res_tree_qqb_wm(C2Lim%AmpMom,res_lo)
        res_lo(1,:) = [Qdn2,Qup2] * res_lo(1,:)
        res_lo(2,:) = [Qdn2,Qup2] * res_lo(2,:)
        
@@ -1281,7 +1276,7 @@ contains
 
     else
 
-       call res_tree_qqb_w(SLim%AmpMom,res_lo)
+       call res_tree_qqb_wm(SLim%AmpMom,res_lo)
 
        !-- S
        call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
