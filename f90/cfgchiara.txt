@@ -43,7 +43,7 @@ HOPPET=/users/ttp/signorile/Desktop/tools
 
 # PolyLogs
 # GINAC=/Users/fabrizio/tools/lib
-HANDYG=/users/ttp/signorile/Desktop/tools
+HANDYG=/users/ttp/signorile/Desktop/tools/handyg-install
 
 # Other libraries
 # CHAPLIN=/Users/fabrizio/tools/lib
