@@ -25,6 +25,23 @@ module mod_parms
 
   !chiara
   real(dp), public, save :: cLWud,cLWnue
+  real(dp), public, save :: cLW
+
+  ! raoul added
+
+  ! warning: all testing done with VCKM = 1, so diagonal elements only!
+  real(dp), public, parameter :: VCKM_ud = one
+  real(dp), public, parameter :: VCKM_us = zero
+  real(dp), public, parameter :: VCKM_ub = zero
+  real(dp), public, parameter :: VCKM_cd = zero
+  real(dp), public, parameter :: VCKM_cs = one
+  real(dp), public, parameter :: VCKM_cb = zero
+  real(dp), public, parameter :: VCKM_td = zero
+  real(dp), public, parameter :: VCKM_ts = zero
+  real(dp), public, parameter :: VCKM_tb = one
+  real(dp), public, parameter, dimension(3,3) :: VCKM(3,3)=reshape( [VCKM_ud,VCKM_cd,VCKM_td,VCKM_us,VCKM_cs,VCKM_ts,VCKM_ub,VCKM_cb,VCKM_tb],[3,3])
+  
+  
 
   
   !-- same for complex mass scheme
@@ -42,6 +59,7 @@ module mod_parms
 
   !chiara
   complex(dp), public, save :: cms_cLWud,cms_cLWnue
+  complex(dp), public, save :: cms_cLW
 
 
   !-- fixed parameters
@@ -60,7 +78,6 @@ module mod_parms
   real(dp), public, parameter :: Qnu2 = Qnu**2, Qel2=Qel**2
 
   !Mixing matrix elements
-  real(dp), public, parameter :: Vud  = one
   real(dp), public, parameter :: Vnue = one
 
   !--------------------------------------------------------------------------
@@ -291,7 +308,8 @@ contains
     cms_cRnu = zero
 
     !chiara
-    cms_cLWud = 1/sqrt2/cms_sw*Vud
+    cms_cLWud = 1/sqrt2/cms_sw!*Vud
+    cms_cLW   = 1/sqrt2/cms_sw
     cms_cLWnue = 1/sqrt2/cms_sw*Vnue
 
     !-- now set the real values
@@ -315,7 +333,8 @@ contains
     !chiara
     !--
     swMG=sqrt( 0.22224648578577766_dp) 
-    cLWud  = 1/sqrt2/swMG*Vud
+    cLWud  = 1/sqrt2/swMG!*Vud
+    cLW    = 1/sqrt2/swMG
     cLWnue = 1/sqrt2/swMG*Vnue
     !cLWud  = real(cms_cLWud,dp)
     !cLWnue = real(cms_cLWnue,dp)
