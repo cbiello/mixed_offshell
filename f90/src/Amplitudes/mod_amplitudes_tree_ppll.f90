@@ -14,7 +14,8 @@ module mod_amplitudes_tree_ppll
   !-- res_tree   --> 0 -> q e- e+ qb
   !-- res_treeAA --> 0 -> e- a a e+
   
-  public :: res_tree_qqb,res_treeAA_aa 
+  public :: res_tree_qqb,res_treeAA_aa
+  public :: res_tree_qqb_gen
   
   public :: res_tree_g_qqb,res_tree_a_qqb 
   public :: res_tree_a_aq,res_tree_a_qa
@@ -30,6 +31,76 @@ module mod_amplitudes_tree_ppll
   public :: master_amp_qgqb_llb
   
 contains
+
+  ! New from Raoul !
+
+  ! conventions: 0 -> q(1) qb(2) l(3) lb(4)
+  ! amp returned as -5:7 x -5:7 matrix
+  ! used for NC, CC+, CC-
+
+  
+
+  !----------------------------------------------------------------------
+  !-- 4-point amplitudes
+  !----------------------------------------------------------------------
+
+    subroutine res_tree_qqb_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    real(dp) :: sprod(4,4)
+    complex(dp) :: za(4,4),zb(4,4),coupl(-5:5,-5:5,-1:1,-1:1)
+    complex(dp) :: amp
+    real(dp) :: aa,bb
+    integer  :: i1,i2,i3,i4,i,j
+
+    !-- 0 --> q(1)^- qb(2) [V --> l(3)^- lb(4)]
+    amp(i1,i2,i3,i4) = two * za(i1,i3)*zb(i4,i2)/sprod(i1,i2)
+
+    call spinoru(4,(/-p(:,1),-p(:,2),p(:,3),p(:,4)/),za,zb,sprod)
+
+    
+    call get_coupl_gen(sprod(1,2),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl)
+
+    res = zero
+    
+    aa = abs(amp(2,1,3,4))**2  ! qqb LL,RR + qbq LR, RL
+    bb = abs(amp(1,2,3,4))**2  ! qqb LR, RL + qbq LL, RR
+
+!    print *,  " d db LL",coupl(1,-1,-1,-1)
+!    print *,  " d db LR",coupl(1,-1,-1,+1)
+!    print *,  " d db RL",coupl(1,-1,+1,-1)
+!    print *,  " d db RR",coupl(1,-1,+1,+1)
+!
+!
+!    print *,  " u ub LL",coupl(2,-2,-1,-1)
+!    print *,  " u ub LR",coupl(2,-2,-1,+1)
+!    print *,  " u ub RL",coupl(2,-2,+1,-1)
+!    print *,  " u ub RR",coupl(2,-2,+1,+1)
+
+    do i = -5,5
+       do j = -5,5
+          if ( i .gt. 0 .and. j .lt. 0) then ! qqb
+             res(i,j) =  aa * ( abs(coupl(i,j,-1,-1))**2 + abs(coupl(i,j,+1,+1))**2 ) + &
+                  bb * ( abs(coupl(i,j,-1,+1))**2 + abs(coupl(i,j,+1,-1))**2 )
+          elseif ( i .lt. 0 .and. j .gt. 0) then ! qbq
+             res(i,j) =  bb * ( abs(coupl(i,j,-1,-1))**2 + abs(coupl(i,j,+1,+1))**2 ) + &
+                  aa * ( abs(coupl(i,j,-1,+1))**2 + abs(coupl(i,j,+1,-1))**2 )
+          else
+             cycle
+          endif
+       enddo
+    enddo
+
+    res = res * xn * eesq2 * aveqq
+
+    return
+
+  end subroutine res_tree_qqb_gen
+
+
+  
+
 
   !----------------------------------------------------------------------
   !-- 4-point amplitudes

@@ -6,17 +6,140 @@ module mod_coupl
   implicit none
   private
 
-  public :: get_coupl, get_coupl_w
+  public :: get_coupl, get_coupl_w, get_coupl_gen
 
   interface get_coupl
      module procedure get_coupl_real, get_coupl_cmplx
   end interface get_coupl
+
+  interface get_coupl_gen
+     module procedure get_coupl_real_gen, get_coupl_cmplx_gen
+  end interface get_coupl_gen
 
   !interface get_coupl_w
   !   module procedure get_coupl_w_real, get_coupl_w_cmplx
   !end interface get_coupl_w
 
 contains
+
+  subroutine get_coupl_real_gen(mll,Q1,Q2,cL1,cL2,cR1,cR2,coupl)
+    ! note that all coupling arguments Q1,Q2, cL1,cL2,cR1,cR2 are ignored for CC, as the couplings are universal
+    real(dp), intent(in)     :: mll
+    real(dp), intent(in)     :: Q1(:),Q2(:),cL1(:),cL2(:),cR1(:),cR2(:)
+    complex(dp), intent(out) :: coupl(-5:5,-5:5,-1:1,-1:1)        ! 
+    complex(dp)              :: propZ, propW
+    integer                  ::i,j
+
+    propZ = mll/(mll-mzsq_prop)
+    propW = mll/(mll-mwsq_prop)
+
+#if (_Vcharge == 0)
+    coupl = czero
+    do i = 1,2
+       if (i .eq.0) cycle
+       coupl(i,-i,-1,-1) = Q1(i)*Q2(i) + propZ * cL1(i) * cL2(i)
+       coupl(i,-i,-1,+1) = Q1(i)*Q2(i) + propZ * cL1(i) * cR2(i)
+       coupl(i,-i,+1,-1) = Q1(i)*Q2(i) + propZ * cR1(i) * cL2(i)
+       coupl(i,-i,+1,+1) = Q1(i)*Q2(i) + propZ * cR1(i) * cR2(i)
+    enddo
+    coupl(-1,+1,:,:) = coupl(+1,-1,:,:)
+    coupl(-2,+2,:,:) = coupl(+2,-2,:,:)
+
+    coupl(+3,-3,:,:) = coupl(+1,-1,:,:)
+    coupl(+5,-5,:,:) = coupl(+1,-1,:,:)
+    coupl(-3,+3,:,:) = coupl(+1,-1,:,:)
+    coupl(-5,+5,:,:) = coupl(+1,-1,:,:)
+    coupl(+4,-4,:,:) = coupl(+2,-2,:,:)
+    coupl(-4,+4,:,:) = coupl(+2,-2,:,:)
+#elif (_Vcharge ==1)
+    coupl = czero
+
+    do i = 2,4,2
+       do j = -5,-1,2
+          coupl(i,j,-1,-1) = propW*cLW*cLWnue * VCKM(abs(i)/2,(abs(j)+1)/2)
+          coupl(j,i,-1,-1) = propW*cLW*cLWnue * VCKM(abs(i)/2,(abs(j)+1)/2)
+       enddo
+    enddo
+    
+
+#elif (_Vcharge ==-1)
+    coupl = czero
+    do i = 1,5,2
+       do j = -4,-2,2
+          coupl(i,j,-1,-1) = propW*cLW*cLWnue * VCKM((abs(i)+1)/2,abs(j)/2)
+          coupl(j,i,-1,-1) = propW*cLW*cLWnue * VCKM((abs(i)+1)/2,abs(j)/2)
+       enddo
+    enddo
+
+#endif
+    
+
+
+
+  end subroutine get_coupl_real_gen
+
+
+  subroutine get_coupl_cmplx_gen(mll,Q1,Q2,cL1,cL2,cR1,cR2,coupl)
+    ! note that all coupling arguments Q1,Q2, cL1,cL2,cR1,cR2 are ignored for CC, as the couplings are universal
+    real(dp), intent(in)     :: mll
+    real(dp), intent(in)     :: Q1(:),Q2(:)
+    complex(dp), intent(in)  :: cL1(:),cL2(:),cR1(:),cR2(:)
+    complex(dp), intent(out) :: coupl(-5:5,-5:5,-1:1,-1:1)        ! 
+    complex(dp)              :: propZ, propW
+    integer                  ::i,j
+
+    propZ = mll/(mll-mzsq_prop)
+    propW = mll/(mll-mwsq_prop)
+
+#if (_Vcharge == 0)
+    coupl = czero
+    do i = 1,2
+       if (i .eq.0) cycle
+       coupl(i,-i,-1,-1) = Q1(i)*Q2(i) + propZ * cL1(i) * cL2(i)
+       coupl(i,-i,-1,+1) = Q1(i)*Q2(i) + propZ * cL1(i) * cR2(i)
+       coupl(i,-i,+1,-1) = Q1(i)*Q2(i) + propZ * cR1(i) * cL2(i)
+       coupl(i,-i,+1,+1) = Q1(i)*Q2(i) + propZ * cR1(i) * cR2(i)
+    enddo
+    coupl(-1,+1,:,:) = coupl(+1,-1,:,:)
+    coupl(-2,+2,:,:) = coupl(+2,-2,:,:)
+
+    coupl(+3,-3,:,:) = coupl(+1,-1,:,:)
+    coupl(+5,-5,:,:) = coupl(+1,-1,:,:)
+    coupl(-3,+3,:,:) = coupl(+1,-1,:,:)
+    coupl(-5,+5,:,:) = coupl(+1,-1,:,:)
+    coupl(+4,-4,:,:) = coupl(+2,-2,:,:)
+    coupl(-4,+4,:,:) = coupl(+2,-2,:,:)
+#elif (_Vcharge ==1)
+    coupl = czero
+
+    do i = 2,4,2
+       do j = -5,-1,2
+          coupl(i,j,-1,-1) = propW*cLW*cLWnue * VCKM(abs(i)/2,(abs(j)+1)/2)
+          coupl(j,i,-1,-1) = propW*cLW*cLWnue * VCKM(abs(i)/2,(abs(j)+1)/2)
+       enddo
+    enddo
+    
+
+#elif (_Vcharge ==-1)
+    coupl = czero
+    do i = 1,5,2
+       do j = -4,-2,2
+          coupl(i,j,-1,-1) = propW*cLW*cLWnue * VCKM((abs(i)+1)/2,abs(j)/2)
+          coupl(j,i,-1,-1) = propW*cLW*cLWnue * VCKM((abs(i)+1)/2,abs(j)/2)
+       enddo
+    enddo
+
+#endif
+    
+
+
+
+  end subroutine get_coupl_cmplx_gen
+
+  
+
+
+  
 
   subroutine get_coupl_real(mll,Q1,Q2,cL1,cL2,cR1,cR2,coupl,cin)
     integer,optional :: cin !if charged current mediated, cin=1
