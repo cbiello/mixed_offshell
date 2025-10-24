@@ -14,6 +14,7 @@ module mod_chooser
   use mod_cut_histo
   !--
   use mod_checks
+  use mod_check_amp
   !--
   use mod_vegas_parms
   use mod_parms
@@ -30,7 +31,7 @@ contains
 
   subroutine chooser()
     character(30) :: input_file
-    logical       :: parse_error,do_check
+    logical       :: parse_error,do_check,do_MG_check
     integer       :: infile_dev = 77
     integer       :: outdev     = 6
     !--
@@ -70,6 +71,7 @@ contains
 
     !-- run checks
     do_check = log_val_opt('-check',.false.)
+    do_MG_check = log_val_opt('-MGcheck',.false.)
     
     !-- check that parsing went through correctly
     parse_error =  ta_CheckAllArgsUsed(outdev)
@@ -150,6 +152,10 @@ contains
     if (do_check) then
        call do_checks()
        return
+    endif
+
+    if (do_MG_check) then
+       call check_amp()
     endif
         
     !----------------------------------------------------------------
