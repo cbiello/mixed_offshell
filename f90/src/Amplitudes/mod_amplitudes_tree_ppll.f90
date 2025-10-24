@@ -16,6 +16,7 @@ module mod_amplitudes_tree_ppll
   
   public :: res_tree_qqb,res_treeAA_aa
   public :: res_tree_qqb_gen
+  public :: res_tree_g_qqb_gen, res_tree_g_gq_gen, res_tree_g_qg_gen
   
   public :: res_tree_g_qqb,res_tree_a_qqb 
   public :: res_tree_a_aq,res_tree_a_qa
@@ -48,17 +49,21 @@ contains
     real(dp), intent(in)  :: p(:,:)
     real(dp), intent(out) :: res(-5:7,-5:7)
     real(dp) :: sprod(4,4)
-    complex(dp) :: za(4,4),zb(4,4),coupl(-5:5,-5:5,-1:1,-1:1)
+    complex(dp) :: za(4,4),zb(4,4),coupl(1:3,-1:1,-1:1)
     complex(dp) :: amp
     real(dp) :: aa,bb
-    integer  :: i1,i2,i3,i4,i,j
+    integer  :: i1,i2,i3,i4,i,j,ii
 
     !-- 0 --> q(1)^- qb(2) [V --> l(3)^- lb(4)]
-    amp(i1,i2,i3,i4) = two * za(i1,i3)*zb(i4,i2)/sprod(i1,i2)
+    !    amp(i1,i2,i3,i4) = two * za(i1,i3)*zb(i4,i2)/sprod(i1,i2)
+        amp(i1,i2,i3,i4) = two * za(i1,i3)*zb(i4,i2)/sprod(i1,i2)
 
     call spinoru(4,(/-p(:,1),-p(:,2),p(:,3),p(:,4)/),za,zb,sprod)
 
     
+!    call get_coupl(sprod(1,2),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
+    !         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl)
+
     call get_coupl_gen(sprod(1,2),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
          [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl)
 
@@ -80,26 +85,249 @@ contains
 
     do i = -5,5
        do j = -5,5
+
+#if (_Vcharge == 0)          
+          if ( i .eq. -j) then
+             if (mod(abs(i),2) .eq. 0) ii=2
+             if (mod(abs(i),2) .eq. 1) ii=1
+          else
+             cycle
+          endif
+#elif (_Vcharge == 1)
+          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+             ii = 3
+          else
+             cycle
+          endif
+#elif (_Vcharge == -1)
+          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
+             ii = 3
+          else
+             cycle
+          endif
+#endif       
           if ( i .gt. 0 .and. j .lt. 0) then ! qqb
-             res(i,j) =  aa * ( abs(coupl(i,j,-1,-1))**2 + abs(coupl(i,j,+1,+1))**2 ) + &
-                  bb * ( abs(coupl(i,j,-1,+1))**2 + abs(coupl(i,j,+1,-1))**2 )
+             res(i,j) =  aa * ( abs(coupl(ii,-1,-1))**2 + abs(coupl(ii,+1,+1))**2 ) + &
+                  bb * ( abs(coupl(ii,-1,+1))**2 + abs(coupl(ii,+1,-1))**2 )
           elseif ( i .lt. 0 .and. j .gt. 0) then ! qbq
-             res(i,j) =  bb * ( abs(coupl(i,j,-1,-1))**2 + abs(coupl(i,j,+1,+1))**2 ) + &
-                  aa * ( abs(coupl(i,j,-1,+1))**2 + abs(coupl(i,j,+1,-1))**2 )
+             res(i,j) =  bb * ( abs(coupl(ii,-1,-1))**2 + abs(coupl(ii,+1,+1))**2 ) + &
+                  aa * ( abs(coupl(ii,-1,+1))**2 + abs(coupl(ii,+1,-1))**2 )
           else
              cycle
           endif
        enddo
     enddo
 
+    print *, "eesq2",eesq2
+
     res = res * xn * eesq2 * aveqq
+
 
     return
 
   end subroutine res_tree_qqb_gen
 
 
+  !----------------------------------------------------------------------
+  !-- 5-point amplitudes
+  !----------------------------------------------------------------------
+
+
+
+  !-- generic amplitude for nlo QCD mission
+  !-- iconf(5,:) are the required crossings from 0 -> q g qb l lb [e.g. qqb -> e-e+ g is 2,5,1,3,4]
+  !-- ave is the averaging factor
+  !-- always assume that leptons are 3 and 4, otherwise coupling is wrong
+  !-- if need to move leptons around: see routine for QED emission
+  subroutine res_tree_j_qcd_gen(p,iconf,ave,res)
+    real(dp), intent(in)  :: p(:,:),ave
+    integer, intent(in)   :: iconf(:,:)
+    real(dp), intent(out) :: res(size(iconf,2),3)
+    integer     :: i,hq,hg,hl
+    real(dp)    :: sprod(5,5)
+    complex(dp) :: za(5,5),zb(5,5),coupl(1:3,-1:1,-1:1),amp(-1:1,-1:1,-1:1)
+
+    res = zero
+
+    call spinoru(5,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5)/),za,zb,sprod)
+    call get_coupl_gen(sprod(3,4),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl)
+
+    do i = 1,size(iconf,2)
+       amp = master_amp_qgqb_llb(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
+
+       do hl=-1,1,2
+          do hg=-1,1,2
+             do hq=-1,1,2
+                res(i,:) = res(i,:) + abs(amp(hq,hg,hl)*coupl(:,hq,hl))**2
+             enddo
+          enddo
+       enddo
+       
+    enddo
+                    
+
+    !-- eesq already in coupl
+    res = ave * 8 * xn * Cf * eesq2 * res
+
+  end subroutine res_tree_j_qcd_gen
+
   
+  !-- qqb channel
+  !-- q(p1) qb(p2) -> e-(p3) e+(p4) g(p5)
+  !-- res(1,:) = q qb for dn and up
+  !-- res(2,:) = qb q for dn and up
+  subroutine res_tree_g_qqb_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    integer               :: i,j,ii,jj
+    real(dp)              :: res1(2,3)
+    integer, parameter :: iconf(5,2) = reshape([2,5,1,3,4, 1,5,2,3,4],[5,2])
+
+    call res_tree_j_qcd_gen(p,iconf,aveqq,res1)
+
+    res = zero
+    do i = -5,5
+       do j = -5,5
+#if (_Vcharge == 0)          
+          if ( i .eq. -j) then
+             if (mod(abs(i),2) .eq. 0) ii=2
+             if (mod(abs(i),2) .eq. 1) ii=1
+          else
+             cycle
+          endif
+#elif (_Vcharge == 1)
+          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+             ii = 3
+          else
+             cycle
+          endif
+#elif (_Vcharge == -1)
+          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
+             ii = 3
+          else
+             cycle
+          endif
+#endif       
+!          if ( i .eq. -j) then
+!             if (mod(abs(i),2) .eq. 0) jj=2
+!             if (mod(abs(i),2) .eq. 1) jj=1
+!             !          elseif(mod(abs(i*j),2) .eq. 1) then  ! one of i and j is even, the other odd -- this would be for any FC current
+!             elseif (abs(i+j) .eq. 1) then                   ! this supposes a unit CKM matrix
+!             ii=3
+!          else
+!             cycle
+!          endif
+          if (i .gt. 0 .and. j .lt. 0) then   ! qqb
+             res(i,j) = res1(1,ii)
+          elseif (i .lt. 0 .and. j .gt. 0) then ! qbq
+             res(i,j) = res1(2,ii)
+          endif
+       enddo
+    enddo
+
+
+    
+  end subroutine res_tree_g_qqb_gen
+
+!  !-- qqb channel
+!  !-- q(p1) qb(p2) -> e-(p3) e+(p4) γ(p5)
+!  !-- res(1,:) = q qb for dn and up
+!  !-- res(2,:) = qb q for dn and up
+!  subroutine res_tree_a_qqb(p,res)
+!    real(dp), intent(in)  :: p(:,:)
+!    real(dp), intent(out) :: res(2,2)
+!    integer, parameter :: iconf(5,2) = reshape([2,5,1,3,4, 1,5,2,3,4],[5,2])
+!
+!    call res_tree_j_qed(p,iconf,aveqq,res)
+!
+!  end subroutine res_tree_a_qqb
+
+  !-- gq channel
+  !-- g(p1) q(p2) -> e-(p3) e+(p4) q(p5)
+  !-- res(1,:) = g qb for dn and up
+  !-- res(2,:) = g q  for dn and up
+  subroutine res_tree_g_gq_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    real(dp)              :: res1(2,2)
+    integer               :: i,j,ii,jj
+    integer, parameter :: iconf(5,2) = reshape([2,1,5,3,4, 5,1,2,3,4],[5,2])
+
+    call res_tree_j_qcd(p,iconf,aveqg,res1)
+
+
+    res = zero
+    do i = -5,5
+       do j = -5,5
+#if (_Vcharge == 0)                   
+          jj = quark_type(j)
+#else
+          jj = 3
+#endif          
+          if (i .eq. 0 .and. j .gt. 0) then   ! gq
+             res(i,j) = res1(2,jj)
+          elseif (i .eq. 0 .and. j .lt. 0) then ! gqb
+             res(i,j) = res1(1,jj)
+          endif
+       enddo
+    enddo
+
+  end subroutine res_tree_g_gq_gen
+
+  !-- qg channel
+  !-- q(p1) g(p2) -> e-(p3) e+(p4) q(p5)
+  !-- res(1,:) = q  g for dn and up
+  !-- res(2,:) = qb g  for dn and up
+  subroutine res_tree_g_qg_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    real(dp)              :: res1(2,2)
+    integer               :: i,j,ii,jj
+    integer, parameter :: iconf(5,2) = reshape([5,2,1,3,4, 1,2,5,3,4],[5,2])
+
+    call res_tree_j_qcd(p,iconf,aveqg,res1)
+
+    res = zero
+    do i = -5,5
+       do j = -5,5
+#if (_Vcharge == 0)          
+          ii = quark_type(i)
+#else
+          ii = 3
+#endif
+          
+          if (i .gt. 0 .and. j .eq. 0) then   ! qg
+             res(i,j) = res1(1,ii)
+          elseif (i .lt. 0 .and. j .eq. 0) then ! qbg
+             res(i,j) = res1(2,ii)
+          endif
+       enddo
+    enddo
+    
+  end subroutine res_tree_g_qg_gen
+  
+!  !-- aq channel
+!  !-- as before, but with g <-> a
+!  subroutine res_tree_a_aq(p,res)
+!    real(dp), intent(in)  :: p(:,:)
+!    real(dp), intent(out) :: res(2,2)
+!    integer, parameter :: iconf(5,2) = reshape([2,1,5,3,4, 5,1,2,3,4],[5,2])
+!
+!    call res_tree_j_qed(p,iconf,aveqa,res)
+!
+!  end subroutine res_tree_a_aq
+!
+!  !-- qa channel
+!  !-- as above, but with g <-> a
+!  subroutine res_tree_a_qa(p,res)
+!    real(dp), intent(in)  :: p(:,:)
+!    real(dp), intent(out) :: res(2,2)
+!    integer, parameter :: iconf(5,2) = reshape([5,2,1,3,4, 1,2,5,3,4],[5,2])
+!
+!    call res_tree_j_qed(p,iconf,aveqa,res)
+!
+!  end subroutine res_tree_a_qa
 
 
   !----------------------------------------------------------------------
