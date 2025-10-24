@@ -118,8 +118,6 @@ contains
        enddo
     enddo
 
-    print *, "eesq2",eesq2
-
     res = res * xn * eesq2 * aveqq
 
 
@@ -250,11 +248,11 @@ contains
   subroutine res_tree_g_gq_gen(p,res)
     real(dp), intent(in)  :: p(:,:)
     real(dp), intent(out) :: res(-5:7,-5:7)
-    real(dp)              :: res1(2,2)
+    real(dp)              :: res1(2,3)
     integer               :: i,j,ii,jj
     integer, parameter :: iconf(5,2) = reshape([2,1,5,3,4, 5,1,2,3,4],[5,2])
 
-    call res_tree_j_qcd(p,iconf,aveqg,res1)
+    call res_tree_j_qcd_gen(p,iconf,aveqg,res1)
 
 
     res = zero
@@ -262,8 +260,14 @@ contains
        do j = -5,5
 #if (_Vcharge == 0)                   
           jj = quark_type(j)
-#else
+#elif (_Vcharge == -1)
           jj = 3
+          if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
+          if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+#elif (_Vcharge == +1)
+          jj = 3
+          if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
+          if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
 #endif          
           if (i .eq. 0 .and. j .gt. 0) then   ! gq
              res(i,j) = res1(2,jj)
@@ -282,19 +286,25 @@ contains
   subroutine res_tree_g_qg_gen(p,res)
     real(dp), intent(in)  :: p(:,:)
     real(dp), intent(out) :: res(-5:7,-5:7)
-    real(dp)              :: res1(2,2)
+    real(dp)              :: res1(2,3)
     integer               :: i,j,ii,jj
     integer, parameter :: iconf(5,2) = reshape([5,2,1,3,4, 1,2,5,3,4],[5,2])
 
-    call res_tree_j_qcd(p,iconf,aveqg,res1)
+    call res_tree_j_qcd_gen(p,iconf,aveqg,res1)
 
     res = zero
     do i = -5,5
        do j = -5,5
 #if (_Vcharge == 0)          
           ii = quark_type(i)
-#else
+#elif (_Vcharge == -1)
           ii = 3
+          if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
+          if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+#elif (_Vcharge == 1)
+          ii = 3
+          if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
+          if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
 #endif
           
           if (i .gt. 0 .and. j .eq. 0) then   ! qg
