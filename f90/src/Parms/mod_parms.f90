@@ -333,11 +333,12 @@ contains
     !chiara
     !--
     swMG=sqrt( 0.22224648578577766_dp) 
-    cLWud  = 1/sqrt2/swMG!*Vud
-    cLW    = 1/sqrt2/swMG
-    cLWnue = 1/sqrt2/swMG*Vnue
-    !cLWud  = real(cms_cLWud,dp)
-    !cLWnue = real(cms_cLWnue,dp)
+    !cLWud  = 1/sqrt2/swMG!*Vud
+    !cLW    = 1/sqrt2/swMG
+    !cLWnue = 1/sqrt2/swMG*Vnue
+    cLWud  = real(cms_cLWud,dp)
+    cLW  = real(cms_cLW,dp)
+    cLWnue = real(cms_cLWnue,dp)
 
 
     !-- axial and vector couplings, complex-mass scheme
