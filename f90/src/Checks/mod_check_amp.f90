@@ -2,19 +2,18 @@ module mod_check_amp
   use mod_types
   use mod_consts_dp
   use mod_proc_parms
+  use mod_parms
   use mod_auxfunctions
   use mod_amplitudes_tree_ppll
 
-  public :: check_amp_lo
-!  public :: check_amp_nloqcd_r
-!  public :: check_amp_nloewk_r
+  public :: check_amp
 
 contains
 
   subroutine check_amp()
     integer            :: ipoint, i,j
     real(dp)           :: p(1:4,6,20),p_lo(4,4),p_nlo(4,5)
-    real(dp)           :: mgamps(1:20,-2:2,-2:2),ouramps(-2:2,-2:2)
+    real(dp)           :: mgamps(1:20,-2:3,-2:3),ouramps(-2:3,-2:3)
     logical            :: amps_agree,all_amps_agree
     real(dp)           :: tol=1E-6_dp
     
@@ -25,6 +24,9 @@ contains
        call import_MGresults_lo(p,mgamps)
     elseif (corr .eq. 'nloqcd') then
        call import_MGresults_nloqcd(p,mgamps)
+    elseif (corr .eq. 'nloew') then
+       call import_MGresults_nloew(p,mgamps)
+       
     endif
     
      amps_agree = .true.
@@ -39,11 +41,14 @@ contains
         elseif (corr .eq. 'nloqcd') then
            p_nlo(:,1:5) = p(:,1:5,ipoint)
            call get_our_amps_nloqcd(p_nlo,ouramps)
+        elseif (corr .eq. 'nloew') then
+           p_nlo(:,1:5) = p(:,1:5,ipoint)
+           call get_our_amps_nloew(p_nlo,ouramps)
         endif
 
         
-        do i = -2,2
-           do j = -2,2
+        do i = -2,3
+           do j = -2,3
 !             print *, i,j!,mgamps(ipoint,i,j),ouramps(i,j)
               call compare_amps(mgamps(ipoint,i,j),ouramps(i,j),tol,amps_agree)
               if (.not. amps_agree) all_amps_agree = .false.
@@ -71,7 +76,7 @@ contains
    ! *************** functions to import MG results *******************
 
    subroutine import_MGresults_lo(p,mgamps)
-     real(dp), intent(out)           :: p(1:4,6,20),mgamps(1:20,-2:2,-2:2)
+     real(dp), intent(out)           :: p(1:4,6,20),mgamps(1:20,-2:3,-2:3)
      real(dp)          :: uux_emep(20), ddx_emep(20), uxu_emep(20), dxd_emep(20)
      real(dp)           :: dux_emvex(20), uxd_emvex(20)
      real(dp)           :: udx_veep(20), dxu_veep(20)
@@ -104,7 +109,7 @@ contains
 
   
   subroutine import_MGresults_nloqcd(p,mgamps)
-     real(dp), intent(out)           :: p(1:4,6,20),mgamps(1:20,-2:2,-2:2)
+     real(dp), intent(out)           :: p(1:4,6,20),mgamps(1:20,-2:3,-2:3)
      real(dp)           :: uux_emepg(20), ddx_emepg(20), uxu_emepg(20), dxd_emepg(20)
      real(dp)           :: gux_emepux(20), gdx_emepdx(20), gu_emepu(20), gd_emepd(20)
      real(dp)           :: uxg_emepux(20), dxg_emepdx(20), ug_emepu(20), dg_emepd(20)
@@ -173,11 +178,83 @@ contains
 
 
 
+    subroutine import_MGresults_nloew(p,mgamps)
+     real(dp), intent(out)           :: p(1:4,6,20),mgamps(1:20,-2:3,-2:3)
+     real(dp)           :: uux_emepa(20), ddx_emepa(20), uxu_emepa(20), dxd_emepa(20)
+     real(dp)           :: aux_emepux(20), adx_emepdx(20), au_emepu(20), ad_emepd(20)
+     real(dp)           :: uxa_emepux(20), dxa_emepdx(20), ua_emepu(20), da_emepd(20)
+     real(dp)           :: dux_emvexa(20), uxd_emvexa(20)
+     real(dp)           :: da_emvexu(20), ad_emvexu(20), aux_emvexdx(20), uxa_emvexdx(20)
+     real(dp)           :: udx_veepa(20), dxu_veepa(20)
+     real(dp)           :: ua_veepd(20), au_veepd(20), adx_veepux(20), dxa_veepux(20)
+
+     
+#if (_Vcharge == 0) 
+#include "./MG_output/MG_qqb_emep_a.out"
+#include "./MG_output/MG_qbq_emep_a.out"
+#include "./MG_output/MG_qa_emep_q.out"
+#include "./MG_output/MG_aq_emep_q.out"
+#include "./MG_output/MG_qba_emep_qb.out"
+#include "./MG_output/MG_aqb_emep_qb.out"
+     
+    mgamps(:,+2,-2) = uux_emepa(:)
+    mgamps(:,+1,-1) = ddx_emepa(:)
+    mgamps(:,-2,+2) = uxu_emepa(:)
+    mgamps(:,-1,+1) = dxd_emepa(:)
+    mgamps(:,+2,3) = ua_emepu(:)   ! for checks, put photon in position 3
+    mgamps(:,+1,3) = da_emepd(:)
+    mgamps(:,-2,3) = uxa_emepux(:)  
+    mgamps(:,-1,3) = dxa_emepdx(:)
+    
+    mgamps(:,3,+2) = au_emepu(:)   
+    mgamps(:,3,+1) = ad_emepd(:)
+    mgamps(:,3,-2) = aux_emepux(:) 
+    mgamps(:,3,-1) = adx_emepdx(:)
+
+
+#elif (_Vcharge == 1)
+#include "./MG_output/MG_qqb_veep_a.out"
+#include "./MG_output/MG_qbq_veep_a.out"
+#include "./MG_output/MG_qa_veep_q.out"
+#include "./MG_output/MG_qba_veep_qb.out"
+#include "./MG_output/MG_aq_veep_q.out"
+#include "./MG_output/MG_aqb_veep_qb.out"
+
+    mgamps(:,+2,-1) = udx_veepa(:)
+    mgamps(:,-1,+2) = dxu_veepa(:)
+    mgamps(:,3,-1) = adx_veepux(:)
+    mgamps(:,-1,3) = dxa_veepux(:)
+    mgamps(:,3,+2) = au_veepd(:)
+    mgamps(:,+2,3) = ua_veepd(:)
+
+
+#elif (_Vcharge == -1)
+#include "./MG_output/MG_qqb_emvx_a.out"
+#include "./MG_output/MG_qbq_emvx_a.out"
+#include "./MG_output/MG_qa_emvx_q.out"
+#include "./MG_output/MG_qba_emvx_qb.out"
+#include "./MG_output/MG_aq_emvx_q.out"
+#include "./MG_output/MG_aqb_emvx_qb.out"
+    
+    mgamps(:,+1,-2) = dux_emvexa(:)
+    mgamps(:,-2,+1) = uxd_emvexa(:)
+    mgamps(:,3,-2) = aux_emvexdx(:)
+    mgamps(:,-2,3) = uxa_emvexdx(:)
+    mgamps(:,3,+1) = ad_emvexu(:)
+    mgamps(:,+1,3) = da_emvexu(:)
+  
+    
+#endif
+
+  end subroutine import_MGresults_nloew
+
+
+
    ! ************* functions to get our amplitudes *************
 
    subroutine get_our_amps_lo(p,amp)
      real(dp), intent(in)    :: p(4,4)
-     real(dp), intent(out)   :: amp(-2:2,-2:2)
+     real(dp), intent(out)   :: amp(-2:3,-2:3)
      real(dp)                :: res(-5:7,-5:7),res1(2,2)
 
 
@@ -189,7 +266,7 @@ contains
    
    subroutine get_our_amps_nloqcd(p,amp)
      real(dp), intent(in)    :: p(4,5)
-     real(dp), intent(out)   :: amp(-2:2,-2:2)
+     real(dp), intent(out)   :: amp(-2:3,-2:3)
      real(dp)                :: res_qqb(-5:7,-5:7), res_gq(-5:7,-5:7), res_qg(-5:7,-5:7)
 
      amp = zero
@@ -201,6 +278,26 @@ contains
      amp = amp * (0.118_dp)*four*pi   ! gs^2
 
    end subroutine get_our_amps_nloqcd
+
+
+
+   subroutine get_our_amps_nloew(p,amp)
+     real(dp), intent(in)    :: p(4,5)
+     real(dp), intent(out)   :: amp(-2:3,-2:3)
+     real(dp)                :: res_qqb(-5:7,-5:7), res_aq(-5:7,-5:7), res_qa(-5:7,-5:7)
+
+     amp = zero
+     call res_tree_a_qqb_gen(p,res_qqb)
+     call res_tree_a_aq_gen(p,res_aq)
+     call res_tree_a_qa_gen(p,res_qa)
+     amp(-2:2,-2:2) = res_qqb(-2:2,-2:2)
+     amp(-2:2,3) = res_qa(-2:2,7)      ! for the checks, put the photon in position 3
+     amp(3,-2:2) = res_aq(7,-2:2)
+
+
+     amp = amp * eesq
+
+   end subroutine get_our_amps_nloew
 
      
 ! ************* FUNCTIONS "COMPARE_AMPS" *************     

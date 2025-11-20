@@ -17,6 +17,7 @@ module mod_amplitudes_tree_ppll
   public :: res_tree_qqb,res_treeAA_aa
   public :: res_tree_qqb_gen
   public :: res_tree_g_qqb_gen, res_tree_g_gq_gen, res_tree_g_qg_gen
+  public :: res_tree_a_qqb_gen, res_tree_a_aq_gen, res_tree_a_qa_gen
   
   public :: res_tree_g_qqb,res_tree_a_qqb 
   public :: res_tree_a_aq,res_tree_a_qa
@@ -170,6 +171,94 @@ contains
 
   end subroutine res_tree_j_qcd_gen
 
+
+    !-- generic amplitude for nlo QED mission
+  !-- iconf(5,:) are the required crossings from 0 -> q a qb l lb [e.g. qqb -> e-e+ a is 2,5,1,3,4]
+  !-- ave is the averaging factor
+  subroutine res_tree_j_qed_gen(p,iconf,ave,res)
+    real(dp), intent(in)  :: p(:,:),ave
+    integer, intent(in)   :: iconf(:,:)
+    real(dp), intent(out) :: res(size(iconf,2),3)
+    integer     :: i,hq,ha,hl
+    real(dp)    :: sprod(5,5)
+    complex(dp) :: za(5,5),zb(5,5),coupl_is(1:2,-1:1,-1:1),coupl_fs(1:2,-1:1,-1:1)
+    complex(dp) :: amp_is(-1:1,-1:1,-1:1),amp_fs(-1:1,-1:1,-1:1),amp(2),amp_w(-1:1,-1:1,-1:1)
+    integer :: ismin,ismax,fsmin,fsmax
+    logical :: need
+
+    res = zero
+    ismin = -1; ismax = -1
+    fsmin = -1; fsmax = -1
+
+    call spinoru(5,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5)/),za,zb,sprod)
+
+    do i = 1,size(iconf,2)
+
+#if (_Vcharge == 0)       
+       !-- initial-state emission
+       amp_is = master_amp_qgqb_llb(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
+       call need_coupl_gen(iconf(4,i),iconf(5,i),ismin,ismax,need)
+       if (need) call get_coupl(sprod(ismin,ismax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_is)
+
+       !-- final_state emission
+       amp_fs = master_amp_qgqb_llb(iconf(4,i),iconf(2,i),iconf(5,i),iconf(1,i),iconf(3,i),za,zb)
+       call need_coupl_gen(iconf(1,i),iconf(3,i),fsmin,fsmax,need)
+       if (need) call get_coupl(sprod(fsmin,fsmax),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLdn,cms_cLup],[cms_cL_lep,cms_cL_lep],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl_fs)
+
+       do hl=-1,1,2
+          do ha=-1,1,2
+             do hq=-1,1,2
+
+                amp = [Qdn,Qup]*amp_is(hq,ha,hl)*coupl_is(:,hq,hl) + Q_lep*amp_fs(hl,ha,hq)*coupl_fs(:,hq,hl) 
+                res(i,1:2) = res(i,1:2) + abs(amp(1:2))**2
+
+             enddo
+          enddo
+       enddo
+#elif (_Vcharge == -1)
+       amp_w(-1,-1,-1) = agamtree(iconf(1,i),iconf(3,i),iconf(4,i),iconf(5,i),iconf(2,i),za,zb,sprod,-1)
+       amp_w(-1,-1,+1) = agamtree(iconf(1,i),iconf(3,i),iconf(4,i),iconf(5,i),iconf(2,i),za,zb,sprod,+1)
+       amp_w = amp_w / sw2 / two
+       
+       res(i,3) = abs(amp_w(-1,-1,-1))**2 + abs(amp_w(-1,-1,+1))**2  
+
+#elif (_Vcharge == +1)
+       amp_w(-1,-1,-1) = agamtree(iconf(3,i),iconf(1,i),iconf(5,i),iconf(4,i),iconf(2,i),zb,za,sprod,-1)
+       amp_w(-1,-1,+1) = agamtree(iconf(3,i),iconf(1,i),iconf(5,i),iconf(4,i),iconf(2,i),zb,za,sprod,+1)
+
+       amp_w = amp_w / sw2 / two
+       res(i,3) = abs(amp_w(-1,-1,-1))**2 + abs(amp_w(-1,-1,+1))**2 
+
+#endif
+
+       
+    enddo
+
+    res = res * 8._dp * xn * ave * eesq2 ! * ee**2
+  contains
+
+    subroutine need_coupl_gen(i1,i2,imin_ref,imax_ref,need)
+      integer, intent(in)  :: i1,i2
+      integer, intent(inout) :: imin_ref,imax_ref
+      logical, intent(out) :: need
+      integer :: imin,imax
+
+      imin = min(i1,i2)
+      imax = max(i1,i2)
+      if (imin_ref.ne.imin .or. imax_ref.ne.imax) then 
+         need = .true.
+         imin_ref = imin
+         imax_ref = imax
+      else
+         need = .false.
+      endif
+    end subroutine need_coupl_gen
+
+  end subroutine res_tree_j_qed_gen
+
+
   
   !-- qqb channel
   !-- q(p1) qb(p2) -> e-(p3) e+(p4) g(p5)
@@ -228,18 +317,62 @@ contains
     
   end subroutine res_tree_g_qqb_gen
 
-!  !-- qqb channel
-!  !-- q(p1) qb(p2) -> e-(p3) e+(p4) γ(p5)
-!  !-- res(1,:) = q qb for dn and up
-!  !-- res(2,:) = qb q for dn and up
-!  subroutine res_tree_a_qqb(p,res)
-!    real(dp), intent(in)  :: p(:,:)
-!    real(dp), intent(out) :: res(2,2)
-!    integer, parameter :: iconf(5,2) = reshape([2,5,1,3,4, 1,5,2,3,4],[5,2])
-!
-!    call res_tree_j_qed(p,iconf,aveqq,res)
-!
-!  end subroutine res_tree_a_qqb
+  !-- qqb channel
+  !-- q(p1) qb(p2) -> e-(p3) e+(p4) γ(p5)
+  !-- res(1,:) = q qb for dn and up
+  !-- res(2,:) = qb q for dn and up
+  subroutine res_tree_a_qqb_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    integer               :: i,j,ii,jj
+    real(dp)              :: res1(2,3)
+    integer, parameter :: iconf(5,2) = reshape([2,5,1,3,4, 1,5,2,3,4],[5,2])
+
+    call res_tree_j_qed_gen(p,iconf,aveqq,res1)
+
+        res = zero
+    do i = -5,5
+       do j = -5,5
+#if (_Vcharge == 0)          
+          if ( i .eq. -j) then
+             if (mod(abs(i),2) .eq. 0) ii=2
+             if (mod(abs(i),2) .eq. 1) ii=1
+          else
+             cycle
+          endif
+#elif (_Vcharge == 1)
+          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+             ii = 3
+          else
+             cycle
+          endif
+#elif (_Vcharge == -1)
+          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
+             ii = 3
+          else
+             cycle
+          endif
+#endif       
+!          if ( i .eq. -j) then
+!             if (mod(abs(i),2) .eq. 0) jj=2
+!             if (mod(abs(i),2) .eq. 1) jj=1
+!             !          elseif(mod(abs(i*j),2) .eq. 1) then  ! one of i and j is even, the other odd -- this would be for any FC current
+!             elseif (abs(i+j) .eq. 1) then                   ! this supposes a unit CKM matrix
+!             ii=3
+!          else
+!             cycle
+!          endif
+          if (i .gt. 0 .and. j .lt. 0) then   ! qqb
+             res(i,j) = res1(1,ii)
+          elseif (i .lt. 0 .and. j .gt. 0) then ! qbq
+             res(i,j) = res1(2,ii)
+          endif
+       enddo
+    enddo
+
+  end subroutine res_tree_a_qqb_gen
+
+  
 
   !-- gq channel
   !-- g(p1) q(p2) -> e-(p3) e+(p4) q(p5)
@@ -317,27 +450,76 @@ contains
     
   end subroutine res_tree_g_qg_gen
   
-!  !-- aq channel
-!  !-- as before, but with g <-> a
-!  subroutine res_tree_a_aq(p,res)
-!    real(dp), intent(in)  :: p(:,:)
-!    real(dp), intent(out) :: res(2,2)
-!    integer, parameter :: iconf(5,2) = reshape([2,1,5,3,4, 5,1,2,3,4],[5,2])
-!
-!    call res_tree_j_qed(p,iconf,aveqa,res)
-!
-!  end subroutine res_tree_a_aq
-!
-!  !-- qa channel
-!  !-- as above, but with g <-> a
-!  subroutine res_tree_a_qa(p,res)
-!    real(dp), intent(in)  :: p(:,:)
-!    real(dp), intent(out) :: res(2,2)
-!    integer, parameter :: iconf(5,2) = reshape([5,2,1,3,4, 1,2,5,3,4],[5,2])
-!
-!    call res_tree_j_qed(p,iconf,aveqa,res)
-!
-!  end subroutine res_tree_a_qa
+  !  !-- aq channel
+  !  !-- as before, but with g <-> a
+
+    subroutine res_tree_a_aq_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    real(dp)              :: res1(2,3)
+    integer               :: i,j,ii,jj
+    integer, parameter :: iconf(5,2) = reshape([2,1,5,3,4, 5,1,2,3,4],[5,2])
+
+    call res_tree_j_qed_gen(p,iconf,aveqa,res1)
+
+
+    res = zero
+    do i = -5,7
+       do j = -5,7
+#if (_Vcharge == 0)                   
+          jj = quark_type(j)
+#elif (_Vcharge == -1)
+          jj = 3
+          if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
+          if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+#elif (_Vcharge == +1)
+          jj = 3
+          if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
+          if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+#endif          
+          if (i .eq. 7 .and. j .gt. 0) then   ! aq
+             res(i,j) = res1(2,jj)
+          elseif (i .eq. 7 .and. j .lt. 0) then ! aqb
+             res(i,j) = res1(1,jj)
+          endif
+       enddo
+    enddo
+
+  end subroutine res_tree_a_aq_gen
+
+    subroutine res_tree_a_qa_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    real(dp)              :: res1(2,3)
+    integer               :: i,j,ii,jj
+    integer, parameter :: iconf(5,2) = reshape([5,2,1,3,4, 1,2,5,3,4],[5,2])
+
+    call res_tree_j_qed_gen(p,iconf,aveqa,res1)
+
+    res = zero
+    do i = -5,7
+       do j = -5,7
+#if (_Vcharge == 0)          
+          ii = quark_type(i)
+#elif (_Vcharge == -1)
+          ii = 3
+          if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
+          if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+#elif (_Vcharge == 1)
+          ii = 3
+          if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
+          if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+#endif
+          
+          if (i .gt. 0 .and. j .eq. 7) then   ! qa
+             res(i,j) = res1(1,ii)
+          elseif (i .lt. 0 .and. j .eq. 7) then ! qba
+             res(i,j) = res1(2,ii)
+          endif
+       enddo
+    enddo
+    
+  end subroutine res_tree_a_qa_gen
 
 
   !----------------------------------------------------------------------
@@ -641,6 +823,43 @@ contains
     res(+1,+1,-1) = -za(i4,i3)**2*dena
     
   end function master_amp_qgqb_llb
+
+
+  
+  function agamtree(p1,p2,p3,p4,p5,za,zb,sprod,hgamma)
+    ! for CC, stolen from MCFM
+    complex(dp), intent(in)    :: za(5,5),zb(5,5)
+    real(dp), intent(in)    :: sprod(5,5)
+    integer, intent(in)        :: p1,p2,p3,p4,p5,hgamma
+    complex(dp):: agamtree
+    complex(dp):: prp12,prp34
+
+
+!    prp34=s(p3,p4)/cmplx((s(p3,p4)-wmass**2),wmass*wwidth,kind=dp)
+    !    prp12=s(p1,p2)/cmplx((s(p1,p2)-wmass**2),wmass*wwidth,kind=dp)
+    prp34=sprod(p3,p4)/(sprod(p3,p4)-mwsq_prop)
+    prp12=sprod(p1,p2)/(sprod(p1,p2)-mwsq_prop)
+
+
+
+!---  c.f. Eqs.(4.4),(4.5) of hep-ph/9803250 (multiplied by -i)
+!---       for the terms proportional to prp34
+      if (hgamma == -1) then
+         agamtree=-zb(p2,p4)**2/(sprod(p1,p2)-sprod(p3,p4))*( &
+              Qup*(za(p2,p5)/(zb(p4,p3)*zb(p1,p5))*prp34  &
+              -za(p4,p5)/(zb(p1,p2)*zb(p3,p5))*prp12) &
+              +Qdn*(za(p1,p5)/(zb(p4,p3)*zb(p2,p5))*prp34  &
+              +za(p4,p5)/(zb(p1,p2)*zb(p3,p5))*prp12))
+      elseif (hgamma == +1) then
+        agamtree=-za(p1,p3)**2/(sprod(p1,p2)-sprod(p3,p4))*( &
+             Qdn*(zb(p1,p5)/(za(p3,p4)*za(p2,p5))*prp34  &
+             +zb(p4,p5)/(za(p2,p1)*za(p3,p5))*prp12) &
+             +Qup*(zb(p2,p5)/(za(p3,p4)*za(p1,p5))*prp34 &
+             -zb(p4,p5)/(za(p2,p1)*za(p3,p5))*prp12))
+     endif
+
+   end function agamtree
+  
 
   !-- routine for a[1] a[2] > e-[3] e+[4] a[5]
   subroutine res_treeAA_a_aa(p,res)
