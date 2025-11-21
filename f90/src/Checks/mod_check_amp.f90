@@ -266,6 +266,13 @@ contains
      real(dp)           :: aux_emepgux(20), adx_emepgdx(20), au_emepgu(20), ad_emepgd(20)
      real(dp)           :: uxa_emepgux(20), dxa_emepgdx(20), ua_emepgu(20), da_emepgd(20)
      real(dp)           :: ag_emepuux(20),ag_emepddx(20),ga_emepuux(20),ga_emepddx(20)
+     !
+     real(dp)           :: udx_veepga(20), dxu_veepga(20),adx_veepgux(20),dxa_veepgux(20),au_veepgd(20),ua_veepgd(20)
+     real(dp)           :: gdx_veepuxa(20),dxg_veepuxa(20), gu_veepda(20),ug_veepda(20),ga_veepdux(20),ag_veepdux(20)
+     !
+     real(dp)           :: dux_emvexga(20), uxd_emvexga(20),aux_emvexgdx(20),uxa_emvexgdx(20),ad_emvexgu(20),da_emvexgu(20)
+     real(dp)           :: gux_emvexdxa(20),uxg_emvexdxa(20),gd_emvexua(20),dg_emvexua(20),ga_emvexudx(20),ag_emvexudx(20)
+     
 
      
 #if (_Vcharge == 0) 
@@ -314,35 +321,71 @@ contains
     !
 !
 #elif (_Vcharge == 1)
-!#include "./MG_output/MG_qqb_veep_a.out"
-!#include "./MG_output/MG_qbq_veep_a.out"
-!#include "./MG_output/MG_qa_veep_q.out"
-!#include "./MG_output/MG_qba_veep_qb.out"
-!#include "./MG_output/MG_aq_veep_q.out"
-!#include "./MG_output/MG_aqb_veep_qb.out"
+#include "./MG_output/MG_qqb_veep_ga.out"
+#include "./MG_output/MG_qbq_veep_ga.out"
+
+#include "./MG_output/MG_gq_veep_qa.out"
+#include "./MG_output/MG_qg_veep_qa.out"
+#include "./MG_output/MG_gqb_veep_qba.out"
+#include "./MG_output/MG_qbg_veep_qba.out"
+
+#include "./MG_output/MG_aq_veep_gq.out"
+#include "./MG_output/MG_qba_veep_gqb.out"
+#include "./MG_output/MG_qa_veep_gq.out"
+#include "./MG_output/MG_aqb_veep_gqb.out"
+
+#include "./MG_output/MG_ag_veep_qqb.out"
+#include "./MG_output/MG_ga_veep_qqb.out"
+
 !
-!    mgamps(:,+2,-1) = udx_veepa(:)
-!    mgamps(:,-1,+2) = dxu_veepa(:)
-!    mgamps(:,3,-1) = adx_veepux(:)
-!    mgamps(:,-1,3) = dxa_veepux(:)
-!    mgamps(:,3,+2) = au_veepd(:)
-!    mgamps(:,+2,3) = ua_veepd(:)
+    mgamps(:,+2,-1) = udx_veepga(:)
+    mgamps(:,-1,+2) = dxu_veepga(:)
+    mgamps(:,3,-1) =  adx_veepgux(:)
+    mgamps(:,-1,3) =  dxa_veepgux(:)
+    mgamps(:,3,+2) =  au_veepgd(:)
+    mgamps(:,+2,3) =  ua_veepgd(:)
+
+    mgamps(:,0,-1) =  gdx_veepuxa(:)
+    mgamps(:,-1,0) =  dxg_veepuxa(:)
+    mgamps(:,0,+2) =  gu_veepda(:)
+    mgamps(:,+2,0) =  ug_veepda(:)
+
+    mgamps(:,0,3) = ga_veepdux(:)*nup
+    mgamps(:,3,0) = ag_veepdux(:)*nup
 !
 !
 #elif (_Vcharge == -1)
-!#include "./MG_output/MG_qqb_emvx_a.out"
-!#include "./MG_output/MG_qbq_emvx_a.out"
-!#include "./MG_output/MG_qa_emvx_q.out"
-!#include "./MG_output/MG_qba_emvx_qb.out"
-!#include "./MG_output/MG_aq_emvx_q.out"
-!#include "./MG_output/MG_aqb_emvx_qb.out"
+
+#include "./MG_output/MG_qqb_emvx_ga.out"
+#include "./MG_output/MG_qbq_emvx_ga.out"
+
+#include "./MG_output/MG_gq_emvx_qa.out"
+#include "./MG_output/MG_qg_emvx_qa.out"
+#include "./MG_output/MG_gqb_emvx_qba.out"
+#include "./MG_output/MG_qbg_emvx_qba.out"
+
+#include "./MG_output/MG_aq_emvx_gq.out"
+#include "./MG_output/MG_qba_emvx_gqb.out"
+#include "./MG_output/MG_qa_emvx_gq.out"
+#include "./MG_output/MG_aqb_emvx_gqb.out"
+
+#include "./MG_output/MG_ag_emvx_qqb.out"
+#include "./MG_output/MG_ga_emvx_qqb.out"
 !    
-!    mgamps(:,+1,-2) = dux_emvexa(:)
-!    mgamps(:,-2,+1) = uxd_emvexa(:)
-!    mgamps(:,3,-2) = aux_emvexdx(:)
-!    mgamps(:,-2,3) = uxa_emvexdx(:)
-!    mgamps(:,3,+1) = ad_emvexu(:)
-!    mgamps(:,+1,3) = da_emvexu(:)
+    mgamps(:,+1,-2) = dux_emvexga(:)
+    mgamps(:,-2,+1) = uxd_emvexga(:)
+    mgamps(:,3,-2)  = aux_emvexgdx(:)
+    mgamps(:,-2,3)  = uxa_emvexgdx(:)
+    mgamps(:,3,+1)  = ad_emvexgu(:)
+    mgamps(:,+1,3)  = da_emvexgu(:)
+
+    mgamps(:,0,-2)  = gux_emvexdxa(:)
+    mgamps(:,-2,0)  = uxg_emvexdxa(:)
+    mgamps(:,0,+1)  = gd_emvexua(:)
+    mgamps(:,+1,0)  = dg_emvexua(:)
+
+    mgamps(:,0,3) = ga_emvexudx(:)*nup
+    mgamps(:,3,0) = ag_emvexudx(:)*nup
 !  
 !    
 #endif

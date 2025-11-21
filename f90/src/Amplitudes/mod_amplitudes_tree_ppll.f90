@@ -754,9 +754,13 @@ contains
     call res_tree_jj_ag_gen(p,iconf1,iconf2,avega,res_tmp)
 
     res = zero
-
+#if (_Vcharge == 0)
     res(7,0) = res_tmp(1,1) * ndn + res_tmp(1,2) * nup
-
+#elif (_Vcharge == -1)
+    res(7,0) = res_tmp(1,3)*nup
+#elif (_Vcharge == 1)
+    res(7,0) = res_tmp(1,3)*nup
+#endif
   end subroutine res_tree_ga_ag_gen
 
   !-- ga channel
@@ -766,14 +770,20 @@ contains
   subroutine res_tree_ga_ga_gen(p,res)
     real(dp), intent(in)  :: p(:,:)
     real(dp), intent(out) :: res(-5:7,-5:7)
-    real(dp) :: res_tmp(1,2)
+    real(dp) :: res_tmp(1,3)
     integer, parameter :: iconf1(6,1) = reshape([5,2,6,3,1,4],[6,1])
     integer, parameter :: iconf2(6,1) = reshape([5,2,1,6,3,4],[6,1])
 
     call res_tree_jj_ag_gen(p,iconf1,iconf2,avega,res_tmp)
 
     res = zero
+#if (_Vcharge == 0)
     res(0,7) = res_tmp(1,1) * ndn + res_tmp(1,2) * nup
+#elif (_Vcharge == -1)
+    res(0,7) = res_tmp(1,3)*nup
+#elif (_Vcharge == 1)
+    res(0,7) = res_tmp(1,3)*nup
+#endif
 
   end subroutine res_tree_ga_ga_gen
 
@@ -784,7 +794,7 @@ contains
     integer, intent(in)   :: iconf1(:,:), iconf2(:,:)
     real(dp), intent(out) :: res(size(iconf1,2),3)
     integer     :: i1,i2,i3,i4
-    integer     :: j
+    integer     :: j,ic1,ic2,ic3,ic4,ic5,ic6
     complex(dp) :: za(6,6), zb(6,6)
     real(dp)    :: sprod(6,6), sijk
     complex(dp) :: ampl_res1(-1:1,-1:1,-1:1,-1:1),ampl_res2(-1:1,-1:1,-1:1,-1:1)
@@ -848,9 +858,10 @@ contains
        enddo
 
 #elif (_Vcharge == -1)
-    res(j,3) = ubdgmsq(iconf1(1,j),iconf1(2,j),iconf1(3,j),iconf1(4,j),iconf1(5,j),iconf1(6,j),za,zb,sprod)
+       res(j,3) = ubdgmsq(iconf1(1,j),iconf1(3,j),iconf1(4,j),iconf1(6,j),iconf1(5,j),iconf1(2,j),za,zb,sprod)/sw2**2
 #elif (_Vcharge == +1)
-    res(j,3) = ubdgmsq(iconf1(2,j),iconf1(1,j),iconf1(4,j),iconf1(3,j),iconf1(5,j),iconf1(6,j),zb,za,sprod)
+       res(j,3) = ubdgmsq(iconf1(3,j),iconf1(1,j),iconf1(6,j),iconf1(4,j),iconf1(5,j),iconf1(2,j),zb,za,sprod)/ sw2**2
+
 #endif
  enddo
 
