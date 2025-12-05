@@ -13,7 +13,7 @@ module mod_aux_sectors
   private
 
   public :: get_prefactor
-  public :: get_respdf,get_respdf_vect
+  public :: get_respdf,get_respdf_vect, get_respdf_gen
   public :: get_respdf_hoppet
 
   public :: fill_sv_logs
@@ -28,6 +28,10 @@ module mod_aux_sectors
   public :: gq_lumi_splitb,qg_lumi_splitb
 
   public :: check_ff
+
+  public :: gen_lumi
+
+  public :: multiply_IS_charges
 
 contains
 
@@ -45,6 +49,73 @@ contains
     pref = pref * units
 
   end subroutine get_prefactor
+
+
+    subroutine get_respdf_gen(as_ord,aem_ord,proc,amp2,respdf)
+
+    integer, intent(in) :: as_ord,aem_ord
+    type(KinConfig), intent(in) :: proc
+    real(dp), intent(in)        :: amp2(-5:7,-5:7)
+    real(dp), intent(out)       :: respdf(ipdf)
+
+
+
+    if (ipdf == 1) then
+       call get_respdf_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+    elseif (ipdf == 3) then
+       call get_respdf_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+    endif
+
+    contains
+
+      subroutine get_respdf_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2,f1,f2)
+    
+      end subroutine get_respdf_one_gen
+
+      subroutine get_respdf_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2,f1,f2)
+
+        !-- do not compute the other scales if we're not doing histograms
+        if (nohistos) then
+
+           respdf(2:) = zero
+
+        else
+               
+           !-- half
+           call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*half,f1,f2)
+           respdf(2) = pref*gen_lumi(amp2,f1,f2)
+           
+           !-- twice
+           call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*two,f1,f2)
+           respdf(3) = pref*gen_lumi(amp2,f1,f2)
+
+        endif
+    
+      end subroutine get_respdf_three_gen
+
+    end subroutine get_respdf_gen
 
   subroutine get_respdf(lumi,as_ord,aem_ord,proc,amp2,respdf)
     interface
@@ -129,6 +200,8 @@ contains
       end subroutine get_respdf_three
 
     end subroutine get_respdf
+
+    
       
   !-- evolve PDFs once if we have more limits with same kinematics
   !-- amp2(q/qb,dn/up,i_limit)
@@ -428,6 +501,24 @@ contains
   end subroutine fill_sv_logs
 
   !-- luminosities
+
+
+  function gen_lumi(res,f1,f2) result(respdf)
+    ! added by Raoul
+    real(dp), intent(in) :: res(-5:7,-5:7),f1(-6:),f2(-6:)
+    real(dp) :: respdf
+    integer  :: i1,i2
+
+    respdf = zero
+    do i1= -5,7
+       do i2 = -5,7
+          respdf = respdf + f1(i1)*f2(i2)*res(i1,i2)
+       enddo
+    enddo
+
+  end function gen_lumi
+
+    
   
   function ns_lumi(res,f1,f2) result(respdf)
     real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
@@ -718,6 +809,28 @@ contains
     respdf = res(1,1)*f1(7)*f2(0)
   end function ag_lumi
 
+
+
+
+  function multiply_IS_charges(res_in,leg) result(res_out)
+    real(dp), intent(in)  :: res_in(-5:7,-5:7)
+    integer, intent(in)   :: leg
+    real(dp) :: res_out(-5:7,-5:7)
+    integer               :: i,j
+
+    
+
+    do i = -5,7
+       do j = -5,7
+          if (leg .eq. 1) then
+             res_out(i,j) = res_in(i,j)*Qsq_IS(i)
+          elseif (leg .eq. 2) then
+             res_out(i,j) = res_in(i,j)*Qsq_IS(j)
+          endif
+       enddo
+    enddo
+
+  end function multiply_IS_charges
   !--
 
   !-- NaN checks
