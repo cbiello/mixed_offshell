@@ -32,6 +32,14 @@ module mod_proc_parms
   public :: print_counters,reset_counters
   public :: set_buff
 
+#if (_Vcharge == 0)
+  real(dp), public, parameter :: current_charge = zero
+#elif (_Vcharge == -1)
+  real(dp), public, parameter :: current_charge = -one
+#elif (_Vcharge == +1)
+  real(dp), public, parameter :: current_charge = +one
+#endif
+  
   real(dp), public, parameter :: Q_lep = Qel
   real(dp), public, parameter :: Q_lep2 = Q_lep**2
   real(dp), public, save :: cL_lep

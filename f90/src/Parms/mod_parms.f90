@@ -127,6 +127,15 @@ module mod_parms
   integer, public, parameter :: id_nutau = 15 !-- neutrino tau 
   !--------------------------------------------------------------------------
 
+  ! raoul added
+  !-- charges for final state leptons
+  real(dp), public, save  :: Q3
+  real(dp), public, save  :: Q4
+  !-- generation labels for quarks
+  real(dp), public, parameter  :: Qgeneration(-5:5)=[3,2,2,1,1,0,1,1,2,2,3]
+  real(dp), public, parameter  :: Q_IS(-5:7) = [-Qdn,-Qup,-Qdn,-Qup,-Qdn,zero,Qdn,Qup,Qdn,Qup,Qdn,Qup,zero]
+  real(dp), public, parameter  :: Qsq_IS(-5:7) = [Qdn2,Qup2,Qdn2,Qup2,Qdn2,zero,Qdn2,Qup2,Qdn2,Qup2,Qdn2,Qup2,zero]
+  ! ----- 
   public :: get_parms,help_parms
   public :: set_qcd_parms,set_ew_parms_cms
   public :: print_qcd_parms,print_ew_parms
@@ -176,6 +185,19 @@ contains
     Gf  = real_val_opt('-Gf',1.16639E-5_dp)        !-- for Gmu scheme
     alpha_0  = real_val_opt('-alpha_0',1/137._dp)  !-- for alpha(0) scheme
     alpha_mz = real_val_opt('-alpha_mz',1/128._dp) !-- for alpha(0) scheme
+
+    ! couplings of final state leptons
+#if (_Vcharge == 0)
+    Q3 = -one
+    Q4 = +one
+#elif  (_Vcharge == -1)
+    Q3 = -one
+    Q4 = zero
+#elif  (_Vcharge == +1)
+    Q3 = zero
+    Q4 = +one
+#endif
+    
     
   end subroutine get_parms
 
