@@ -402,7 +402,7 @@ contains
      real(dp), intent(out)   :: amp(-2:3,-2:3)
      real(dp)                :: res(-5:7,-5:7),res1(2,2)
 
-
+     amp = zero
      call res_tree_qqb_gen(p,res)
      amp(-2:2,-2:2) = res(-2:2,-2:2)
 
