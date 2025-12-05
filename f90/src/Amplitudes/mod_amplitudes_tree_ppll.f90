@@ -96,18 +96,27 @@ contains
           else
              cycle
           endif
-#elif (_Vcharge == 1)
-          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+#else
+          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
           endif
-#elif (_Vcharge == -1)
-          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-             ii = 3
-          else
-             cycle
-          endif
+!#elif (_Vcharge == 1)
+!!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+!          !             ii = 3
+!          if 
+!             ii=3
+!          else
+!             cycle
+!          endif
+!#elif (_Vcharge == -1)
+!          !          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
+!
+!             ii = 3
+!          else
+!             cycle
+!          endif
 #endif       
           if ( i .gt. 0 .and. j .lt. 0) then ! qqb
              res(i,j) =  aa * ( abs(coupl(ii,-1,-1))**2 + abs(coupl(ii,+1,+1))**2 ) + &
@@ -285,18 +294,24 @@ contains
           else
              cycle
           endif
-#elif (_Vcharge == 1)
-          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+#else
+          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
           endif
-#elif (_Vcharge == -1)
-          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-             ii = 3
-          else
-             cycle
-          endif
+!#elif (_Vcharge == 1)
+!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+!             ii = 3
+!          else
+!             cycle
+!          endif
+!#elif (_Vcharge == -1)
+!          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
+!             ii = 3
+!          else
+!             cycle
+!          endif
 #endif       
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
@@ -342,18 +357,24 @@ contains
           else
              cycle
           endif
-#elif (_Vcharge == 1)
-          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+#else
+          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
-          endif
-#elif (_Vcharge == -1)
-          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-             ii = 3
-          else
-             cycle
-          endif
+          endif          
+!#elif (_Vcharge == 1)
+!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+!             ii = 3
+!          else
+!             cycle
+!          endif
+!#elif (_Vcharge == -1)
+!          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
+!             ii = 3
+!          else
+!             cycle
+!          endif
 #endif       
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
@@ -552,18 +573,24 @@ contains
           else
              cycle
           endif
-#elif (_Vcharge == 1)
-          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+#else
+          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
-          endif
-#elif (_Vcharge == -1)
-          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-             ii = 3
-          else
-             cycle
-          endif
+          endif                    
+!#elif (_Vcharge == 1)
+!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
+!             ii = 3
+!          else
+!             cycle
+!          endif
+!#elif (_Vcharge == -1)
+!          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
+!             ii = 3
+!          else
+!             cycle
+!          endif
 #endif       
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
@@ -1652,8 +1679,8 @@ contains
     complex(dp) :: amp_g(-1:1,-1:1,-1:1)
     complex(dp) :: amp_h(-1:1,-1:1,-1:1)
     real(dp) :: pref
-    real(dp), parameter :: Q4(2) = (/Qdn**4,Qup**4/)*Q_lep**2
-    real(dp), parameter :: Q3(2) = (/Qdn**3,Qup**3/)*Q_lep**3
+!    real(dp), parameter :: Q4(2) = (/Qdn**4,Qup**4/)*Q_lep**2
+!    real(dp), parameter :: Q3(2) = (/Qdn**3,Qup**3/)*Q_lep**3
     integer :: i,i1,i2,i3,i4,i5,i6
     complex(dp) :: c12_ql(1:2,-1:1,-1:1),c34_ql(1:2,-1:1,-1:1)
     complex(dp) :: c13_ql(1:2,-1:1,-1:1),c24_ql(1:2,-1:1,-1:1)
