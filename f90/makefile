@@ -195,6 +195,7 @@ OBJS_vegas = \
 
 OBJS_check = \
 	mod_checks.o \
+	mod_check_amp.o \
 
 OBJS_chooser = \
 	mod_run_proc_lonlo.o \
