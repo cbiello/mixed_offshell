@@ -223,10 +223,12 @@ contains
          TCS6Lim,TCC6S6Lim,S5S6Lim,C6S5S6Lim,TCS5S6Lim,TCC6S5S6Lim,C6Lim
     integer, parameter :: imax_ipdf = 2, imax_ilim = 4
     real(dp) :: FintNNLO_ns(16),kin(8)
-    real(dp) :: res_lo(2,2),res_nlo(2,2),res_nnlo(2,2),res_tmp(2,2)
-    real(dp) :: respdf(ipdf)
+    real(dp) :: res_lo(-5:7,-5:7),res_nlo(-5:7,-5:7),res_nnlo(-5:7,-5:7),res_nlo_tmp(-5:7,-5:7),res_lo_tmp(-5:7,-5:7)
+    real(dp) :: respdf(ipdf), res_nlo_eikqed(-5:7,-5:7), res_nlo_ischarges(-5:7,-5:7)
+    real(dp) :: res_lo_eikqed(-5:7,-5:7),res_lo_ischarges(-5:7,-5:7)
+    real(dp) :: respdf_tmp_part(ipdf,1:4)
     real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect(2,2,imax_ipdf)
-    real(dp) :: respdf_vect_part(imax_ilim,ipdf)
+    real(dp) :: respdf_vect_part(ipdf,imax_ilim),respdf_tmp(ipdf,3)
     real(dp) :: e5,e6,eta5i,eta6i,eik_qcd,eik_qed(4),si5,si6,s56
     real(dp) :: z,z5,z6,zi
     real(dp) :: damp
@@ -269,7 +271,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
+!    HardProc%ids(1:6) = [0,0,id_el,id_elbar,id_g,id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -282,8 +284,8 @@ contains
        call partition_nnlo_fact(HardProc,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=i)
        
-       call res_tree_ga_qqb(HardProc%AmpMom,res_nnlo)
-       call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo,respdf)
+       call res_tree_ga_qqb_gen(HardProc%AmpMom,res_nnlo)
+       call get_respdf_gen(1,1,Hardproc,res_nnlo,respdf)
 
        respdf = respdf*HardProc%wgt*damp
 
@@ -298,7 +300,7 @@ contains
     !!                             S5                                        !!
     !!-----------------------------------------------------------------------!!
 
-    S5Lim%ids(1:5) = [0,0,id_el,-id_el,id_a]
+!    S5Lim%ids(1:5) = [0,0,id_el,id_elbar,id_a]
     call cut_histo(S5Lim)
 
     if (S5Lim%makecut.or.S5Lim%flag) then
@@ -311,8 +313,8 @@ contains
        call partition_nnlo_fact(S5Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=i)
        
-       call res_tree_a_qqb(S5Lim%AmpMom,res_nlo)
-       call get_respdf(ns_lumi,1,1,S5Lim,res_nlo,respdf)
+       call res_tree_a_qqb_gen(S5Lim%AmpMom,res_nlo)
+       call get_respdf_gen(1,1,S5Lim,res_nlo,respdf)
        
        call get_qcd_eik(Cf,S5Lim%Lim_etaij,[1,2],5,eik_qcd)
        e5 = S5Lim%Lim_KinInv(1)
@@ -331,7 +333,7 @@ contains
     !!                             S6 + C6S6                                 !!
     !!-----------------------------------------------------------------------!!
 
-    S6Lim%ids(1:5) = [0,0,id_el,-id_el,id_g]
+!    S6Lim%ids(1:5) = [0,0,id_el,id_elbar,id_g]
     call cut_histo(S6Lim)
 
     if (S6Lim%makecut.or.S6Lim%flag) then
@@ -341,27 +343,32 @@ contains
        
     else
 
-       call res_tree_g_qqb(S6Lim%AmpMom,res_nlo)
+       call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo_tmp)
+       call get_qed_eik_gen(res_nlo_tmp,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
+       call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_tmp(:,1))
        
        !-- prepare PDFs structures, S6
-       call get_qed_eik(charges,S6Lim%Lim_etaij,[1,2,3,4],6,eik_qed)
-       res_tmp_vect(1:2,1,1) = res_nlo(1:2,1) * eik_qed(1:2)
-       res_tmp_vect(1:2,2,1) = res_nlo(1:2,2) * eik_qed(3:4)
+!       call get_qed_eik(charges,S6Lim%Lim_etaij,[1,2,3,4],6,eik_qed)
+!       res_tmp_vect(1:2,1,1) = res_nlo(1:2,1) * eik_qed(1:2)
+!       res_tmp_vect(1:2,2,1) = res_nlo(1:2,2) * eik_qed(3:4)
 
        !-- prepare PDFs structures, CS6
-       res_tmp_vect(:,1,2) = res_nlo(:,1) * Qdn2
-       res_tmp_vect(:,2,2) = res_nlo(:,2) * Qup2
+!       res_tmp_vect(:,1,2) = res_nlo(:,1) * Qdn2
+       !       res_tmp_vect(:,2,2) = res_nlo(:,2) * Qup2
+       res_nlo_ischarges = multiply_IS_charges(res_nlo_tmp,i)
+       call get_respdf_gen(1,1,S6Lim,res_nlo_ischarges,respdf_tmp(:,2))
+                 
 
        !-- get PDFs for all of them
-       call get_respdf_vect(ns_lumi,1,1,S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
+!       call get_respdf_vect(ns_lumi,1,1,S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
 
        !-- S6
        call partition_nnlo_fact(S6Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=i)
 
        e6 = S6Lim%Lim_KinInv(1)
-       respdf_vect_part(1,:) = -respdf_vect(1,:)/e6**2*S6Lim%wgt*damp
-       FintNNLO_ns(3) = respdf_vect_part(1,1)
+       respdf_tmp(:,1) = -respdf_tmp(:,1)/e6**2*S6Lim%wgt*damp
+       FintNNLO_ns(3) = respdf_tmp(1,1)
 
        !-- C6S6
        call partition_nnlo_fact(S6Lim,damp,iconf_qcd=[1,2,5],&
@@ -370,10 +377,10 @@ contains
        e6    = C6S6Lim%Lim_KinInv(1)
        eta6i = C6S6Lim%Lim_etaij(i,6)
 
-       respdf_vect_part(2,:) = respdf_vect(2,:)/e6**2/eta6i*C6S6Lim%wgt*damp
-       FintNNLO_ns(4) = respdf_vect_part(2,1)
+       respdf_tmp(:,2) = respdf_tmp(:,2)/e6**2/eta6i*C6S6Lim%wgt*damp
+       FintNNLO_ns(4) = respdf_tmp(1,2)
 
-       respdf = sum(respdf_vect_part(1:2,:),1)
+       respdf = sum(respdf_tmp(:,1:2),2)
        kin(3) = respdf(1)
 
        call fill_histo(respdf,vegasweight)
@@ -397,11 +404,9 @@ contains
        call partition_nnlo_fact(C6Lim,damp,iconf_qcd=[1,2,5],&
             i_qcd=i)
 
-       call res_tree_g_qqb(C6Lim%AmpMom,res_nlo)
-       res_nlo(:,1) = res_nlo(:,1) * Qdn2
-       res_nlo(:,2) = res_nlo(:,2) * Qup2
-
-       call get_respdf(ns_lumi,1,1,C6Lim,res_nlo,respdf)
+       call res_tree_g_qqb_gen(C6Lim%AmpMom,res_nlo_tmp)
+       res_nlo_ischarges = multiply_IS_charges(res_nlo_tmp,i)
+       call get_respdf_gen(1,1,C6Lim,res_nlo_ischarges,respdf)
 
        z   = C6Lim%Lim_z(2)
        si6 = C6Lim%Lim_sij(i,6)
@@ -419,7 +424,7 @@ contains
     !!                      S5S6 + TCS5S6 + C6S5S6 + TCC6S5S6                !!
     !!-----------------------------------------------------------------------!!
 
-    S5S6Lim%ids(1:4) = [0,0,id_el,-id_el]
+!    S5S6Lim%ids(1:4) = [0,0,id_el,id_elbar]
     call cut_histo(S5S6Lim)
 
     if (S5S6Lim%makecut.or.S5S6Lim%flag) then
@@ -429,19 +434,15 @@ contains
        
     else
 
-       call res_tree_qqb(S5S6Lim%AmpMom,res_lo)
+       call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo_tmp)
 
        !-- Prepare for PDFs, S5S6
        call get_qcd_eik(Cf,S5S6Lim%Lim_etaij,[1,2],5,eik_qcd) 
-       call get_qed_eik(charges,S5S6Lim%Lim_etaij,[1,2,3,4],6,eik_qed)
-       res_tmp_vect(1:2,1,1) = res_lo(1:2,1) * eik_qed(1:2) 
-       res_tmp_vect(1:2,2,1) = res_lo(1:2,2) * eik_qed(3:4) 
-
-       !-- Prepare for PDFs, TCS5S6
-       res_tmp_vect(:,1,2) = res_lo(:,1) * Qdn2
-       res_tmp_vect(:,2,2) = res_lo(:,2) * Qup2
-
-       call get_respdf_vect(ns_lumi,1,1,S5S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
+       call get_qed_eik_gen(res_lo_tmp,S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
+       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
+       call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_tmp(:,1))
+       call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_tmp(:,2))
+       
        
        !-- S5S6
        call partition_nnlo_fact(S5S6Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -449,8 +450,8 @@ contains
        e5 = S5S6Lim%Lim_KinInv(1)
        e6 = S5S6Lim%Lim_KinInv(2)
 
-       respdf_vect_part(1,:) = respdf_vect(1,:)*eik_qcd/e5**2/e6**2*S5S6Lim%wgt*damp
-       FintNNLO_ns(6) = respdf_vect_part(1,1)
+       respdf_tmp_part(:,1) = respdf_tmp(:,1)*eik_qcd/e5**2/e6**2*S5S6Lim%wgt*damp
+       FintNNLO_ns(6) = respdf_tmp_part(1,1)
 
        !-- TCS5S6
        si5 = TCS5S6Lim%Lim_sij(i,5)
@@ -459,8 +460,8 @@ contains
        z5 = TCS5S6Lim%Lim_z(1)
        z6 = TCS5S6Lim%Lim_z(2)
 
-       respdf_vect_part(2,:) = -respdf_vect(2,:)*Cf*Pgaq_ds(si5,si6,z5,z6)*TCS5S6Lim%wgt
-       FintNNLO_ns(7) = respdf_vect_part(2,1)
+       respdf_tmp_part(:,2) = -respdf_tmp(:,2)*Cf*Pgaq_ds(si5,si6,z5,z6)*TCS5S6Lim%wgt
+       FintNNLO_ns(7) = respdf_tmp_part(1,2)
 
        !-- C6S5S6
        call partition_nnlo_fact(S5S6Lim,damp,iconf_qcd=[1,2,5],i_qcd=i)
@@ -468,8 +469,8 @@ contains
        e6    = C6S5S6Lim%Lim_KinInv(2)
        eta6i = C6S5S6Lim%Lim_etaij(i,6)
 
-       respdf_vect_part(3,:) = -respdf_vect(2,:)*eik_qcd/e5**2/eta6i/e6**2*C6S5S6Lim%wgt*damp
-       FintNNLO_ns(8) = respdf_vect_part(3,1)
+       respdf_tmp_part(:,3) = -respdf_tmp(:,2)*eik_qcd/e5**2/eta6i/e6**2*C6S5S6Lim%wgt*damp
+       FintNNLO_ns(8) = respdf_tmp_part(1,3)
 
        !-- TCC6S5S6
        e5    = TCC6S5S6Lim%Lim_KinInv(1)
@@ -477,10 +478,10 @@ contains
        eta5i = TCC6S5S6Lim%Lim_etaij(i,5)
        eta6i = TCC6S5S6Lim%Lim_etaij(i,6)
 
-       respdf_vect_part(4,:) = respdf_vect(2,:)*Cf/eta5i/e5**2/eta6i/e6**2*TCC6S5S6Lim%wgt
-       FintNNLO_ns(9) = respdf_vect_part(4,1)
+       respdf_tmp_part(:,4) = respdf_tmp(:,2)*Cf/eta5i/e5**2/eta6i/e6**2*TCC6S5S6Lim%wgt
+       FintNNLO_ns(9) = respdf_tmp_part(1,4)
 
-       respdf = sum(respdf_vect_part(1:4,:),1)
+       respdf = sum(respdf_tmp_part(:,1:4),2)
        kin(5) = respdf(1)
        
        call fill_histo(respdf,vegasweight)
@@ -501,11 +502,10 @@ contains
        
     else
 
-       call res_tree_qqb(TCLim%AmpMom,res_lo)
+       call res_tree_qqb_gen(TCLim%AmpMom,res_lo_tmp)
+       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
 
-       res_tmp(:,1) = res_lo(:,1) * Qdn2
-       res_tmp(:,2) = res_lo(:,2) * Qup2
-       call get_respdf(ns_lumi,1,1,TCLim,res_tmp,respdf)
+       call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf_tmp(:,1))
 
        !-- TC
        si5 = TCLim%Lim_sij(i,5)
@@ -516,18 +516,18 @@ contains
        z6 = TCLim%Lim_z(2)
        zi = TCLim%Lim_z(3)
 
-       respdf_vect_part(1,:) = -respdf*Cf*Pgaq(s56,-si5,-si6,z5,z6,zi)*TCLim%wgt
-       FintNNLO_ns(10) = respdf_vect_part(1,1)
+       respdf_tmp_part(:,1) = -respdf_tmp(:,1)*Cf*Pgaq(s56,-si5,-si6,z5,z6,zi)*TCLim%wgt
+       FintNNLO_ns(10) = respdf_tmp_part(1,1)
 
        !-- TCC6
        z6 = TCC6Lim%Lim_z(2)
        z5 = TCC6Lim%Lim_z(1)
        si5 = TCC6Lim%Lim_KinInv(1)
        
-       respdf_vect_part(2,:) = respdf*(Cf*two*Pqg(z5)/si5)*(two*Pqg(z6)/si6)*TCC6Lim%wgt
-       FintNNLO_ns(11) = respdf_vect_part(2,1)
+       respdf_vect_part(:,2) = respdf_tmp(:,1)*(Cf*two*Pqg(z5)/si5)*(two*Pqg(z6)/si6)*TCC6Lim%wgt
+       FintNNLO_ns(11) = respdf_vect_part(1,2)
        
-       respdf = sum(respdf_vect_part(1:2,:),1)
+       respdf = sum(respdf_vect_part(:,1:2),2)
        kin(6) = respdf(1)
        
        call fill_histo(respdf,vegasweight)
@@ -548,11 +548,10 @@ contains
        
     else
 
-       call res_tree_qqb(TCS6Lim%AmpMom,res_lo)
+       call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo_tmp)
+       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
 
-       res_tmp(:,1) = res_lo(:,1) * Qdn2
-       res_tmp(:,2) = res_lo(:,2) * Qup2
-       call get_respdf(ns_lumi,1,1,TCS6Lim,res_tmp,respdf)
+       call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_tmp(:,1))
        
        !-- TCS6
        z5  = TCS6Lim%Lim_z(1)
@@ -561,17 +560,17 @@ contains
        si5 = TCS6Lim%Lim_sij(i,5)
        si6 = TCS6Lim%Lim_sij(i,6)
 
-       respdf_vect_part(1,:) = respdf*Pgaq_s2(si5,si6,z5,z6)*Cf*TCS6Lim%wgt
-       FintNNLO_ns(12) = respdf_vect_part(1,1)
+       respdf_tmp_part(:,1) = respdf_tmp(:,1)*Pgaq_s2(si5,si6,z5,z6)*Cf*TCS6Lim%wgt
+       FintNNLO_ns(12) = respdf_tmp_part(1,1)
 
        !-- TCC6S6
        e6 = TCC6S6Lim%Lim_KinInv(1)
        eta6i = TCC6S6Lim%Lim_etaij(i,6)
        
-       respdf_vect_part(2,:) = respdf*(Cf*two*Pqg(z5)/si5)/e6**2/eta6i*TCC6S6Lim%wgt
-       FintNNLO_ns(13) = respdf_vect_part(2,1)
+       respdf_tmp_part(:,2) = respdf_tmp(:,1)*(Cf*two*Pqg(z5)/si5)/e6**2/eta6i*TCC6S6Lim%wgt
+       FintNNLO_ns(13) = respdf_tmp_part(1,2)
 
-       respdf = sum(respdf_vect_part(1:2,:),1)
+       respdf = sum(respdf_tmp_part(:,1:2),2)
        kin(7) = respdf(1)
        
        call fill_histo(respdf,vegasweight)
@@ -582,7 +581,7 @@ contains
     !!                     TCS5 + TCC6S5 + C6S5                              !!
     !!-----------------------------------------------------------------------!!
 
-    TCS5Lim%ids(1:4) = [0,0,id_el,-id_el]
+!    TCS5Lim%ids(1:4) = [0,0,id_el,id_elbar]
     call cut_histo(TCS5Lim)
 
     if (TCS5Lim%makecut.or.TCS5Lim%flag) then
@@ -592,11 +591,9 @@ contains
        
     else
 
-       call res_tree_qqb(TCS5Lim%AmpMom,res_lo)
-
-       res_tmp(:,1) = res_lo(:,1) * Qdn2
-       res_tmp(:,2) = res_lo(:,2) * Qup2
-       call get_respdf(ns_lumi,1,1,TCS5Lim,res_tmp,respdf)
+       call res_tree_qqb_gen(TCS5Lim%AmpMom,res_lo_tmp)
+       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
+       call get_respdf_gen(1,1,TCS5Lim,res_lo_ischarges,respdf_tmp(:,1))
        
        !-- TCS5
        z5  = TCS5Lim%Lim_z(1)
@@ -605,15 +602,15 @@ contains
        si5 = TCS5Lim%Lim_sij(i,5)
        si6 = TCS5Lim%Lim_sij(i,6)
 
-       respdf_vect_part(1,:) = respdf*Pgaq_s2(si6,si5,z6,z5)*Cf*TCS5Lim%wgt
-       FintNNLO_ns(14) = respdf_vect_part(1,1)
+       respdf_tmp_part(:,1) = respdf_tmp(:,1)*Pgaq_s2(si6,si5,z6,z5)*Cf*TCS5Lim%wgt
+       FintNNLO_ns(14) = respdf_tmp_part(1,1)
 
        !-- TCC6S5
        e5 = TCC6S5Lim%Lim_KinInv(1)
        eta5i = TCC6S5Lim%Lim_etaij(i,5)
        
-       respdf_vect_part(2,:) = respdf*(Cf/e5**2/eta5i)*(two*Pqg(z6)/si6)*TCC6S5Lim%wgt
-       FintNNLO_ns(15) = respdf_vect_part(2,1)
+       respdf_tmp_part(:,2) = respdf_tmp(:,1)*(Cf/e5**2/eta5i)*(two*Pqg(z6)/si6)*TCC6S5Lim%wgt
+       FintNNLO_ns(15) = respdf_tmp_part(1,2)
 
        !-- C6S5
        call partition_nnlo_fact(C6S5Lim,damp,iconf_qcd=[1,2,5],i_qcd=i) 
@@ -624,10 +621,10 @@ contains
        z6  = C6S5Lim%Lim_z(2)
        si6 = C6S5Lim%Lim_sij(i,6)
 
-       respdf_vect_part(3,:) = -respdf*(eik_qcd/e5**2)*(two*Pqg(z6)/si6)*C6S5Lim%wgt*damp
-       FintNNLO_ns(16) = respdf_vect_part(3,1)
+       respdf_tmp_part(:,3) = -respdf_tmp(:,1)*(eik_qcd/e5**2)*(two*Pqg(z6)/si6)*C6S5Lim%wgt*damp
+       FintNNLO_ns(16) = respdf_tmp_part(1,3)
 
-       respdf = sum(respdf_vect_part(1:3,:),1)
+       respdf = sum(respdf_vect_part(:,1:3),2)
        kin(8) = respdf(1)
        
        call fill_histo(respdf,vegasweight)
@@ -638,6 +635,27 @@ contains
     call close_histo()
 
     call check_ff(ff,xx,FintNNLO_ns)
+
+    if (FintNNLO_ns(1) .ne. zero) then
+       print *, "FintNNLO_ns",FintNNLO_ns
+       print *, "S5",FintNNLO_ns(2),one + FintNNLO_ns(1) / FintNNLO_ns(2)
+       print *, "S6",FintNNLO_ns(3),one + FintNNLO_ns(1) / FintNNLO_ns(3)
+       print *, "S6C6",FintNNLO_ns(4),one - FintNNLO_ns(1) / FintNNLO_ns(4)
+       print *, "C6",FintNNLO_ns(5),one + FintNNLO_ns(1) / FintNNLO_ns(5)
+       print *, "S5S6",FintNNLO_ns(6),one - FintNNLO_ns(1) / FintNNLO_ns(6)
+       print *, "TC S5 S6",FintNNLO_ns(7),one + FintNNLO_ns(1) / FintNNLO_ns(7)
+       print *, "C6 S5 S6",FintNNLO_ns(8),one + FintNNLO_ns(1) / FintNNLO_ns(8)
+       print *, "TC C6 S5 S6",FintNNLO_ns(9),one - FintNNLO_ns(1) / FintNNLO_ns(9)
+       print *, "TC",FintNNLO_ns(10),one + FintNNLO_ns(1) / FintNNLO_ns(10)
+       print *, "TC C6",FintNNLO_ns(11),one - FintNNLO_ns(1) / FintNNLO_ns(11)
+       print *, "TC S6",FintNNLO_ns(12),one - FintNNLO_ns(1) / FintNNLO_ns(12)
+       print *, "TC C6 S6",FintNNLO_ns(13),one + FintNNLO_ns(1) / FintNNLO_ns(13)
+       print *, "TC S5",FintNNLO_ns(14),one - FintNNLO_ns(1) / FintNNLO_ns(14)
+       print *, "TC C6 S5",FintNNLO_ns(15),one + FintNNLO_ns(1) / FintNNLO_ns(15)
+       print *, "C6 S5",FintNNLO_ns(16),one - FintNNLO_ns(1) / FintNNLO_ns(16)
+       print *, "sum", sum(FintNNLO_ns)/FintNNLO_ns(1)
+       stop
+    endif
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_ns = FintNNLO_ns
