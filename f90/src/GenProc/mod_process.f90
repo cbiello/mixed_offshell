@@ -21,6 +21,11 @@ module mod_process
      integer  :: npart  !-- how many particles in this configuration
      logical :: flag    !-- technical flag from kinematic generation
      logical :: makecut !-- actual fiducial cuts
+     integer :: part(nmax) ! part = (id_1, id_2, id_3, ... id_6)
+                           !         id_3 = ( +/- id_el, +/- id_nu )
+                           ! in Parms/mod_parms.f90 
+                           ! integer, public, parameter :: id_el = 11 !-- + is always particle
+
   end type KinConfig
 
 contains
@@ -45,7 +50,8 @@ contains
     AKinConfig%ids = -99
     AKinConfig%flag    = .false.
     AKinConfig%makecut = .true.
-    
+    AKinConfig%part = -99
+
   end subroutine initialize_config
     
 end module mod_process
