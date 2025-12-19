@@ -33,8 +33,11 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf)
-    real(dp)    :: res_lo(2,2)
+    real(dp)    :: res_lo(-5:7,-5:7)
+    logical :: oldcode
 
+    oldcode = .true.
+    
     xsect_lo_ns = 0
 
     ff(1) = zero
@@ -42,6 +45,7 @@ contains
     xx(1:kLO_max)=buff+onet*real(yRnd(1:kLO_max),dp)
     call random_number(xx(kLO_max_full))
 
+    
 #if (_withchecks == 1)
     if (override) then
        xx(1:kLO_max_full) = yRnd(1:kLO_max_full)
@@ -60,8 +64,14 @@ contains
 
     else
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       call get_respdf(ns_lumi,0,0,LOProc,res_lo,respdf)
+       !CB (19Dec25)
+       if(oldcode) then
+          call res_tree_qqb(LOProc%AmpMom,res_lo)
+          call get_respdf(ns_lumi,0,0,LOProc,res_lo,respdf)
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
+          call get_respdf_gen(0,0,LOProc,res_lo,respdf)
+       endif
 
        respdf = respdf*LOProc%wgt
 
@@ -173,8 +183,9 @@ contains
        kin(1) = zero
        
     else    
-       
+
        call res_tree_qqb_wp(LOProc%AmpMom,res_lo)
+       
        call get_respdf(qQpb_lumi_wp,0,0,LOProc,res_lo,respdf)
 
        respdf = respdf*LOProc%wgt
@@ -231,7 +242,7 @@ contains
        kin(1) = zero
        
     else    
-       
+
        call res_tree_qqb_wm(LOProc%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wm,0,0,LOProc,res_lo,respdf)
 
