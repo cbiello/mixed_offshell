@@ -393,6 +393,9 @@ contains
     character(*), intent(in) :: my_ew_scheme
     integer, intent(in) :: outdev
 
+    write(outdev,*) '# PROCESS  = ', _Vcharge
+    write(outdev,*) '#'
+
     write(outdev,*) '# complex mass scheme = ', cm_scheme
     write(outdev,*) '#'
 

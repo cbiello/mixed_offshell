@@ -36,7 +36,7 @@ contains
     real(dp)    :: res_lo(-5:7,-5:7)
     logical :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
     
     xsect_lo_ns = 0
 
@@ -159,6 +159,12 @@ contains
     real(dp)    :: kin(1),respdf(ipdf)
     real(dp)    :: res_lo(1,2)
 
+
+
+    print*, 'I am in xsect_lo_ns_wp'
+
+
+    stop
     xsect_lo_ns_wp = 0
 
     ff(1) = zero

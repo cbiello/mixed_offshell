@@ -15,6 +15,9 @@ FCmpi=mpif90
 # Default='-O3 -ffree-line-length-1000'
 FFLAGS='-O3 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000'
 
+#Include the choice of the boson
+Vcharge=0
+
 #Configure with checks: true/false. Default=true
 CHECKS=true
 

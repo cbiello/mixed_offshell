@@ -183,9 +183,9 @@ OBJS_histo = \
 	mod_proc_histo.o \
 	mod_histo.o \
 	mod_cut_histo_aux.o \
-	mod_cut_histo.o \
 	mod_cut_histo_$(analysis).o \
-#        mod_cut_histo_W_ATLAS.o \
+	mod_cut_histo.o \
+	# mod_cut_histo_W_ATLAS.o \
 
 OBJS_vegas = \
 	mod_my_vegas.o \
@@ -237,7 +237,7 @@ endif
 #####################################################################
 
 $(EXEC): $(MAIN) $(TWOLINSTDIR) $(TWOLINSTOBJ) $(OBJS) $(HISTODIR) $(GRIDDIR) $(BINDIR)
-	$(F95) $(FOPTS) $(patsubst %,$(OBJSDIR)/%,$(OBJS)) $(LIBS) $(MAIN) -o $(EXEC)
+	$(F95) -D_Vcharge=$(Vcharge) $(FOPTS) $(patsubst %,$(OBJSDIR)/%,$(OBJS)) $(LIBS) $(MAIN) -o $(EXEC)
 
 $(OBJSDIR):
 	mkdir -p $(OBJSDIR)
@@ -285,10 +285,10 @@ makedep.inc:
 
 #%.o %.mod --> create both in single pass
 %.o %.mod: %.f90 | $(OBJSDIR) $(MODDIR)
-	$(F95) $(FOPTS) $(LIBS) $(SETFFOUT) $(OBJSDIR)/$@ $<
+	$(F95) -D_Vcharge=$(Vcharge) $(FOPTS) $(LIBS) $(SETFFOUT) $(OBJSDIR)/$@ $<
 
 %.o: %.F | $(OBJSDIR) $(MODDIR)
-	$(F95) $(FOPTS) $(LIBS) $(SETFFOUT) $(OBJSDIR)/$@ $<
+	$(F95) -D_Vcharge=$(Vcharge) $(FOPTS) $(LIBS) $(SETFFOUT) $(OBJSDIR)/$@ $<
 
 #####################################################################
 
