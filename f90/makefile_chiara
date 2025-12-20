@@ -183,9 +183,14 @@ OBJS_histo = \
 	mod_proc_histo.o \
 	mod_histo.o \
 	mod_cut_histo_aux.o \
-	mod_cut_histo_$(analysis).o \
+	mod_cut_histo_W_ATLAS.o \
+        mod_cut_histo_PC_ATLAS_160601736.o \
+        mod_cut_histo.o \
+	# mod_cut_histo_$(analysis).o \
+	mod_cut_histo_W_ATLAS.o \
+	mod_cut_histo_PC_ATLAS_160601736.o \
 	mod_cut_histo.o \
-	# mod_cut_histo_W_ATLAS.o \
+	mod_cut_histo_W_ATLAS.o \
 
 OBJS_vegas = \
 	mod_my_vegas.o \
