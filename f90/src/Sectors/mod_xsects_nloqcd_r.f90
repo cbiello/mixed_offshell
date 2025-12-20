@@ -142,14 +142,6 @@ contains
 
     endif
 
-
-    if(FintNLO_ns(1) .ne. zero) then
-    print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
-    print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), FintNLO_ns(2)/FintNLO_ns(1) 
-    print*, ''
-    pause
-    endif
-
     ff(1) = sum(kin)
     call close_histo()
 
