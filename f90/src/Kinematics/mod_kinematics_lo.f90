@@ -46,6 +46,8 @@ contains
 
     LOConfig%npart  = 4 
     
+    allocate(LOConfig%part(LOConfig%npart))
+
     LOConfig%mu2ref = mv2 !-- for hoppet
 
     LOConfig%Lim_etaij(1,2) = one
