@@ -28,7 +28,7 @@ MPI=false
 With2L=false
 
 #Analysis
-#analysis=fb_ATLAS_160601736
+#analysis=PC_ATLAS_160601736
 #analysis=w_dflt
 analysis=W_ATLAS
 
