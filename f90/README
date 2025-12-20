@@ -10,3 +10,8 @@ Here some instructions and tricks
   -----> the analysis has to be set accordingly
 
   (?) whay to set automatically the correct analysis?  
+
+3) The order of the partons is always: q qp > l lx
+   namely: d ux > w- > e- vex
+           dx u > w+ > ve e+
+
