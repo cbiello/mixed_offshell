@@ -112,6 +112,7 @@ module mod_parms
   !--------------------------------------------------------------------------
   !-- human numbers
   integer, public, parameter :: id_q = 1 !-- generic quark
+  integer, public, parameter :: id_qp = 2 !-- generic quark of different flavour
   integer, public, parameter :: id_b = 5 !-- b-quark
   integer, public, parameter :: id_g = 21
   integer, public, parameter :: id_a = 22
