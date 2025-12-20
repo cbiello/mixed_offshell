@@ -1,0 +1,12 @@
+Here some instructions and tricks
+1) to run CCDY be sure you set    oldcode = .false. 
+   in src/Sectors/mod_xsects_lo.f90
+
+2) the process can be set via the configure file
+   0 : Z boson
+  -1 : W- exchange
+  +1 : W+ exchange
+  -----> this is set via the Vcharge flag
+  -----> the analysis has to be set accordingly
+
+  (?) whay to set automatically the correct analysis?  
