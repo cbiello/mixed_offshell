@@ -34,6 +34,7 @@ contains
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf)
     real(dp)    :: res_lo(-5:7,-5:7)
+    real(dp)    :: res_lo_old(2,2)
     logical :: oldcode
 
     oldcode = .false.
@@ -56,6 +57,16 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+        ! couplings of final state leptons
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+#endif
+
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -64,10 +75,9 @@ contains
 
     else
 
-       !CB (19Dec25)
        if(oldcode) then
-          call res_tree_qqb(LOProc%AmpMom,res_lo)
-          call get_respdf(ns_lumi,0,0,LOProc,res_lo,respdf)
+          call res_tree_qqb(LOProc%AmpMom,res_lo_old)
+          call get_respdf(ns_lumi,0,0,LOProc,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
           call get_respdf_gen(0,0,LOProc,res_lo,respdf)
