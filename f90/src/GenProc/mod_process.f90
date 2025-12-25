@@ -33,7 +33,14 @@ contains
   subroutine initialize_config(AKinConfig)
     !set all properties of KinConfig to initial values (mostly zero)
     type(KinConfig) :: AKinConfig
-    
+   
+    !----------------------------------
+    ! Deallocate dynamic components
+    !----------------------------------
+    if (allocated(AKinConfig%part)) then
+       deallocate(AKinConfig%part)
+    endif
+
     AKinConfig%AmpMom = 0
     AKinConfig%LimMom = 0
     AKinConfig%Lim_etaij = 0
