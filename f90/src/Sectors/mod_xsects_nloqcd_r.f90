@@ -67,6 +67,27 @@ contains
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
 
+    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g]
+    C1Lim%part = [id_q,-id_q,id_el,-id_el]
+    C2Lim%part = [id_q,-id_q,id_el,-id_el]
+    
+    ! define process specific partons
+!#if (_Vcharge == 0)
+!    HardProc%part(1:5) = [0,0,0,0,0]
+!     HardProc%part(1:5) = [id_q,-id_q,id_el,-id_el,id_g]
+!    C1Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
+!    C2Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
+!#elif  (_Vcharge == -1)
+!    HardProc%part(1:5) = [id_q,-id_qp,id_el,-id_nue,id_g]
+!    C1Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
+!    C2Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
+!#elif  (_Vcharge == +1)
+!    HardProc%part(1:5) = [id_q,-id_qp,id_nue,-id_el,id_g]
+!    C1Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
+!    C2Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
+!#endif
+
+
     !-- Hard
     call cut_histo(HardProc)
     if (HardProc%makecut.or.HardProc%flag) then
@@ -115,6 +136,7 @@ contains
 
     endif
 
+
     !-- C2
     call cut_histo(C2Lim)
     
@@ -141,6 +163,7 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
+
 
     ff(1) = sum(kin)
     call close_histo()
