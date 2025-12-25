@@ -58,7 +58,7 @@ contains
 
     call kinematics_lo(xx,LOProc)
 
-        ! couplings of final state leptons
+    ! define process specific partons
 #if (_Vcharge == 0)
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
 #elif  (_Vcharge == -1)
