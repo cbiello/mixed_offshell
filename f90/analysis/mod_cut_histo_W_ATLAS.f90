@@ -85,7 +85,6 @@ contains
     real(dp) :: mT_min = 200._dp, mT_max = 5000._dp
     real(dp) :: ptlep_cut = 65._dp, ptmiss_cut = 85._dp 
     real(dp) :: ylep_cut = 2.4_dp 
-    integer  :: part(4)
 
     !----------------------------------------------------------
     !-- consistency test
@@ -135,6 +134,7 @@ contains
           print*, 'where is the final state lepton?'
     
     endif
+
 
     !-- transverse mass
     dphiln = get_dphi(rec_mom(:,1),rec_mom(:,2))
