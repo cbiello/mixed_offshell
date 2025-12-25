@@ -21,7 +21,7 @@ contains
 
     !-- Inclusive histograms
     call new_histo('rate',0._dp,1._dp,0.5_dp)       !-- 1
-    call new_histo('massT',200._dp,3000._dp,10._dp)   !-- 2
+    call new_histo('massT',50._dp,3000._dp,10._dp)   !-- 2
     !call new_histo('yll' ,-5._dp,5._dp,0.1_dp)      !-- 3
     !call new_histo('ptll',0._dp,3000._dp,10._dp)    !-- 4
     !call new_histo('ptl',10._dp, 3000._dp,10._dp)  !-- 5
@@ -83,8 +83,8 @@ contains
     real(dp) :: ptlep_geom = 35._dp, dYll_cut = 3.5_dp
     real(dp) :: ptl, ptmiss, dphiln, massT
     real(dp) :: mT_min = 200._dp, mT_max = 5000._dp
-    real(dp) :: ptlep_cut = 65._dp, ptmiss_cut = 85._dp
-    real(dp) :: ylep_cut = 2.4_dp ! FIX ME
+    real(dp) :: ptlep_cut = 65._dp, ptmiss_cut = 85._dp 
+    real(dp) :: ylep_cut = 2.4_dp 
     integer  :: part(4)
 
     !----------------------------------------------------------
@@ -119,16 +119,18 @@ contains
     !-- Recombination of leptons: reject event
     if(leptons_recombined) return
 
-    ! FIX ME: only for debug
-    part = [id_q, -id_q, -id_el, id_nue]
+
+    !-- q qb -> l lx
 
     !-- lepton pT
-    if (abs(part(4)) .eq. abs(id_nue)) then
-          ptl  = get_pt(rec_mom(:,1))
-          ptmiss = get_pT(rec_mom(:,2))
-    elseif (abs(part(3)) .eq. abs(id_el) ) then 
+    if ( (event%part(3) .gt. 0) .and. (mod(event%part(3), 2) .eq. 0)) then
+          !print*, '3 is a neutrino'
           ptl  = get_pt(rec_mom(:,2))
           ptmiss = get_pT(rec_mom(:,1))
+    elseif ((event%part(3) .gt. 0) .and. (mod(event%part(3), 2) .ne. 0) ) then
+          !print*, '3 is a lepton' 
+          ptl  = get_pt(rec_mom(:,1))
+          ptmiss = get_pT(rec_mom(:,2))
     else
           print*, 'where is the final state lepton?'
     
