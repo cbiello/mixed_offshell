@@ -1,6 +1,6 @@
 Here some instructions and tricks
 1) to run CCDY be sure you set    oldcode = .false. 
-   in src/Sectors/mod_xsects_lo.f90
+   [useful for debugging]
 
 2) the process can be set via the configure file
    0 : Z boson
@@ -15,3 +15,13 @@ Here some instructions and tricks
    namely: d ux > w- > e- vex
            dx u > w+ > ve e+
 
+
+
+
+******************************************
+
+Old routines that should be deleted
+- xsect_nloewk_r_is_ns_wp
+- xsect_nloewk_r_is_ns_wm
+- xsect_nloewk_r_fs_53_ns_wp 
+- xsect_nloewk_r_fs_54_ns_wp
