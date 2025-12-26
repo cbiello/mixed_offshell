@@ -34,8 +34,8 @@ module mod_xsects_nloewk_r
   public :: xsect_nloewk_r_is_aq, xsect_nloewk_r_is_qa
 
   !CB: W xsect
-  public :: xsect_nloewk_r_is_ns_wp
-  public :: xsect_nloewk_r_is_ns_wm
+  public :: xsect_nloewk_r_is_ns_wp ! deprecated -> delete
+  public :: xsect_nloewk_r_is_ns_wm ! deprecated -> delete
   !public :: xsect_nloewk_r_fs_53_ns_wp, xsect_nloewk_r_fs_54_ns_wp
   !public :: xsect_nloewk_r_fs_53_ns_wm, xsect_nloewk_r_fs_54_ns_wm
 
@@ -54,7 +54,9 @@ contains
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintNLO_ns(6),kin(4)
     real(dp)    :: respdf(ipdf),respdf_tmp(ipdf,3)
-    real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7),res_tmp(2,2),res_test(2,2), res_lo_tmp(-5:7,-5:7)
+    real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_lo_tmp_old(2,2)
+    real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7),res_lo_tmp(-5:7,-5:7)
+!    real(dp)    :: res_tmp(2,2),res_test(2,2)
     real(dp)    :: z,s5i,eik(4),e5,eta5i,eik_gen(4,4)
     real(dp)    :: damp
     logical     :: oldcode
@@ -75,7 +77,7 @@ contains
        print *, 'overriding input'
     endif
 #endif
-    
+
     if ((xx(xE)*xx(xRHO).lt.buff_r) .or. (xx(xE)*(one-xx(xRHO)).lt.buff_r)) then
        failed_points = failed_points + 1
        return
@@ -102,8 +104,8 @@ contains
     else    
 
        if (oldcode) then
-          call res_tree_a_qqb(HardProc%AmpMom,res_test)       
-          call get_respdf(ns_lumi,0,1,HardProc,res_test,respdf)
+          call res_tree_a_qqb(HardProc%AmpMom,res_nlo_old)       
+          call get_respdf(ns_lumi,0,1,HardProc,res_nlo_old,respdf)
        else
           call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
@@ -131,10 +133,10 @@ contains
     else
 
        if (oldcode) then
-          call res_tree_qqb(C1Lim%AmpMom,res_test)
-          res_test(1,:) = [Qdn2,Qup2] * res_test(1,:)
-          res_test(2,:) = [Qdn2,Qup2] * res_test(2,:)
-          call get_respdf(ns_lumi,0,1,C1Lim,res_test,respdf)
+          call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
+          res_lo_old(1,:) = [Qdn2,Qup2] * res_lo_old(1,:)
+          res_lo_old(2,:) = [Qdn2,Qup2] * res_lo_old(2,:)
+          call get_respdf(ns_lumi,0,1,C1Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
           res_lo = multiply_IS_charges(res_lo,1)
@@ -168,10 +170,10 @@ contains
     else
 
        if (oldcode) then
-          call res_tree_qqb(C2Lim%AmpMom,res_test)
-          res_test(1,:) = [Qdn2,Qup2] * res_test(1,:)
-          res_test(2,:) = [Qdn2,Qup2] * res_test(2,:)
-          call get_respdf(ns_lumi,0,1,C2Lim,res_test,respdf)
+          call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
+          res_lo_old(1,:) = [Qdn2,Qup2] * res_lo_old(1,:)
+          res_lo_old(2,:) = [Qdn2,Qup2] * res_lo_old(2,:)
+          call get_respdf(ns_lumi,0,1,C2Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
           res_lo = multiply_IS_charges(res_lo,2)
@@ -194,6 +196,8 @@ contains
     endif
 
     !-- S and CS
+       
+    !-- S
     call cut_histo(SLim)
     
     if (SLim%makecut.or.SLim%flag) then
@@ -204,13 +208,11 @@ contains
     else
        e5 = SLim%Lim_KinInv(1)
        if (oldcode) then
-          call res_tree_qqb(SLim%AmpMom,res_test)
-          
-          !-- S
+          call res_tree_qqb(SLim%AmpMom,res_lo_old)
           call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
-          res_tmp(:,1) = res_test(:,1) * eik(1:2) !-- dn
-          res_tmp(:,2) = res_test(:,2) * eik(3:4) !-- up
-          call get_respdf(ns_lumi,0,1,SLim,res_tmp,respdf_tmp(:,1))
+          res_lo_tmp_old(:,1) = res_lo_old(:,1) * eik(1:2) !-- dn
+          res_lo_tmp_old(:,2) = res_lo_old(:,2) * eik(3:4) !-- up
+          call get_respdf(ns_lumi,0,1,SLim,res_lo_tmp_old,respdf_tmp(:,1))
        else
           call res_tree_qqb_gen(SLim%AmpMom,res_lo_tmp)
           call get_qed_eik_gen(res_lo_tmp,SLim%Lim_etaij,[1,2,3,4],5,res_lo)
@@ -225,18 +227,16 @@ contains
 
        !-- SC1
        if (oldcode) then
-          res_tmp(:,1) = res_test(:,1) * Qdn2
-          res_tmp(:,2) = res_test(:,2) * Qup2
-          call get_respdf(ns_lumi,0,1,SLim,res_tmp,respdf_tmp(:,2))
+          res_lo_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
+          res_lo_tmp_old(:,2) = res_lo_old(:,2) * Qup2
+          call get_respdf(ns_lumi,0,1,SLim,res_lo_tmp_old,respdf_tmp(:,2))
           respdf_tmp(:,3) = respdf_tmp(:,2)
        else
           res_lo = multiply_IS_charges(res_lo_tmp,1)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,2))
+          res_lo = multiply_IS_charges(res_lo_tmp,2)
+          call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,3))
        endif
-
-       res_lo = multiply_IS_charges(res_lo_tmp,2)
-       call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,3))
-
 
        e5    = SC1Lim%Lim_KinInv(1)
        eta5i = SC1Lim%Lim_KinInv(2)
@@ -246,6 +246,7 @@ contains
        !-- SC2
        e5    = SC2Lim%Lim_KinInv(1)
        eta5i = SC2Lim%Lim_KinInv(2)
+
        respdf_tmp(:,3) = respdf_tmp(:,3)/e5**2/eta5i * SC2Lim%wgt
        FintNLO_ns(6) = respdf_tmp(1,3)
 
@@ -255,26 +256,7 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
-
-!!!!!!!!!!!!!debug CS
-    if (FintNLO_ns(1) .ne. 0 ) then
-       print *, sum(FintNLO_ns)/FintNLO_ns(1)
-       print *, FintNLO_ns
-       print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
-       print*, 'FintNLO_ns(2) = ', FintNLO_ns(4)
-       print*, 'cancellation hard/soft   ', one + FintNLO_ns(4)/FintNLO_ns(1)
-       print*, 'cancellation hard/coll1   ', one + FintNLO_ns(2)/FintNLO_ns(1)
-       print*, 'cancellation hard/coll2   ', one + FintNLO_ns(3)/FintNLO_ns(1)
-       print*, 'cancellation hard/Scoll1   ', one - FintNLO_ns(5)/FintNLO_ns(1)
-       print*, 'cancellation hard/Scoll2   ', one - FintNLO_ns(6)/FintNLO_ns(1)
-       print* , 'cancellation coll1/scoll1, ', one + FintNLO_ns(2)/FintNLO_ns(5)
-       print* , 'cancellation coll2/scoll2, ', one + FintNLO_ns(3)/FintNLO_ns(6)
-       print* , 'cancellation soft/scoll1, ', one + FintNLO_ns(4)/FintNLO_ns(5)
-       print* , 'cancellation soft/scoll2, ', one + FintNLO_ns(4)/FintNLO_ns(6)
-       stop
-       
-    endif
-
+    
     ff(1) = sum(kin)
     call close_histo()
 
