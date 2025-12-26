@@ -56,7 +56,6 @@ contains
     real(dp)    :: respdf(ipdf),respdf_tmp(ipdf,3)
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_lo_tmp_old(2,2)
     real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7),res_lo_tmp(-5:7,-5:7)
-!    real(dp)    :: res_tmp(2,2),res_test(2,2)
     real(dp)    :: z,s5i,eik(4),e5,eta5i,eik_gen(4,4)
     real(dp)    :: damp
     logical     :: oldcode
@@ -87,12 +86,52 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,&
          C1Lim=C1Lim,C2Lim=C2Lim,SLim=SLim,SC1Lim=SC1Lim,SC2Lim=SC2Lim,compute_etas=.true.)
+    
+    ! define process specific partons
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
     C1Lim%ids(1:4)    = [0,0,id_el,-id_el]
     C2Lim%ids(1:4)    = [0,0,id_el,-id_el]
     SLim%ids(1:4)     = [0,0,id_el,-id_el]
     SC1Lim%ids(1:4)   = [0,0,id_el,-id_el]
     SC2Lim%ids(1:4)   = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_q,-id_q,id_el,-id_el,id_a]
+    C1Lim%part    = [id_q,-id_q,id_el,-id_el]
+    C2Lim%part    = [id_q,-id_q,id_el,-id_el]
+    SLim%part     = [id_q,-id_q,id_el,-id_el]
+    SC1Lim%part   = [id_q,-id_q,id_el,-id_el]
+    SC2Lim%part   = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    C1Lim%ids(1:4)    = [0,0,id_el,-id_nue]
+    C2Lim%ids(1:4)    = [0,0,id_el,-id_nue]
+    SLim%ids(1:4)     = [0,0,id_el,-id_nue]
+    SC1Lim%ids(1:4)   = [0,0,id_el,-id_nue]
+    SC2Lim%ids(1:4)   = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    C1Lim%part    = [id_q,-id_qp,id_el,-id_nue]
+    C2Lim%part    = [id_q,-id_qp,id_el,-id_nue]
+    SLim%part     = [id_q,-id_qp,id_el,-id_nue]
+    SC1Lim%part   = [id_q,-id_qp,id_el,-id_nue]
+    SC2Lim%part   = [id_q,-id_qp,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    C1Lim%ids(1:4)    = [0,0,id_nue,-id_el]
+    C2Lim%ids(1:4)    = [0,0,id_nue,-id_el]
+    SLim%ids(1:4)     = [0,0,id_nue,-id_el]
+    SC1Lim%ids(1:4)   = [0,0,id_nue,-id_el]
+    SC2Lim%ids(1:4)   = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_a]
+    C1Lim%part    = [id_q,-id_qp,id_nue,-id_el]
+    C2Lim%part    = [id_q,-id_qp,id_nue,-id_el]
+    SLim%part     = [id_q,-id_qp,id_nue,-id_el]
+    SC1Lim%part   = [id_q,-id_qp,id_nue,-id_el]
+    SC2Lim%part   = [id_q,-id_qp,id_nue,-id_el]
+#endif
 
     !-- Hard
     call cut_histo(HardProc)

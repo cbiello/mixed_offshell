@@ -79,21 +79,21 @@ contains
     C1Lim%part = [id_q,-id_q,id_el,-id_el]
     C2Lim%part = [id_q,-id_q,id_el,-id_el]
 #elif  (_Vcharge == -1)
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
     C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
 
     HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C1Lim%part = [id_q,-id_q,id_el,-id_nue]
-    C2Lim%part = [id_q,-id_q,id_el,-id_nue]
+    C1Lim%part = [id_q,-id_qp,id_el,-id_nue]
+    C2Lim%part = [id_q,-id_qp,id_el,-id_nue]
 #elif  (_Vcharge == +1)
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
     C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
 
     HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C1Lim%part = [id_q,-id_q,id_nue,-id_el]
-    C2Lim%part = [id_q,-id_q,id_nue,-id_el]
+    C1Lim%part = [id_q,-id_qp,id_nue,-id_el]
+    C2Lim%part = [id_q,-id_qp,id_nue,-id_el]
 #endif
 
 

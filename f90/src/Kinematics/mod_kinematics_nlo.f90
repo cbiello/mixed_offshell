@@ -264,7 +264,9 @@ contains
           
           SLim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac
           SLim%npart = 4
-          
+         
+          if ( .not. allocated(SLim%part))  allocate(SLim%part(4))
+
           !-- now prepare the soft-collinar
           if (present(SC1Lim)) then
 
@@ -273,9 +275,9 @@ contains
              SC1Lim%Lim_KinInv(1:2) = [half*sqrts*x1,x2] !-- E5,eta
              SC1Lim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac 
              SC1Lim%npart = SLim%npart
-             
-             !allocate(SC1Lim%part(SC1Lim%npart))
 
+             if ( .not. allocated(SC1Lim%part))  allocate(SC1Lim%part(4))
+             
           endif
 
           if (present(SC2Lim)) then
@@ -285,8 +287,9 @@ contains
              SC2Lim%Lim_KinInv(1:2) = [half*sqrts*x1,one-x2] !-- E5,eta
              SC2Lim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac
              SC2Lim%npart = SLim%npart
+          
+             if ( .not. allocated(SC2Lim%part))  allocate(SC2Lim%part(4))
 
-             !allocate(SC2Lim%part(SC2Lim%npart))
           endif
        
        endif
