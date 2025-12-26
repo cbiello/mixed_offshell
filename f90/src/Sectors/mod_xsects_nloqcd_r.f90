@@ -25,8 +25,8 @@ module mod_xsects_nloqcd_r
   public :: xsect_nloqcd_r_is_gq,xsect_nloqcd_r_is_qg
 
   !!!!! W xsect
-  public :: xsect_nloqcd_r_is_ns_wp
-  public :: xsect_nloqcd_r_is_ns_wm
+  public :: xsect_nloqcd_r_is_ns_wp ! deprecated -> remove
+  public :: xsect_nloqcd_r_is_ns_wm ! deprecated -> remove
 
 contains
 
@@ -38,8 +38,13 @@ contains
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintNLO_ns(nFint),kin(nkin)
     real(dp)    :: respdf(ipdf)
-    real(dp)    :: res_nlo(2,2),res_lo(2,2)
+    real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2)
+    real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7)
     real(dp)    :: z,s5i
+    !--
+    logical :: oldcode
+
+    oldcode = .true.
 
     xsect_nloqcd_r_is_ns = 0
 
@@ -63,6 +68,9 @@ contains
     call open_histo()
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
+
+    ! define process specific partons
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
@@ -70,22 +78,23 @@ contains
     HardProc%part = [id_q,-id_q,id_el,-id_el,id_g]
     C1Lim%part = [id_q,-id_q,id_el,-id_el]
     C2Lim%part = [id_q,-id_q,id_el,-id_el]
-    
-    ! define process specific partons
-!#if (_Vcharge == 0)
-!    HardProc%part(1:5) = [0,0,0,0,0]
-!     HardProc%part(1:5) = [id_q,-id_q,id_el,-id_el,id_g]
-!    C1Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
-!    C2Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
-!#elif  (_Vcharge == -1)
-!    HardProc%part(1:5) = [id_q,-id_qp,id_el,-id_nue,id_g]
-!    C1Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
-!    C2Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
-!#elif  (_Vcharge == +1)
-!    HardProc%part(1:5) = [id_q,-id_qp,id_nue,-id_el,id_g]
-!    C1Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
-!    C2Lim%part(1:4) = [id_q,-id_q,id_el,-id_el]
-!#endif
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
+    C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
+    C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g]
+    C1Lim%part = [id_q,-id_q,id_el,-id_nue]
+    C2Lim%part = [id_q,-id_q,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_g]
+    C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
+    C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g]
+    C1Lim%part = [id_q,-id_q,id_nue,-id_el]
+    C2Lim%part = [id_q,-id_q,id_nue,-id_el]
+#endif
 
 
     !-- Hard
@@ -97,8 +106,13 @@ contains
 
     else    
 
-       call res_tree_g_qqb(HardProc%AmpMom,res_nlo)
-       call get_respdf(ns_lumi,1,0,HardProc,res_nlo,respdf)
+       if(oldcode) then
+          call res_tree_g_qqb(HardProc%AmpMom,res_nlo_old)
+          call get_respdf(ns_lumi,1,0,HardProc,res_nlo_old,respdf)
+       else 
+          call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
+          call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
+       endif 
 
        respdf = respdf*HardProc%wgt
 
@@ -118,9 +132,13 @@ contains
        FintNLO_ns(2) = zero
 
     else
-
-       call res_tree_qqb(C1Lim%AmpMom,res_lo)
-       call get_respdf(ns_lumi,1,0,C1Lim,res_lo,respdf)
+       if(oldcode) then
+          call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
+          call get_respdf(ns_lumi,1,0,C1Lim,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
+          call get_respdf_gen(1,0,C1Lim,res_lo,respdf)
+       endif 
 
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
@@ -146,9 +164,13 @@ contains
        FintNLO_ns(3) = zero
 
     else
-
-       call res_tree_qqb(C2Lim%AmpMom,res_lo)
-       call get_respdf(ns_lumi,1,0,C2Lim,res_lo,respdf)
+       if(oldcode) then
+          call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
+          call get_respdf(ns_lumi,1,0,C2Lim,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
+          call get_respdf_gen(1,0,C2Lim,res_lo,respdf)
+       endif
 
        z   = C2Lim%Lim_KinInv(1)
        s5i = C2Lim%Lim_KinInv(2)
