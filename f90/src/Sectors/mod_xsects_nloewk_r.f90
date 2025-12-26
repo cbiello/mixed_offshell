@@ -117,6 +117,7 @@ contains
     SLim%part     = [id_q,-id_qp,id_el,-id_nue]
     SC1Lim%part   = [id_q,-id_qp,id_el,-id_nue]
     SC2Lim%part   = [id_q,-id_qp,id_el,-id_nue]
+
 #elif  (_Vcharge == +1)
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_a]
     C1Lim%ids(1:4)    = [0,0,id_nue,-id_el]
@@ -361,6 +362,11 @@ contains
     real(dp)    :: res_tmp_vect(2,2,2),respdf_vect(2,ipdf)    
     real(dp)    :: z,s5i,eik(4),e5,eta5i
     real(dp)    :: damp,Qsq_FS(2)
+    !--
+    real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_lo_tmp_old(2,2)
+    logical     :: oldcode
+
+    oldcode = .true.
 
     xsect_nlo_5i_a_ns = 0
 
@@ -380,13 +386,38 @@ contains
        failed_points = failed_points + 1
        return
     endif
-    
+   
     call open_histo()
 
     call kinematics_nlo_fs(xx,icoll,jother,HardProc,CLim,CSLim,SLim)
+    
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
     CLim%ids(1:4)     = [0,0,id_el,-id_el]
     SLim%ids(1:4)     = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_q,-id_q,id_el,-id_el,id_a]
+    CLim%part     = [id_q,-id_q,id_el,-id_el]
+    SLim%part     = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    CLim%ids(1:4)     = [0,0,id_el,-id_nue]
+    SLim%ids(1:4)     = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    CLim%part     = [id_q,-id_qp,id_el,-id_nue]
+    SLim%part     = [id_q,-id_qp,id_el,-id_nue]
+
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    CLim%ids(1:4)     = [0,0,id_nue,-id_el]
+    SLim%ids(1:4)     = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_a]
+    CLim%part     = [id_q,-id_qp,id_nue,-id_el]
+    SLim%part     = [id_q,-id_qp,id_nue,-id_el]
+#endif
 
     Qsq_FS = [Q3**2, Q4**2]
     
@@ -399,8 +430,13 @@ contains
 
     else    
 
-       call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo)
-       call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
+       if (oldcode) then
+          call res_tree_a_qqb(HardProc%AmpMom,res_nlo_old)
+          call get_respdf(ns_lumi,0,1,HardProc,res_nlo_old,respdf)
+       else
+          call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo)
+          call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
+       endif
 
        call partition_nlo_qed(HardProc,damp,icoll)
        
@@ -423,17 +459,25 @@ contains
 
     else
 
+       if (oldcode) then
+
+       call res_tree_qqb(CLim%AmpMom,res_lo_old)
+       res_lo_old = Q_lep2*res_lo_old
+       call get_respdf(ns_lumi,0,1,CLim,res_lo_old,respdf)
+       else
+       
        call res_tree_qqb_gen(CLim%AmpMom,res_lo)
+       res_lo = Qsq_Fs(icoll-2)**2 * res_lo
        call get_respdf_gen(0,1,CLim,res_lo,respdf)
+
+       endif
 
        z   = CLim%Lim_KinInv(1)
        s5i = CLim%Lim_KinInv(2)
 
        !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]
        !-- which loses precision
-!       respdf = (-one)*respdf*(two/s5i)*(Q_lep2*Pqg(z))&
-       !            * CLim%wgt
-       respdf = (-one)*respdf*(two/s5i)*(Qsq_Fs(icoll-2)**2 * Pqg(z))&
+       respdf = (-one)*respdf*(two/s5i)*(Pqg(z))&
             * CLim%wgt
 
        FintNLO_ns(2) = respdf(1)
@@ -452,35 +496,46 @@ contains
        FintNLO_ns(3:4) = zero
 
     else
-       call res_tree_qqb_gen(SLim%AmpMom,res_lo_tmp)
-       call get_qed_eik_gen(res_lo_tmp,SLim%Lim_etaij,[1,2,3,4],5,res_lo)
-       call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,1))
-!       call res_tree_qqb_gen(SLim%AmpMom,res_lo)
-!
-!       !-- prepare PDFs structures, S
-!       call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
-!       res_tmp_vect(:,1,1) = res_lo(:,1) * eik(1:2) !-- dn
-!       res_tmp_vect(:,2,1) = res_lo(:,2) * eik(3:4) !-- dn
-!
-!       !-- prepare PDFs structures, CS
-!       res_tmp_vect(:,:,2) = res_lo(:,:) * Q_lep2
-!
-!       !-- get PDFs for all of them
-!       call get_respdf_vect(ns_lumi,0,1,SLim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
+       if (oldcode) then
+          call res_tree_qqb(SLim%AmpMom,res_lo_old)
+          call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
+          res_tmp_vect(:,1,1) = res_lo_old(:,1) * eik(1:2) !-- dn
+          res_tmp_vect(:,2,1) = res_lo_old(:,2) * eik(3:4) !-- up
+          res_tmp_vect(:,:,2) = res_lo_old(:,:) * Q_lep2
+          call get_respdf_vect(ns_lumi,0,1,SLim,res_tmp_vect(:,:,1:2), &
+                  respdf_vect(1:2,:))
+
+       else
+          call res_tree_qqb_gen(SLim%AmpMom,res_lo_tmp)
+          call get_qed_eik_gen(res_lo_tmp,SLim%Lim_etaij,[1,2,3,4],5,res_lo)
+          call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,1))
+
+       endif 
        
        !-- S
        call partition_nlo_qed(SLim,damp,icoll)
        
        e5 = SLim%Lim_KinInv(1)
-       respdf_tmp(:,1) = -respdf_tmp(:,1)/e5**2 * SLim%wgt * damp
+
+       if (oldcode) then
+           respdf_tmp(:,1) = -respdf_vect(1,:)/e5**2 * SLim%wgt * damp
+       else        
+           respdf_tmp(:,1) = -respdf_tmp(:,1)/e5**2 * SLim%wgt * damp
+       endif
+
        FintNLO_ns(3) = respdf_tmp(1,1)
 
        !-- CS
        e5    = CSLim%Lim_KinInv(1)
        eta5i = CSLim%Lim_KinInv(2)
-       !       respdf_tmp(:,2) = respdf_vect(2,:)/e5**2/eta5i * CSLim%wgt
-       res_lo = res_lo_tmp * Qsq_Fs(icoll-2)**2 /e5**2/eta5i * CSLim%wgt
-       call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,2))
+
+       if (oldcode) then
+               respdf_tmp(:,2) = respdf_vect(2,:)/e5**2/eta5i * CSLim%wgt
+       else
+               res_lo = res_lo_tmp * Qsq_Fs(icoll-2)**2 /e5**2/eta5i * CSLim%wgt
+               call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,2))
+       endif
+       
        FintNLO_ns(4) = respdf_tmp(1,2)
 
        respdf(:) = sum(respdf_tmp(:,1:2),2)
@@ -490,19 +545,6 @@ contains
 
     endif
 
-!!!!!!!!!!!!!debug CS
-    if (FintNLO_ns(1) .ne. 0 ) then
-       print *, sum(FintNLO_ns)/FintNLO_ns(1)
-       print *, FintNLO_ns
-       print*, 'cancellation hard/soft   ', one + FintNLO_ns(3)/FintNLO_ns(1)
-       print*, 'cancellation hard/coll   ', one + FintNLO_ns(2)/FintNLO_ns(1)
-       print*, 'cancellation hard/Scoll   ', one - FintNLO_ns(4)/FintNLO_ns(1)
-       print* , 'cancellation coll/scoll, ', one + FintNLO_ns(2)/FintNLO_ns(4)
-       print* , 'cancellation soft/scoll, ', one + FintNLO_ns(3)/FintNLO_ns(4)
-
-       stop
-       
-    endif
     
     ff(1) = sum(kin)
     call close_histo()
