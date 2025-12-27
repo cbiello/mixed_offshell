@@ -13,6 +13,11 @@ module mod_amplitudes_loop_ppll
   implicit none
   private
 
+  !-- general routines [work in progress]
+  public :: res_qcdloop_qqb_gen
+
+
+
   !-- for qcdloop amplitudes, use mine
   public :: res_qcdloop_qqb
   public :: res_ewkloop_qqb,res_ewkloopAA_aa
@@ -89,6 +94,23 @@ contains
   !--- amplitudes without extra radiation
   !-----------------------------------------------------------------
   
+
+
+  ! conventions: 0 -> q(1) qb(2) l(3) lb(4)
+  ! amp returned as -5:7 x -5:7 matrix
+  ! used for NC, CC+, CC-
+
+  subroutine res_qcdloop_qqb_gen(p,res0,res1fin)
+    real(dp), intent(in)  :: p(4,4)
+    real(dp), intent(out) :: res0(-5:7,-5:7),res1fin(-5:7,-5:7)
+
+    call res_tree_qqb_gen(p,res0)
+    res1fin = -8._dp*Cf*res0
+
+  end subroutine res_qcdloop_qqb_gen
+
+
+
   !-- res(1,:) = q qb -> e- e [dn,up]
   !-- res(2,:) = qb q -> e- e [dn,up]
   subroutine res_qcdloop_qqb(p,res0,res1fin)

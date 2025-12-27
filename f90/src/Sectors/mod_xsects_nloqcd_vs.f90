@@ -25,8 +25,8 @@ module mod_xsects_nloqcd_vs
   public :: xsect_nloqcd_s_ns
   public :: xsect_nloqcd_s_gq,xsect_nloqcd_s_qg
 
-  public :: xsect_nloqcd_v_ns_wp
-  public :: xsect_nloqcd_s_ns_wp
+  public :: xsect_nloqcd_v_ns_wp ! deprecated -> remove
+  public :: xsect_nloqcd_s_ns_wp ! deprecated -> remove
 
 contains
 
@@ -37,7 +37,12 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf)
-    real(dp)    :: res_tree(2,2),res_loop(2,2)
+    real(dp)    :: res_tree(-5:7,-5:7),res_loop(-5:7,-5:7)
+    !--
+    real(dp)    :: res_tree_old(2,2),res_loop_old(2,2)
+    logical :: oldcode
+
+    oldcode = .false.
 
     xsect_nloqcd_v_ns = 0
 
@@ -56,6 +61,16 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+    ! define process specific partons
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+#endif
+
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -64,8 +79,13 @@ contains
        
     else    
 
-       call res_qcdloop_qqb(LOProc%AmpMom,res_tree,res_loop)
-       call get_respdf(ns_lumi,1,0,LOProc,res_loop,respdf)
+       if(oldcode) then
+          call res_qcdloop_qqb(LOProc%AmpMom,res_tree_old,res_loop_old)
+          call get_respdf(ns_lumi,1,0,LOProc,res_loop_old,respdf)
+       else 
+          call res_qcdloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
+          call get_respdf_gen(1,0,LOProc,res_loop,respdf)
+       endif
 
        respdf = respdf*LOProc%wgt
        
