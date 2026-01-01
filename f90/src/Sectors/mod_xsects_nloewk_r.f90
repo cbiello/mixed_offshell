@@ -2,6 +2,7 @@ module mod_xsects_nloewk_r
   use mod_types
   use mod_consts_dp
   use mod_parms
+  use mod_limvals
   use mod_proc_parms
   use mod_kinematics_nlo
   use mod_process
@@ -66,7 +67,8 @@ contains
     oldcode = .false.
 
     ff(1) = zero
-
+    limval_nlo_is = zero
+    
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
 
@@ -136,6 +138,7 @@ contains
 
     !-- Hard
     call cut_histo(HardProc)
+
     if (HardProc%makecut.or.HardProc%flag) then
 
        kin(1) = zero
@@ -156,6 +159,7 @@ contains
 
 
        kin(1) = respdf(1)
+
        FintNLO_ns(1) = kin(1)
 
        call fill_histo(respdf,vegasweight)
@@ -194,7 +198,7 @@ contains
 
        FintNLO_ns(2) = respdf(1)
        kin(2) = respdf(1)
-       
+
        call fill_histo(respdf,vegasweight)
 
     endif
@@ -230,7 +234,7 @@ contains
 
        FintNLO_ns(3) = respdf(1)
        kin(3) = respdf(1)
-       
+
        call fill_histo(respdf,vegasweight)
 
     endif
@@ -261,8 +265,8 @@ contains
        
        call partition_nlo_qed(SLim,damp,12)
        
-
        respdf_tmp(:,1) = -respdf_tmp(:,1)/e5**2 * SLim%wgt * damp
+
        FintNLO_ns(4) = respdf_tmp(1,1)
 
        !-- SC1
@@ -277,9 +281,11 @@ contains
           res_lo = multiply_IS_charges(res_lo_tmp,2)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,3))
        endif
-
+       
+       
        e5    = SC1Lim%Lim_KinInv(1)
        eta5i = SC1Lim%Lim_KinInv(2)
+
        respdf_tmp(:,2) = respdf_tmp(:,2)/e5**2/eta5i * SC1Lim%wgt
        FintNLO_ns(5) = respdf_tmp(1,2)
 
@@ -288,6 +294,7 @@ contains
        eta5i = SC2Lim%Lim_KinInv(2)
 
        respdf_tmp(:,3) = respdf_tmp(:,3)/e5**2/eta5i * SC2Lim%wgt
+       
        FintNLO_ns(6) = respdf_tmp(1,3)
 
        respdf(:) = sum(respdf_tmp(:,1:3),2)
@@ -303,7 +310,13 @@ contains
     call check_ff(ff,xx,FintNLO_ns)
     
 #if(_withchecks == 1)
-    FintNLO_ew(1:6) = FintNLO_ns
+    limval_nlo_is = FintNLO_ns
+    limval_nlo_is(2) = FintNLO_ns(4)  ! soft
+    limval_nlo_is(3:4) = FintNLO_ns(2:3)  ! coll
+!    FintNLO_ew = FintNLO_ns  ! hard
+!    FintNLO_ew(2) = FintNLO_ns(4)  ! soft
+!    FintNLO_ew(3:4) = FintNLO_ns(2:3)  ! coll
+    
 #endif
 
   end function xsect_nloewk_r_is_ns
@@ -366,9 +379,11 @@ contains
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_lo_tmp_old(2,2)
     logical     :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
 
     xsect_nlo_5i_a_ns = 0
+
+    limval_nlo = zero
 
     ff(1) = zero
 
@@ -390,6 +405,13 @@ contains
     call open_histo()
 
     call kinematics_nlo_fs(xx,icoll,jother,HardProc,CLim,CSLim,SLim)
+
+!    print *, "xx",xx
+!    print *, "p1",HardProc%AmpMom(1:4,1)
+!    print *, "p2",HardProc%AmpMom(1:4,2)
+!    print *, "p3",HardProc%AmpMom(1:4,3)
+!    print *, "p4",HardProc%AmpMom(1:4,4)
+!    print *, "p5",HardProc%AmpMom(1:4,5)
     
 #if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
@@ -423,6 +445,7 @@ contains
     
     !-- Hard
     call cut_histo(HardProc)
+
     if (HardProc%makecut.or.HardProc%flag) then
 
        kin(1) = zero
@@ -550,9 +573,16 @@ contains
     call close_histo()
 
     call check_ff(ff,xx,FintNLO_ns)
+
+
     
 #if(_withchecks == 1)
     FintNLO_ew(1:4) = FintNLO_ns
+    limval_nlo = FintNLO_ns
+    limval_nlo(2) = FintNLO_ns(3)   ! soft
+    limval_nlo(3) = FintNLO_ns(2)   ! soft
+
+    print *, "limval",limval_nlo
 #endif
 
   end function xsect_nlo_5i_a_ns
