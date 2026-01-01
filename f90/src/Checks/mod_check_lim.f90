@@ -11,7 +11,7 @@ module mod_check_lim
   private
 
   integer, parameter :: limdepth_min = -3
-  integer, parameter :: limdepth_max = -11
+  integer, parameter :: limdepth_max = -13
   integer, parameter :: number_limits_nlo = 3
   integer, parameter :: number_terms_nlo = 4
   integer, parameter :: number_limits_nlo_is = 5
@@ -128,10 +128,11 @@ contains
        ! check cancellation
           do ilim = 1, number_limits_nlo
              ssign = +one
-!             if (ilim .eq. 3) ssign = -one  ! SC
+             if (ilim .eq. 3) ssign = -one  ! SC
              do iterm = 1, number_terms_nlo/2
                 i1 =  cancelling_terms_nlo(ilim,iterm,1)
                 i2 =  cancelling_terms_nlo(ilim,iterm,2)
+                if (.not. sing_terms_nlo(ilim,iterm)) cycle    ! don't check if there is no sing (sub)limit
 
 !                cancelling_term_index = cancelling_terms_nlo(iterm,ilim)
                 if (limmat(i,i1,ilim) .ne. zero) then
@@ -142,7 +143,7 @@ contains
 !                   print *, loglimcancellation(i,ilim,iterm)
                 else
                    limcancellation(i,ilim,iterm) = (limmat(i,i1,ilim) + ssign*limmat(i,i2,ilim))
-                   loglimcancellation(i,ilim,iterm) = zero
+                   loglimcancellation(i,ilim,iterm) = -1000.0_dp
                                    
 !                   print *, ilim, iterm, (limmat(i,iterm,ilim) + ssign*limmat(i,cancelling_term_index,ilim))
                 endif
@@ -321,15 +322,16 @@ contains
        ! check cancellation
           do ilim = 1,number_limits_nlo_is
              ssign = +one
-             !if (ilim .eq. 5 .or. ilim .eq. 6) ssign = -one  ! SC
+!             if (ilim .eq. 5 .or. ilim .eq. 6) ssign = -one  ! SC
              do iterm = 1, number_terms_nlo_is/2
+                ssign = +one
+                if ((ilim .eq. 4 .or. ilim .eq. 5) .and. (iterm .ne. number_terms_nlo_is/2)) ssign = -one  ! SC, but not for one coll limit!
                 i1 =  cancelling_terms_nlo(ilim,iterm,1)
                 i2 =  cancelling_terms_nlo(ilim,iterm,2)
                 if (.not. sing_terms_nlo(ilim,iterm)) cycle    ! don't check if there is no sing (sub)limit
 
 !                cancelling_term_index = cancelling_terms_nlo_is(iterm,ilim)
                 if (limmat(i,i1,ilim) .ne. zero) then
-
                    limcancellation(i,ilim,iterm) = (limmat(i,i1,ilim) + ssign*limmat(i,i2,ilim))/limmat(i,i1,ilim)
                    loglimcancellation(i,ilim,iterm) = log(abs(limcancellation(i,ilim,iterm)))/log(10.0_dp)
                                    
@@ -373,6 +375,7 @@ contains
 !          print *, ilim,iterm,loglimcancellation(:,ilim,iterm)
           i = 1
           do limdepth = limdepth_min,limdepth_max+1,-1
+             !print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
              print *, loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
              !print *, limcancellation(i,ilim,iterm)
              !             write(101+ifile,*) limdepth,loglimcancellation(i,ilim,iterm)
