@@ -4,7 +4,8 @@ module mod_lim_proc
   use mod_my_vegas
   use mod_proc_parms
   use mod_lim_proc_nlo
-
+  use mod_check_lim
+  
   implicit none
   private
 
@@ -31,6 +32,7 @@ contains
     if (corr(1:3).eq.'nlo') then
        call run_check_lim_nlo(vg_result,vg_error,vg_chi2)
     elseif (corr.eq.'nnlo') then
+       call vegas_integrate(NNLOdim_vegas,check_lim_nnlo,vg_result,vg_error,vg_chi2)
 !       if (ch(1:2).eq.'ns' .and. sec(1:2) .eq. 'rr') call run_proc_rr_ns(vg_result,vg_error,vg_chi2)
 !       if (ch.eq.'gq' .and. sec(1:2) .eq. 'rr') call run_proc_rr_gq(vg_result,vg_error,vg_chi2)
 !       if (ch.eq.'qg' .and. sec(1:2) .eq. 'rr') call run_proc_rr_qg(vg_result,vg_error,vg_chi2)

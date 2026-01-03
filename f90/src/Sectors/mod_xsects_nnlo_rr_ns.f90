@@ -13,6 +13,7 @@ module mod_xsects_nnlo_rr_ns
   use mod_partitions
   use mod_ol_interface, only: OL_rr_id,gsq_ol,eesq_ol
   use openloops
+  use mod_limvals
   implicit none
 #if(_withchecks == 1)
   real(dp), public, save :: FintNNLO_rr_tc_ns(16)
@@ -240,6 +241,9 @@ contains
     xx(1:kNNLO_max)=buff+onet*real(yRnd(1:kNNLO_max),dp)
     call random_number(xx(kNNLO_max_full-1))
     call random_number(xx(kNNLO_max_full))
+
+    limval_nnlo = zero
+
     
 #if (_withchecks == 1)
     if (override) then
@@ -636,29 +640,43 @@ contains
 
     call check_ff(ff,xx,FintNNLO_ns)
 
-    if (FintNNLO_ns(1) .ne. zero) then
-       print *, "FintNNLO_ns",FintNNLO_ns
-       print *, "S5",FintNNLO_ns(2),one + FintNNLO_ns(1) / FintNNLO_ns(2)
-       print *, "S6",FintNNLO_ns(3),one + FintNNLO_ns(1) / FintNNLO_ns(3)
-       print *, "S6C6",FintNNLO_ns(4),one - FintNNLO_ns(1) / FintNNLO_ns(4)
-       print *, "C6",FintNNLO_ns(5),one + FintNNLO_ns(1) / FintNNLO_ns(5)
-       print *, "S5S6",FintNNLO_ns(6),one - FintNNLO_ns(1) / FintNNLO_ns(6)
-       print *, "TC S5 S6",FintNNLO_ns(7),one + FintNNLO_ns(1) / FintNNLO_ns(7)
-       print *, "C6 S5 S6",FintNNLO_ns(8),one + FintNNLO_ns(1) / FintNNLO_ns(8)
-       print *, "TC C6 S5 S6",FintNNLO_ns(9),one - FintNNLO_ns(1) / FintNNLO_ns(9)
-       print *, "TC",FintNNLO_ns(10),one + FintNNLO_ns(1) / FintNNLO_ns(10)
-       print *, "TC C6",FintNNLO_ns(11),one - FintNNLO_ns(1) / FintNNLO_ns(11)
-       print *, "TC S6",FintNNLO_ns(12),one - FintNNLO_ns(1) / FintNNLO_ns(12)
-       print *, "TC C6 S6",FintNNLO_ns(13),one + FintNNLO_ns(1) / FintNNLO_ns(13)
-       print *, "TC S5",FintNNLO_ns(14),one - FintNNLO_ns(1) / FintNNLO_ns(14)
-       print *, "TC C6 S5",FintNNLO_ns(15),one + FintNNLO_ns(1) / FintNNLO_ns(15)
-       print *, "C6 S5",FintNNLO_ns(16),one - FintNNLO_ns(1) / FintNNLO_ns(16)
-       print *, "sum", sum(FintNNLO_ns)/FintNNLO_ns(1)
-       stop
-    endif
+ !!   if (FintNNLO_ns(1) .ne. zero) then
+ !!      print *, "FintNNLO_ns",FintNNLO_ns
+ !!      print *, "S5",FintNNLO_ns(2),one + FintNNLO_ns(1) / FintNNLO_ns(2)
+ !!      print *, "S6",FintNNLO_ns(3),one + FintNNLO_ns(1) / FintNNLO_ns(3)
+ !!      print *, "S6C6",FintNNLO_ns(4),one - FintNNLO_ns(1) / FintNNLO_ns(4)
+ !!      print *, "C6",FintNNLO_ns(5),one + FintNNLO_ns(1) / FintNNLO_ns(5)
+ !!      print *, "S5S6",FintNNLO_ns(6),one - FintNNLO_ns(1) / FintNNLO_ns(6)
+ !!      print *, "TC S5 S6",FintNNLO_ns(7),one + FintNNLO_ns(1) / FintNNLO_ns(7)
+ !!      print *, "C6 S5 S6",FintNNLO_ns(8),one + FintNNLO_ns(1) / FintNNLO_ns(8)
+ !!      print *, "TC C6 S5 S6",FintNNLO_ns(9),one - FintNNLO_ns(1) / FintNNLO_ns(9)
+ !!      print *, "TC",FintNNLO_ns(10),one + FintNNLO_ns(1) / FintNNLO_ns(10)
+ !!      print *, "TC C6",FintNNLO_ns(11),one - FintNNLO_ns(1) / FintNNLO_ns(11)
+ !!      print *, "TC S6",FintNNLO_ns(12),one - FintNNLO_ns(1) / FintNNLO_ns(12)
+ !!      print *, "TC C6 S6",FintNNLO_ns(13),one + FintNNLO_ns(1) / FintNNLO_ns(13)
+ !!      print *, "TC S5",FintNNLO_ns(14),one - FintNNLO_ns(1) / FintNNLO_ns(14)
+ !!      print *, "TC C6 S5",FintNNLO_ns(15),one + FintNNLO_ns(1) / FintNNLO_ns(15)
+ !!      print *, "C6 S5",FintNNLO_ns(16),one - FintNNLO_ns(1) / FintNNLO_ns(16)
+ !!      print *, "sum", sum(FintNNLO_ns)/FintNNLO_ns(1)
+!!!       stop
+ !!   endif
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_ns = FintNNLO_ns
+    limval_nnlo = FintNNLO_ns          ! HARD, S5, S6 --> 1,2,3
+    limval_nnlo(10) = FintNNLO_ns(4)    ! S6 C6
+    limval_nnlo(5) = FintNNLO_ns(5)    ! C6
+    limval_nnlo(6) = FintNNLO_ns(6)    ! S5 S6
+    limval_nnlo(12) = FintNNLO_ns(7)    ! S5 S6 TC
+    limval_nnlo(13) = FintNNLO_ns(8)    ! S5 S6 C6 
+    limval_nnlo(16) = FintNNLO_ns(9)    ! S5 S6 TC C6 
+    limval_nnlo(4) = FintNNLO_ns(10)    ! TC
+    limval_nnlo(11) = FintNNLO_ns(11)    ! TC C6
+    limval_nnlo(9) = FintNNLO_ns(12)    ! S6 TC
+    limval_nnlo(15) = FintNNLO_ns(13)    ! S6 C6 TC
+    limval_nnlo(7) = FintNNLO_ns(14)    ! S5 TC
+    limval_nnlo(14) = FintNNLO_ns(15)    ! S5 TC C6
+    limval_nnlo(8) = FintNNLO_ns(16)    ! S5 C6
 #endif
 
   end function xsect_nnlo_rr_5i6ia_ns_ga

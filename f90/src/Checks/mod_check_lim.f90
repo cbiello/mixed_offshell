@@ -7,11 +7,13 @@ module mod_check_lim
   use mod_kinematics_nlo
   use mod_xsects_nloqcd_r
   use mod_xsects_nloewk_r
+  use mod_kinematics_nnlo_tc_is_eu_ac
+  use mod_xsects_nnlo_rr_ns
   
   private
 
   integer, parameter :: limdepth_min = -3
-  integer, parameter :: limdepth_max = -13
+  integer, parameter :: limdepth_max = -9
   integer, parameter :: number_limits_nlo = 3
   integer, parameter :: number_terms_nlo = 4
   integer, parameter :: number_limits_nlo_is = 5
@@ -82,8 +84,9 @@ contains
        ! soft limit
        if (verbose) print *, "soft limit"
        xlim = x
-       xlim(kNLO_min) = 10.0_dp**limdepth
-       xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
+!       xlim(kNLO_min) = 10.0_dp**limdepth
+       !       xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
+       xlim = set_small_x(x,limdepth,kNLO_min)
        rlim(1) = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)
        if (verbose) print *, "limval", limval_nlo(1:number_terms_nlo)
 
@@ -93,8 +96,9 @@ contains
        !       ! coll limit
        if (verbose) print *, "coll limit"
        xlim = x
-       xlim(kNLO_min+1) = 10.0_dp**limdepth
-       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
+!       xlim(kNLO_min+1) = 10.0_dp**limdepth
+!       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
+       xlim = set_small_x(x,limdepth,kNLO_min+1)
        rlim(2) = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)
        if (verbose) print *, "limval", limval_nlo(1:number_terms_nlo)
 
@@ -104,10 +108,11 @@ contains
        !       ! soft-coll limit
        if (verbose) print *, "softcoll limit"
        xlim = x
-       xlim(kNLO_min) = 10.0_dp**limdepth
-       xlim(kNLO_min+1) = 10.0_dp**limdepth
-       xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
-       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
+!       xlim(kNLO_min) = 10.0_dp**limdepth
+!       xlim(kNLO_min+1) = 10.0_dp**limdepth
+!       xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
+       !       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
+       xlim = set_small_x(x,limdepth,kNLO_min,kNLO_min+1)
 
        rlim(3) = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)
        if (verbose) print *, "limval", limval_nlo(1:number_terms_nlo)
@@ -264,8 +269,8 @@ contains
        !       ! coll1 limit
        if (verbose) print *, "coll1 limit"
        xlim = x
-       xlim(kNLO_min+1) = 10.0_dp**limdepth
-       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
+!       xlim(kNLO_min+1) = 10.0_dp**limdepth
+!       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
        rlim(2) = xsect_nloewk_r_is_ns(xlim,ff_dum,vegasweight)
 
        limmat(i,1:number_terms_nlo_is,2) = limval_nlo_is(1:number_terms_nlo_is)
@@ -398,17 +403,17 @@ contains
   
 
 
-  real(dp15) function check_lim_nnlo(ndim,x,vegasweight) result(r)
-    integer, intent(in)    :: ndim
-    real(dp15), intent(in) :: x(ndim)
-    real(dp15), intent(in) :: vegasweight
-    real(dp15)             :: xlim(ndim),rlim(number_limits_nnlo)
+  integer function check_lim_nnlo(yRnd,ff,vegasweight) result(r)
+!    integer, intent(in)    :: ndim
+    real(dp15)              :: yRnd(30), vegasweight,ff(1)
+    real(dp15)             :: xlim(30),x(30),rlim(number_limits_nnlo)
     
     real(dp)               :: limmat(limdepth_min-limdepth_max+1,number_terms_nnlo,number_limits_nnlo),ssign(number_limits_nnlo)
     real(dp)               :: limcancellation(limdepth_min-limdepth_max+1,number_limits_nnlo,number_terms_nnlo/2),loglimcancellation(limdepth_min-limdepth_max+1,number_limits_nnlo,number_terms_nnlo/2)
     
     integer                :: limdepth, i, ilim,iterm,i1,i2,ifile
     integer                :: cancelling_terms_nnlo(number_limits_nnlo,number_terms_nnlo/2,2)
+    logical                :: sing_terms_nnlo(number_limits_nnlo,number_terms_nnlo/2)
     integer, save          :: num_checks = 1
 
     cancelling_terms_nnlo(1,1,1:2)=[2,1]       ! first  pair for x1->0 limit
@@ -554,71 +559,58 @@ contains
 
     ssign = [one, one,one,one,-one,-one,-one,-one,-one,-one,one,one,one,one,-one]
 
-    r = zero
+    x = yRnd
+
+    sing_terms_nnlo = .true.
+    i = 1
+    r = 0
     limmat = zero
     limval_nnlo = zero
     ! run without limits
     ! r = my_nnlo_function(ndim,x,vegasweight)
 
-    
+
     print *, "----- USING POINT # ", num_checks
     do limdepth = limdepth_min,limdepth_max,-1
        do ilim = 1, number_limits_nnlo
-          
+          print *, "limit",ilim
           xlim = x
 
           select case (ilim)
           case(1)
-             xlim(1) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5)
           case(2)
-             xlim(2) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE6)
           case(3)
-             xlim(3) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xRHO5)
           case(4)
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xRHO6)
           case(5)
-             xlim(1) = 10.0_dp**limdepth
-             xlim(2) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5,xE6)
           case(6)
-             xlim(1) = 10.0_dp**limdepth
-             xlim(3) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5,xRHO5)
           case(7)
-             xlim(1) = 10.0_dp**limdepth
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5,xRHO6)
           case(8)
-             xlim(2) = 10.0_dp**limdepth
-             xlim(3) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE6,xRHO5)
           case(9)
-             xlim(2) = 10.0_dp**limdepth
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE6,xRHO6)
           case(10)
-             xlim(3) = 10.0_dp**limdepth
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xRHO5,xRHO6)
           case(11)
-             xlim(1) = 10.0_dp**limdepth
-             xlim(2) = 10.0_dp**limdepth
-             xlim(3) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5,xE6,xRHO5)
           case(12)
-             xlim(1) = 10.0_dp**limdepth
-             xlim(2) = 10.0_dp**limdepth
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5,xE6,xRHO6)
           case(13)
-             xlim(1) = 10.0_dp**limdepth
-             xlim(3) = 10.0_dp**limdepth
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5,xRHO5,xRHO6)
           case(14)
-             xlim(2) = 10.0_dp**limdepth
-             xlim(3) = 10.0_dp**limdepth
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE6,xRHO5,xRHO6)
           case(15)
-             xlim(1) = 10.0_dp**limdepth
-             xlim(2) = 10.0_dp**limdepth
-             xlim(3) = 10.0_dp**limdepth
-             xlim(4) = 10.0_dp**limdepth
+             xlim = set_small_x(x,limdepth,xE5,xE6,xRHO5,xRHO6)
           end  select
-!       rlim(ilim) = my_nnlo_function(ndim,xlim,vegasweight)
+          rlim(ilim) = xsect_nnlo_rr_5161a_ns_ga(xlim,ff,vegasweight)
           limmat(i,1:number_terms_nnlo,ilim) = limval_nnlo(1:number_terms_nnlo)
-
+          print *, limval_nnlo
 ! only proceed with check if all contributions are non-zero          
 !          if (product(rlim) .eq. zero) then
 !             return
@@ -628,31 +620,130 @@ contains
 !             do ilim = 1, number_limits_nnlo
 
           do iterm = 1, number_terms_nnlo/2
+             print *, "term", iterm
+
              i1 =  cancelling_terms_nnlo(ilim,iterm,1)
              i2 =  cancelling_terms_nnlo(ilim,iterm,2)
+             print *,i1,i2,limmat(i,i1,ilim),limmat(i,i2,ilim)
+                          
+             if (.not. sing_terms_nnlo(ilim,iterm)) cycle    ! don't check if there is no sing (sub)limit
              
-             if (limmat(i,iterm,ilim) .ne. zero) then
+             if (abs(limmat(i,i1,ilim)) .gt. 1E-300_dp) then
                 limcancellation(i,ilim,iterm) = (limmat(i,i1,ilim) + ssign(ilim)*limmat(i,i2,ilim))/limmat(i,i1,ilim)
                 loglimcancellation(i,ilim,iterm) = log(abs(limcancellation(i,ilim,iterm)))/log(10.0_dp)
-                
-!                   print *, ilim, iterm, (limmat(i,iterm,ilim) + ssign*limmat(i,cancelling_term_index,ilim))/limmat(i,iterm,ilim)
              else
                 limcancellation(i,ilim,iterm) = (limmat(i,i1,ilim) + ssign(ilim)*limmat(i,i2,ilim))
-                loglimcancellation(i,ilim,iterm) = zero
-                      
-                !                   print *, ilim, iterm, (limmat(i,iterm,ilim) + ssign*limmat(i,cancelling_term_index,ilim))
+                loglimcancellation(i,ilim,iterm) = -1000.0_dp
              endif
              
              !               print *, i,ilim,iterm,limcancellation(i,ilim,iterm),loglimcancellation(i,ilim,iterm)
           enddo
+
+
        enddo
 !    endif
     
     i = i+1
  enddo
 
+ 
+ do ilim = 1,number_limits_nnlo
+    if (ilim .eq. 1) then
+       print *, "SCALING SOFT m LIMIT"
+    elseif (ilim .eq. 2) then
+       print *, "SCALING SOFT n LIMIT"
+    elseif (ilim .eq. 3) then
+       print *, "SCALING COLL m LIMIT"
+    elseif (ilim .eq. 4) then
+          print *, "SCALING COLL n LIMIT"
+       elseif (ilim .eq. 5) then
+          print *, "SCALING SOFT m SOFT n LIMIT"
+       elseif (ilim .eq. 6) then
+          print *, "SCALING SOFT m COLL m LIMIT"
+       elseif (ilim .eq. 7) then
+          print *, "SCALING SOFT m COLL n LIMIT"
+       elseif (ilim .eq. 8) then
+          print *, "SCALING SOFT n COLL m LIMIT"
+       elseif (ilim .eq. 9) then
+          print *, "SCALING SOFT n COLL n LIMIT"
+       elseif (ilim .eq. 10) then
+          print *, "SCALING COLL m COLL n LIMIT"
+       elseif (ilim .eq. 11) then
+          print *, "SCALING SOFT m SOFT n COLL m LIMIT"
+       elseif (ilim .eq. 12) then
+          print *, "SCALING SOFT m SOFT n COLL n LIMIT"
+       elseif (ilim .eq. 13) then
+          print *, "SCALING SOFT m COLL m COLL n LIMIT"
+       elseif (ilim .eq. 14) then
+          print *, "SCALING  SOFT n COLL m COLL n LIMIT"
+       elseif (ilim .eq. 14) then
+          print *, "SCALING  SOFT n SOFT m COLL m COLL n LIMIT"
+       endif
+          
+       do iterm = 1, number_terms_nnlo/2
+          print *, iterm
+!          print *, sing_terms_nlo(ilim,iterm)
+          if (.not. sing_terms_nnlo(ilim,iterm)) cycle
+                    
+!          print *, ilim,iterm,loglimcancellation(:,ilim,iterm)
+          i = 1
+          do limdepth = limdepth_min,limdepth_max+1,-1
+             print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+             !print *, loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+             !print *, limcancellation(i,ilim,iterm)
+             !             write(101+ifile,*) limdepth,loglimcancellation(i,ilim,iterm)
+             i = i+1
+          enddo
+          
+          ifile = ifile+1
+       enddo
+       pause
+    enddo
 
-end function check_lim_nnlo
+
+    print *, "num_checks", num_checks
+    if (num_checks .eq. 5) stop
+
+    num_checks = num_checks+1
+        
+    return
+
+
+  end function check_lim_nnlo
+
+
+ function set_small_x(x,limdepth,i1,i2,i3,i4) 
+  real(dp), intent(in)   :: x(30)
+  integer, intent(in)    ::  limdepth
+  integer, intent(in)    :: i1
+  integer, intent(in),optional    :: i2,i3,i4
+  real(dp)  :: set_small_x(30)
+
+  set_small_x = x
+  set_small_x(i1) = 10.0_dp**limdepth
+  set_small_x(i1) = ( set_small_x(i1) - buff)/onet
+
+  if (present(i2)) then
+     set_small_x(i2) = 10.0_dp**limdepth
+     set_small_x(i2) = ( set_small_x(i2) - buff)/onet
+     if (present(i3)) then
+        set_small_x(i3) = 10.0_dp**limdepth
+        set_small_x(i3) = ( set_small_x(i3) - buff)/onet
+        if (present(i4)) then
+           set_small_x(i4) = 10.0_dp**limdepth
+           set_small_x(i4) = ( set_small_x(i4) - buff)/onet
+        endif
+     endif
+  endif
+  
+end function set_small_x
+
+
+
+
+
+
+
 
 end module mod_check_lim
        
