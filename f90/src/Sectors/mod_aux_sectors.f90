@@ -33,6 +33,13 @@ module mod_aux_sectors
 
   public :: multiply_IS_charges
 
+  public :: transition
+  
+  interface transition
+        module procedure transition_res
+        module procedure transition_res_sping
+    end interface
+
 contains
 
   subroutine get_prefactor(muR,as_ord,aem_ord,pref)
@@ -57,7 +64,6 @@ contains
     type(KinConfig), intent(in) :: proc
     real(dp), intent(in)        :: amp2(-5:7,-5:7)
     real(dp), intent(out)       :: respdf(ipdf)
-
 
 
     if (ipdf == 1) then
@@ -863,4 +869,102 @@ contains
 
   end subroutine check_ff
 
+
+  ! >--------------------------------------------------------------------------
+  ! | module procedures of function transision
+  ! | - transition_res for argument res(-6:6,-6:6)
+  ! | - transition_res_sping for argument res_sping(-1:1,-1:1,-6:6,-6:6)
+  ! >--------------------------------------------------------------------------
+  !-- private helper function that generates the transition matrices
+  subroutine get_transisition_matrix(trans, trans_matrix)
+    implicit none
+    
+    real(dp), intent(out) :: trans_matrix(-5:7,-5:7)
+    character(len=*), intent(in) :: trans
+    
+    integer :: i1, i2
+    
+    trans_matrix = zero
+    
+    select case (trans)
+    case ('none')
+       do i1 = -5, 7, 1
+          trans_matrix(i1,i1) = one
+       end do
+    case ('g -> q')
+       do i1 = -5, 7, 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(0,i1) = one
+       end do
+    case ('ga -> q')
+       do i1 = -5, 7, 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(7,i1) = one
+       end do
+    case ('q -> q')
+       do i1 = -int(Nf), int(Nf), 1
+          do i2 = -int(Nf), int(Nf), 1
+             if ((i1 .ne. 0) .and. (i2 .ne. 0) .and. (i1 .ne. 7) .and. (i2 .ne. 7)) trans_matrix(i1,i2) = one
+          end do
+       end do
+    case ('q -> qb')
+       do i1 = -6, 6, 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(i1,-i1) = one
+       end do
+    case ('q -> g')
+       do i1 = -int(Nf), int(Nf), 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(i1,0) = one
+       end do
+    case ('q -> ga')
+       do i1 = -int(Nf), int(Nf), 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(i1,7) = one
+       end do
+    case default
+       print *, 'error: transition function called with unknown splitting.'
+       stop
+    end select
+    
+    return
+    
+
+  end subroutine get_transisition_matrix
+  
+  function transition_res(beam_1, beam_2, res)
+    implicit none
+    
+    real(dp) :: transition_res(-6:6,-6:6)
+    character(len=*), intent(in) :: beam_1
+    character(len=*), intent(in) :: beam_2
+    real(dp), intent(in) :: res(-6:6,-6:6)
+    real(dp) :: trans_matrix_b1(-6:6,-6:6), trans_matrix_b2(-6:6,-6:6)
+    
+    call get_transisition_matrix(beam_1, trans_matrix_b1)
+    call get_transisition_matrix(beam_2, trans_matrix_b2)
+    
+    transition_res = matmul(matmul(trans_matrix_b1, res), transpose(trans_matrix_b2))
+    
+    return
+  end function transition_res
+  
+  function transition_res_sping(beam_1, beam_2, res_sping)
+    implicit none
+    complex(dp) :: transition_res_sping(-1:1,-1:1,-6:6,-6:6)
+    character(len=*), intent(in) :: beam_1
+    character(len=*), intent(in) :: beam_2
+    complex(dp), intent(in) :: res_sping(-1:1,-1:1,-6:6,-6:6)
+    real(dp) :: trans_matrix_b1(-6:6,-6:6), trans_matrix_b2(-6:6,-6:6)
+    integer :: h1, h2
+    
+    call get_transisition_matrix(beam_1, trans_matrix_b1)
+    call get_transisition_matrix(beam_1, trans_matrix_b2)
+    
+    do h1 = -1, 1, 2
+       do h2 = -1, 1, 2
+          transition_res_sping(h1,h2,:,:) = matmul(matmul(trans_matrix_b1, res_sping(h1,h2,:,:)), transpose(trans_matrix_b2))
+       end do
+    end do
+    
+    return
+  end function transition_res_sping
+  
+
+ 
 end module mod_aux_sectors
