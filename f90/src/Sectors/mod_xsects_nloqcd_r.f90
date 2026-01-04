@@ -2,6 +2,7 @@ module mod_xsects_nloqcd_r
   use mod_types
   use mod_consts_dp
   use mod_parms
+  use mod_limvals
   use mod_proc_parms
   use mod_kinematics_nlo
   use mod_process
@@ -206,10 +207,14 @@ contains
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintNLO_gq(2),kin(2)
     real(dp)    :: respdf(ipdf)
-    real(dp)    :: res_nlo(2,2),res_lo(2,2)
+    real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7)
     real(dp)    :: z,s5i
+    logical     :: oldcode
 
     xsect_nloqcd_r_is_gq = 0
+
+    oldcode = .false.
+    limval_nlo = zero
 
     ff(1) = zero
 
@@ -240,11 +245,17 @@ contains
 
        kin(1) = zero
        FintNLO_gq(1) = zero
+       
 
     else    
-
-       call res_tree_g_gq(HardProc%AmpMom,res_nlo)
-       call get_respdf(gq_lumi,1,0,HardProc,res_nlo,respdf)
+       if (oldcode) then
+          call res_tree_g_gq(HardProc%AmpMom,res_nlo_old)
+          call get_respdf(gq_lumi,1,0,HardProc,res_nlo_old,respdf)
+       else
+          call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)
+          call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
+       endif
+          
 
        respdf = respdf*HardProc%wgt
 
@@ -265,8 +276,14 @@ contains
 
     else
 
-       call res_tree_qqb(C1Lim%AmpMom,res_lo)
-       call get_respdf(gq_lumi,1,0,C1Lim,res_lo,respdf)
+       if (oldcode) then
+          call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
+          call get_respdf(gq_lumi,1,0,C1Lim,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
+          res_lo = transition('g -> q', 'none', res_lo)
+          call get_respdf_gen(1,0,C1Lim,res_lo,respdf)
+       endif 
 
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
@@ -290,6 +307,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_HC = FintNLO_gq
+    limval_nlo(1) = FintNLO_gq(1)
+    limval_nlo(3) = FintNLO_gq(2)
 #endif
 
   end function xsect_nloqcd_r_is_gq
