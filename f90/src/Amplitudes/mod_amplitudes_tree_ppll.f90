@@ -15,7 +15,7 @@ module mod_amplitudes_tree_ppll
   !-- res_treeAA --> 0 -> e- a a e+
   
   public :: res_tree_qqb,res_treeAA_aa
-  public :: res_tree_qqb_gen
+  public :: res_tree_qqb_gen, res_treeAA_aa_gen
   public :: res_tree_g_qqb_gen, res_tree_g_gq_gen, res_tree_g_qg_gen
   public :: res_tree_a_qqb_gen, res_tree_a_aq_gen, res_tree_a_qa_gen
   public :: res_tree_ga_qqb_gen, res_tree_ga_qg_gen, res_tree_ga_gq_gen
@@ -956,6 +956,17 @@ contains
     res = me2 * aveaa * Q_lep**4 * eesq2
 
   end subroutine res_treeAA_aa
+
+    !-- a a -> l lb
+  subroutine res_treeAA_aa_gen(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(-5:7,-5:7)
+
+    res = zero
+    call res_treeAA_aa(p,res(7,7))
+
+
+  end subroutine res_treeAA_aa_gen
 
   !-- amplitude for 0 -> em[p1] a[p2] a[p3] ep[p4]
   !-- factor out Q_lep**4 * eesq**2
