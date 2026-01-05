@@ -500,9 +500,9 @@ contains
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
 #endif          
-          if (i .eq. 7 .and. j .gt. 0) then   ! aq
+          if (i .eq. 7 .and. j .gt. 0 .and. j .ne. 7) then   ! aq
              res(i,j) = res1(2,jj)
-          elseif (i .eq. 7 .and. j .lt. 0) then ! aqb
+          elseif (i .eq. 7 .and. j .lt. 0 .and. j .ne. 7) then ! aqb
              res(i,j) = res1(1,jj)
           endif
        enddo
@@ -534,9 +534,9 @@ contains
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
 #endif
           
-          if (i .gt. 0 .and. j .eq. 7) then   ! qa
+          if (i .gt. 0 .and. j .eq. 7 .and. i .ne. 7) then   ! qa
              res(i,j) = res1(1,ii)
-          elseif (i .lt. 0 .and. j .eq. 7) then ! qba
+          elseif (i .lt. 0 .and. j .eq. 7 .and. i .ne. 7) then ! qba
              res(i,j) = res1(2,ii)
           endif
        enddo
