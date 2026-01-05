@@ -13,14 +13,14 @@ module mod_check_lim
   private
 
   integer, parameter :: limdepth_min = -3
-  integer, parameter :: limdepth_max = -9
+  integer, parameter :: limdepth_max = -12
   integer, parameter :: number_limits_nlo = 3
   integer, parameter :: number_terms_nlo = 4
   integer, parameter :: number_limits_nlo_is = 5
   integer, parameter :: number_terms_nlo_is = 6
   integer, parameter :: number_limits_nnlo = 15
   integer, parameter :: number_terms_nnlo = 16
-  logical, parameter :: verbose = .true.
+  logical, parameter :: verbose = .false.
 
   !  integer, public    :: cancelling_terms_nlo(4,3) = reshape([2,1,4,3, 3,4,1,2, 4,3,2,1],[4,3])
 
@@ -41,7 +41,8 @@ contains
 !         real(dp15)       :: xx(30), ff(1), weight
 !       end  function f_to_be_checked
 !    end interface
-    real(dp15)             :: x(30),xlim(30),rlim(number_limits_nlo)
+    real(dp15)             :: x(30),xlim(30)
+    integer                :: rlim(number_limits_nlo)
     
     real(dp)               :: limmat(limdepth_min-limdepth_max+1,number_terms_nlo,number_limits_nlo),ssign
     real(dp)               :: limcancellation(limdepth_min-limdepth_max+1,number_limits_nlo,number_terms_nlo/2),loglimcancellation(limdepth_min-limdepth_max+1,number_limits_nlo,number_terms_nlo/2)
@@ -51,8 +52,8 @@ contains
     integer, save          :: num_checks = 1
     logical                :: sing_terms_nlo(number_limits_nlo,number_terms_nlo/2)
 
-    sing_terms_nlo = .true.
-
+    call set_sing_terms_nlo(sing_terms_nlo)
+    
     cancelling_terms_nlo(1,1,1:2)=[2,1]       ! first  pair for soft limit
     cancelling_terms_nlo(1,2,1:2)=[4,3]       ! second pair for soft limit
 
@@ -76,7 +77,9 @@ contains
     limval_nlo = zero
     ! run without limits
     !    r = xsect_wbfj_n2loxlo_r(ndim,x,vegasweight)
-    r = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)
+    ! r = xsect_nloqcd_r_is_gq(xlim,ff,vegasweight)
+    call xsect_selector(xlim,ff,vegasweight,r)
+
 
     print *, "----- USING POINT # ", num_checks
     do limdepth = limdepth_min,limdepth_max,-1
@@ -87,7 +90,8 @@ contains
 !       xlim(kNLO_min) = 10.0_dp**limdepth
        !       xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
        xlim = set_small_x(x,limdepth,kNLO_min)
-       rlim(1) = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)
+       call xsect_selector(xlim,ff,vegasweight,rlim(1))
+
        if (verbose) print *, "limval", limval_nlo(1:number_terms_nlo)
 
 
@@ -99,7 +103,8 @@ contains
 !       xlim(kNLO_min+1) = 10.0_dp**limdepth
 !       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
        xlim = set_small_x(x,limdepth,kNLO_min+1)
-       rlim(2) = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)
+       call xsect_selector(xlim,ff,vegasweight,rlim(2))
+
        if (verbose) print *, "limval", limval_nlo(1:number_terms_nlo)
 
 
@@ -114,7 +119,8 @@ contains
        !       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
        xlim = set_small_x(x,limdepth,kNLO_min,kNLO_min+1)
 
-       rlim(3) = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)
+       call xsect_selector(xlim,ff,vegasweight,rlim(3))
+
        if (verbose) print *, "limval", limval_nlo(1:number_terms_nlo)
        
        limmat(i,1:number_terms_nlo,3) = limval_nlo(1:number_terms_nlo)
@@ -203,7 +209,8 @@ contains
     ! , i.e. (I-S_m) (I - C_1m - C_2m) + , so 1 hard term + 5 subtr terms
     real(dp15)  :: yRnd(30),vegasweight,ff(1),ff_dum(1)
 
-    real(dp15)             :: x(30),xlim(30),rlim(number_limits_nlo_is)
+    real(dp15)             :: x(30),xlim(30)
+    integer                :: rlim(number_limits_nlo_is)
     
     real(dp)               :: limmat(limdepth_min-limdepth_max+1,number_terms_nlo_is,number_limits_nlo_is),ssign
     real(dp)               :: limcancellation(limdepth_min-limdepth_max+1,number_limits_nlo_is,number_terms_nlo_is/2),loglimcancellation(limdepth_min-limdepth_max+1,number_limits_nlo_is,number_terms_nlo_is/2)
@@ -214,7 +221,7 @@ contains
     integer, save          :: num_checks = 1
 
 
-    sing_terms_nlo = .true.
+    call set_sing_terms_nlo_is(sing_terms_nlo)
 
     cancelling_terms_nlo(1,1,1:2)=[2,1]       ! first  pair for soft limit
     cancelling_terms_nlo(1,2,1:2)=[5,3]       ! second pair for soft limit
@@ -251,7 +258,8 @@ contains
     ! run without limits
     ! todo call correct function here
 
-    r = xsect_nloewk_r_is_ns(x,ff,vegasweight)
+    call xsect_selector(xlim,ff,vegasweight,r)
+
 
     print *, "----- USING POINT # ", num_checks
     do limdepth = limdepth_min,limdepth_max,-1
@@ -260,8 +268,8 @@ contains
        xlim = x
        xlim(kNLO_min) = 10.0_dp**limdepth
        xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
-        
-       rlim(1) = xsect_nloewk_r_is_ns(xlim,ff_dum,vegasweight)
+
+       call xsect_selector(xlim,ff,vegasweight,rlim(1))
               
        limmat(i,1:number_terms_nlo_is,1) = limval_nlo_is(1:number_terms_nlo_is)
        if (verbose) print *, "limval", limval_nlo_is(1:number_terms_nlo_is)
@@ -269,9 +277,11 @@ contains
        !       ! coll1 limit
        if (verbose) print *, "coll1 limit"
        xlim = x
-!       xlim(kNLO_min+1) = 10.0_dp**limdepth
-!       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
-       rlim(2) = xsect_nloewk_r_is_ns(xlim,ff_dum,vegasweight)
+       xlim(kNLO_min+1) = 10.0_dp**limdepth
+       xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
+
+       call xsect_selector(xlim,ff,vegasweight,rlim(2))     
+
 
        limmat(i,1:number_terms_nlo_is,2) = limval_nlo_is(1:number_terms_nlo_is)
        if (verbose) print *, "limval", limval_nlo_is(1:number_terms_nlo_is)
@@ -281,7 +291,8 @@ contains
        if (verbose) print *, "coll2 limit"
        xlim(kNLO_min+1) = one - 10.0_dp**limdepth
        xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
-       rlim(3) = xsect_nloewk_r_is_ns(xlim,ff_dum,vegasweight)
+
+       call xsect_selector(xlim,ff,vegasweight,rlim(3))
 
        limmat(i,1:number_terms_nlo_is,3) = limval_nlo_is(1:number_terms_nlo_is)
        if (verbose) print *, "limval", limval_nlo_is(1:number_terms_nlo_is)
@@ -294,7 +305,8 @@ contains
        xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
        xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
 
-       rlim(4) = xsect_nloewk_r_is_ns(xlim,ff_dum,vegasweight)
+       call xsect_selector(xlim,ff,vegasweight,rlim(4))
+       
        limmat(i,1:number_terms_nlo_is,4) = limval_nlo_is(1:number_terms_nlo_is)
        if (verbose) print *, "limval", limval_nlo_is(1:number_terms_nlo_is)
 
@@ -306,7 +318,7 @@ contains
        xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
        xlim(kNLO_min+1) = ( xlim(kNLO_min+1) - buff)/onet
 
-       rlim(5) = xsect_nloewk_r_is_ns(xlim,ff_dum,vegasweight)
+       call xsect_selector(xlim,ff,vegasweight,rlim(5))
 
        limmat(i,1:number_terms_nlo_is,5) = limval_nlo_is(1:number_terms_nlo_is)
        if (verbose) print *, "limval", limval_nlo_is(1:number_terms_nlo_is)
@@ -380,8 +392,8 @@ contains
 !          print *, ilim,iterm,loglimcancellation(:,ilim,iterm)
           i = 1
           do limdepth = limdepth_min,limdepth_max+1,-1
-             !print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
-             print *, loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+             print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+             !print *, loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
              !print *, limcancellation(i,ilim,iterm)
              !             write(101+ifile,*) limdepth,loglimcancellation(i,ilim,iterm)
              i = i+1
@@ -406,7 +418,8 @@ contains
   integer function check_lim_nnlo(yRnd,ff,vegasweight) result(r)
 !    integer, intent(in)    :: ndim
     real(dp15)              :: yRnd(30), vegasweight,ff(1)
-    real(dp15)             :: xlim(30),x(30),rlim(number_limits_nnlo)
+    real(dp15)             :: xlim(30),x(30)
+    integer                :: rlim(number_limits_nnlo)
     
     real(dp)               :: limmat(limdepth_min-limdepth_max+1,number_terms_nnlo,number_limits_nnlo),ssign(number_limits_nnlo)
     real(dp)               :: limcancellation(limdepth_min-limdepth_max+1,number_limits_nnlo,number_terms_nnlo/2),loglimcancellation(limdepth_min-limdepth_max+1,number_limits_nnlo,number_terms_nnlo/2)
@@ -608,9 +621,8 @@ contains
           case(15)
              xlim = set_small_x(x,limdepth,xE5,xE6,xRHO5,xRHO6)
           end  select
-          rlim(ilim) = xsect_nnlo_rr_5161a_ns_ga(xlim,ff,vegasweight)
+          call xsect_selector(xlim,ff(1),vegasweight,rlim(ilim))
           limmat(i,1:number_terms_nnlo,ilim) = limval_nnlo(1:number_terms_nnlo)
-          print *, limval_nnlo
 ! only proceed with check if all contributions are non-zero          
 !          if (product(rlim) .eq. zero) then
 !             return
@@ -713,34 +725,154 @@ contains
 
 
  function set_small_x(x,limdepth,i1,i2,i3,i4) 
-  real(dp), intent(in)   :: x(30)
-  integer, intent(in)    ::  limdepth
-  integer, intent(in)    :: i1
-  integer, intent(in),optional    :: i2,i3,i4
-  real(dp)  :: set_small_x(30)
+   real(dp), intent(in)   :: x(30)
+   integer, intent(in)    ::  limdepth
+   integer, intent(in)    :: i1
+   integer, intent(in),optional    :: i2,i3,i4
+   real(dp)  :: set_small_x(30)
+   
+   set_small_x = x
+   set_small_x(i1) = 10.0_dp**limdepth
+   set_small_x(i1) = ( set_small_x(i1) - buff)/onet
+   
+   if (present(i2)) then
+      set_small_x(i2) = 10.0_dp**limdepth
+      set_small_x(i2) = ( set_small_x(i2) - buff)/onet
+      if (present(i3)) then
+         set_small_x(i3) = 10.0_dp**limdepth
+         set_small_x(i3) = ( set_small_x(i3) - buff)/onet
+         if (present(i4)) then
+            set_small_x(i4) = 10.0_dp**limdepth
+            set_small_x(i4) = ( set_small_x(i4) - buff)/onet
+         endif
+      endif
+   endif
+   
+ end function set_small_x
 
-  set_small_x = x
-  set_small_x(i1) = 10.0_dp**limdepth
-  set_small_x(i1) = ( set_small_x(i1) - buff)/onet
 
-  if (present(i2)) then
-     set_small_x(i2) = 10.0_dp**limdepth
-     set_small_x(i2) = ( set_small_x(i2) - buff)/onet
-     if (present(i3)) then
-        set_small_x(i3) = 10.0_dp**limdepth
-        set_small_x(i3) = ( set_small_x(i3) - buff)/onet
-        if (present(i4)) then
-           set_small_x(i4) = 10.0_dp**limdepth
-           set_small_x(i4) = ( set_small_x(i4) - buff)/onet
-        endif
-     endif
-  endif
+ subroutine xsect_selector(xlim,ff,vegasweight,r)
+   real(dp15), intent(in)     :: xlim(30)
+   integer, intent(out)       :: r
+   real(dp15), intent(out)    :: vegasweight, ff(1)   
+
+   if (corr .eq. 'nloqcd') then
+
+      if (ch .eq. 'ns') then
+
+         if (sec .eq. 'r_is') then
+            r = xsect_nloqcd_r_is_ns(xlim,ff,vegasweight)
+         else
+            call err_unknown_sec()
+         endif         
+            
+!      elseif (ch .eq. 'gq') then
+
+      else
+         call err_unknown_ch()
+      endif
+      
+   elseif  (corr .eq. 'nloewk') then
+      if (ch .eq. 'ns') then
+      
+         if (sec .eq. 'r_is') then
+            r = xsect_nloewk_r_is_ns(xlim,ff,vegasweight)
+         elseif (sec .eq. 'r_fs_53') then
+            r = xsect_nloewk_r_fs_53_ns(xlim,ff,vegasweight)        
+         else
+            call err_unknown_sec()
+         endif
+      elseif (ch.eq.'aq') then
+         if (sec.eq.'r_is') then
+            r = xsect_nloewk_r_is_aq(xlim,ff,vegasweight)        
+         else
+            call err_unknown_sec()
+         endif
+      else
+         call err_unknown_ch()
+      endif
+      
+      
+   elseif   (corr .eq. 'nnlo') then
+      if (ch .eq.  'ns_ga') then
+         if (sec .eq. 'rr_5161a') then
+            r = xsect_nnlo_rr_5161a_ns_ga(xlim,ff,vegasweight)
+         else
+            call err_unknown_sec()
+         endif
+      else
+         call err_unknown_ch()
+      endif
+      
+   else
+      
+      call err_unknown_corr()
+   endif
+   
+ end subroutine xsect_selector
+
+
+ subroutine set_sing_terms_nlo(sing_terms_nlo)    
+   logical, intent(out)           :: sing_terms_nlo(number_limits_nlo,number_terms_nlo/2)
+
+   sing_terms_nlo = .true.
+   
+   if (corr .eq. 'nloqcd') then
+      if (ch .eq. 'gq') then
+         if (sec .eq. 'r_is') then
+            sing_terms_nlo(1,:) = .false.     ! no soft lim
+            sing_terms_nlo(2,2) = .false.     ! no soft lim inside coll limit
+            sing_terms_nlo(3,:) = .false.     ! no soft-coll lim
+         endif
+      endif
+   endif
+            
   
-end function set_small_x
+ end subroutine set_sing_terms_nlo
+
+ subroutine set_sing_terms_nlo_is(sing_terms_nlo)    
+   logical, intent(out)          :: sing_terms_nlo(number_limits_nlo_is,number_terms_nlo_is/2)
 
 
+   sing_terms_nlo = .true.
+   if (corr .eq. 'nloewk') then
+      if (ch .eq. 'aq') then
+         if (sec .eq. 'r_is') then
+            sing_terms_nlo(1,:) = .false.     ! no soft lim
+            sing_terms_nlo(2:3,2) = .false.     ! no soft lim inside coll limit
+!            sing_terms_nlo(2:3,4:5) = .false.     ! no softcoll lim inside coll limit
+            sing_terms_nlo(4:5,:) = .false.     ! no soft-coll lim
+         endif
+      endif
+   endif
+            
+ end subroutine  set_sing_terms_nlo_is
+   
 
+ subroutine err_unknown_corr()
 
+   print *, "error in limit check!"
+   print *, "unknown correction:", corr
+   stop
+
+ end subroutine err_unknown_corr
+
+  subroutine err_unknown_ch()
+
+   print *, "error in limit check, corr = ", corr
+   print *, "unknown channel:", ch   
+   stop
+
+ end subroutine err_unknown_ch
+
+ subroutine err_unknown_sec()
+
+   print *, "error in limit check, corr, sec  = ", corr, sec
+   print *, "unknown sector:", sec
+   stop
+
+ end subroutine err_unknown_sec
+   
 
 
 
