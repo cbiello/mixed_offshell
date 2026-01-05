@@ -484,14 +484,14 @@ contains
 
        if (oldcode) then
 
-       call res_tree_qqb(CLim%AmpMom,res_lo_old)
-       res_lo_old = Q_lep2*res_lo_old
-       call get_respdf(ns_lumi,0,1,CLim,res_lo_old,respdf)
+          call res_tree_qqb(CLim%AmpMom,res_lo_old)
+          res_lo_old = Q_lep2*res_lo_old
+          call get_respdf(ns_lumi,0,1,CLim,res_lo_old,respdf)
        else
-       
-       call res_tree_qqb_gen(CLim%AmpMom,res_lo)
-       res_lo = Qsq_Fs(icoll-2)**2 * res_lo
-       call get_respdf_gen(0,1,CLim,res_lo,respdf)
+          
+          call res_tree_qqb_gen(CLim%AmpMom,res_lo)
+          res_lo = Qsq_Fs(icoll-2)**2 * res_lo
+          call get_respdf_gen(0,1,CLim,res_lo,respdf)
 
        endif
 
@@ -739,12 +739,13 @@ contains
     real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7),res_tmp(-5:7,-5:7),res_loAA(-5:7,-5:7)
     real(dp)    :: z,s5i
     logical     :: oldcode
+    integer     :: i,j
 
     xsect_nloewk_r_is_aq = 0
 
     limval_nlo_is = zero
 
-    oldcode = .true.
+    oldcode = .false.
 
     ff(1) = zero
 
@@ -783,7 +784,6 @@ contains
        if (oldcode) then
           call res_tree_a_aq(HardProc%AmpMom,res_nlo_old)
           call get_respdf(aq_lumi,0,1,HardProc,res_nlo_old,respdf)
-          print *, "Respdf",respdf
        else
           call res_tree_a_aq_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
@@ -814,7 +814,7 @@ contains
           call get_respdf(aq_lumi,0,1,C1Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
-          res_lo = multiply_IS_charges(res_lo,2)
+          res_lo = multiply_IS_charges(res_lo,1)
           res_lo = transition('ga -> q', 'none', res_lo)
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
        endif
@@ -861,9 +861,11 @@ contains
           call get_respdf(aq_lumi,0,1,C2Lim,res_tmp_old,respdf)
        else
           call res_treeAA_aa_gen(C2Lim%AmpMom,res_lo)
-          res_lo = transition('q -> ga', 'none', res_lo)
+          res_lo = transition('none','q -> ga',  res_lo)
           res_lo = multiply_IS_charges(res_lo,2)
+
           call get_respdf_gen(0,1,C2Lim,res_lo,respdf)
+          respdf = respdf * Pqq(z) / (one-z)
        endif
        
        respdf = (-one)*respdf*(two/s5i)&
