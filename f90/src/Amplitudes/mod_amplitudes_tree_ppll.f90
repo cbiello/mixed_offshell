@@ -231,7 +231,7 @@ contains
 #elif (_Vcharge == -1)
        amp_w(-1,-1,-1) = agamtree(iconf(1,i),iconf(3,i),iconf(4,i),iconf(5,i),iconf(2,i),za,zb,sprod,-1)
        amp_w(-1,-1,+1) = agamtree(iconf(1,i),iconf(3,i),iconf(4,i),iconf(5,i),iconf(2,i),za,zb,sprod,+1)
-       amp_w = amp_w / sw2 / two
+       amp_w = amp_w * cms_cLW * cms_cLWnue
        
        res(i,3) = abs(amp_w(-1,-1,-1))**2 + abs(amp_w(-1,-1,+1))**2  
 
@@ -239,7 +239,8 @@ contains
        amp_w(-1,-1,-1) = agamtree(iconf(3,i),iconf(1,i),iconf(5,i),iconf(4,i),iconf(2,i),zb,za,sprod,-1)
        amp_w(-1,-1,+1) = agamtree(iconf(3,i),iconf(1,i),iconf(5,i),iconf(4,i),iconf(2,i),zb,za,sprod,+1)
 
-       amp_w = amp_w / sw2 / two
+       !       amp_w = amp_w / cms_sw2 / two
+       amp_w = amp_w * cms_cLW * cms_cLWnue
        res(i,3) = abs(amp_w(-1,-1,-1))**2 + abs(amp_w(-1,-1,+1))**2 
 
 #endif
@@ -885,9 +886,9 @@ contains
        enddo
 
 #elif (_Vcharge == -1)
-       res(j,3) = ubdgmsq(iconf1(1,j),iconf1(3,j),iconf1(4,j),iconf1(6,j),iconf1(5,j),iconf1(2,j),za,zb,sprod)/sw2**2
+       res(j,3) = ubdgmsq(iconf1(1,j),iconf1(3,j),iconf1(4,j),iconf1(6,j),iconf1(5,j),iconf1(2,j),za,zb,sprod)/cms_sw2**2
 #elif (_Vcharge == +1)
-       res(j,3) = ubdgmsq(iconf1(3,j),iconf1(1,j),iconf1(6,j),iconf1(4,j),iconf1(5,j),iconf1(2,j),zb,za,sprod)/ sw2**2
+       res(j,3) = ubdgmsq(iconf1(3,j),iconf1(1,j),iconf1(6,j),iconf1(4,j),iconf1(5,j),iconf1(2,j),zb,za,sprod)/ cms_sw2**2
 
 #endif
  enddo
@@ -1231,8 +1232,6 @@ contains
     !    prp12=s(p1,p2)/cmplx((s(p1,p2)-wmass**2),wmass*wwidth,kind=dp)
     prp34=sprod(p3,p4)/(sprod(p3,p4)-mwsq_prop)
     prp12=sprod(p1,p2)/(sprod(p1,p2)-mwsq_prop)
-
-
 
 !---  c.f. Eqs.(4.4),(4.5) of hep-ph/9803250 (multiplied by -i)
 !---       for the terms proportional to prp34
