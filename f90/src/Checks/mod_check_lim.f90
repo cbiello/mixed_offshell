@@ -13,14 +13,14 @@ module mod_check_lim
   private
 
   integer, parameter :: limdepth_min = -3
-  integer, parameter :: limdepth_max = -12
+  integer, parameter :: limdepth_max = -15
   integer, parameter :: number_limits_nlo = 3
   integer, parameter :: number_terms_nlo = 4
   integer, parameter :: number_limits_nlo_is = 5
   integer, parameter :: number_terms_nlo_is = 6
   integer, parameter :: number_limits_nnlo = 15
   integer, parameter :: number_terms_nnlo = 16
-  logical, parameter :: verbose = .false.
+  logical, parameter :: verbose = .true.
 
   !  integer, public    :: cancelling_terms_nlo(4,3) = reshape([2,1,4,3, 3,4,1,2, 4,3,2,1],[4,3])
 
@@ -46,7 +46,7 @@ contains
     
     real(dp)               :: limmat(limdepth_min-limdepth_max+1,number_terms_nlo,number_limits_nlo),ssign
     real(dp)               :: limcancellation(limdepth_min-limdepth_max+1,number_limits_nlo,number_terms_nlo/2),loglimcancellation(limdepth_min-limdepth_max+1,number_limits_nlo,number_terms_nlo/2)
-    
+    real(dp)               :: target_scaling_nlo(number_limits_nlo,number_terms_nlo/2),scaling(limdepth_min-limdepth_max+1,number_limits_nlo,number_terms_nlo/2)
     integer                :: limdepth, i, ilim,iterm,i1,i2,ifile,icoll,jother
     integer                :: cancelling_terms_nlo(number_limits_nlo,number_terms_nlo/2,2)
     integer, save          :: num_checks = 1
@@ -62,10 +62,15 @@ contains
 
     cancelling_terms_nlo(3,1,1:2)=[4,1]       ! first  pair for softcoll limit
     cancelling_terms_nlo(3,2,1:2)=[3,2]       ! second pair for softcoll limit
+
+    target_scaling_nlo(1,:) = -one            ! soft limit
+    target_scaling_nlo(2,:) = -half            ! coll limit
+    target_scaling_nlo(3,:) = -half            ! softcoll limit
+    
         
 !    x(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     x = yRnd
-    
+
     i  = 1
     r = 0
     ff(1) = zero
@@ -78,12 +83,13 @@ contains
     ! run without limits
     !    r = xsect_wbfj_n2loxlo_r(ndim,x,vegasweight)
     ! r = xsect_nloqcd_r_is_gq(xlim,ff,vegasweight)
-    call xsect_selector(xlim,ff,vegasweight,r)
+    !call xsect_selector(xlim,ff,vegasweight,r)
 
 
     print *, "----- USING POINT # ", num_checks
     do limdepth = limdepth_min,limdepth_max,-1
        print *, "---------limdepth----------",limdepth
+
        ! soft limit
        if (verbose) print *, "soft limit"
        xlim = x
@@ -159,7 +165,7 @@ contains
 !                   print *, ilim, iterm, (limmat(i,iterm,ilim) + ssign*limmat(i,cancelling_term_index,ilim))
                 endif
                 
- !               print *, i,ilim,iterm,limcancellation(i,ilim,iterm),loglimcancellation(i,ilim,iterm)
+                print *, i,ilim,iterm,limcancellation(i,ilim,iterm),loglimcancellation(i,ilim,iterm)
              enddo
           enddo
 !       endif
@@ -185,25 +191,31 @@ contains
           i = 1
           do limdepth = limdepth_min,limdepth_max+1,-1
              !             write(101+ifile,*) limdepth,loglimcancellation(i,ilim,iterm)
-             print *, loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+             scaling(i,ilim,iterm) = loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+             print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),scaling(i,ilim,iterm)
              i = i+1
           enddo
                           
           ifile = ifile+1
        enddo
+       call evaluate_scaling(scaling(:,ilim,:),target_scaling_nlo(ilim,:),sing_terms_nlo(ilim,:))
     enddo
+
+
     
     print *, "num_checks", num_checks
     if (num_checks .eq. 5) stop
 
     num_checks = num_checks+1
+
+
         
     return
     
   end function check_lim_nlo
+
+
   
-
-
   integer function check_lim_nlo_is(yRnd,ff,vegasweight) result(r)
     ! this checks NLO sometimes used for initial state
     ! , i.e. (I-S_m) (I - C_1m - C_2m) + , so 1 hard term + 5 subtr terms
@@ -214,7 +226,7 @@ contains
     
     real(dp)               :: limmat(limdepth_min-limdepth_max+1,number_terms_nlo_is,number_limits_nlo_is),ssign
     real(dp)               :: limcancellation(limdepth_min-limdepth_max+1,number_limits_nlo_is,number_terms_nlo_is/2),loglimcancellation(limdepth_min-limdepth_max+1,number_limits_nlo_is,number_terms_nlo_is/2)
-    
+    real(dp)               :: target_scaling_nlo(number_limits_nlo_is,number_terms_nlo_is/2),scaling(limdepth_min-limdepth_max+1,number_limits_nlo_is,number_terms_nlo_is/2)
     integer                :: limdepth, i, ilim,iterm,i1,i2,ifile
     integer                :: cancelling_terms_nlo(number_limits_nlo_is,number_terms_nlo_is/2,2)
     logical                :: sing_terms_nlo(number_limits_nlo_is,number_terms_nlo_is/2)
@@ -245,10 +257,18 @@ contains
     cancelling_terms_nlo(5,1,1:2)=[6,1]       ! first  pair for softcoll2 limit
     cancelling_terms_nlo(5,2,1:2)=[4,2]       ! second pair for softcoll2 limit
     cancelling_terms_nlo(5,3,1:2)=[5,3]       ! dummy
-!    sing_terms_nlo(5,3) = .false.
+    !    sing_terms_nlo(5,3) = .false.
+
+
+    target_scaling_nlo(1,:) = -one            ! soft limit
+    target_scaling_nlo(2,:) = -half            ! coll limit
+    target_scaling_nlo(3,:) = -half            ! softcoll limit
+    target_scaling_nlo(4,1:2) = -half            ! coll limit
+    target_scaling_nlo(5,1:2) = -half            ! softcoll limit
+    target_scaling_nlo(4,3) = -one            ! softcoll limit, on "other" IS parton --> soft  
+    target_scaling_nlo(5,3) = -one            ! softcoll limit, on "other" IS parton --> soft
 
     x = yRnd
-        
     i  = 1
     r = 0
     ff(1) = zero
@@ -257,9 +277,8 @@ contains
     limval_nlo_is = zero
     ! run without limits
     ! todo call correct function here
-
-    call xsect_selector(xlim,ff,vegasweight,r)
-
+    !call xsect_selector(x,ff,vegasweight,r)
+        
 
     print *, "----- USING POINT # ", num_checks
     do limdepth = limdepth_min,limdepth_max,-1
@@ -268,7 +287,6 @@ contains
        xlim = x
        xlim(kNLO_min) = 10.0_dp**limdepth
        xlim(kNLO_min) = ( xlim(kNLO_min) - buff)/onet
-
        call xsect_selector(xlim,ff,vegasweight,rlim(1))
               
        limmat(i,1:number_terms_nlo_is,1) = limval_nlo_is(1:number_terms_nlo_is)
@@ -337,7 +355,8 @@ contains
 
 !
        ! check cancellation
-          do ilim = 1,number_limits_nlo_is
+       do ilim = 1, number_limits_nlo_is
+          if (verbose) print *, "limit",ilim
              ssign = +one
 !             if (ilim .eq. 5 .or. ilim .eq. 6) ssign = -one  ! SC
              do iterm = 1, number_terms_nlo_is/2
@@ -358,16 +377,17 @@ contains
                    limcancellation(i,ilim,iterm) = (limmat(i,i1,ilim) + ssign*limmat(i,i2,ilim))
                    loglimcancellation(i,ilim,iterm) = -1000.0_dp
                                    
-!                   print *, ilim, iterm, (limmat(i,iterm,ilim) + ssign*limmat(i,cancelling_term_index,ilim))
+ !                  print *, ilim, iterm, (limmat(i,iterm,ilim) + ssign*limmat(i,cancelling_term_index,ilim))
                 endif
                 
- !               print *, i,ilim,iterm,limcancellation(i,ilim,iterm),loglimcancellation(i,ilim,iterm)
+!               print *, i,ilim,iterm,limcancellation(i,ilim,iterm),loglimcancellation(i,ilim,iterm)
              enddo
           enddo
 !       endif
                 
        i = i+1
     enddo
+!    pause
 
     ifile = 1
     do ilim = 1,number_limits_nlo_is
@@ -385,14 +405,13 @@ contains
        endif
           
        do iterm = 1, number_terms_nlo_is/2
-          print *, iterm
-!          print *, sing_terms_nlo(ilim,iterm)
           if (.not. sing_terms_nlo(ilim,iterm)) cycle
                     
 !          print *, ilim,iterm,loglimcancellation(:,ilim,iterm)
           i = 1
-          do limdepth = limdepth_min,limdepth_max+1,-1
-             print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+          do limdepth = limdepth_min,limdepth_max+2,-1
+             scaling(i+1,ilim,iterm) = loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm) 
+             !print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),scaling(i+1,ilim,iterm)
              !print *, loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
              !print *, limcancellation(i,ilim,iterm)
              !             write(101+ifile,*) limdepth,loglimcancellation(i,ilim,iterm)
@@ -401,11 +420,11 @@ contains
                           
           ifile = ifile+1
        enddo
-       pause
+       call evaluate_scaling(scaling(:,ilim,:),target_scaling_nlo(ilim,:),sing_terms_nlo(ilim,:))
     enddo
     
-    print *, "num_checks", num_checks
-    if (num_checks .eq. 5) stop
+    print *, "num_checks sdc", num_checks
+    if (num_checks .eq. 20) stop
 
     num_checks = num_checks+1
         
@@ -623,6 +642,7 @@ contains
           end  select
           call xsect_selector(xlim,ff(1),vegasweight,rlim(ilim))
           limmat(i,1:number_terms_nnlo,ilim) = limval_nnlo(1:number_terms_nnlo)
+          if (verbose) print *, limval_nnlo
 ! only proceed with check if all contributions are non-zero          
 !          if (product(rlim) .eq. zero) then
 !             return
@@ -637,7 +657,6 @@ contains
              i1 =  cancelling_terms_nnlo(ilim,iterm,1)
              i2 =  cancelling_terms_nnlo(ilim,iterm,2)
              print *,i1,i2,limmat(i,i1,ilim),limmat(i,i2,ilim)
-                          
              if (.not. sing_terms_nnlo(ilim,iterm)) cycle    ! don't check if there is no sing (sub)limit
              
              if (abs(limmat(i,i1,ilim)) .gt. 1E-300_dp) then
@@ -647,6 +666,8 @@ contains
                 limcancellation(i,ilim,iterm) = (limmat(i,i1,ilim) + ssign(ilim)*limmat(i,i2,ilim))
                 loglimcancellation(i,ilim,iterm) = -1000.0_dp
              endif
+             print *, ilim,iterm, limcancellation(i,ilim,iterm)
+!             pause
              
              !               print *, i,ilim,iterm,limcancellation(i,ilim,iterm),loglimcancellation(i,ilim,iterm)
           enddo
@@ -688,19 +709,20 @@ contains
           print *, "SCALING SOFT m COLL m COLL n LIMIT"
        elseif (ilim .eq. 14) then
           print *, "SCALING  SOFT n COLL m COLL n LIMIT"
-       elseif (ilim .eq. 14) then
+       elseif (ilim .eq. 15) then
           print *, "SCALING  SOFT n SOFT m COLL m COLL n LIMIT"
        endif
           
-       do iterm = 1, number_terms_nnlo/2
+       do iterm = 1,  1 !number_terms_nnlo/2
           print *, iterm
 !          print *, sing_terms_nlo(ilim,iterm)
           if (.not. sing_terms_nnlo(ilim,iterm)) cycle
                     
 !          print *, ilim,iterm,loglimcancellation(:,ilim,iterm)
           i = 1
-          do limdepth = limdepth_min,limdepth_max+1,-1
-             print *, limcancellation(i+1,ilim,iterm),limcancellation(i,ilim,iterm),loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
+          do limdepth = limdepth_min,limdepth_max+2,-1
+             print *, i
+             print *, limcancellation(i+2,ilim,iterm),limcancellation(i,ilim,iterm),(loglimcancellation(i+2,ilim,iterm)-loglimcancellation(i,ilim,iterm))/two
              !print *, loglimcancellation(i+1,ilim,iterm)-loglimcancellation(i,ilim,iterm)
              !print *, limcancellation(i,ilim,iterm)
              !             write(101+ifile,*) limdepth,loglimcancellation(i,ilim,iterm)
@@ -712,12 +734,14 @@ contains
        pause
     enddo
 
-
+ 
     print *, "num_checks", num_checks
-    if (num_checks .eq. 5) stop
+    
+    
+    if (num_checks .eq. 20) stop
 
     num_checks = num_checks+1
-        
+       
     return
 
 
@@ -725,11 +749,11 @@ contains
 
 
  function set_small_x(x,limdepth,i1,i2,i3,i4) 
-   real(dp), intent(in)   :: x(30)
+   real(dp15), intent(in)   :: x(30)
    integer, intent(in)    ::  limdepth
    integer, intent(in)    :: i1
    integer, intent(in),optional    :: i2,i3,i4
-   real(dp)  :: set_small_x(30)
+   real(dp15)  :: set_small_x(30)
    
    set_small_x = x
    set_small_x(i1) = 10.0_dp**limdepth
@@ -797,6 +821,12 @@ contains
       if (ch .eq.  'ns_ga') then
          if (sec .eq. 'rr_5161a') then
             r = xsect_nnlo_rr_5161a_ns_ga(xlim,ff,vegasweight)
+         elseif (sec .eq. 'rr_5161c') then
+            r = xsect_nnlo_rr_5161c_ns_ga(xlim,ff,vegasweight)
+         elseif (sec .eq. 'rr_5262a') then
+            r = xsect_nnlo_rr_5262a_ns_ga(xlim,ff,vegasweight)
+         elseif (sec .eq. 'rr_5262c') then
+            r = xsect_nnlo_rr_5262c_ns_ga(xlim,ff,vegasweight)
          else
             call err_unknown_sec()
          endif
@@ -844,8 +874,18 @@ contains
             sing_terms_nlo(4:5,:) = .false.     ! no soft-coll lim
          endif
       endif
+   elseif (corr .eq. 'nloqcd') then
+      if (ch .eq. 'ns') then
+         if (sec .eq. 'r_is') then
+            sing_terms_nlo = .false.           ! only have C1 and C2
+            sing_terms_nlo(2,1) = .true.
+            sing_terms_nlo(3,1) = .true.
+         endif
+
+      endif
    endif
-            
+
+   
  end subroutine  set_sing_terms_nlo_is
    
 
@@ -873,6 +913,112 @@ contains
 
  end subroutine err_unknown_sec
    
+
+
+  subroutine evaluate_scaling(scaling,target_scaling,sing_terms)
+    real(dp), intent(in)   :: scaling(:,:),target_scaling(:)
+    logical, intent(in)    :: sing_terms(:)
+    integer                :: nlim,nterms,ilim,iterm,scaling_rating
+    
+
+    nterms = size(scaling,dim=2)
+ 
+    if (nterms .ne. size(target_scaling,dim=1)) then
+       print *, 'error', nterms, size(target_scaling,dim=1)
+       stop
+    endif
+    do iterm = 1,nterms
+       if (.not. sing_terms(iterm)) return
+       call test_scaling(scaling(:,iterm), target_scaling(iterm),scaling_rating)
+       print *, "scaling rating", scaling_rating
+       select case(scaling_rating)
+       case(5)
+          print *, "scaling of term #", iterm, " is perfect"
+       case(4)
+          print *, "scaling of term #", iterm, " is excellent"
+       case(3)
+          print *, "scaling of term #", iterm, " is very good"
+       case(2)
+          print *, "scaling of term #", iterm, " is good"
+       case(1)
+          print *, "scaling of term #", iterm, " is ok"
+       case(0)
+          print *, "scaling of term #", iterm, " failed!"
+          pause
+       case default
+          print *, "error getting scaling_rating"
+          stop
+       end select
+    enddo
+
+
+  end subroutine evaluate_scaling
+
+  subroutine test_scaling(scaling,target_scaling,scaling_rating)
+    real(dp), intent(in)   :: scaling(:),target_scaling
+    integer, intent(out)  :: scaling_rating
+    integer                :: ndepth, idepth,i
+    real(dp)               :: tol1, tol2, tol3
+
+    tol1 = 0.05_dp
+    tol2 = 0.2_dp
+    tol3 = 0.5_dp
+    
+    scaling_rating = -1
+    ndepth = size(scaling,dim=1)
+    scaling_rating  = 0
+    
+    do idepth = 1,ndepth-3
+       if ( close_enough(scaling(idepth),target_scaling,tol1) .and.  close_enough(scaling(idepth+1),target_scaling,tol1) &
+            .and. close_enough(scaling(idepth+2),target_scaling,tol1) .and. close_enough(scaling(idepth+3),target_scaling,tol1) ) then
+          scaling_rating = 5
+          return
+       endif
+    enddo
+
+    do idepth = 1,ndepth-3
+       if ( close_enough(scaling(idepth),target_scaling,tol2) .and.  close_enough(scaling(idepth+1),target_scaling,tol2) &
+            .and. close_enough(scaling(idepth+2),target_scaling,tol2) .and. close_enough(scaling(idepth+3),target_scaling,tol2) ) then
+          scaling_rating = 4
+          return
+       endif
+    enddo
+   
+     do idepth = 1,ndepth-2
+       if (close_enough(scaling(idepth),target_scaling,tol2) .and.  close_enough(scaling(idepth+1),target_scaling,tol2) &
+            .and. close_enough(scaling(idepth+2),target_scaling,tol2)  ) then
+          scaling_rating = 3
+          return
+       endif
+    enddo
+    
+    do idepth = 1,ndepth-2
+       if (close_enough(scaling(idepth),target_scaling,tol3) .and.  close_enough(scaling(idepth+1),target_scaling,tol3) &
+            .and. close_enough(scaling(idepth+2),target_scaling,tol3)  ) then
+          scaling_rating = 2
+          return
+       endif
+    enddo
+
+    do idepth = 1,ndepth-1
+       if (close_enough(scaling(idepth),target_scaling,tol3) .and.  close_enough(scaling(idepth+1),target_scaling,tol3) ) then
+          scaling_rating = 1
+          return
+       endif
+    enddo
+
+  end  subroutine test_scaling
+
+  logical function close_enough(a,b,tol)
+    real(dp), intent(in)   :: a,b,tol
+
+    if ( abs((a-b)/a) .lt. abs(tol) ) then
+       close_enough = .true.
+    else
+       close_enough = .false.
+    end if
+
+  end function close_enough
 
 
 
