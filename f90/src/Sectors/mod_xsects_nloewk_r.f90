@@ -310,10 +310,6 @@ contains
     limval_nlo_is = FintNLO_ns
     limval_nlo_is(2) = FintNLO_ns(4)  ! soft
     limval_nlo_is(3:4) = FintNLO_ns(2:3)  ! coll
-!    FintNLO_ew = FintNLO_ns  ! hard
-!    FintNLO_ew(2) = FintNLO_ns(4)  ! soft
-!    FintNLO_ew(3:4) = FintNLO_ns(2:3)  ! coll
-    
 #endif
 
   end function xsect_nloewk_r_is_ns
@@ -402,13 +398,6 @@ contains
     call open_histo()
 
     call kinematics_nlo_fs(xx,icoll,jother,HardProc,CLim,CSLim,SLim)
-
-!    print *, "xx",xx
-!    print *, "p1",HardProc%AmpMom(1:4,1)
-!    print *, "p2",HardProc%AmpMom(1:4,2)
-!    print *, "p3",HardProc%AmpMom(1:4,3)
-!    print *, "p4",HardProc%AmpMom(1:4,4)
-!    print *, "p5",HardProc%AmpMom(1:4,5)
     
 #if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
@@ -578,8 +567,6 @@ contains
     limval_nlo = FintNLO_ns
     limval_nlo(2) = FintNLO_ns(3)   ! soft
     limval_nlo(3) = FintNLO_ns(2)   ! soft
-
-    print *, "limval",limval_nlo
 #endif
 
   end function xsect_nlo_5i_a_ns
