@@ -15,6 +15,7 @@ module mod_aux_sectors
   public :: get_prefactor
   public :: get_respdf,get_respdf_vect, get_respdf_gen
   public :: get_respdf_hoppet
+  public :: get_respdf_hoppet_gen
 
   public :: fill_sv_logs
 
@@ -310,6 +311,171 @@ contains
   end subroutine get_respdf_vect
 
   !--
+
+    subroutine get_respdf_hoppet_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+    use hoppet_v1, except => dp
+    interface
+       function lumi(res,f1,f2)
+         use mod_types
+         real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
+         real(dp) :: lumi
+       end function lumi
+    end interface
+    type(pdf_table), intent(in)           :: myPDFs1,myPDFs2
+    type(pdf_table), intent(in), optional :: myPDFs1_Lmu(:),myPDFs2_Lmu(:)
+    integer, intent(in) :: as_ord,aem_ord
+    type(KinConfig), intent(in) :: proc
+    real(dp), intent(in)        :: amp2(:,:)
+    real(dp), intent(out)       :: respdf(:)
+
+    if (ipdf == 1) then
+       call get_respdf_hoppet_one_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+    elseif (ipdf == 3) then
+       call get_respdf_hoppet_three_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+    endif
+
+  contains
+
+  subroutine get_respdf_hoppet_one_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+      use hoppet_v1, except => dp
+      type(pdf_table), intent(in)           :: myPDFs1,myPDFs2
+      type(pdf_table), intent(in), optional :: myPDFs1_Lmu(:),myPDFs2_Lmu(:)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(-5:7,-5:7)
+      real(dp), intent(out)       :: respdf(:)
+      real(dp) :: pref,mu2ref
+      real(dp15) :: f1_dp15(-6:7),f2_dp15(-6:7)
+
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+
+      if (present(myPDFs1_Lmu)) then
+         mu2ref = proc%mu2ref
+         if (present(myPDFs2_Lmu)) then
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         endif
+      elseif (present(myPDFs2_Lmu)) then
+         mu2ref = proc%mu2ref
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+              myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+      else
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15)
+      endif
+
+      respdf(1) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+
+    end subroutine get_respdf_hoppet_one_gen
+
+    subroutine get_respdf_hoppet_three_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+      use hoppet_v1, except => dp
+      type(pdf_table), intent(in)           :: myPDFs1,myPDFs2
+      type(pdf_table), intent(in), optional :: myPDFs1_Lmu(:),myPDFs2_Lmu(:)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(-5:7,-5:7)
+      real(dp), intent(out)       :: respdf(:)
+      real(dp) :: pref,mu2ref
+      real(dp15) :: f1_dp15(-6:7),f2_dp15(-6:7)
+
+      !-- central scale
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+
+      if (present(myPDFs1_Lmu)) then
+         mu2ref = proc%mu2ref
+         if (present(myPDFs2_Lmu)) then
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         endif
+      elseif (present(myPDFs2_Lmu)) then
+         mu2ref = proc%mu2ref
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+              myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+      else
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15)
+      endif
+
+      respdf(1) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+
+      !-- do not compute the other scales if we're not doing histograms
+      if (nohistos) then
+
+         respdf(2:) = zero
+
+      else
+      
+         !-- half
+         call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+         
+         if (present(myPDFs1_Lmu)) then
+            mu2ref = proc%mu2ref
+            if (present(myPDFs2_Lmu)) then
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            else
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            endif
+         elseif (present(myPDFs2_Lmu)) then
+            mu2ref = proc%mu2ref
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15)
+         endif
+         
+         respdf(2) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+         
+         !-- two
+         call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+         
+         if (present(myPDFs1_Lmu)) then
+            mu2ref = proc%mu2ref
+            if (present(myPDFs2_Lmu)) then
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            else
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            endif
+         elseif (present(myPDFs2_Lmu)) then
+            mu2ref = proc%mu2ref
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15)
+         endif
+         
+         respdf(3) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+
+      endif
+         
+    end subroutine get_respdf_hoppet_three_gen
+ 
+  end subroutine get_respdf_hoppet_gen
+
 
   subroutine get_respdf_hoppet(myPDFs1,myPDFs2,lumi,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
     use hoppet_v1, except => dp

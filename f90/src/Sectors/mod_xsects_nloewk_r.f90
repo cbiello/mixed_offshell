@@ -60,7 +60,6 @@ contains
     real(dp)    :: z,s5i,eik(4),e5,eta5i,eik_gen(4,4)
     real(dp)    :: damp
     logical     :: oldcode
-    integer     :: i,j
 
     xsect_nloewk_r_is_ns = 0
 
@@ -739,7 +738,6 @@ contains
     real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7),res_tmp(-5:7,-5:7),res_loAA(-5:7,-5:7)
     real(dp)    :: z,s5i
     logical     :: oldcode
-    integer     :: i,j
 
     xsect_nloewk_r_is_aq = 0
 
