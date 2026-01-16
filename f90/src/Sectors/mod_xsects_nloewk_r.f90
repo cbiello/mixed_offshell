@@ -37,8 +37,6 @@ module mod_xsects_nloewk_r
   !CB: W xsect
   public :: xsect_nloewk_r_is_ns_wp ! deprecated -> delete
   public :: xsect_nloewk_r_is_ns_wm ! deprecated -> delete
-  !public :: xsect_nloewk_r_fs_53_ns_wp, xsect_nloewk_r_fs_54_ns_wp
-  !public :: xsect_nloewk_r_fs_53_ns_wm, xsect_nloewk_r_fs_54_ns_wm
 
 
 contains
