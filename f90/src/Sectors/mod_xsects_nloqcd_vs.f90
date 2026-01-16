@@ -114,11 +114,12 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf)
+    real(dp)    :: res_lo(-5:7,-5:7)
     !--
     real(dp)    :: res_lo_old(2,2)
     logical :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
 
     xsect_nloqcd_s_ns = 0
 
@@ -158,12 +159,12 @@ contains
 
        if (oldcode) then
            call res_tree_qqb(LOProc%AmpMom,res_lo_old)
-
            call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,0,LOProc,res_lo_old,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
            call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,0,LOProc,res_lo_old,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-
        else
-           print*, 'not implmented yet'
+           call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
+           call get_respdf_hoppet_gen(xPij,PDFs,1,0,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+           call get_respdf_hoppet_gen(PDFs,xPij,1,0,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
        endif
 
 
