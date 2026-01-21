@@ -341,8 +341,14 @@ contains
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintNLO_qg(2),kin(2)
     real(dp)    :: respdf(ipdf)
-    real(dp)    :: res_nlo(2,2),res_lo(2,2)
+    real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7)
+    !--
+    real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2)
     real(dp)    :: z,s5i
+    logical     :: oldcode
+
+    
+    oldcode = .true.
 
     xsect_nloqcd_r_is_qg = 0
 
@@ -366,8 +372,26 @@ contains
     call open_histo()
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C2Lim=C2Lim,compute_etas=.false.)
+
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_q,id_g,id_el,-id_el,id_q]
+    C2Lim%part = [id_q,-id_q,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_q]
+    C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_qp,id_g,id_el,-id_nue,id_q]
+    C2Lim%part = [id_qp,-id_q,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_q]
+    C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_qp,id_g,id_nue,-id_el,id_q]
+    C2Lim%part = [id_qp,-id_q,id_nue,-id_el]
+#endif
 
     !-- Hard
     call cut_histo(HardProc)
@@ -378,8 +402,14 @@ contains
 
     else    
 
-       call res_tree_g_qg(HardProc%AmpMom,res_nlo)
-       call get_respdf(qg_lumi,1,0,HardProc,res_nlo,respdf)
+       if (oldcode) then
+          call res_tree_g_qg(HardProc%AmpMom,res_nlo_old)
+          call get_respdf(qg_lumi,1,0,HardProc,res_nlo_old,respdf)
+       else
+          call res_tree_g_qg_gen(HardProc%AmpMom,res_lo)
+          call get_respdf_gen(1,0,HardProc,res_lo,respdf)
+       endif
+
 
        respdf = respdf*HardProc%wgt
 
@@ -400,8 +430,14 @@ contains
 
     else
 
-       call res_tree_qqb(C2Lim%AmpMom,res_lo)
-       call get_respdf(qg_lumi,1,0,C2Lim,res_lo,respdf)
+       if (oldcode) then
+          call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
+          call get_respdf(qg_lumi,1,0,C2Lim,res_lo_old,respdf)
+       else   
+          call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
+          res_lo = transition('none', 'g -> q', res_lo)
+          call get_respdf_gen(1,0,C2Lim,res_lo,respdf)
+       endif
 
        z   = C2Lim%Lim_KinInv(1)
        s5i = C2Lim%Lim_KinInv(2)
