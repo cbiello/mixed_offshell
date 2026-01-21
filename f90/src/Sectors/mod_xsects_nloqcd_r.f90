@@ -213,7 +213,7 @@ contains
 
     xsect_nloqcd_r_is_gq = 0
 
-    oldcode = .false.
+    oldcode = .true.
     limval_nlo = zero
 
     ff(1) = zero
@@ -236,8 +236,28 @@ contains
     call open_histo()
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,compute_etas=.false.)
+
+    ! define process specific partons
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_g,id_q,id_el,-id_el,id_q]
+    C1Lim%part = [-id_q,id_q,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_q]
+    C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_g,id_qp,id_el,-id_nue,id_q]
+    C1Lim%part = [-id_q,id_qp,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_q]
+    C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
+    
+    HardProc%part = [id_g,id_qp,id_nue,-id_el,id_q]
+    C1Lim%part = [-id_q,id_qp,id_nue,-id_el]
+#endif
+
 
     !-- Hard
     call cut_histo(HardProc)

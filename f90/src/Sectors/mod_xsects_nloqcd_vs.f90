@@ -266,7 +266,12 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf)
-    real(dp)    :: res_lo(2,2)
+    real(dp)    :: res_lo(-5:7,-5:7)
+    !--
+    real(dp)    :: res_lo_old(2,2)
+    logical :: oldcode
+
+    oldcode = .true.
 
     xsect_nloqcd_s_gq = 0
 
@@ -285,6 +290,15 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+    
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [-id_q,id_q,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [-id_q,id_qp,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [-id_q,id_qp,id_nue,-id_el]
+#endif
+
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -293,10 +307,17 @@ contains
        
     else    
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
 
-       !-- ns_lumi because the convolution is done in xPij
-       call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,0,LOProc,res_lo,respdf,myPDFs1_Lmu=[xPij_Lmu])
+       if (oldcode) then
+          call res_tree_qqb(LOProc%AmpMom,res_lo_old)
+          !-- ns_lumi because the convolution is done in xPij
+          call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,0,LOProc,res_lo_old,respdf,myPDFs1_Lmu=[xPij_Lmu])
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
+          !why don't we have to rotate?
+          call get_respdf_hoppet_gen(xPij,PDFs,1,0,LOProc,res_lo,respdf,myPDFs1_Lmu=[xPij_Lmu])
+       endif
+          
        respdf = tr*respdf*LOProc%wgt
 
        kin(1) = respdf(1)

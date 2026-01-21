@@ -1,3 +1,9 @@
+./configure --cfgfile=cfgchiara.txt
+
+
+
+
+
 Here some instructions and tricks
 1) to run CCDY be sure you set    oldcode = .false. 
    [useful for debugging]
