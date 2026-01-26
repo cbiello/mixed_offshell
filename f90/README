@@ -1,3 +1,9 @@
+./configure --cfgfile=cfgchiara.txt
+
+
+
+
+
 Here some instructions and tricks
 1) to run CCDY be sure you set    oldcode = .false. 
    [useful for debugging]
@@ -25,3 +31,12 @@ Old routines that should be deleted
 - xsect_nloewk_r_is_ns_wm
 - xsect_nloewk_r_fs_53_ns_wp 
 - xsect_nloewk_r_fs_54_ns_wp
+- xsect_nloqcd_v_ns_wp
+- xsect_nloqcd_s_ns_wp
+
+
+******************************************
+
+27.12.2025
+The NLO QCD implementation of (real-CT) and virtual 
+for Z, W is complete. Integrated collinear is still work in progress

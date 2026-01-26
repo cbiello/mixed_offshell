@@ -93,8 +93,6 @@ contains
   !-----------------------------------------------------------------
   !--- amplitudes without extra radiation
   !-----------------------------------------------------------------
-  
-
 
   ! conventions: 0 -> q(1) qb(2) l(3) lb(4)
   ! amp returned as -5:7 x -5:7 matrix
@@ -110,7 +108,8 @@ contains
   end subroutine res_qcdloop_qqb_gen
 
 
-
+  ! old amplitudes for NC
+  
   !-- res(1,:) = q qb -> e- e [dn,up]
   !-- res(2,:) = qb q -> e- e [dn,up]
   subroutine res_qcdloop_qqb(p,res0,res1fin)
