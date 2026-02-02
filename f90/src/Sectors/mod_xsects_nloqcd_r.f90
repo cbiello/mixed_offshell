@@ -47,7 +47,13 @@ contains
 
     oldcode = .true.
 
+    !----- initialisation
     xsect_nloqcd_r_is_ns = 0
+    res_nlo_old(:,:) = zero
+    res_lo_old(:,:) = zero
+    res_nlo(:,:) = zero
+    res_lo(:,:) = zero
+    !----- end
 
     ff(1) = zero
 
@@ -213,7 +219,7 @@ contains
 
     xsect_nloqcd_r_is_gq = 0
 
-    oldcode = .true.
+    oldcode = .false.
     limval_nlo = zero
 
     ff(1) = zero
@@ -275,7 +281,6 @@ contains
           call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
        endif
-          
 
        respdf = respdf*HardProc%wgt
 
