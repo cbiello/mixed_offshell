@@ -201,6 +201,9 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_HC1C2 = FintNLO_ns
+    limval_nlo_is = zero
+    limval_nlo_is(1) = FintNLO_ns(1)
+    limval_nlo_is(3:4) = FintNLO_ns(2:3)  ! coll
 #endif
 
   end function xsect_nloqcd_r_is_ns
