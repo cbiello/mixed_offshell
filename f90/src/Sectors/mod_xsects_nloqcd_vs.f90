@@ -271,7 +271,7 @@ contains
     real(dp)    :: res_lo_old(2,2)
     logical :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
 
     xsect_nloqcd_s_gq = 0
 

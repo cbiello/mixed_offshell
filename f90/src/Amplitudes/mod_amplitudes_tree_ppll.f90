@@ -421,10 +421,12 @@ contains
           jj = 3
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+          if ( abs(j).eq.5 ) cycle 
 #elif (_Vcharge == +1)
           jj = 3
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+          if ( abs(j).eq.5) cycle
 #endif          
           if (i .eq. 0 .and. j .gt. 0) then   ! gq
              res(i,j) = res1(2,jj)
@@ -458,10 +460,12 @@ contains
           ii = 3
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+          if ( abs(i).eq.5 ) cycle
 #elif (_Vcharge == 1)
           ii = 3
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+          if ( abs(i).eq.5 ) cycle
 #endif
           
           if (i .gt. 0 .and. j .eq. 0) then   ! qg
@@ -636,10 +640,12 @@ contains
           jj = 3
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+          if ( abs(j).eq.5 ) cycle
 #elif (_Vcharge == +1)
           jj = 3
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+          if ( abs(j).eq.5 ) cycle
 #endif          
           if (i .eq. 0 .and. j .gt. 0) then   ! gq
              res(i,j) = res1(2,jj)
