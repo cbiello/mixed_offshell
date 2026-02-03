@@ -12,6 +12,7 @@ module mod_xsects_nloewk_vs
   use mod_amplitudes_loop_ppll
   use mod_hoppet_tools
   use mod_hoppet_nlo
+  use, intrinsic :: ieee_arithmetic
   implicit none
 #if(_withchecks == 1)
   real(dp), public, save :: FintNLOEWK_vs(1)
@@ -19,7 +20,10 @@ module mod_xsects_nloewk_vs
 
   private
 
-  public :: xsect_nloewk_v_ns,xsect_nloewk_v_aa
+  public :: xsect_nloewk_v_ns ![WORK IN PROGRESS]
+
+
+  public :: xsect_nloewk_v_aa
   public :: xsect_nloewk_s_ns,xsect_nloewk_s_aa
   public :: xsect_nloewk_s_aq,xsect_nloewk_s_qa
 
@@ -32,9 +36,19 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf)
-    real(dp)    :: res_tree(2,3),res_loop(2,3)
+    real(dp)    :: res_tree(-5:7,-5:7),res_loop(-5:7,-5:7)
+    real(dp)    :: res_tmp(-5:7,-5:7)
+    !--
+    real(dp)    :: res_tree_old(2,3),res_loop_old(2,3)
+    real(dp)    :: res_loop_old_tmp(2,3)
+    integer :: i, j 
+    logical :: oldcode
+
+    oldcode = .true.
 
     xsect_nloewk_v_ns = 0
+    res_loop(:,:) = 0
+    res_tree(:,:) = 0
 
     ff(1) = zero
 
@@ -51,6 +65,16 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+    ! define process specific partons
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+#endif
+
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -58,12 +82,18 @@ contains
        kin(1) = zero
        
     else    
+    
+         !print*, 'LOProc%AmpMom= ',LOProc%AmpMom
 
-       call res_ewkloop_qqb(LOProc%AmpMom,res_tree,res_loop)
-       call get_respdf(ns_lumi_splitb,0,1,LOProc,res_loop,respdf)
+       if (oldcode) then
+          call res_ewkloop_qqb(LOProc%AmpMom,res_tree_old,res_loop_old)
+          call get_respdf(ns_lumi_splitb,0,1,LOProc,res_loop_old,respdf)
+       else
+          call res_ewkloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
+          call get_respdf_gen(0,1,LOProc,res_loop,respdf)
+       endif 
 
        respdf = respdf*LOProc%wgt
-       
        kin(1) = respdf(1)
 
        call fill_histo(respdf,vegasweight)
