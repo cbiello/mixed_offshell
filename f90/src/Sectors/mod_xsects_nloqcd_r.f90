@@ -42,6 +42,7 @@ contains
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2)
     real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7)
     real(dp)    :: z,s5i
+    integer     :: i, j
     !--
     logical :: oldcode
 
@@ -93,6 +94,7 @@ contains
     HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g]
     C1Lim%part = [id_q,-id_qp,id_el,-id_nue]
     C2Lim%part = [id_q,-id_qp,id_el,-id_nue]
+
 #elif  (_Vcharge == +1)
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
@@ -118,8 +120,16 @@ contains
           call get_respdf(ns_lumi,1,0,HardProc,res_nlo_old,respdf)
        else 
           call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
+          
+          ! print*, 'res_nlo'
+          ! do i = -5, 7
+          !    do j = -5, 7
+          !        write(*,'(2I4,1X,ES24.16)') i, j, res_nlo(i,j)
+          !    end do
+          ! end do
+       
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
-       endif 
+       endif
 
        respdf = respdf*HardProc%wgt
 
@@ -288,7 +298,7 @@ contains
           call res_tree_g_gq(HardProc%AmpMom,res_nlo_old)
           call get_respdf(gq_lumi,1,0,HardProc,res_nlo_old,respdf)
        else
-          call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)
+          call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)          
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
        endif
 

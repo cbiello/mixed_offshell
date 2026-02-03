@@ -32,7 +32,7 @@ module mod_aux_sectors
 
   public :: gen_lumi
 
-  public :: multiply_IS_charges
+  public :: multiply_IS_charges, multiply_FSQ_charges
 
   public :: transition
   
@@ -1003,6 +1003,23 @@ contains
     enddo
 
   end function multiply_IS_charges
+
+
+  function multiply_FSQ_charges(res_in) result(res_out)
+    real(dp), intent(in)  :: res_in(-5:7,-5:7)
+    real(dp) :: res_out(-5:7,-5:7)
+    integer               :: i,j
+    real(dp)  :: FSQ_charge
+
+    
+    do i = -5,7
+       do j = -5,7
+          FSQ_charge = Q_IS(1) + Q_IS(2) - Q3 - Q4
+          res_out(i,j) = res_in(i,j)*FSQ_charge**2
+       enddo
+    enddo
+
+  end function multiply_FSQ_charges
   !--
 
   !-- NaN checks
