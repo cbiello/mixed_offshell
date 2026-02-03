@@ -892,9 +892,9 @@ contains
        enddo
 
 #elif (_Vcharge == -1)
-       res(j,3) = ubdgmsq(iconf1(1,j),iconf1(3,j),iconf1(4,j),iconf1(6,j),iconf1(5,j),iconf1(2,j),za,zb,sprod)/cms_sw2**2
+       res(j,3) = ubdgmsq(iconf1(1,j),iconf1(3,j),iconf1(4,j),iconf1(6,j),iconf1(5,j),iconf1(2,j),za,zb,sprod)
 #elif (_Vcharge == +1)
-       res(j,3) = ubdgmsq(iconf1(3,j),iconf1(1,j),iconf1(6,j),iconf1(4,j),iconf1(5,j),iconf1(2,j),zb,za,sprod)/ cms_sw2**2
+       res(j,3) = ubdgmsq(iconf1(3,j),iconf1(1,j),iconf1(6,j),iconf1(4,j),iconf1(5,j),iconf1(2,j),zb,za,sprod)
 
 #endif
  enddo
@@ -1880,6 +1880,12 @@ contains
            /(za(p2,p5)*zb(p2,p6)*zb(p6,p1)*(s345-s(p3,p4))))*prp34/s(p3,p4) &
            +zazb(p3,p1,p6,p2)**2*zb(p4,p5) &
            /(za(p3,p5)*zb(p2,p6)*zb(p1,p6)*(s345-s(p3,p4)))*prp345/s345)
+
+      aLL = aLL*cms_cLW*cms_cLWnue*two
+      aLR = aLR*cms_cLW*cms_cLWnue*two
+      aRL = aRL*cms_cLW*cms_cLWnue*two
+      aRR = aRR*cms_cLW*cms_cLWnue*two
+      
 
       ubdgmsq=abs(aLL)**2+abs(aRR)**2+abs(aRL)**2+abs(aLR)**2
 
