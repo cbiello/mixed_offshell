@@ -65,6 +65,7 @@ contains
     propZ = mll/(mll-mzsq_prop)
     propW = mll/(mll-mwsq_prop)
 
+
 #if (_Vcharge == 0)
     ! Z boson
     coupl = zero
@@ -75,7 +76,7 @@ contains
 #else
     ! W+ or W-        
     coupl = czero
-    coupl(3,-1,-1) = propW * cLW* cLWnue
+    coupl(3,-1,-1) = propW * cms_cLW* cms_cLWnue
 #endif
     
   end subroutine get_coupl_cmplx_gen
@@ -129,7 +130,7 @@ contains
 #else
     ! W+ or W-        
         coupl = czero
-        coupl(:,-1,-1) = propW * cLW* cLWnue
+        coupl(:,-1,-1) = propW * cms_cLW* cms_cLWnue
 #endif
 
       end subroutine get_coupl_cmplx
@@ -152,7 +153,7 @@ contains
 
     !u + dbar > W+
     !d + ubar > W-
-    coupl(:,-1,-1) = propW * cLWud * cLWnue
+    coupl(:,-1,-1) = propW * cms_cLWud * cms_cLWnue
     coupl(:,-1,+1) = czero
     coupl(:,+1,-1) = czero
     coupl(:,+1,+1) = czero
