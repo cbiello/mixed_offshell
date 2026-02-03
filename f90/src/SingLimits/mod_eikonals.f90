@@ -64,24 +64,30 @@ contains
     endif
 
 
-
     eik = zero
     res_out = zero
     do i = 1, size(array_pos)
        do j = i+1, size(array_pos)
           m = array_pos(i)
           n = array_pos(j)
+          
           eik =  -etas(m,n)/etas(m,a_pos)/etas(n,a_pos)
           do al = -5,5
              do be = -5,5
-                Qvec = [ -Q_IS(al), -Q_IS(be), Q3, Q4, - Qq(al)  - Qq(be) - Q3 - Q4]                
+                !                Qvec = [ -Q_IS(al), -Q_IS(be), Q3, Q4, Q_IS(al)  + Q_IS(be) - Q3 - Q4]
+                Qvec = [ -Q_IS(al), -Q_IS(be), Q3, Q4, Q_IS(al)  + Q_IS(be) - Q3 - Q4]
                 res_out(al,be) = res_out(al,be) + ampl(al,be)*eik*Qvec(m)*Qvec(n)
-
-             enddo
+                ! res_out(al,be) = res_out(al,be) + eik*Qvec(m)*Qvec(n)
+                if (abs(ampl(al,be)) .gt. zero) then
+                !   print *, al,be,m,n,Qvec(m),Qvec(n)
+                endif
+                enddo
           enddo
           
       enddo
-    enddo
+   enddo
+
+   
 
   end subroutine get_qed_eik_gen
 
