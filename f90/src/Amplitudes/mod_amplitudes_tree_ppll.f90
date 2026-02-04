@@ -970,8 +970,9 @@ contains
     real(dp), intent(out) :: res(-5:7,-5:7)
 
     res = zero
+#if (_Vcharge == 0)          
     call res_treeAA_aa(p,res(7,7))
-
+#endif
 
   end subroutine res_treeAA_aa_gen
 
