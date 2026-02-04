@@ -229,14 +229,21 @@ contains
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7)
     real(dp)    :: z,s5i
     logical     :: oldcode
-
-    xsect_nloqcd_r_is_gq = 0
+    integer :: i, j
 
     oldcode = .false.
+
+    !----- initialisation
+    xsect_nloqcd_r_is_gq = 0
+    res_nlo_old(:,:) = zero
+    res_lo_old(:,:) = zero
+    res_nlo(:,:) = zero
+    res_lo(:,:) = zero
     limval_nlo = zero
-
     ff(1) = zero
-
+    !----- end
+    
+    
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
 
@@ -295,6 +302,28 @@ contains
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
        endif
 
+
+
+      
+      
+
+
+       print*, 'res_nlo(-5,0) =', res_nlo(-5,0)
+       print*, 'res_nlo(0,-5) =', res_nlo(0,-5)
+       print*, 'res_nlo(5,0) =', res_nlo(5,0)
+       print*, 'res_nlo(0,5) =', res_nlo(0,5)
+
+
+
+   !do i = -5, 7
+   !    do j = -5, 7
+   !       write(*,'(2I4,1X,ES24.16)') i, j, res_nlo(i,j)
+   !    end do
+   ! end do
+
+
+
+      
        respdf = respdf*HardProc%wgt
 
        kin(1) = respdf(1)
@@ -368,9 +397,16 @@ contains
     
     oldcode = .false.
 
+    !----- initialisation
     xsect_nloqcd_r_is_qg = 0
-
+    res_nlo_old(:,:) = zero
+    res_lo_old(:,:) = zero
+    res_nlo(:,:) = zero
+    res_lo(:,:) = zero
+    limval_nlo = zero
     ff(1) = zero
+    !----- end
+
 
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
@@ -427,6 +463,15 @@ contains
           call res_tree_g_qg_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
        endif
+
+
+       print*, 'res_nlo(-5,0) =', res_nlo(-5,0)
+       print*, 'res_nlo(0,-5) =', res_nlo(0,-5)
+       print*, 'res_nlo(5,0) =', res_nlo(5,0)
+       print*, 'res_nlo(0,5) =', res_nlo(0,5)
+
+
+       pause
 
 
        respdf = respdf*HardProc%wgt
