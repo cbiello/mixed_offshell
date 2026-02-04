@@ -1,4 +1,4 @@
-module mod_cut_histo_W_ATLAS
+module mod_cut_histo_V_minimal
   use mod_types
   use mod_consts_dp
   use mod_parms
@@ -257,4 +257,4 @@ contains
 
   end subroutine cut_histo
   
-end module mod_cut_histo_W_ATLAS 
+end module mod_cut_histo_V_minimal 

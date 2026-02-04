@@ -28,8 +28,7 @@ With2L=false
 Vcharge=0
 
 #Analysis
-#analysis=w_dflt
-analysis=W_ATLAS
+analysis=V_minimal
 
 #---------------------------------
 # Mandatory configuration options
