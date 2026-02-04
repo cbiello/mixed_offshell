@@ -44,7 +44,7 @@ contains
     integer :: i, j 
     logical :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
 
     xsect_nloewk_v_ns = 0
     res_loop(:,:) = 0
@@ -83,8 +83,6 @@ contains
        
     else    
     
-         !print*, 'LOProc%AmpMom= ',LOProc%AmpMom
-
        if (oldcode) then
           call res_ewkloop_qqb(LOProc%AmpMom,res_tree_old,res_loop_old)
           call get_respdf(ns_lumi_splitb,0,1,LOProc,res_loop_old,respdf)

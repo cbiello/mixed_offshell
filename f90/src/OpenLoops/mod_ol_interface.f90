@@ -77,12 +77,6 @@ contains
           call register_red_qcd(1)
        elseif (corr.eq.'nloewk' .and. sec.eq.'v') then
           call register_red_ew(1)
-       elseif (corr.eq.'nloewk' .and. sec .eq.'r_is_wp') then
-          call register_red_ewreal(1)
-       elseif (corr.eq.'nloewk' .and. sec.eq.'r_is_wm') then
-          call register_red_ewreal(-1)
-       elseif (corr.eq.'nloewk' .and. sec.eq.'r_is') then
-          call register_red_ewreal(0)
        endif
 
     elseif (corr.eq.'nloewk' .and. sec.eq.'v' .and. ch.eq.'aa') then
@@ -243,18 +237,23 @@ contains
       
     end subroutine register_red_qcd
 
-    !-- q qb -> e- e+ [NLO EW]
+    !-- quark-quark > lep lep photon [NLO EW]
     subroutine register_red_ew(istart)
       integer, intent(in) :: istart
       call set_parameter("order_ew", 2)  !-- tree-level
       call set_parameter("order_qcd", 0) !-- tree-level
       call set_parameter("loop_order_ew", 3) !-- one-loop
       call set_parameter("loop_order_qcd",0) !-- one-loop
-      !
+      !-- q qb -> e- e+ 
       OL_id(istart  ) = register_process("1 -1  -> 11 -11",11) !-- d db -> e- e+
       OL_id(istart+1) = register_process("2 -2  -> 11 -11",11) !-- u ub -> e- e+
       OL_id(istart+2) = register_process("5 -5  -> 11 -11",11) !-- b bb -> e- e+
-
+      !-- q q' > W+ > v l+
+      OL_id(istart+3) = register_process("-1 2  -> 12 -11",11) !-- db u -> ve e+
+      OL_id(istart+4) = register_process("2 -1  -> 12 -11",11) !-- u db -> ve e+ 
+      !-- q q' > W- > l- v~
+      !OL_id(istart+5) = register_process("1 -2  -> 11 -12",11) !-- d ub -> e- ve~ : obtained by crossing 
+      !OL_id(istart+6) = register_process("-2 1  -> 11 -12",11) !-- ub d -> e- ve~ : obtained by crossing
     end subroutine register_red_ew
 
     !-- q qpb -> l nu [NLO EW]
