@@ -353,8 +353,8 @@ contains
       OL_id(istart+1) = register_process("2 -1  -> 12 -11",11) !-- u db -> ve e+
 #elseif (_Vcharge == -1)
       !-- q q' > W- > l- v~
-      OL_id(istart+5) = register_process("1 -2  -> 11 -12",11) !-- d ub -> e- ve~ 
-      OL_id(istart+6) = register_process("-2 1  -> 11 -12",11) !-- ub d -> e- ve~
+      OL_id(istart) = register_process("1 -2  -> 11 -12",11) !-- d ub -> e- ve~ 
+      OL_id(istart+1) = register_process("-2 1  -> 11 -12",11) !-- ub d -> e- ve~
 #endif
       
     end subroutine register_red_ew

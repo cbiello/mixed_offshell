@@ -109,8 +109,7 @@ contains
   end subroutine res_qcdloop_qqb_gen
 
 
-  ! old amplitudes for NC
-  
+  ! old amplitudes for NC  
   !-- res(1,:) = q qb -> e- e [dn,up]
   !-- res(2,:) = qb q -> e- e [dn,up]
   subroutine res_qcdloop_qqb(p,res0,res1fin)
@@ -181,18 +180,6 @@ contains
     real(dp) :: finiteZdn,finiteZup
     real(dp) :: finiteWdu,finiteWud 
 
-
-
-    !print*, 'p= ', p(:,:)
-
-
-    !print*, 'two*scr(p(:,1),p(:,2))= ', two*scr(p(:,1),p(:,2))
-    !print*, 'two*scr(p(:,1),p(:,3))= ', two*scr(p(:,1),p(:,3))
-    !print*, 'two*scr(p(:,1),p(:,4))= ', two*scr(p(:,1),p(:,4))
-    !print*, 'two*scr(p(:,2),p(:,3))= ', two*scr(p(:,2),p(:,3))
-    !print*, 'two*scr(p(:,2),p(:,4))= ', two*scr(p(:,2),p(:,4))
-    !print*, 'two*scr(p(:,3),p(:,4))= ', two*scr(p(:,3),p(:,4))
-
     p_ol(:,3:4) = p(:,3:4)
 
     ord(:,1) = [1,2] !-- q qb
@@ -200,66 +187,63 @@ contains
 
     do i = 1,2
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
-       do j = 1,5
+#if (_Vcharge==0)
+       do j = 1,3
+#else
+       do j = 1,2
+#endif
           call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
        enddo
+
     enddo
 
     res0 = res0_ol
 
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
     res1 = res1/(aem_ol/twopi)
-
     
     !-- now go to finite part
     call get_Lij(p,mu_ol,[1,2,3,4],Lij,Lij2)
 
+#if (_Vcharge == 0)
+    
     finiteZdn = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
     res1fin(1,1) = res1(0,1,1) - finiteZdn * res0(1,1)
 
     finiteZup = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
     res1fin(1,2) = res1(0,1,2) - finiteZup * res0(1,2)
-
     res1fin(1,3) = res1(0,1,3) - finiteZdn * res0(1,3)
-
-    !print*, 'fin 1= ', finiteZdn, finiteZup, finiteZdn
 
     finiteZdn = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
     res1fin(2,1) = res1(0,2,1) - finiteZdn * res0(2,1)
 
     finiteZup = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
     res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
-
     res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
 
-    !print*, 'fin 2= ', finiteZdn, finiteZup, finiteZdn
+#elseif (_Vcharge == 1)
     
     !--- filling up the W
-
     ! dx u > W+ > v l+
     finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
-    res1fin(1,4) = res1(0,1,4) - finiteWdu * res0(1,4)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
     
-    !print*, 'fin 1 Wdu = ', finiteWdu
-
     ! u dx > W+ > v l+
     finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
-    res1fin(1,5) = res1(0,1,5) - finiteWud * res0(1,5)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
-    !print*, 'fin 1 Wud = ', finiteWud
-
+#elseif (_Vcharge == -1)
+    
     ! d ux > W- > l v~
     finiteWdu = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
-    res1fin(2,4) = res1(0,2,4) - finiteWdu * res0(2,4)
-
-    !print*, 'fin 2 Wdu = ', finiteWdu
+    res1fin(2,1) = res1(0,2,1) - finiteWdu * res0(2,1)
 
     ! ux d > W- > l v~
     finiteWud = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
-    res1fin(1,5) = res1(0,2,5) - finiteWud * res0(2,5)
+    res1fin(1,2) = res1(0,2,2) - finiteWud * res0(2,2)
 
-   ! print*, 'fin 2 Wud = ', finiteWud
-
+#endif
+    
     !--reshape the resfin matrix element to have the new shape 
 #if (_Vcharge == 0) 
     res1loopfin(-1,1) = res1fin(2,1)
@@ -273,14 +257,14 @@ contains
     res1loopfin(3,-3) = res1fin(1,1)
     res1loopfin(4,-4) = res1fin(1,2)
     res1loopfin(5,-5) = res1fin(1,3)
-#elif (_Vcharge == +1)
-    res1loopfin(-1,2) = res1fin(1,4)
-    res1loopfin(2,-1) = res1fin(1,5)
+#elif (_Vcharge == 1)
+    res1loopfin(-1,2) = res1fin(1,1)
+    res1loopfin(2,-1) = res1fin(1,2)
     res1loopfin(4,-3) = res1loopfin(-1,2)
     res1loopfin(-3,4) = res1loopfin(2,-1)
 #elif (_Vcharge == -1)
-    res1loopfin(1,-2) = res1fin(2,4)
-    res1loopfin(-2,1) = res1fin(2,5)
+    res1loopfin(1,-2) = res1fin(2,1)
+    res1loopfin(-2,1) = res1fin(2,2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
     res1loopfin(3,-4) = res1loopfin(1,-2)
 #endif
