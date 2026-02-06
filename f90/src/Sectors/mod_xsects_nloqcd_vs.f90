@@ -11,7 +11,6 @@ module mod_xsects_nloqcd_vs
   use mod_amplitudes_tree_ppll
   use mod_amplitudes_tree_ppnul
   use mod_amplitudes_loop_ppll
-  use mod_amplitudes_loop_pplnu
   use mod_hoppet_tools
   use mod_hoppet_nlo
   implicit none

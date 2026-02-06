@@ -221,7 +221,7 @@ contains
     res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
     res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
 
-#elseif (_Vcharge == 1)
+#elif (_Vcharge == 1)
     
     !--- filling up the W
     ! dx u > W+ > v l+
@@ -232,7 +232,7 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
-#elseif (_Vcharge == -1)
+#elif (_Vcharge == -1)
     
     ! d ux > W- > l v~
     finiteWdu = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
@@ -281,6 +281,8 @@ contains
     real(dp15) :: res1(0:2),acc,res0_ol
     real(dp) :: Lij(4,4),Lij2(4,4)
 
+#if(_Vcharge==0)
+    
     p_ol = p
     
     call evaluate_loop(OL_id(1),p_ol,res0_ol,res1,acc)
@@ -292,6 +294,13 @@ contains
     !-- now go to finite part
     call get_Lij(p,mu_ol,[1,2],Lij,Lij2)
     res1fin = res1(0) - get_fin_ewk_aallb(1,2,Lij,Lij2)*res0
+
+#else
+
+    write(*,*), 'no aa process for CC DY'
+    stop
+
+#endif
 
 #if(_withchecks == 1)
     if (checkpoles) then
@@ -305,6 +314,67 @@ contains
   !--- amplitudes with extra radiation, ns
   !-----------------------------------------------------------------
   
+  !-- res(1,:) = q qb -> e- e+ g [dn,up,bot]
+  !-- res(2,:) = qb q -> e- e+ g [dn,up,bot]
+  subroutine res_ewkloop_g_qqb_gen(p,res0,res1fin)
+    real(dp), intent(in)  :: p(4,5)
+    real(dp), intent(out) :: res0(2,3),res1fin(2,3)
+    real(dp15) :: p_ol(4,5)
+    real(dp15) :: res1(0:2,2,3),acc(2,3),res0_ol(2,3)
+    integer  :: ord(2,2),i,j
+    real(dp) :: Lij(5,5),Lij2(5,5)
+
+    p_ol(:,3:5) = p(:,3:5)
+    
+    ord(:,1) = [1,2] !-- q qb
+    ord(:,2) = [2,1] !-- qb q
+
+    do i = 1,2
+       p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
+#if (_Vcharge==0)
+       do j = 1,3
+          call evaluate_loop(OL_id(j+3),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+       enddo
+#else
+       do j = 1,2
+          call evaluate_loop(OL_id(j+2),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+       enddo       
+#endif
+    enddo
+    res0 = res0_ol
+
+    !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
+    res1 = res1/(two*aem_ol*as_ol)
+    res0 = res0/(as_ol*four*pi)
+
+    !-- now go to finite part
+    call get_Lij(p,mu_ol,[1,2,3,4],Lij,Lij2)
+
+#if (_Vcharge==0)
+
+    res1fin(1,:) = res1(0,1,:) - get_fin_ewk_qqbllb(2,1,3,4,Lij,Lij2)*res0(1,:)
+    res1fin(2,:) = res1(0,2,:) - get_fin_ewk_qqbllb(1,2,3,4,Lij,Lij2)*res0(2,:)
+
+#elif (_Vcharge==1)
+
+    !TODO
+    
+#elif (_Vcharge==-1)
+
+    !TODO
+
+#endif
+
+#if(_withchecks == 1)
+    if (checkpoles) then
+       call check_poles('q qb->e- e+ g ew',i1ewk_qqbllb(2,1,3,4,Lij,Lij2),res0(1,:),res1(:,1,:))
+       call check_poles('qb q->e- e+ g ew',i1ewk_qqbllb(1,2,3,4,Lij,Lij2),res0(2,:),res1(:,2,:))
+    endif
+#endif
+    
+  end subroutine res_ewkloop_g_qqb_gen
+  
+  !----- OLD CODE
   !-- res(1,:) = q qb -> e- e+ g [dn,up,bot]
   !-- res(2,:) = qb q -> e- e+ g [dn,up,bot]
   subroutine res_ewkloop_g_qqb(p,res0,res1fin)
