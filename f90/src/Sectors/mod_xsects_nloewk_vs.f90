@@ -21,10 +21,10 @@ module mod_xsects_nloewk_vs
   private
 
   public :: xsect_nloewk_v_ns ![WORK IN PROGRESS]
-
+  public :: xsect_nloewk_s_ns ![WORK IN PROGRESS]
 
   public :: xsect_nloewk_v_aa
-  public :: xsect_nloewk_s_ns,xsect_nloewk_s_aa
+  public :: xsect_nloewk_s_aa
   public :: xsect_nloewk_s_aq,xsect_nloewk_s_qa
 
 contains
@@ -174,8 +174,18 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_3(ipdf)
-    real(dp)    :: res_lo(2,2),res_lo_tmp(2,2),bit1,bit2,eta13,eta14
+    real(dp)    :: res_lo_old(2,2),res_lo_tmp_old(2,2),bit1,bit2,eta13,eta14
+    !--
+    real(dp)    :: res_lo(-5:7,-5:7), res_lo_tmp(-5:7,-5:7)
+    !--
+    integer :: i, j
+    logical :: oldcode
 
+    oldcode = .true.
+    
+    
+    res_lo_old(:,:) = 0
+    res_lo_tmp_old(:,:) = 0
     xsect_nloewk_s_ns = 0
 
     ff(1) = zero
@@ -193,6 +203,15 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+       ! define process specific partons
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+#endif
+
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -200,30 +219,36 @@ contains
        kin(1) = zero
        
     else    
+ 
+        if (oldcode) then 
+            call res_tree_qqb(LOProc%AmpMom,res_lo_old)
+            res_lo_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
+            res_lo_tmp_old(:,2) = res_lo_old(:,2) * Qup2
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       res_lo_tmp(:,1) = res_lo(:,1) * Qdn2
-       res_lo_tmp(:,2) = res_lo(:,2) * Qup2
+            !-- z-dependent bit
+             call get_respdf_hoppet(xPij,PDFs,ns_lumi,0,1,LOProc,res_lo_tmp_old,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+             respdf_1 = respdf_1*LOProc%wgt
 
-       !-- z-dependent bit
-       call get_respdf_hoppet(xPij,PDFs,ns_lumi,0,1,LOProc,res_lo_tmp,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-       respdf_1 = respdf_1*LOProc%wgt
+             call get_respdf_hoppet(PDFs,xPij,ns_lumi,0,1,LOProc,res_lo_tmp_old,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+             respdf_2 = respdf_2*LOProc%wgt
 
-       call get_respdf_hoppet(PDFs,xPij,ns_lumi,0,1,LOProc,res_lo_tmp,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-       respdf_2 = respdf_2*LOProc%wgt
+             !-- FLM[1,2] bit, assuming Emax = sqrt(q2)/2
+             eta13 = half*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,3))/LoProc%AmpMom(1,1)/LOProc%AmpMom(1,3)
+             eta14 = half*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,4))/LoProc%AmpMom(1,1)/LOProc%AmpMom(1,4)
+             bit1 = 13._dp - two/three*pisq
+             bit2 = log(eta13/eta14)*(three/two)+real(dilog2(one-eta13),kind=dp)-real(dilog2(one-eta14),kind=dp)
 
-       !-- FLM[1,2] bit, assuming Emax = sqrt(q2)/2
-       eta13 = half*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,3))/LoProc%AmpMom(1,1)/LOProc%AmpMom(1,3)
-       eta14 = half*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,4))/LoProc%AmpMom(1,1)/LOProc%AmpMom(1,4)
-       bit1 = 13._dp - two/three*pisq
-       bit2 = log(eta13/eta14)*(three/two)+real(dilog2(one-eta13),kind=dp)-real(dilog2(one-eta14),kind=dp)
+             res_lo_tmp_old(1,:) = (Q_lep2 * bit1 + four*Q_lep*[Qdn,Qup] * bit2)*res_lo_old(1,:)
+             res_lo_tmp_old(2,:) = (Q_lep2 * bit1 - four*Q_lep*[Qdn,Qup] * bit2)*res_lo_old(2,:)
 
-       res_lo_tmp(1,:) = (Q_lep2 * bit1 + four*Q_lep*[Qdn,Qup] * bit2)*res_lo(1,:)
-       res_lo_tmp(2,:) = (Q_lep2 * bit1 - four*Q_lep*[Qdn,Qup] * bit2)*res_lo(2,:)
-
-       call get_respdf(ns_lumi,0,1,LOProc,res_lo_tmp,respdf_3)
-       respdf_3 = respdf_3*LOproc%wgt
+             call get_respdf(ns_lumi,0,1,LOProc,res_lo_tmp_old,respdf_3)
+             respdf_3 = respdf_3*LOproc%wgt
        
+       else 
+            print*, 'NOT IMPLEMENTED YET'
+            call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
+       endif 
+
        respdf = respdf_1 + respdf_2 + respdf_3
        
        kin(1) = respdf(1)
