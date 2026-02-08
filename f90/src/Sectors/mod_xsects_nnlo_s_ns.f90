@@ -1107,7 +1107,12 @@ contains
     real(dp) :: intsub(ipdf),intsub_1(ipdf),intsub_2(ipdf),sv_logs(ipdf)
     real(dp) :: intsub_pls(ipdf),intsub_els(ipdf)
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1)
-    real(dp) :: res_nlo(2,2),res_tmp(2,2),eik_qed(4)
+    real(dp) :: res_nlo(2,2),res_tmp(2,2),eik_qed(4) !FIX ME: add "old" in the name 
+    !---
+    real(dp) :: res_nlo_new(-5:7,-5:7),res_tmp_new(-5:7,-5:7) !FIX ME: remove "new" in the name 
+    logical  :: oldcode
+
+    oldcode = .false.
 
     xsect_nnlo_s_ns_oewk_is = 0
 
@@ -1158,7 +1163,57 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
+    ! define process specific partons
+#if (_Vcharge == 0)
     HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_el,-id_el]
+    C2Lim_z1%ids(1:4)    = [0,0,id_el,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_el]
+    SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
+    SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
+
+    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
+    C1Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
+    C2Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
+    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
+    SC1Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
+    SC2Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_el,-id_nue]
+    C2Lim_z1%ids(1:4)    = [0,0,id_el,-id_nue]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_nue]
+    SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
+    SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
+
+    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    C1Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
+    C2Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
+    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
+    SC1Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
+    SC2Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
+
+#elif  (_Vcharge == +1)
+    HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_nue,-id_el]
+    C2Lim_z1%ids(1:4)    = [0,0,id_nue,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_nue,-id_el]
+    SC1Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
+    SC2Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
+
+    HardProc_z1%part = [id_q,-id_qp,id_nue,-id_el,id_a]
+    C1Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
+    C2Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
+    SLim_z1%part     = [id_q,-id_qp,id_nue,-id_el]
+    SC1Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
+    SC2Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
+#endif
+
+
+!HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+
+
     call cut_histo(HardProc_z1)
 
     if (HardProc_z1%makecut) then
@@ -1602,7 +1657,57 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    ! define process specific partons
+#if (_Vcharge == 0)
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_el,-id_el]
+    C2Lim_z1%ids(1:4)    = [0,0,id_el,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_el]
+    SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
+    SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
+
+    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
+    C1Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
+    C2Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
+    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
+    SC1Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
+    SC2Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_el,-id_nue]
+    C2Lim_z1%ids(1:4)    = [0,0,id_el,-id_nue]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_nue]
+    SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
+    SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
+
+    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    C1Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
+    C2Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
+    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
+    SC1Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
+    SC2Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
+
+#elif  (_Vcharge == +1)
+    HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_nue,-id_el]
+    C2Lim_z1%ids(1:4)    = [0,0,id_nue,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_nue,-id_el]
+    SC1Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
+    SC2Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
+
+    HardProc_z1%part = [id_q,-id_qp,id_nue,-id_el,id_a]
+    C1Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
+    C2Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
+    SLim_z1%part     = [id_q,-id_qp,id_nue,-id_el]
+    SC1Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
+    SC2Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
+#endif
+
+      oldcode = .false.
+
+!HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -1612,7 +1717,8 @@ contains
 
     else
 
-       call res_tree_a_qqb(HardProc%AmpMom,res_nlo)
+       if (oldcode ) then
+          call res_tree_a_qqb(HardProc%AmpMom,res_nlo)
 
        call get_respdf(ns_lumi,1,1,HardProc,res_nlo,respdf)
 
@@ -1661,6 +1767,13 @@ contains
        kin(9) = respdf(1)
 
        call fill_histo(respdf,vegasweight)
+
+       else 
+          print*, 'not implemented yet'
+          call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo_new)
+          stop
+       endif 
+
 
     endif
 
