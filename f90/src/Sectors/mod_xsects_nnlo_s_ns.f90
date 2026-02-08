@@ -23,7 +23,8 @@ module mod_xsects_nnlo_s_ns
   public :: xsect_nnlo_s_ns_s12
   public :: xsect_nnlo_s_ns_vqcd,xsect_nnlo_s_ns_vewk
   public :: xsect_nnlo_s_ns_oqcd
-  public :: xsect_nnlo_s_ns_oewk_is,xsect_nnlo_s_ns_oewk_fs_53,xsect_nnlo_s_ns_oewk_fs_54
+  public :: xsect_nnlo_s_ns_oewk_is ![WORK IN PROGRESS]
+  public :: xsect_nnlo_s_ns_oewk_fs_53,xsect_nnlo_s_ns_oewk_fs_54
   public :: xsect_nnlo_s_ns_qqb,xsect_nnlo_s_ns_qq
 
   public :: xsect_nnlo_s_ns_vewknf
@@ -593,6 +594,11 @@ contains
     real(dp) :: ns_int_sub(2,2)
     real(dp) :: res_nlo_old(2,2),res_tmp(2,2), res_lo(-5:7,-5:7) , res_nlo(-5:7,-5:7), res_nlo_incl_int_sub(-5:7,-5:7), res_lo_incl_int_sub(-5:7,-5:7)
     real(dp) :: res_nlo_ischarges_1(-5:7,-5:7),res_nlo_ischarges_2(-5:7,-5:7),res_lo_ischarges_1(-5:7,-5:7),res_lo_ischarges_2(-5:7,-5:7)
+
+    !----
+    logical :: oldcode 
+
+    oldcode = .false.
 
     xsect_nnlo_s_ns_oqcd = 0
 
@@ -1743,6 +1749,14 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
+    !
+    !
+    !WORK IN PROGRESS > CHIARA
+    !
+    !
+    !
+    !
+    !
     ! define process specific partons
 #if (_Vcharge == 0)
     HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
@@ -1805,8 +1819,7 @@ contains
 
        if (oldcode ) then
           call res_tree_a_qqb(HardProc%AmpMom,res_nlo)
-
-       call get_respdf(ns_lumi,1,1,HardProc,res_nlo,respdf)
+          call get_respdf(ns_lumi,1,1,HardProc,res_nlo,respdf)
 
        EC = HardProc%Lim_Ei(1)
        call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
@@ -1855,8 +1868,11 @@ contains
        call fill_histo(respdf,vegasweight)
 
        else 
-          print*, 'not implemented yet'
+          print*, 'ONGOING implemented'
           call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo_new)
+          call get_respdf_gen(1,1,HardProc,res_nlo_new,respdf)
+          EC = HardProc%Lim_Ei(1)
+          call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
           stop
        endif 
 
