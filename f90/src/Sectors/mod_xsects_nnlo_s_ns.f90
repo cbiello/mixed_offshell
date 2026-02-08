@@ -587,11 +587,12 @@ contains
     real(dp) :: xx(kNLO_max_full),z
     real(dp) :: kin(9),FintNNLO_s_ns_oqcd(9)
     real(dp) :: damp,EC,eta51,eta52,s15,s25,z5
-    real(dp) :: respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_bak(ipdf)
+    real(dp) :: respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_bak(ipdf),respdf_bak_1(ipdf),respdf_bak_2(ipdf)
     real(dp) :: intsub(ipdf),intsub_1(ipdf),intsub_2(ipdf),sv_logs(ipdf)
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1)
     real(dp) :: ns_int_sub(2,2)
-    real(dp) :: res_nlo(2,2),res_tmp(2,2)
+    real(dp) :: res_nlo_old(2,2),res_tmp(2,2), res_lo(-5:7,-5:7) , res_nlo(-5:7,-5:7), res_nlo_incl_int_sub(-5:7,-5:7), res_lo_incl_int_sub(-5:7,-5:7)
+    real(dp) :: res_nlo_ischarges_1(-5:7,-5:7),res_nlo_ischarges_2(-5:7,-5:7),res_lo_ischarges_1(-5:7,-5:7),res_lo_ischarges_2(-5:7,-5:7)
 
     xsect_nnlo_s_ns_oqcd = 0
 
@@ -649,11 +650,17 @@ contains
 
     else
 
-       call res_tree_g_qqb(HardProc_z1%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
+       if (oldcode) then
+          call res_tree_g_qqb(HardProc_z1%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
 
-       call get_respdf(ns_lumi,1,1,HardProc_z1,res_nlo,respdf)
+          call get_respdf(ns_lumi,1,1,HardProc_z1,res_nlo_old,respdf)
+       else
+          call res_tree_g_qqb_gen(HardProc_z1%AmpMom,res_nlo)
+          res_nlo = multiply_IS_charges(res_nlo,1)
+          call get_respdf_gen(1,1,HardProc_z1,res_nlo,respdf)
+       endif
 
        !-- partition function in the limit: 6 || 1
        HardProc_z1%Lim_etaij(1,6) = zero
@@ -693,12 +700,17 @@ contains
 
     else
 
-       call res_tree_qqb(C1Lim_z1%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(ns_lumi,1,1,C1Lim_z1,res_nlo,respdf)
-
+       if (oldcode) then
+          call res_tree_qqb(C1Lim_z1%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          call get_respdf(ns_lumi,1,1,C1Lim_z1,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim_z1%AmpMom,res_lo)
+          res_lo = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,C1Lim_z1,res_lo,respdf)
+       endif
+          
        !-- damp = one
        EC = C1Lim_z1%Lim_Ei(1)
        eta51 = C1Lim_z1%Lim_KinInv(4)
@@ -733,11 +745,16 @@ contains
 
     else
 
-       call res_tree_qqb(C2Lim_z1%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(ns_lumi,1,1,C2Lim_z1,res_nlo,respdf)
+       if (oldcode) then
+          call res_tree_qqb(C2Lim_z1%AmpMom,res_nlo)
+          res_nlo(:,1) = Qdn2 * res_nlo(:,1)
+          res_nlo(:,2) = Qup2 * res_nlo(:,2)          
+          call get_respdf(ns_lumi,1,1,C2Lim_z1,res_nlo,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim_z1%AmpMom,res_lo)
+          res_lo = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,C2Lim_z1,res_lo,respdf)
+       endif
 
        !-- damp = zero
        EC = C2Lim_z1%Lim_Ei(1)
@@ -777,12 +794,18 @@ contains
 
     else
 
-       call res_tree_g_qqb(HardProc_z2%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(ns_lumi,1,1,HardProc_z2,res_nlo,respdf)
-
+       if (oldcode) then
+          call res_tree_g_qqb(HardProc_z2%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          
+          call get_respdf(ns_lumi,1,1,HardProc_z2,res_nlo_old,respdf)
+       else
+          call res_tree_g_qqb_gen(HardProc_z2%AmpMom,res_nlo)
+          res_nlo = multiply_IS_charges(res_nlo,2)
+          call get_respdf_gen(1,1,HardProc_z2,res_nlo,respdf)
+       endif
+       
        !-- partition function in the limit: 6 || 2
        HardProc_z2%Lim_etaij(1,6) = HardProc_z2%Lim_etaij(1,2)
        HardProc_z2%Lim_etaij(2,6) = zero
@@ -821,12 +844,17 @@ contains
 
     else
 
-       call res_tree_qqb(C1Lim_z2%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(ns_lumi,1,1,C1Lim_z2,res_nlo,respdf)
-
+       if (oldcode) then
+          call res_tree_qqb(C1Lim_z2%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)          
+          call get_respdf(ns_lumi,1,1,C1Lim_z2,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim_z2%AmpMom,res_lo)
+          res_lo = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,C1Lim_z2,res_lo,respdf)
+       endif
+       
        !-- damp = zero
        EC = C1Lim_z2%Lim_Ei(1)
        call fill_sv_logs(C1Lim_z2%muf(1)**2,4*EC**2,sv_logs)
@@ -860,12 +888,17 @@ contains
 
     else
 
-       call res_tree_qqb(C2Lim_z2%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(ns_lumi,1,1,C2Lim_z2,res_nlo,respdf)
-
+       if (oldcode) then
+          call res_tree_qqb(C2Lim_z2%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)          
+          call get_respdf(ns_lumi,1,1,C2Lim_z2,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim_z2%AmpMom,res_lo)
+          res_lo = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,C2Lim_z2,res_lo,respdf)
+       endif
+       
        !-- damp = one
        EC = C2Lim_z2%Lim_Ei(1)
        call fill_sv_logs(C2Lim_z2%muf(1)**2,4*EC**2,sv_logs)
@@ -904,34 +937,42 @@ contains
 
     else
 
-       call res_tree_g_qqb(HardProc%AmpMom,res_tmp)
-       res_nlo(:,1) = Qdn2 * res_tmp(:,1)
-       res_nlo(:,2) = Qup2 * res_tmp(:,2)
-
-       call get_respdf(ns_lumi,1,1,HardProc,res_nlo,respdf_bak)
-
+       if (oldcode) then          
+          call res_tree_g_qqb(HardProc%AmpMom,res_tmp)
+          res_nlo_old(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo_old(:,2) = Qup2 * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,HardProc,res_nlo_old,respdf_bak)
+       else
+          call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
+          res_nlo_ischarges_1 = multiply_IS_charges(res_nlo,1)
+          call get_respdf_gen(1,1,HardProc,res_nlo_ischarges,respdf_bak)
+          res_nlo_ischarges_2 = multiply_IS_charges(res_nlo,2)
+          call get_respdf_gen(1,1,HardProc,res_nlo_ischarges_1,respdf_bak_1)
+          call get_respdf_gen(1,1,HardProc,res_nlo_ischarges_2,respdf_bak_2)
+       endif
+          
        EC = HardProc%Lim_Ei(1)
        call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
-
+       
        !-- subtract plus, leg 1
        HardProc%Lim_etaij(1,6) = zero
        HardProc%Lim_etaij(2,6) = HardProc%Lim_etaij(1,2)
        HardProc%Lim_etaij(3,6) = HardProc%Lim_etaij(1,3)
        HardProc%Lim_etaij(4,6) = HardProc%Lim_etaij(1,4)
-
+          
        call partition_nnlo_fact(HardProc,damp,&
             iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=1,i_qed=1)
        eta51 = HardProc%Lim_etaij(1,5)
        intsub_1 = PqqNLO(1) - Pqq0_R(1) * log(eta51) * damp
        intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
        intsub_1 = - intsub_1
-
+       
        !-- subtract plus, leg 2
        HardProc%Lim_etaij(1,6) = HardProc%Lim_etaij(1,2)
        HardProc%Lim_etaij(2,6) = zero
        HardProc%Lim_etaij(3,6) = HardProc%Lim_etaij(2,3)
        HardProc%Lim_etaij(4,6) = HardProc%Lim_etaij(2,4)
-
+          
        call partition_nnlo_fact(HardProc,damp,&
             iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=2,i_qed=2)
        eta52 = HardProc%Lim_etaij(2,5)
@@ -939,18 +980,30 @@ contains
        intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
        intsub_2 = - intsub_2
 
-       respdf_1 = (intsub_1 + intsub_2) * respdf_bak * HardProc%wgt
-
+       if (oldcode) then
+          respdf_1 = (intsub_1 + intsub_2) * respdf_bak * HardProc%wgt
+       else
+          respdf_1 = (intsub_1*respdf_ischarges_1 + intsub_2*respdf_ischarges_2) * HardProc%wgt
+       endif
+          
        !-- elastic component (soft photon)
-       ns_int_sub = reshape(calG_QqQl(HardProc,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
-       res_nlo(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
-       res_nlo(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
+       if (oldcode) then
+          ns_int_sub = reshape(calG_QqQl(HardProc,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
+          res_nlo_old(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
+          res_nlo_old(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
 
-       call get_respdf(ns_lumi,1,1,HardProc,res_nlo,respdf_2)
+          call get_respdf(ns_lumi,1,1,HardProc,res_nlo_old,respdf_2)
+       else
+!todo:placeholder          res_nlo_incl_int_sub = placeholder(res_nlo,HardProc,[1,2,3,4])
+          call get_respdf(1,1,HardProc,res_nlo_incl_int_sub,respdf_2)
+       endif
+
        respdf_2 = (respdf_2 - 3*respdf_bak*sv_logs) * HardProc%wgt
 
+       
        !-- total
        respdf = respdf_1 + respdf_2
+          
 
        FintNNLO_s_ns_oqcd(7) = respdf(1)
        kin(7) = respdf(1)
@@ -972,11 +1025,18 @@ contains
 
     else
 
-       call res_tree_qqb(C1Lim%AmpMom,res_tmp)
-       res_nlo(:,1) = Qdn2 * res_tmp(:,1)
-       res_nlo(:,2) = Qup2 * res_tmp(:,2)
-
-       call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf_bak)
+       if (oldcode) then          
+          call res_tree_qqb(C1Lim%AmpMom,res_tmp)
+          res_nlo(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo(:,2) = Qup2 * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf_bak)
+       else
+          call res_tree_qqb_gen(HardProc%AmpMom,res_lo)
+          res_lo_ischarges_1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_1,respdf_ischarges_1)
+          res_lo_ischarges_2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_2,respdf_ischarges_2)
+       endif
 
        EC = C1Lim%Lim_Ei(1)
        call fill_sv_logs(C1Lim%muf(1)**2,4*EC**2,sv_logs)
@@ -995,15 +1055,28 @@ contains
        intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
        intsub_2 = - intsub_2
 
-       respdf_1 = (intsub_1 + intsub_2) * respdf_bak * C1Lim%wgt &
-                * CF * 2/s15 * Pqg(z5)/(one-z5)
+       if (oldcode) then
+          respdf_1 = (intsub_1 + intsub_2) * respdf_bak * C1Lim%wgt &
+               * CF * 2/s15 * Pqg(z5)/(one-z5)
+       else
+          respdf_1 = (intsub_1 * respdf_ischarges_1 + intsub_2*respdf_ischarges_2) * C1Lim%wgt &
+               * CF * 2/s15 * Pqg(z5)/(one-z5)
+       endif
 
+          
        !-- elastic component (soft photon)
-       ns_int_sub = reshape(calG_QqQl(C1Lim,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
-       res_nlo(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
-       res_nlo(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
+       if (oldcode) then
+          ns_int_sub = reshape(calG_QqQl(C1Lim,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
+          res_nlo(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
+          res_nlo(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
 
-       call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf_2)
+          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf_2)
+       else
+!todo:placeholder          res_lo_incl_int_sub = placeholder(res_lo,C1Lim,[1,2,3,4])
+          call get_respdf_gen(1,1,C1Lim,res_lo_incl_int_sub,respdf_2)
+       endif
+
+       
        respdf_2 = (respdf_2 - 3*respdf_bak*sv_logs) * C1Lim%wgt &
                 * CF * 2/s15 * Pqg(z5)/(one-z5)
 
@@ -1031,11 +1104,18 @@ contains
 
     else
 
-       call res_tree_qqb(C2Lim%AmpMom,res_tmp)
-       res_nlo(:,1) = Qdn2 * res_tmp(:,1)
-       res_nlo(:,2) = Qup2 * res_tmp(:,2)
-
-       call get_respdf(ns_lumi,1,1,C2Lim,res_nlo,respdf_bak)
+       if (oldcode) then
+          call res_tree_qqb(C2Lim%AmpMom,res_tmp)
+          res_nlo(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo(:,2) = Qup2 * res_tmp(:,2)          
+          call get_respdf(ns_lumi,1,1,C2Lim,res_nlo,respdf_bak)
+       else
+          call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
+          res_lo_ischarges_1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_1,respdf_ischarges_1)
+          res_lo_ischarges_2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_2,respdf_ischarges_2)
+       endif
 
        EC = C2Lim%Lim_Ei(1)
        call fill_sv_logs(C2Lim%muf(1)**2,4*EC**2,sv_logs)
@@ -1058,10 +1138,16 @@ contains
                 * CF * 2/s25 * Pqg(z5)/(one-z5)
 
        !-- elastic component (soft photon)
-       ns_int_sub = reshape(calG_QqQl(C2Lim,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
-       res_nlo(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
-       res_nlo(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
-
+       if (oldcode) then
+          ns_int_sub = reshape(calG_QqQl(C2Lim,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
+          res_nlo(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
+          res_nlo(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,C2Lim,res_nlo,respdf_2)
+       else
+!todo:placeholder          res_lo_incl_int_sub = placeholder(res_lo,C2Lim,[1,2,3,4])
+          call get_respdf(1,1,C2Lim,res_lo_incl_int_sub,respdf_2)
+       endif
+       
        call get_respdf(ns_lumi,1,1,C2Lim,res_nlo,respdf_2)
        respdf_2 = (respdf_2 - 3*respdf_bak*sv_logs) * C2Lim%wgt &
                 * CF * 2/s25 * Pqg(z5)/(one-z5)

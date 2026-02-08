@@ -1,4 +1,4 @@
-module mod_cut_histo_W_ATLAS
+module mod_cut_histo_V_minimal
   use mod_types
   use mod_consts_dp
   use mod_parms
@@ -21,6 +21,8 @@ contains
 
     !-- Inclusive histograms
     call new_histo('total',0._dp,1._dp,1.0_dp)       !-- 1
+    call new_histo('mll',200._dp,3000._dp,10._dp)       !-- 2
+    
     ! call new_histo('rate',0._dp,1._dp,1.0_dp)       !-- 1
     ! call new_histo('massT',200._dp,3000._dp,10._dp)   !-- 2
     !call new_histo('yll' ,-5._dp,5._dp,0.1_dp)      !-- 3
@@ -64,40 +66,24 @@ contains
   end subroutine init_user_histo
 
 
-
-  !-- we need 
-  !-- 1) |eta| < 2.4
-  !-- 2) p_T^l > 65 GeV
-  !-- 3) p_T^v > 85 GeV
-  !-- 4) 200 < m_T^W < 5000 GeV [single differential measurements]
-  !-- 5) 200 < m_T^W < 2000 GeV
-
-
   !-- order is f + f -> e- e+ [g a/q qb]
   subroutine cut_histo(event)
     type(KinConfig), intent(inout) :: event
     real(dp) :: rap_boost
     real(dp) :: rec_mom(4,4),rec_mom_lab(4,4),pv(4)
     real(dp) :: mll,yll,ptlm,ptlp,ylp,ylm,ptl1,ptl2,dYll,costh_star
+    real(dp) :: ptlc, ptnu
     integer :: nreco,ids(4)
     logical :: leptons_recombined
-    real(dp) :: ptlep_geom = 35._dp, dYll_cut = 3.5_dp
+    !-- Z cuts
+    real(dp) :: harder_cut = 40._dp, dYll_cut = 3.5_dp
+    !-- W cuts
+    real(dp) :: ptlep_cut = 65._dp, ptmiss_cut = 85._dp
+    !-- other future cuts
+    real(dp) :: ptlep_geom = 35._dp
     real(dp) :: ptl, ptmiss, dphiln, massT
     real(dp) :: mT_min = 200._dp, mT_max = 5000._dp
-    real(dp) :: ptlep_cut = 65._dp, ptmiss_cut = 85._dp 
-    real(dp) :: ylep_cut = 2.4_dp 
-
-    !----------------------------------------------------------
-    !-- consistency test
-    !----------------------------------------------------------
-
-! #if (_Vcharge == 0)
-!     print*, '******************************************************'
-!     print*, '******* This is NOT the correct analys to run! *******'
-!     print*, '******************************************************'
-!     print*, ''
-!     stop
-! #endif
+    real(dp) :: ylep_cut = 2.4_dp
 
     !----------------------------------------------------------
     !-- do not touch this part
@@ -109,21 +95,54 @@ contains
     if (event%flag) return
     
     rap_boost = half*log(event%PartFrac(1)/event%PartFrac(2))
+    
+    !----------------------------------------------------------
+    !-- user-defined cuts below
+    !----------------------------------------------------------
+    
+    !-- dress leptons
+    call recombine_photons(event,rec_mom,nreco,ids,leptons_recombined)
+    !-- Recombination of leptons: reject event
+    if(leptons_recombined) return
+    
+    !-- compute lepton observables and cut on them
+    pv(:) = rec_mom(:,1) + rec_mom(:,2)
+    
+    mll = sqrt(scr(pv,pv))
+    if (mll.le.qmin .or. mll.ge.qmax) return
 
+#if (_Vcharge == 0)
+    ptlm  = get_pt(rec_mom(:,1))
+    ptlp  = get_pt(rec_mom(:,2))
+    !-- Harder and softer leptons
+    if(ptlm < ptlp) then
+      ptl1 = ptlp
+      ptl2 = ptlm
+    else
+      ptl1 = ptlm
+      ptl2 = ptlp
+    endif
+    !-- softer lepton pT cut
+    if (ptl2 .le. ptlep_cut) return
+    !-- harder lepton pT cut
+    if (ptl1 .le. harder_cut) return
+#else
+    ptlc  = get_pt(rec_mom(:,1))
+    ptnu  = get_pt(rec_mom(:,2))
+    !-- charged lepton pT cut
+    if (ptlc .le. ptlep_cut) return
+    !-- neutrino pT missing cut
+    if (ptnu .le. ptmiss_cut) return
+#endif
+
+    !------------------------------------------------------
+    !-- OBSERVABLES
+    !------------------------------------------------------
+    
     obs(1) = 0.1_dp !-- rate 
+    obs(2) = mll    !-- mll
     
-    ! !----------------------------------------------------------
-    ! !-- user-defined cuts below
-    ! !----------------------------------------------------------
-    
-    ! !-- dress leptons
-    ! call recombine_photons(event,rec_mom,nreco,ids,leptons_recombined)
-    ! !-- Recombination of leptons: reject event
-    ! if(leptons_recombined) return
-
-
     ! !-- q qb -> l lx
-
     ! !-- lepton pT
     ! if ( (event%part(3) .gt. 0) .and. (mod(event%part(3), 2) .eq. 0)) then
     !       !print*, '3 is a neutrino'
@@ -238,4 +257,4 @@ contains
 
   end subroutine cut_histo
   
-end module mod_cut_histo_W_ATLAS 
+end module mod_cut_histo_V_minimal 
