@@ -1804,9 +1804,8 @@ contains
     SC2Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
 #endif
 
-      oldcode = .false.
-
-!HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    !for debug
+    oldcode = .false.
 
     call cut_histo(HardProc)
 
@@ -1891,13 +1890,12 @@ contains
 
        call fill_histo(respdf,vegasweight)
 
-
     endif
 
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    
     call cut_histo(C1Lim)
 
     if (C1Lim%makecut) then
@@ -1906,12 +1904,15 @@ contains
        kin(10) = zero
 
     else
-
-       call res_tree_qqb(C1Lim%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf)
+       if ( oldcode ) then
+          call res_tree_qqb(C1Lim%AmpMom,res_nlo)
+          res_nlo(:,1) = Qdn2 * res_nlo(:,1)
+          res_nlo(:,2) = Qup2 * res_nlo(:,2)
+          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf)
+       else
+          print*, 'work in progreswork in progresss'
+          call res_tree_qqb_gen(C1Lim%AmpMom,res_nlo_new)
+       endif 
 
        EC = C1Lim%Lim_Ei(1)
        call fill_sv_logs(C1Lim%muf(1)**2,4*EC**2,sv_logs)
