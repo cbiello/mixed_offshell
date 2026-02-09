@@ -1820,43 +1820,67 @@ contains
        if (oldcode ) then
           call res_tree_a_qqb(HardProc%AmpMom,res_nlo)
           call get_respdf(ns_lumi,1,1,HardProc,res_nlo,respdf)
+       else 
+          call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo_new)
+          call get_respdf_gen(1,1,HardProc,res_nlo_new,respdf)
+       endif
 
        EC = HardProc%Lim_Ei(1)
        call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
 
+       !-- NLO partition function for ONLO operator
        call partition_nlo_qed(HardProc,damp_qed,12)
-
+          
+       ! parton 6 has been integrated out
        HardProc%Lim_etaij(:,6) = HardProc%Lim_etaij(:,5)
-
-       !-- subtract plus, leg 1
+          
+       !-- subtract plus, leg 1 
+       ! parton 5 can be collinear to parton 1: eta[1,5] = 0
+       ! all the angle between parton i and 5 is the same as between i and 1
        HardProc%Lim_etaij(1,5) = zero
        HardProc%Lim_etaij(2,5) = HardProc%Lim_etaij(1,2)
        HardProc%Lim_etaij(3,5) = HardProc%Lim_etaij(1,3)
        HardProc%Lim_etaij(4,5) = HardProc%Lim_etaij(1,4)
-
+          
+       !-- limit of the damping factor [remnants of NNLO partitions]
+       !-- \tilde{omega} = damp = omega computed with angles in the limit
        call partition_nnlo_fact(HardProc,damp,&
             iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=1,i_qed=1)
+          
+       !-- construct the counterterm
+       ! Pqq0_R(1) = "minus" component of the plus distribution
        eta61 = HardProc%Lim_etaij(1,6)
        intsub_1 = PqqNLO(1) - Pqq0_R(1) * log(eta61) * damp
        intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
        intsub_1 = - intsub_1
-
+       
        !-- subtract plus, leg 2
+       ! parton 5 can be collinear to parton 2: eta[2,5] = 0
+       ! all the angle between parton i and 5 is the same as between i and 2
        HardProc%Lim_etaij(1,5) = HardProc%Lim_etaij(1,2)
        HardProc%Lim_etaij(2,5) = zero
        HardProc%Lim_etaij(3,5) = HardProc%Lim_etaij(2,3)
        HardProc%Lim_etaij(4,5) = HardProc%Lim_etaij(2,4)
-
+          
+       !-- limit of the damping factor [remnants of NNLO partition]
+       !-- \tilde{omega} = damp = omega computed with angles in the limit
        call partition_nnlo_fact(HardProc,damp,&
             iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=2,i_qed=2)
+          
+       !-- construct the counterterm
+       ! Pqq0_R(1) = "minus" component of the plus distribution
        eta62 = HardProc%Lim_etaij(2,6)
        intsub_2 = PqqNLO(1) - Pqq0_R(1) * log(eta62) * damp
        intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
        intsub_2 = - intsub_2
 
+       !-- conterterm containing the "minus" component of the plus distributions
+       ! given that this term is proportional to FLM[z=1], the contribution
+       ! of leg 1 and 2 can be summed together
        intsub_pls = intsub_1 + intsub_2
 
        !-- elastic component
+       ! forth line in Eq.(2.65) of https://arxiv.org/pdf/2203.11237 
        intsub_els = 4*zeta2 - 3*sv_logs
 
        !-- total
@@ -1866,15 +1890,6 @@ contains
        kin(9) = respdf(1)
 
        call fill_histo(respdf,vegasweight)
-
-       else 
-          print*, 'ONGOING implemented'
-          call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo_new)
-          call get_respdf_gen(1,1,HardProc,res_nlo_new,respdf)
-          EC = HardProc%Lim_Ei(1)
-          call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
-          stop
-       endif 
 
 
     endif
