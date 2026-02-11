@@ -462,7 +462,9 @@ contains
     
   end subroutine res_ewkloop_g_qqb
 
+  !!!!!!!!!!!!!!!!!!
   !TODO: QCD TO DO!!
+  !!!!!!!!!!!!!!!!!!
   !-- res(1,:) = [d db, db d] -> e- e+ a
   !-- res(2,:) = [u ub, ub u] -> e- e+ a
   subroutine res_qcdloop_a_qqb(p,res0,res1fin)
