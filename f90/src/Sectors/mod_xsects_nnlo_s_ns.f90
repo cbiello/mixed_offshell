@@ -951,7 +951,7 @@ contains
        else
           call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
           res_nlo_ischarges_1 = multiply_IS_charges(res_nlo,1)
-          call get_respdf_gen(1,1,HardProc,res_nlo_ischarges,respdf_bak)
+          call get_respdf_gen(1,1,HardProc,res_nlo_ischarges_1,respdf_bak)
           res_nlo_ischarges_2 = multiply_IS_charges(res_nlo,2)
           call get_respdf_gen(1,1,HardProc,res_nlo_ischarges_1,respdf_bak_1)
           call get_respdf_gen(1,1,HardProc,res_nlo_ischarges_2,respdf_bak_2)
@@ -989,7 +989,7 @@ contains
        if (oldcode) then
           respdf_1 = (intsub_1 + intsub_2) * respdf_bak * HardProc%wgt
        else
-          respdf_1 = (intsub_1*respdf_ischarges_1 + intsub_2*respdf_ischarges_2) * HardProc%wgt
+          respdf_1 = (intsub_1*respdf_bak_1 + intsub_2*respdf_bak_2) * HardProc%wgt
        endif
           
        !-- elastic component (soft photon)
@@ -1001,7 +1001,7 @@ contains
           call get_respdf(ns_lumi,1,1,HardProc,res_nlo_old,respdf_2)
        else
 !todo:placeholder          res_nlo_incl_int_sub = placeholder(res_nlo,HardProc,[1,2,3,4])
-          call get_respdf(1,1,HardProc,res_nlo_incl_int_sub,respdf_2)
+          call get_respdf_gen(1,1,HardProc,res_nlo_incl_int_sub,respdf_2)
        endif
 
        respdf_2 = (respdf_2 - 3*respdf_bak*sv_logs) * HardProc%wgt
@@ -1033,15 +1033,15 @@ contains
 
        if (oldcode) then          
           call res_tree_qqb(C1Lim%AmpMom,res_tmp)
-          res_nlo(:,1) = Qdn2 * res_tmp(:,1)
-          res_nlo(:,2) = Qup2 * res_tmp(:,2)
-          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf_bak)
+          res_nlo_old(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo_old(:,2) = Qup2 * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo_old,respdf_bak)
        else
           call res_tree_qqb_gen(HardProc%AmpMom,res_lo)
           res_lo_ischarges_1 = multiply_IS_charges(res_lo,1)
-          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_1,respdf_ischarges_1)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_1,respdf_1)
           res_lo_ischarges_2 = multiply_IS_charges(res_lo,2)
-          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_2,respdf_ischarges_2)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_2,respdf_2)
        endif
 
        EC = C1Lim%Lim_Ei(1)
@@ -1065,7 +1065,7 @@ contains
           respdf_1 = (intsub_1 + intsub_2) * respdf_bak * C1Lim%wgt &
                * CF * 2/s15 * Pqg(z5)/(one-z5)
        else
-          respdf_1 = (intsub_1 * respdf_ischarges_1 + intsub_2*respdf_ischarges_2) * C1Lim%wgt &
+          respdf_1 = (intsub_1 * respdf_1 + intsub_2*respdf_2) * C1Lim%wgt &
                * CF * 2/s15 * Pqg(z5)/(one-z5)
        endif
 
@@ -1073,10 +1073,10 @@ contains
        !-- elastic component (soft photon)
        if (oldcode) then
           ns_int_sub = reshape(calG_QqQl(C1Lim,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
-          res_nlo(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
-          res_nlo(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
+          res_nlo_old(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
+          res_nlo_old(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
 
-          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo,respdf_2)
+          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo_old,respdf_2)
        else
 !todo:placeholder          res_lo_incl_int_sub = placeholder(res_lo,C1Lim,[1,2,3,4])
           call get_respdf_gen(1,1,C1Lim,res_lo_incl_int_sub,respdf_2)
@@ -1112,15 +1112,15 @@ contains
 
        if (oldcode) then
           call res_tree_qqb(C2Lim%AmpMom,res_tmp)
-          res_nlo(:,1) = Qdn2 * res_tmp(:,1)
-          res_nlo(:,2) = Qup2 * res_tmp(:,2)          
-          call get_respdf(ns_lumi,1,1,C2Lim,res_nlo,respdf_bak)
+          res_nlo_old(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo_old(:,2) = Qup2 * res_tmp(:,2)          
+          call get_respdf(ns_lumi,1,1,C2Lim,res_nlo_old,respdf_bak)
        else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
           res_lo_ischarges_1 = multiply_IS_charges(res_lo,1)
-          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_1,respdf_ischarges_1)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_1,respdf_1)
           res_lo_ischarges_2 = multiply_IS_charges(res_lo,2)
-          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_2,respdf_ischarges_2)
+          call get_respdf_gen(1,1,HardProc,res_lo_ischarges_2,respdf_2)
        endif
 
        EC = C2Lim%Lim_Ei(1)
@@ -1140,18 +1140,18 @@ contains
        intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
        intsub_2 = - intsub_2
 
-       respdf_1 = (intsub_1 + intsub_2) * respdf_bak * C2Lim%wgt &
+       respdf_1 = (intsub_1 + intsub_2) * respdf_1 * C2Lim%wgt &
                 * CF * 2/s25 * Pqg(z5)/(one-z5)
 
        !-- elastic component (soft photon)
        if (oldcode) then
           ns_int_sub = reshape(calG_QqQl(C2Lim,one,[Qdn,-Qdn, Qup,-Qup],Q_lep),[2,2])
-          res_nlo(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
-          res_nlo(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
-          call get_respdf(ns_lumi,1,1,C2Lim,res_nlo,respdf_2)
+          res_nlo_old(:,1) = ns_int_sub(:,1) * res_tmp(:,1)
+          res_nlo_old(:,2) = ns_int_sub(:,2) * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,C2Lim,res_nlo_old,respdf_2)
        else
 !todo:placeholder          res_lo_incl_int_sub = placeholder(res_lo,C2Lim,[1,2,3,4])
-          call get_respdf(1,1,C2Lim,res_lo_incl_int_sub,respdf_2)
+          call get_respdf_gen(1,1,C2Lim,res_lo_incl_int_sub,respdf_2)
        endif
        
        call get_respdf(ns_lumi,1,1,C2Lim,res_nlo,respdf_2)
