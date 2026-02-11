@@ -76,7 +76,7 @@ contains
     integer :: nreco,ids(4)
     logical :: leptons_recombined
     !-- Z cuts
-    real(dp) :: harder_cut = 40._dp, dYll_cut = 3.5_dp
+    real(dp) :: harder_cut = 70._dp, dYll_cut = 3.5_dp
     !-- W cuts
     real(dp) :: ptlep_cut = 65._dp, ptmiss_cut = 85._dp
     !-- other future cuts
