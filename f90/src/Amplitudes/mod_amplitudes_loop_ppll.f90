@@ -17,7 +17,8 @@ module mod_amplitudes_loop_ppll
   public :: res_qcdloop_qqb_gen
   public :: res_ewkloop_qqb_gen
 
-
+  public :: res_ewkloop_g_qqb_gen
+  public :: res_ewkloop_g_gq_gen
 
   !-- for qcdloop amplitudes, use mine
   public :: res_qcdloop_qqb
@@ -185,17 +186,22 @@ contains
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
 
+#if (_Vcharge==0)
     do i = 1,2
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
-#if (_Vcharge==0)
        do j = 1,3
-#else
-       do j = 1,2
-#endif
           call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
        enddo
-
     enddo
+#else
+    do i = 1,1 ! no additional ord since we have defined all the process
+               ! therefore we don't need to obtain the results via crossing
+       p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
+       do j = 1,2
+          call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+       enddo
+    enddo
+#endif
 
     res0 = res0_ol
 
@@ -208,39 +214,35 @@ contains
 #if (_Vcharge == 0)
     
     finiteZdn = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
-    res1fin(1,1) = res1(0,1,1) - finiteZdn * res0(1,1)
-
     finiteZup = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
+    res1fin(1,1) = res1(0,1,1) - finiteZdn * res0(1,1)
     res1fin(1,2) = res1(0,1,2) - finiteZup * res0(1,2)
     res1fin(1,3) = res1(0,1,3) - finiteZdn * res0(1,3)
 
     finiteZdn = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
-    res1fin(2,1) = res1(0,2,1) - finiteZdn * res0(2,1)
-
     finiteZup = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
+    !--CB: equivalently (1,2,3,4,Lij,Lij2,-Qdn,Qdn,Q_lep,-Q_lep) and same for Qup
+    res1fin(2,1) = res1(0,2,1) - finiteZdn * res0(2,1)
     res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
     res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
 
 #elif (_Vcharge == 1)
-    
-    !--- filling up the W
-    ! dx u > W+ > v l+
+
+    !-1 2  -> 12 -11
     finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
     res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
-    
-    ! u dx > W+ > v l+
+    !2 -1  -> 12 -11
     finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
 #elif (_Vcharge == -1)
     
-    ! d ux > W- > l v~
-    finiteWdu = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
-    res1fin(2,1) = res1(0,2,1) - finiteWdu * res0(2,1)
-
-    ! ux d > W- > l v~
-    finiteWud = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
-    res1fin(1,2) = res1(0,2,2) - finiteWud * res0(2,2)
+    !1 -2  -> 11 -12
+    finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
+    !-2 1  -> 11 -12
+    finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
 #endif
     
@@ -260,11 +262,11 @@ contains
 #elif (_Vcharge == 1)
     res1loopfin(-1,2) = res1fin(1,1)
     res1loopfin(2,-1) = res1fin(1,2)
-    res1loopfin(4,-3) = res1loopfin(-1,2)
-    res1loopfin(-3,4) = res1loopfin(2,-1)
+    res1loopfin(4,-3) = res1loopfin(2,-1)
+    res1loopfin(-3,4) = res1loopfin(-1,2)
 #elif (_Vcharge == -1)
-    res1loopfin(1,-2) = res1fin(2,1)
-    res1loopfin(-2,1) = res1fin(2,2)
+    res1loopfin(1,-2) = res1fin(1,1)
+    res1loopfin(-2,1) = res1fin(1,2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
     res1loopfin(3,-4) = res1loopfin(1,-2)
 #endif
@@ -314,33 +316,38 @@ contains
   !--- amplitudes with extra radiation, ns
   !-----------------------------------------------------------------
   
-  !-- res(1,:) = q qb -> e- e+ g [dn,up,bot]
-  !-- res(2,:) = qb q -> e- e+ g [dn,up,bot]
-  subroutine res_ewkloop_g_qqb_gen(p,res0,res1fin)
+  !-- res1loopfin(-5:7,-5:7) is a matrix in the flavour space
+  !-- we use res1fin internally for historical (Z) reasons
+  subroutine res_ewkloop_g_qqb_gen(p,res0,res1loopfin)
     real(dp), intent(in)  :: p(4,5)
-    real(dp), intent(out) :: res0(2,3),res1fin(2,3)
+    real(dp), intent(out) :: res0(2,3), res1loopfin(-5:7,-5:7)
+    real(dp) :: res1fin(2,3)
     real(dp15) :: p_ol(4,5)
     real(dp15) :: res1(0:2,2,3),acc(2,3),res0_ol(2,3)
     integer  :: ord(2,2),i,j
     real(dp) :: Lij(5,5),Lij2(5,5)
+    real(dp) :: finiteZdn, finiteZup, finiteWdu, finiteWud
 
     p_ol(:,3:5) = p(:,3:5)
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
 
-    do i = 1,2
-       p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
 #if (_Vcharge==0)
+    do i = 1,2 !for crossing symmetry
+       p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
        do j = 1,3
           call evaluate_loop(OL_id(j+3),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
        enddo
+    enddo
 #else
+    do i = 1,1 !no needed crossing-symmetry
+       p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
        do j = 1,2
           call evaluate_loop(OL_id(j+2),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
-       enddo       
-#endif
+       enddo
     enddo
+#endif
     res0 = res0_ol
 
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
@@ -352,24 +359,63 @@ contains
 
 #if (_Vcharge==0)
 
-    res1fin(1,:) = res1(0,1,:) - get_fin_ewk_qqbllb(2,1,3,4,Lij,Lij2)*res0(1,:)
-    res1fin(2,:) = res1(0,2,:) - get_fin_ewk_qqbllb(1,2,3,4,Lij,Lij2)*res0(2,:)
+    finiteZdn = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
+    finiteZup = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
+    res1fin(1,1) = res1(0,1,1) - finiteZdn * res0(1,1)
+    res1fin(1,2) = res1(0,1,2) - finiteZup * res0(1,2)
+    res1fin(1,3) = res1(0,1,3) - finiteZdn * res0(1,3)
 
+    finiteZdn = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
+    !equivalently get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qdn,Q_lep,-Q_lep)
+    !CB: I suggest to always use 1234 as order and touch the charges only
+    finiteZup = get_fin_ewk_qqbllb_gen(2,1,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
+    res1fin(2,1) = res1(0,2,1) - finiteZdn * res0(2,1)
+    res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
+    res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
+    
 #elif (_Vcharge==1)
 
-    !TODO
+    !-1 2 -> 12 -11 21
+    finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
+    !2 -1 -> 12 -11 21
+    finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
     
 #elif (_Vcharge==-1)
 
-    !TODO
+    !1 -2 -> 11 -12 21
+    finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
+    !-2 1 -> 11 -12 21
+    finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
 #endif
 
-#if(_withchecks == 1)
-    if (checkpoles) then
-       call check_poles('q qb->e- e+ g ew',i1ewk_qqbllb(2,1,3,4,Lij,Lij2),res0(1,:),res1(:,1,:))
-       call check_poles('qb q->e- e+ g ew',i1ewk_qqbllb(1,2,3,4,Lij,Lij2),res0(2,:),res1(:,2,:))
-    endif
+    !--reshape the resfin matrix element to have the new shape 
+#if (_Vcharge == 0) 
+    res1loopfin(-1,1) = res1fin(2,1)
+    res1loopfin(-2,2) = res1fin(2,2)
+    res1loopfin(-3,3) = res1fin(2,1)
+    res1loopfin(-4,4) = res1fin(2,2)
+    res1loopfin(-5,5) = res1fin(2,3)
+
+    res1loopfin(1,-1) = res1fin(1,1)
+    res1loopfin(2,-2) = res1fin(1,2)
+    res1loopfin(3,-3) = res1fin(1,1)
+    res1loopfin(4,-4) = res1fin(1,2)
+    res1loopfin(5,-5) = res1fin(1,3)
+#elif (_Vcharge == 1)
+    res1loopfin(-1,2) = res1fin(1,1)
+    res1loopfin(2,-1) = res1fin(1,2)
+    res1loopfin(4,-3) = res1loopfin(2,-1)
+    res1loopfin(-3,4) = res1loopfin(-1,2)
+#elif (_Vcharge == -1)
+    res1loopfin(1,-2) = res1fin(1,1)
+    res1loopfin(-2,1) = res1fin(1,2)
+    res1loopfin(-4,3) = res1loopfin(-2,1)
+    res1loopfin(3,-4) = res1loopfin(1,-2)
 #endif
     
   end subroutine res_ewkloop_g_qqb_gen
@@ -416,6 +462,7 @@ contains
     
   end subroutine res_ewkloop_g_qqb
 
+  !TODO: QCD TO DO!!
   !-- res(1,:) = [d db, db d] -> e- e+ a
   !-- res(2,:) = [u ub, ub u] -> e- e+ a
   subroutine res_qcdloop_a_qqb(p,res0,res1fin)
@@ -430,6 +477,114 @@ contains
   !-----------------------------------------------------------------
   !--- amplitudes with extra radiation, gq and qg
   !-----------------------------------------------------------------
+
+  !-- gq amplitudes oneloop ewk
+  !-- res1loopfin(-5:7,-5:7) is a matrix in the flavour space
+  subroutine res_ewkloop_g_gq_gen(p,res0,res1loopfin)
+    real(dp), intent(in)  :: p(4,5)
+    real(dp), intent(out) :: res0(2,3),res1loopfin(-5:7,-5:7)
+    real(dp) :: res1fin(2,3)
+    real(dp15) :: p_ol(4,5)
+    real(dp15) :: res1(0:2,2,3),acc(2,3),res0_ol(2,3)
+    integer  :: j
+    real(dp) :: Lij(5,5),Lij2(5,5)
+    real(dp) :: finiteZdn, finiteZup, finiteWdu, finiteWud
+
+    p_ol(:,1:5) = p(:,1:5)
+
+#if (_Vcharge == 0)
+    !antiquarks in is
+    do j = 1,3
+       call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
+    enddo
+    !quarks in is
+    do j = 1,3
+       call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
+    enddo
+#else
+    !up (or anti-up) in is
+    call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
+    !anti-down (or down) in is
+    call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
+#endif
+    
+    res0 = res0_ol
+    
+    !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
+    res1 = res1/(two*aem_ol*as_ol)
+    res0 = res0/(as_ol*four*pi)
+
+    !-- now go to finite part
+    call get_Lij(p,mu_ol,[2,3,4,5],Lij,Lij2)
+
+#if (_Vcharge == 0)
+
+    !21 -1 -> 11 -11 -1  |---> 1 -1 -> 11 -11
+    finiteZdn = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)    
+    finiteZup = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
+    res1fin(1,1) = res1(0,1,1) - finiteZdn * res0(1,1)
+    res1fin(1,2) = res1(0,1,2) - finiteZup * res0(1,2)
+    res1fin(1,3) = res1(0,1,3) - finiteZdn * res0(1,3)
+    ! print*, 'finiteZdn= ', finiteZdn
+    ! print*, 'finiteZup= ', finiteZup
+    ! print*, 'old= ', get_fin_ewk_qqbllb(2,5,3,4,Lij,Lij2)
+
+    !21 1 -> 11 -11 1  |---> -1 1 -> 11 -11
+    finiteZdn = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,-Qdn,Qdn,Q_lep,-Q_lep)
+    finiteZup =	get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,-Qup,Qup,Q_lep,-Q_lep)
+    res1fin(2,1) = res1(0,2,1) - finiteZdn * res0(2,1)
+    res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
+    res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
+    ! print*, 'finiteZdn= ', finiteZdn
+    ! print*, 'finiteZup= ', finiteZup
+    ! print*, 'old= ', get_fin_ewk_qqbllb(5,2,3,4,Lij,Lij2)
+    
+#elif (_Vcharge == 1)
+
+    !21 2 -> 12 -11 1
+    finiteWdu = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
+    !21 -1 -> 12 -11 -2
+    finiteWud = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
+
+#elif (_Vcharge == -1)
+
+    !21 -2 -> 11 -12 -1
+    finiteWdu = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
+    !21 1 -> 11 -12 2
+    finiteWud = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
+    
+#endif
+
+    !--reshape the resfin matrix element to have the new shape 
+#if (_Vcharge == 0) 
+    res1loopfin(0,-1) = res1fin(1,1)
+    res1loopfin(0,-2) = res1fin(1,2)
+    res1loopfin(0,-3) = res1fin(1,1)
+    res1loopfin(0,-4) = res1fin(1,2)
+    res1loopfin(0,-5) = res1fin(1,3)
+    !
+    res1loopfin(0,1) = res1fin(2,1)
+    res1loopfin(0,2) = res1fin(2,2)
+    res1loopfin(0,3) = res1fin(2,1)
+    res1loopfin(0,4) = res1fin(2,2)
+    res1loopfin(0,5) = res1fin(2,3)
+#elif (_Vcharge == 1)
+    res1loopfin(0,2) = res1fin(1,1)
+    res1loopfin(0,-1) = res1fin(1,2)
+    res1loopfin(0,-3) = res1loopfin(0,-1)
+    res1loopfin(0,4) = res1loopfin(0,4)
+#elif (_Vcharge == -1)
+    res1loopfin(0,-2) = res1fin(1,1)
+    res1loopfin(0,1) = res1fin(1,2)
+    res1loopfin(0,3) = res1loopfin(0,1)
+    res1loopfin(0,-4) = res1loopfin(0,-2)
+#endif
+    
+  end subroutine res_ewkloop_g_gq_gen
 
   !-- res(1,:) = g qb -> e- e+ qb [dn,up,bot]
   !-- res(2,:) = g q  -> e- e+ q  [dn,up,bot]
@@ -469,6 +624,11 @@ contains
 #endif
     
   end subroutine res_ewkloop_g_gq
+
+  !!!!!!!!!!!!!!!!!!!!!
+  !TODO
+  !add g_qg_gen
+  !!!!!!!!!!!!!!!!!!!!!
 
   !-- res(1,:) = q g  -> e- e+ q  [dn,up,bot]
   !-- res(2,:) = qb g -> e- e+ qb [dn,up,bot]
