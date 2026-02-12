@@ -19,6 +19,10 @@ module mod_amplitudes_loop_ppll
 
   public :: res_ewkloop_g_qqb_gen
   public :: res_ewkloop_g_gq_gen
+  public :: res_ewkloop_g_qg_gen
+  public :: res_ewkloop_g_qqb_nf_gen
+  public :: res_ewkloop_g_gq_nf_gen
+  public :: res_ewkloop_g_qg_nf_gen
 
   !-- for qcdloop amplitudes, use mine
   public :: res_qcdloop_qqb
@@ -578,7 +582,7 @@ contains
     res1loopfin(0,2) = res1fin(1,1)
     res1loopfin(0,-1) = res1fin(1,2)
     res1loopfin(0,-3) = res1loopfin(0,-1)
-    res1loopfin(0,4) = res1loopfin(0,4)
+    res1loopfin(0,4) = res1loopfin(0,2)
 #elif (_Vcharge == -1)
     res1loopfin(0,-2) = res1fin(1,1)
     res1loopfin(0,1) = res1fin(1,2)
@@ -600,13 +604,15 @@ contains
 
     p_ol(:,1:5) = p(:,1:5)
     
+    !quark in is
     do j = 1,3
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
     enddo
-
+    !antiquarks in is
     do j = 1,3
        call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
     enddo
+    
     res0 = res0_ol
     
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
@@ -628,9 +634,115 @@ contains
   end subroutine res_ewkloop_g_gq
 
   !!!!!!!!!!!!!!!!!!!!!
-  !TODO
-  !add g_qg_gen
-  !!!!!!!!!!!!!!!!!!!!!
+  ! g_qg_gen
+  ! res1loopfin(-5:7,-5:7) is a matrix in the flavour space 
+  subroutine res_ewkloop_g_qg_gen(p,res0,res1loopfin)
+    real(dp), intent(in)  :: p(4,5)
+    real(dp), intent(out) :: res0(2,3)
+    real(dp)   :: res1fin(2,3)
+    real(dp15) :: p_ol(4,5)
+    real(dp15) :: res1(0:2,2,3),acc(2,3),res0_ol(2,3)
+    integer  :: j
+    real(dp) :: Lij(5,5),Lij2(5,5)
+    real(dp), intent(out) :: res1loopfin(-5:7,-5:7)
+    real(dp) :: finiteZdn, finiteZup, finiteWdu, finiteWud
+
+    p_ol(:,1:5) = p(:,1:5)
+
+#if (_Vcharge == 0)
+    !quarks
+    do j = 1,3
+       call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
+    enddo
+    !antiquarks
+    do j = 1,3
+       call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
+    enddo
+#else
+    !ol_id(3)= 2 21 -> 12 -11 1  OR  -1 21 -> 12 -11 -2
+    !up (or anti-up) in is
+    call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
+    !anti-down (or down) in is
+    !ol_id(4)= -1 21 -> 12 -11 -2  OR  1 21 -> 11 -12 2
+    call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
+#endif
+    
+    res0 = res0_ol
+       
+    !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
+    res1 = res1/(two*aem_ol*as_ol)
+    res0 = res0/(as_ol*four*pi)
+
+    !-- now go to finite part
+    call get_Lij(p,mu_ol,[1,3,4,5],Lij,Lij2)
+
+#if (_Vcharge == 0)    
+    !1 21 -> 11 -11 -1  |---> 1 -1 -> 11 -11
+    finiteZdn = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)    
+    finiteZup = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
+    res1fin(1,1) = res1(0,1,1) - finiteZdn * res0(1,1)
+    res1fin(1,2) = res1(0,1,2) - finiteZup * res0(1,2)
+    res1fin(1,3) = res1(0,1,3) - finiteZdn * res0(1,3)
+    !print*, 'new dn= ', get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
+    !print*, 'new up= ', get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
+    !print*, 'old= ', get_fin_ewk_qqbllb(5,1,3,4,Lij,Lij2)
+
+    !-1 21 -> 11 -11 1  |---> -1 1 -> 11 -11
+    finiteZdn = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,-Qdn,Qdn,Q_lep,-Q_lep)
+    finiteZup =	get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,-Qup,Qup,Q_lep,-Q_lep)
+    res1fin(2,1) = res1(0,2,1) - finiteZdn * res0(2,1)
+    res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
+    res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
+    !print*, 'finiteZdn= ', finiteZdn
+    !print*, 'finiteZup= ', finiteZup
+    !print*, 'old= ', get_fin_ewk_qqbllb(1,5,3,4,Lij,Lij2)
+    
+#elif (_Vcharge == 1)
+
+    !2 21 -> 12 -11 1
+    finiteWdu = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
+    !-1 21 -> 12 -11 -2
+    finiteWud = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
+
+#elif (_Vcharge == -1)
+
+    !-2 21 -> 11 -12 -1
+    finiteWdu = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
+    res1fin(1,1) = res1(0,1,1) - finiteWdu * res0(1,1)
+    !1 21 -> 11 -12 2
+    finiteWud = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
+    res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
+    
+#endif
+
+    ! FIlling the res1loopfin in flavour space
+#if (_Vcharge == 0) 
+    res1loopfin(1,0) = res1fin(1,1)
+    res1loopfin(2,0) = res1fin(1,2)
+    res1loopfin(3,0) = res1fin(1,1)
+    res1loopfin(4,0) = res1fin(1,2)
+    res1loopfin(5,0) = res1fin(1,3)
+    !
+    res1loopfin(-1,0) = res1fin(2,1)
+    res1loopfin(-2,0) = res1fin(2,2)
+    res1loopfin(-3,0) = res1fin(2,1)
+    res1loopfin(-4,0) = res1fin(2,2)
+    res1loopfin(-5,0) = res1fin(2,3)
+#elif (_Vcharge == 1)
+    res1loopfin(2,0) = res1fin(1,1)
+    res1loopfin(-1,0) = res1fin(1,2)
+    res1loopfin(-3,0) = res1loopfin(-1,0)
+    res1loopfin(4,0) = res1loopfin(2,0)
+#elif (_Vcharge == -1)
+    res1loopfin(-2,0) = res1fin(1,1)
+    res1loopfin(1,0) = res1fin(1,2)
+    res1loopfin(3,0) = res1loopfin(1,0)
+    res1loopfin(-4,0) = res1loopfin(-2,0)
+#endif
+    
+  end subroutine res_ewkloop_g_qg_gen
 
   !-- res(1,:) = q g  -> e- e+ q  [dn,up,bot]
   !-- res(2,:) = qb g -> e- e+ qb [dn,up,bot]
@@ -772,6 +884,69 @@ contains
 
   end subroutine res_ewkloop_qqb_nf
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!! nf amps from OL !!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine res_ewkloop_g_qqb_nf_gen(p,res1loopfin)
+    real(dp), intent(in)  :: p(4,5)
+    real(dp), intent(out) :: res1loopfin(-5:7,-5:7)
+    real(dp)   :: res1fin(2,2)
+    real(dp15) :: p_ol(4,5)
+    real(dp15) :: res1(0:2,2,2),acc(2,2),res0_ol(2,2)
+    integer  :: ord(2,2),i,j
+
+#if (_Vcharge == 0)
+    p_ol(:,3:5) = p(:,3:5)
+    ord(:,1) = [1,2] !-- q qb
+    ord(:,2) = [2,1] !-- qb q
+    do i = 1,2
+       p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
+       do j = 1,2
+          call evaluate_loop(OL_id(j+3),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+       enddo
+    enddo
+#else
+    p_ol(:,1:5) = p(:,1:5)
+    !-1 2 -> 12 -11 21 or 1 -2 -> 11 -12 21
+    call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
+    !2 -1 -> 12 -11 21 or -2 1 -> 11 -12 21
+    call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))    
+#endif
+
+    !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
+    res1 = res1/(aem_ol/twopi)/(4*pi*as_ol)
+    res1fin(1,:) = res1(0,1,:)
+    res1fin(2,:) = res1(0,2,:)
+
+    !-- filling the res1loopfin in flavour space
+#if (_Vcharge == 0) 
+    res1loopfin(1,-1) = res1fin(1,1)
+    res1loopfin(2,-2) = res1fin(1,2)
+    res1loopfin(3,-3) = res1fin(1,1)
+    res1loopfin(4,-4) = res1fin(1,2)
+    res1loopfin(5,-5) = res1fin(1,1)
+    !
+    res1loopfin(-1,1) = res1fin(2,1)
+    res1loopfin(-2,2) = res1fin(2,2)
+    res1loopfin(-3,3) = res1fin(2,1)
+    res1loopfin(-4,4) = res1fin(2,2)
+    res1loopfin(-5,5) = res1fin(2,1) !no diff in the nf part
+#elif (_Vcharge == 1)
+    res1loopfin(-1,2) = res1fin(1,1)
+    res1loopfin(2,-1) = res1fin(1,2)
+    res1loopfin(-3,4) = res1loopfin(-1,2)
+    res1loopfin(4,-3) = res1loopfin(2,-1)
+#elif (_Vcharge == -1)
+    res1loopfin(1,-2) = res1fin(1,1)
+    res1loopfin(-2,1) = res1fin(1,2)
+    res1loopfin(3,-4) = res1loopfin(1,-2)
+    res1loopfin(-4,3) = res1loopfin(-2,1)
+#endif
+
+  end subroutine res_ewkloop_g_qqb_nf_gen
+  
+  
   subroutine res_ewkloop_g_qqb_nf(p,res1fin)
     real(dp), intent(in)  :: p(4,5)
     real(dp), intent(out) :: res1fin(2,2)
@@ -799,6 +974,66 @@ contains
 
   end subroutine res_ewkloop_g_qqb_nf
 
+
+  subroutine res_ewkloop_g_gq_nf_gen(p,res1loopfin)
+    real(dp), intent(in)  :: p(4,5)
+    real(dp), intent(out) :: res1loopfin(-5:7,-5:7)
+    real(dp)   :: res1fin(2,2)
+    real(dp15) :: p_ol(4,5)
+    real(dp15) :: res1(0:2,2,2),acc(2,2),res0_ol(2,2)
+    integer  :: j
+
+    p_ol(:,1:5) = p(:,1:5)
+
+#if (_Vcharge == 0)
+    !anti-quark
+    do j = 1,2
+       call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
+    enddo
+    !quarks
+    do j = 1,2
+       call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
+    enddo
+#else
+    !21 2 -> 12 -11 1 or 21 -2 -> 11 -12 -1
+    call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
+    !21 -1 -> 12 -11 -2 or 21 1 -> 11 -12 2
+    call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
+#endif
+
+    !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
+    res1 = res1/(aem_ol/twopi)/(4*pi*as_ol)
+    res1fin(1,:) = res1(0,1,:)
+    res1fin(2,:) = res1(0,2,:)
+
+    !-- filling the res1loopfin in flavour space
+#if (_Vcharge == 0) 
+    res1loopfin(0,-1) = res1fin(1,1)
+    res1loopfin(0,-2) = res1fin(1,2)
+    res1loopfin(0,-3) = res1fin(1,1)
+    res1loopfin(0,-4) = res1fin(1,2)
+    res1loopfin(0,-5) = res1fin(1,1)
+    !
+    res1loopfin(0,1) = res1fin(2,1)
+    res1loopfin(0,2) = res1fin(2,2)
+    res1loopfin(0,3) = res1fin(2,1)
+    res1loopfin(0,4) = res1fin(2,2)
+    res1loopfin(0,5) = res1fin(2,1) !no diff in the nf part
+#elif (_Vcharge == 1)
+    res1loopfin(0,2) = res1fin(1,1)
+    res1loopfin(0,-1) = res1fin(1,2)
+    res1loopfin(0,4) = res1loopfin(0,2)
+    res1loopfin(0,-3) = res1loopfin(0,-1)
+#elif (_Vcharge == -1)
+    res1loopfin(0,-2) = res1fin(1,1)
+    res1loopfin(0,1) = res1fin(1,2)
+    res1loopfin(0,-4) = res1loopfin(0,-2)
+    res1loopfin(0,3) = res1loopfin(0,1)
+#endif    
+    
+  end subroutine res_ewkloop_g_gq_nf_gen
+
+  
   subroutine res_ewkloop_g_gq_nf(p,res1fin)
     real(dp), intent(in)  :: p(4,5)
     real(dp), intent(out) :: res1fin(2,2)
@@ -824,6 +1059,65 @@ contains
     
   end subroutine res_ewkloop_g_gq_nf
 
+  subroutine res_ewkloop_g_qg_nf_gen(p,res1loopfin)
+    real(dp), intent(in)  :: p(4,5)
+    real(dp), intent(out) :: res1loopfin(-5:7,-5:7)
+    real(dp)   :: res1fin(2,2)
+    real(dp15) :: p_ol(4,5)
+    real(dp15) :: res1(0:2,2,2),acc(2,2),res0_ol(2,2)
+    integer  :: j
+
+    p_ol(:,1:5) = p(:,1:5)
+
+#if (_Vcharge == 0)
+    !quark
+    do j = 1,2
+       call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
+    enddo
+    !anti-quark
+    do j = 1,2
+       call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
+    enddo
+#else
+    !2 21 -> 12 -11 1 or -2 21 -> 11 -12 -1
+    call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
+    !-1 21 -> 12 -11 -2 or 1 21 -> 11 -12 2
+    call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
+#endif
+       
+    !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
+    res1 = res1/(aem_ol/twopi)/(4*pi*as_ol)
+    res1fin(1,:) = res1(0,1,:)
+    res1fin(2,:) = res1(0,2,:)
+    
+    !-- filling the res1loopfin in flavour space
+#if (_Vcharge == 0) 
+    res1loopfin(1,0) = res1fin(1,1)
+    res1loopfin(2,0) = res1fin(1,2)
+    res1loopfin(3,0) = res1fin(1,1)
+    res1loopfin(4,0) = res1fin(1,2)
+    res1loopfin(5,0) = res1fin(1,1)
+    !
+    res1loopfin(-1,0) = res1fin(2,1)
+    res1loopfin(-2,0) = res1fin(2,2)
+    res1loopfin(-3,0) = res1fin(2,1)
+    res1loopfin(-4,0) = res1fin(2,2)
+    res1loopfin(-5,0) = res1fin(2,1) !no diff in the nf part
+#elif (_Vcharge == 1)
+    res1loopfin(2,0) = res1fin(1,1)
+    res1loopfin(-1,0) = res1fin(1,2)
+    res1loopfin(4,0) = res1loopfin(2,0)
+    res1loopfin(-3,0) = res1loopfin(-1,0)
+#elif (_Vcharge == -1)
+    res1loopfin(-2,0) = res1fin(1,1)
+    res1loopfin(1,0) = res1fin(1,2)
+    res1loopfin(-4,0) = res1loopfin(-2,0)
+    res1loopfin(3,0) = res1loopfin(1,0)
+#endif    
+    
+  end subroutine res_ewkloop_g_qg_nf_gen
+
+  
   subroutine res_ewkloop_g_qg_nf(p,res1fin)
     real(dp), intent(in)  :: p(4,5)
     real(dp), intent(out) :: res1fin(2,2)
