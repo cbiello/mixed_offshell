@@ -51,6 +51,7 @@ contains
     real(dp)    :: FintRV_ns(6),kin(4)
     real(dp)    :: respdf(ipdf),respdf_tmp(ipdf,3)
     real(dp)    :: res0(2,2),res1(2,2)
+    real(dp)    :: res1gen(-5:7,-5:7)
     real(dp)    :: res0red(2,2),res1red(2,2),res_tmp(2,2)
     real(dp)    :: limcol(2),eik(4),e5,eta5i
     real(dp)    :: damp
@@ -94,6 +95,11 @@ contains
 
     else    
 
+
+       call ol_res_qcdloop_a_qqb_gen(HardProc%AmpMom,res0,res1gen)
+       print*, 'res1gen=', res1gen
+       stop
+       
        call res_qcdloop_a_qqb(HardProc%AmpMom,res0,res1)
        call get_respdf(ns_lumi,1,1,HardProc,res1,respdf)
 
@@ -255,6 +261,7 @@ contains
     real(dp)    :: FintRV_ns(4),kin(3)
     real(dp)    :: respdf(ipdf),respdf_tmp(ipdf,2)
     real(dp)    :: res0(2,2),res1(2,2),res0red(2,2),res1red(2,2)
+    real(dp)    :: res1gen(-5:7,-5:7)
     real(dp)    :: res_tmp_vect(2,2,2),respdf_vect(2,ipdf)
     real(dp)    :: z,s5i,eik(4),e5,eta5i
     real(dp)    :: damp
@@ -292,7 +299,11 @@ contains
        kin(1) = zero
        FintRV_ns(1) = zero
 
-    else    
+    else
+
+       call ol_res_qcdloop_a_qqb_gen(HardProc%AmpMom,res0,res1gen)
+       print*, 'res1gen= ', res1gen
+       stop
 
        call res_qcdloop_a_qqb(HardProc%AmpMom,res0,res1)
        call get_respdf(ns_lumi,1,1,HardProc,res1,respdf)
@@ -401,7 +412,8 @@ contains
     !--
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintRV_aq(3),kin(3)
-    real(dp)    :: res0(2,2),res1(2,2) 
+    real(dp)    :: res0(2,2),res1(2,2)
+    real(dp)    :: res1gen(-5:7,-5:7)
     real(dp)    :: res0red(2,2),res1red(2,2),restmp(2,2),res0red_AA
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(2),z,s5i
@@ -443,6 +455,9 @@ contains
     else    
 
 
+       call ol_res_qcdloop_a_aq_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+       print*, 'res1gen= ', res1gen
+       stop
        
        call res_qcdloop_a_aq(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(aq_lumi,1,1,HardProc,res1,respdf)
@@ -536,7 +551,8 @@ contains
     !--
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintRV_qa(3),kin(3)
-    real(dp)    :: res0(2,2),res1(2,2) 
+    real(dp)    :: res0(2,2),res1(2,2)
+    real(dp)    :: res1gen(-5:7,-5:7)
     real(dp)    :: res0red(2,2),res1red(2,2),restmp(2,2),res0red_AA
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(2),z,s5i
@@ -578,6 +594,9 @@ contains
     else    
 
 
+       call ol_res_qcdloop_a_qa_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+       print*, 'res1gen= ', res1gen
+       stop
        
        call res_qcdloop_a_qa(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(qa_lumi,1,1,HardProc,res1,respdf)

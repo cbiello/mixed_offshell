@@ -125,8 +125,8 @@ contains
              OL_id(3) = register_process("1 -1 -> 11 -11 22",11)   ! d db > e-e+ a  + d <--> db from crossing, so that I keep the same cache
              OL_id(4) = register_process("2 -2 -> 11 -11 22",11)   ! u ub > e-e+ a  + u <--> ub
 #elif (_Vcharge == 1)
-             OL_id(3) = register_process("-1 2 -> 12 -11 22",11)
-             OL_id(4) = register_process("1 -2 -> 12 -11 22",11)
+             OL_id(3) = register_process("2 -1 -> 12 -11 22",11)
+             OL_id(4) = register_process("-1 2 -> 12 -11 22",11)
 #elif (_Vcharge == -1)
              OL_id(3) = register_process("1 -2 -> 11 -12 22",11)
              OL_id(4) = register_process("-2 1 -> 11 -12 22",11)
@@ -217,8 +217,8 @@ contains
           OL_id(5) = register_process("22 1 -> 11 -11 1",11) !-- ask federico about crossing
           OL_id(6) = register_process("22 2 -> 11 -11 2",11)
 #elif (_Vcharge == 1)
-          OL_id(3) = register_process("22 2 -> 12 -11 1",11)
-          OL_id(4) = register_process("22 -1 -> 12 -11 -2",11)
+          OL_id(3) = register_process("22 -1 -> 12 -11 -2",11)
+          OL_id(4) = register_process("22 2 -> 12 -11 1",11)
 #elif (_Vcharge == -1)
           OL_id(3) = register_process("22 -2 -> 11 -12 -1",11)
           OL_id(4) = register_process("22 1 -> 11 -12 2",11)
@@ -236,8 +236,8 @@ contains
           OL_id(3) = register_process("2 22 -> 12 -11 1",11)
           OL_id(4) = register_process("-1 22 -> 12 -11 -2",11)
 #elif (_Vcharge == -1)
-          OL_id(3) = register_process("-2 22 -> 11 -12 -1",11)
-          OL_id(4) = register_process("1 22 -> 11 -12 2",11)
+          OL_id(3) = register_process("1 22 -> 11 -12 2",11)
+          OL_id(4) = register_process("-2 22 -> 11 -12 -1",11)
 #endif
        endif
 
@@ -323,8 +323,8 @@ contains
 #endif
 
 #if (_Vcharge == 1)
-      OL_id(istart  ) = register_process("-1 2 -> 12 -11",11) !--
-      OL_id(istart+1) = register_process("2 -1 -> 12 -11",11) !-- crossed channel
+      OL_id(istart  ) = register_process("2 -1 -> 12 -11",11) !--
+      OL_id(istart+1) = register_process("-1 2 -> 12 -11",11) !-- crossed channel
 #endif
 
 #if (_Vcharge == -1)
