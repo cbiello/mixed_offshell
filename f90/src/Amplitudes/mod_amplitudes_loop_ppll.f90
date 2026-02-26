@@ -266,16 +266,43 @@ contains
     res1loopfin(3,-3) = res1fin(1,1)
     res1loopfin(4,-4) = res1fin(1,2)
     res1loopfin(5,-5) = res1fin(1,3)
+
+
+    res0loop(-1,1) = res0(2,1)
+    res0loop(-2,2) = res0(2,2)
+    res0loop(-3,3) = res0(2,1)
+    res0loop(-4,4) = res0(2,2)
+    res0loop(-5,5) = res0(2,3)
+
+    res0loop(1,-1) = res0(1,1)
+    res0loop(2,-2) = res0(1,2)
+    res0loop(3,-3) = res0(1,1)
+    res0loop(4,-4) = res0(1,2)
+    res0loop(5,-5) = res0(1,3)
+
+
 #elif (_Vcharge == 1)
     res1loopfin(-1,2) = res1fin(1,1)
     res1loopfin(2,-1) = res1fin(1,2)
     res1loopfin(4,-3) = res1loopfin(2,-1)
     res1loopfin(-3,4) = res1loopfin(-1,2)
+
+    res0loop(-1,2) = res0(1,1)
+    res0loop(2,-1) = res0(1,2)
+    res0loop(4,-3) = res0(1,2)
+    res0loop(-3,4) = res0(1,1)
+
 #elif (_Vcharge == -1)
     res1loopfin(1,-2) = res1fin(1,1)
     res1loopfin(-2,1) = res1fin(1,2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
     res1loopfin(3,-4) = res1loopfin(1,-2)
+
+
+    res0loop(1,-2) = res0(1,1)
+    res0loop(-2,1) = res0(1,2)
+    res0loop(-4,3) = res0(1,2)
+    res0loop(3,-4) = res0(1,1)
 #endif
   
   end subroutine res_ewkloop_qqb_gen
