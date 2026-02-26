@@ -10,7 +10,7 @@ module mod_xsects_nnlo_s_ns
   use mod_amplitudes_tree_ppll
   use mod_amplitudes_loop_ppll
   use mod_splittings_bare
-  use mod_eikonals
+  use mod_eikonals  
   use mod_partitions
   use mod_hoppet_tools
   use mod_hoppet_nnlo
@@ -26,6 +26,7 @@ module mod_xsects_nnlo_s_ns
   public :: xsect_nnlo_s_ns_oewk_is ![WORK IN PROGRESS]
   public :: xsect_nnlo_s_ns_oewk_fs_53,xsect_nnlo_s_ns_oewk_fs_54
   public :: xsect_nnlo_s_ns_qqb,xsect_nnlo_s_ns_qq
+  public :: xsect_nnlo_s_ns_oewk_is_raoul ![WORK IN PROGRESS]
 
   public :: xsect_nnlo_s_ns_vewknf
 
@@ -51,7 +52,7 @@ contains
   end function xsect_nnlo_s_ns_oewk_fs_53
 
   function xsect_nnlo_s_ns_oewk_fs_54(yRnd,ff,vegasweight)
-    integer :: xsect_nnlo_s_ns_oewk_fs_54
+    integer :: xsect_nnlo_s_ns_oewk_fs_54 
     real(dp15) :: yRnd(30),ff(1),vegasweight
 
     xsect_nnlo_s_ns_oewk_fs_54 = xsect_nnlo_s_ns_oewk_fs_5i(yRnd,ff,vegasweight,4,3)
@@ -2831,5 +2832,936 @@ contains
 #endif
 
   end function xsect_nnlo_s_ns_vewknf
+
+    function xsect_nnlo_s_ns_oewk_is_raoul(yRnd,ff,vegasweight)
+    use mod_kinematics_nlo_z
+    implicit none
+    integer :: xsect_nnlo_s_ns_oewk_is_raoul
+    real(dp15) :: yRnd(30),ff(1),vegasweight
+    type(KinConfig) :: HardProc,C1Lim,C2Lim,SLim,SC1Lim,SC2Lim
+    type(KinConfig) :: HardProc_z1,C1Lim_z1,C2Lim_z1,SLim_z1,SC1Lim_z1,SC2Lim_z1
+    type(KinConfig) :: HardProc_z2,C1Lim_z2,C2Lim_z2,SLim_z2,SC1Lim_z2,SC2Lim_z2
+    !--
+    real(dp) :: xx(kNLO_max_full),z
+    real(dp) :: kin(12),FintNNLO_s_ns_oewk(18)
+    real(dp) :: damp,damp_qed,EC,E5,E5sq,eta51,eta52,eta61,eta62,s15,s25,z5
+    real(dp) :: respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_3(ipdf),respdf_bak(ipdf)
+    real(dp) :: intsub(ipdf),intsub_1(ipdf),intsub_2(ipdf),sv_logs(ipdf)
+    real(dp) :: intsub_pls(ipdf),intsub_els(ipdf)
+    real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1)
+    real(dp) :: res_nlo_old(2,2),res_tmp(2,2),eik_qed(4)
+    real(dp) :: res_lo(-5:7,-5:7),res_nlo(-5:7,-5:7),res_lo_ischarges1(-5:7,-5:7),res_lo_ischarges2(-5:7,-5:7),res_lo_eikqed(-5:7,-5:7)
+    logical  :: oldcode
+
+    xsect_nnlo_s_ns_oewk_is_raoul = 0
+
+    oldcode = .false.
+
+    ff(1) = zero
+    kin = 0
+
+    xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
+    call random_number(xx(kNLO_max_full))
+    z = buff+onet*real(yRnd(kNLO_max_full),dp)
+
+#if (_withchecks == 1)
+    if (override) then
+       xx(1:kNLO_max_full) = yRnd(1:kNLO_max_full)
+       print *, 'overriding input'
+    endif
+#endif
+
+    if ((xx(xE)*xx(xRHO).lt.buff_r) .or. (xx(xE)*(one-xx(xRHO)).lt.buff_r)) then
+       failed_points = failed_points + 1
+       return
+    endif
+
+    call open_histo()
+
+    !-- Boosted kinematics - z1
+    call kinematics_nlo_z_is(xx,z,one,HardProc=HardProc_z1,&
+      C1Lim=C1Lim_z1,C2Lim=C2Lim_z1,SLim=SLim_z1,SC1Lim=SC1Lim_z1,SC2Lim=SC2Lim_z1,&
+      compute_etas=.true.)
+
+    !-- Boosted kinematics - z2
+    call kinematics_nlo_z_is(xx,one,z,HardProc=HardProc_z2,&
+      C1Lim=C1Lim_z2,C2Lim=C2Lim_z2,SLim=SLim_z2,SC1Lim=SC1Lim_z2,SC2Lim=SC2Lim_z2,&
+      compute_etas=.true.)
+
+    !-- z1=z2=1 kinematics
+    call kinematics_nlo_z_is(xx,one,one,HardProc=HardProc, &
+      C1Lim=C1Lim,C2Lim=C2Lim,SLim=SLim,SC1Lim=SC1Lim,SC2Lim=SC2Lim, &
+      compute_etas=.true.)
+
+    !-- Splittings and integrated sub terms
+    Pqq0_R = PqqAP_0_R(z)
+    PqqNLO = Pqq_NLO(z)
+
+    !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
+    !!                        FLM[z.1_q,2_qb,3,4|5_a]                        !!
+    !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
+
+    !!-----------------------------------------------------------------------!!
+    !!                             Hard Process                              !!
+    !!-----------------------------------------------------------------------!!
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    call cut_histo(HardProc_z1)
+
+    if (HardProc_z1%makecut) then
+
+       FintNNLO_s_ns_oewk(1) = zero
+       kin(1) = zero
+
+    else
+
+       if (oldcode) then
+          call res_tree_a_qqb(HardProc_z1%AmpMom,res_nlo_old)
+          call get_respdf(ns_lumi,1,1,HardProc_z1,res_nlo_old,respdf)
+                 
+       else
+          call res_tree_a_qqb_gen(HardProc_z1%AmpMom,res_nlo)
+          call get_respdf_gen(1,1,HardProc_z1,res_nlo,respdf)
+       endif
+
+
+       call partition_nlo_qed(HardProc_z1,damp_qed,12)
+
+       !-- partition function in the limit: 5 || 1
+       HardProc_z1%Lim_etaij(:,6) = HardProc_z1%Lim_etaij(:,5)
+       HardProc_z1%Lim_etaij(1,5) = zero
+       HardProc_z1%Lim_etaij(2,5) = HardProc_z1%Lim_etaij(1,2)
+       HardProc_z1%Lim_etaij(3,5) = HardProc_z1%Lim_etaij(1,3)
+       HardProc_z1%Lim_etaij(4,5) = HardProc_z1%Lim_etaij(1,4)
+
+       call partition_nnlo_fact(HardProc_z1,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=1,i_qed=1)
+
+       EC = HardProc_z1%Lim_Ei(1)
+       eta61 = HardProc_z1%Lim_etaij(1,6)
+       call fill_sv_logs(HardProc_z1%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta61) * damp
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       respdf = CF * intsub * respdf * HardProc_z1%wgt * damp_qed
+
+       FintNNLO_s_ns_oewk(1) = respdf(1)
+       kin(1) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                          Collinear Limit 51                           !!
+    !!-----------------------------------------------------------------------!!
+    C1Lim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(C1Lim_z1)
+
+    if (C1Lim_z1%makecut) then
+
+       FintNNLO_s_ns_oewk(2) = zero
+       kin(2) = zero
+
+    else
+
+       if (oldcode) then
+          call res_tree_qqb(C1Lim_z1%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          call get_respdf(ns_lumi,1,1,C1Lim_z1,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim_z1%AmpMom,res_lo)
+          res_lo_ischarges1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,C1Lim_z1,res_lo_ischarges1,respdf)
+       endif
+
+       !-- damp = one
+       EC = C1Lim_z1%Lim_Ei(1)
+       eta61 = C1Lim_z1%Lim_KinInv(4)
+       call fill_sv_logs(C1Lim_z1%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta61)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       s15 = C1Lim_z1%Lim_sij(1,5)
+       z5  = C1Lim_z1%Lim_z(1)
+
+       !-- damp_qed = one
+       respdf = CF * intsub * respdf * C1Lim_z1%wgt &
+              * 2/s15 * Pqg(z5)/(one-z5)
+       respdf = -respdf
+
+       FintNNLO_s_ns_oewk(2) = respdf(1)
+       kin(2) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                          Collinear Limit 52                           !!
+    !!-----------------------------------------------------------------------!!
+    C2Lim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(C2Lim_z1)
+
+    if (C2Lim_z1%makecut) then
+
+       FintNNLO_s_ns_oewk(3) = zero
+       kin(3) = zero
+
+    else
+
+       if (oldcode) then
+          call res_tree_qqb(C2Lim_z1%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)          
+          call get_respdf(ns_lumi,1,1,C2Lim_z1,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim_z1%AmpMom,res_lo)
+          res_lo_ischarges2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,C2Lim_z1,res_lo_ischarges2,respdf)
+       endif
+
+       !-- damp = zero
+       EC = C2Lim_z1%Lim_Ei(1)
+       call fill_sv_logs(C2Lim_z1%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       s25 = C2Lim_z1%Lim_sij(2,5)
+       z5  = C2Lim_z1%Lim_z(2)
+
+       !-- damp_qed = one
+       respdf = CF * intsub * respdf * C2Lim_z1%wgt &
+              * 2/s25 * Pqg(z5)/(one-z5)
+       respdf = -respdf
+
+       FintNNLO_s_ns_oewk(3) = respdf(1)
+       kin(3) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                           Soft-Photon Limit                           !!
+    !!-----------------------------------------------------------------------!!
+    SLim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(SLim_z1)
+
+    if (SLim_z1%makecut) then
+
+       FintNNLO_s_ns_oewk(4:6) = zero
+       kin(4) = zero
+
+    else
+
+       !! ------------------------------- SLim -------------------------------- !!
+       E5 = SLim_z1%Lim_Ei(2)
+       E5sq = E5**2
+       eta51 = SLim_z1%Lim_etaij(1,5)
+       eta52 = SLim_z1%Lim_etaij(2,5)
+
+       if (oldcode) then
+          call res_tree_qqb(SLim_z1%AmpMom,res_tmp)
+          call get_qed_eik(charges,SLim_z1%Lim_etaij,[1,2,3,4],5,eik_qed)
+          eik_qed = eik_qed/E5sq
+          res_nlo_old(:,1) = eik_qed(1:2) * res_tmp(:,1)
+          res_nlo_old(:,2) = eik_qed(3:4) * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,SLim_z1,res_nlo_old,respdf_1)
+       else
+          call res_tree_qqb_gen(SLim_z1%AmpMom,res_lo)
+          call get_qed_eik_gen(res_lo,SLim_z1%Lim_etaij,[1,2,3,4],5,res_lo_eikqed)
+          res_lo_eikqed = res_lo_eikqed/E5sq
+          call get_respdf_gen(1,1,SLim_z1,res_lo_eikqed,respdf_1)
+       endif
+
+       call partition_nlo_qed(SLim_z1,damp_qed,12)
+
+       !-- partition function in the limit: 5 || 1
+       SLim_z1%Lim_etaij(:,6) = SLim_z1%Lim_etaij(:,5)
+       SLim_z1%Lim_etaij(1,5) = zero
+       SLim_z1%Lim_etaij(2,5) = SLim_z1%Lim_etaij(1,2)
+       SLim_z1%Lim_etaij(3,5) = SLim_z1%Lim_etaij(1,3)
+       SLim_z1%Lim_etaij(4,5) = SLim_z1%Lim_etaij(1,4)
+
+       call partition_nnlo_fact(SLim_z1,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=1,i_qed=1)
+
+       EC = SLim_z1%Lim_Ei(1)
+       eta61 = SLim_z1%Lim_etaij(1,6)
+       call fill_sv_logs(SLim_z1%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta61) * damp
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       respdf_1 = CF * intsub * respdf_1 * SLim_z1%wgt * damp_qed
+       respdf_1 = - respdf_1
+
+       FintNNLO_s_ns_oewk(4) = respdf_1(1)
+
+       !! ------------------------------- SC1Lim ------------------------------ !!
+       if (oldcode) then
+          res_nlo_old(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo_old(:,2) = Qup2 * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,SLim_z1,res_nlo_old,respdf_bak)
+       else
+          res_lo_ischarges1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,SLim_z1,res_lo_ischarges1,respdf_bak)
+       endif
+
+       !-- damp = one
+       eta61  = SC1Lim_z1%Lim_KinInv(4)
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta61)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       !-- damp_qed = one
+       respdf_2 = CF * intsub * respdf_bak * SC1Lim_z1%wgt &
+                * one/eta51/E5sq
+
+       FintNNLO_s_ns_oewk(5) = respdf_2(1)
+
+    !! ------------------------------- SC2Lim ------------------------------ !!
+
+       !-- damp = zero
+       intsub = PqqNLO(0)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       if (.not. oldcode) then
+          res_lo_ischarges2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,SLim_z1,res_lo_ischarges2,respdf_bak)
+       endif
+
+       !-- damp_qed = one
+       respdf_3 = CF * intsub * respdf_bak * SC2Lim_z1%wgt &
+                * one/eta52/E5sq
+
+       FintNNLO_s_ns_oewk(6) = respdf_3(1)
+
+    !! ------------------------------- Total ------------------------------- !!
+
+       respdf = respdf_1 + respdf_2 + respdf_3
+       kin(4) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
+    !!                        FLM[1_q,z.2_qb,3,4|5_a]                        !!
+    !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
+
+    !!-----------------------------------------------------------------------!!
+    !!                             Hard Process                              !!
+    !!-----------------------------------------------------------------------!!
+    HardProc_z2%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    call cut_histo(HardProc_z2)
+
+    if (HardProc_z2%makecut) then
+
+       FintNNLO_s_ns_oewk(7) = zero
+       kin(5) = zero
+
+    else
+
+       if (oldcode) then
+          call res_tree_a_qqb(HardProc_z2%AmpMom,res_nlo_old)          
+          call get_respdf(ns_lumi,1,1,HardProc_z2,res_nlo_old,respdf)
+       else
+          call res_tree_a_qqb_gen(HardProc_z2%AmpMom,res_nlo)          
+          call get_respdf_gen(1,1,HardProc_z2,res_nlo,respdf)
+       endif
+
+       call partition_nlo_qed(HardProc_z2,damp_qed,12)
+
+       !-- partition function in the limit: 5 || 2
+       HardProc_z2%Lim_etaij(:,6) = HardProc_z2%Lim_etaij(:,5)
+       HardProc_z2%Lim_etaij(1,5) = HardProc_z2%Lim_etaij(1,2)
+       HardProc_z2%Lim_etaij(2,5) = zero
+       HardProc_z2%Lim_etaij(3,5) = HardProc_z2%Lim_etaij(2,3)
+       HardProc_z2%Lim_etaij(4,5) = HardProc_z2%Lim_etaij(2,4)
+
+       call partition_nnlo_fact(HardProc_z2,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=2,i_qed=2)
+
+       EC = HardProc_z2%Lim_Ei(1)
+       eta62 = HardProc_z2%Lim_etaij(2,6)
+       call fill_sv_logs(HardProc_z2%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta62) * damp
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       respdf = CF * intsub * respdf * HardProc_z2%wgt * damp_qed
+
+       FintNNLO_s_ns_oewk(7) = respdf(1)
+       kin(5) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                          Collinear Limit 51                           !!
+    !!-----------------------------------------------------------------------!!
+    C1Lim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(C1Lim_z2)
+
+    if (C1Lim_z2%makecut) then
+
+       FintNNLO_s_ns_oewk(8) = zero
+       kin(6) = zero
+
+    else
+
+
+       if (oldcode) then
+          call res_tree_qqb(C1Lim_z2%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          call get_respdf(ns_lumi,1,1,C1Lim_z2,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim_z2%AmpMom,res_lo)
+          res_lo_ischarges1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,C1Lim_z2,res_lo_ischarges1,respdf)
+       endif
+
+       !-- damp = zero
+       EC = C1Lim_z2%Lim_Ei(1)
+       call fill_sv_logs(C1Lim_z2%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       s15 = C1Lim_z2%Lim_sij(1,5)
+       z5  = C1Lim_z2%Lim_z(1)
+
+       !-- damp_qed = one
+       respdf = CF * intsub * respdf * C1Lim_z2%wgt &
+              * 2/s15 * Pqg(z5)/(one-z5)
+       respdf = -respdf
+
+       FintNNLO_s_ns_oewk(8) = respdf(1)
+       kin(6) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                          Collinear Limit 52                           !!
+    !!-----------------------------------------------------------------------!!
+    C2Lim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(C2Lim_z2)
+
+    if (C2Lim_z2%makecut) then
+
+       FintNNLO_s_ns_oewk(9) = zero
+       kin(7) = zero
+
+    else
+
+       if (oldcode) then
+          call res_tree_qqb(C2Lim_z2%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)          
+          call get_respdf(ns_lumi,1,1,C2Lim_z2,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim_z2%AmpMom,res_lo)
+          res_lo_ischarges2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,C2Lim_z2,res_lo_ischarges2,respdf)
+       endif
+
+       !-- damp = one
+       EC = C2Lim_z2%Lim_Ei(1)
+       eta62 = C2Lim_z2%Lim_KinInv(4)
+       call fill_sv_logs(C2Lim_z2%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta62)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       s25 = C2Lim_z2%Lim_sij(2,5)
+       z5  = C2Lim_z2%Lim_z(2)
+
+       !-- damp_qed = one
+       respdf = CF * intsub * respdf * C2Lim_z2%wgt &
+              * 2/s25 * Pqg(z5)/(one-z5)
+       respdf = -respdf
+
+       FintNNLO_s_ns_oewk(9) = respdf(1)
+       kin(7) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                           Soft-Photon Limit                           !!
+    !!-----------------------------------------------------------------------!!
+    SLim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(SLim_z2)
+
+    if (SLim_z2%makecut) then
+
+       FintNNLO_s_ns_oewk(10:12) = zero
+       kin(8) = zero
+
+    else
+
+    !! ------------------------------- SLim -------------------------------- !!
+       E5 = SLim_z2%Lim_Ei(2)
+       E5sq = E5**2
+       eta51 = SLim_z2%Lim_etaij(1,5)
+       eta52 = SLim_z2%Lim_etaij(2,5)
+
+       if (oldcode) then
+          call res_tree_qqb(SLim_z2%AmpMom,res_tmp)
+          call get_qed_eik(charges,SLim_z2%Lim_etaij,[1,2,3,4],5,eik_qed)
+          eik_qed = eik_qed/E5sq
+          res_nlo_old(:,1) = eik_qed(1:2) * res_tmp(:,1)
+          res_nlo_old(:,2) = eik_qed(3:4) * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,SLim_z2,res_nlo_old,respdf_1)
+       else
+          call res_tree_qqb_gen(SLim_z2%AmpMom,res_lo)
+          call get_qed_eik_gen(res_lo,SLim_z2%Lim_etaij,[1,2,3,4],5,res_lo_eikqed)
+          res_lo_eikqed = res_lo_eikqed/E5sq
+          call get_respdf_gen(1,1,SLim_z2,res_lo_eikqed,respdf_1)
+       endif
+
+       call partition_nlo_qed(SLim_z2,damp_qed,12)
+
+       !-- partition function in the limit: 5 || 2
+       SLim_z2%Lim_etaij(:,6) = SLim_z2%Lim_etaij(:,5)
+       SLim_z2%Lim_etaij(1,5) = SLim_z2%Lim_etaij(1,2)
+       SLim_z2%Lim_etaij(2,5) = zero
+       SLim_z2%Lim_etaij(3,5) = SLim_z2%Lim_etaij(2,3)
+       SLim_z2%Lim_etaij(4,5) = SLim_z2%Lim_etaij(2,4)
+
+       call partition_nnlo_fact(SLim_z2,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=2,i_qed=2)
+
+       EC = SLim_z2%Lim_Ei(1)
+       eta62 = SLim_z2%Lim_etaij(2,6)
+       call fill_sv_logs(SLim_z2%muf(1)**2,4*EC**2,sv_logs)
+
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta62) * damp
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       respdf_1 = CF * intsub * respdf_1 * SLim_z2%wgt * damp_qed
+       respdf_1 = - respdf_1
+
+       FintNNLO_s_ns_oewk(10) = respdf_1(1)
+
+       !! ------------------------------- SC1Lim ------------------------------ !!
+
+       if (oldcode) then
+          res_nlo_old(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo_old(:,2) = Qup2 * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,SLim_z2,res_nlo_old,respdf_bak)
+       else
+          res_lo_ischarges1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,SLim_z2,res_lo_ischarges1,respdf_bak)
+       endif
+
+       !-- damp = zero
+       intsub = PqqNLO(0)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       !-- damp_qed = one
+       respdf_2 = CF * intsub * respdf_bak * SC1Lim_z2%wgt &
+                * one/eta51/E5sq
+
+       FintNNLO_s_ns_oewk(11) = respdf_2(1)
+
+    !! ------------------------------- SC2Lim ------------------------------ !!
+
+       !-- damp = one
+       eta62  = SC2Lim_z2%Lim_KinInv(4)
+       intsub = PqqNLO(0) - Pqq0_R(0) * log(eta62)
+       intsub = intsub + Pqq0_R(0)*sv_logs
+
+       if (.not. oldcode) then
+          res_lo_ischarges2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,SLim_z2,res_lo_ischarges2,respdf_bak)
+       endif
+
+       !-- damp_qed = one
+       respdf_3 = CF * intsub * respdf_bak * SC2Lim_z2%wgt &
+                * one/eta52/E5sq
+
+       FintNNLO_s_ns_oewk(12) = respdf_3(1)
+
+    !! ------------------------------- Total ------------------------------- !!
+
+       respdf = respdf_1 + respdf_2 + respdf_3
+       kin(8) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
+    !!                         FLM[1_q,2_qb,3,4|5_a]                         !!
+    !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
+
+    !!-----------------------------------------------------------------------!!
+    !!                             Hard Process                              !!
+    !!-----------------------------------------------------------------------!!
+    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    call cut_histo(HardProc)
+
+    if (HardProc%makecut) then
+
+       FintNNLO_s_ns_oewk(13) = zero
+       kin(9) = zero
+
+    else
+
+       if (oldcode) then
+          call res_tree_a_qqb(HardProc%AmpMom,res_nlo_old)
+          call get_respdf(ns_lumi,1,1,HardProc,res_nlo_old,respdf)
+       else
+          call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo)
+          call get_respdf_gen(1,1,HardProc,res_nlo,respdf)
+       endif
+       
+       EC = HardProc%Lim_Ei(1)
+       call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
+
+       call partition_nlo_qed(HardProc,damp_qed,12)
+
+       HardProc%Lim_etaij(:,6) = HardProc%Lim_etaij(:,5)
+
+       !-- subtract plus, leg 1
+       HardProc%Lim_etaij(1,5) = zero
+       HardProc%Lim_etaij(2,5) = HardProc%Lim_etaij(1,2)
+       HardProc%Lim_etaij(3,5) = HardProc%Lim_etaij(1,3)
+       HardProc%Lim_etaij(4,5) = HardProc%Lim_etaij(1,4)
+
+       call partition_nnlo_fact(HardProc,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=1,i_qed=1)
+       eta61 = HardProc%Lim_etaij(1,6)
+       intsub_1 = PqqNLO(1) - Pqq0_R(1) * log(eta61) * damp
+       intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
+       intsub_1 = - intsub_1
+
+       !-- subtract plus, leg 2
+       HardProc%Lim_etaij(1,5) = HardProc%Lim_etaij(1,2)
+       HardProc%Lim_etaij(2,5) = zero
+       HardProc%Lim_etaij(3,5) = HardProc%Lim_etaij(2,3)
+       HardProc%Lim_etaij(4,5) = HardProc%Lim_etaij(2,4)
+
+       call partition_nnlo_fact(HardProc,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=2,i_qed=2)
+       eta62 = HardProc%Lim_etaij(2,6)
+       intsub_2 = PqqNLO(1) - Pqq0_R(1) * log(eta62) * damp
+       intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
+       intsub_2 = - intsub_2
+
+       intsub_pls = intsub_1 + intsub_2
+
+       !-- elastic component
+       intsub_els = 4*zeta2 - 3*sv_logs
+
+       !-- total
+       respdf = CF * (intsub_pls + intsub_els) * respdf * HardProc%wgt * damp_qed
+
+       FintNNLO_s_ns_oewk(13) = respdf(1)
+       kin(9) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                          Collinear Limit 51                           !!
+    !!-----------------------------------------------------------------------!!
+    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(C1Lim)
+
+    if (C1Lim%makecut) then
+
+       FintNNLO_s_ns_oewk(14) = zero
+       kin(10) = zero
+
+    else
+
+       if (oldcode) then
+          call res_tree_qqb(C1Lim%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          call get_respdf(ns_lumi,1,1,C1Lim,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
+          res_lo_ischarges1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,C1Lim,res_lo_ischarges1,respdf)
+       endif
+
+       EC = C1Lim%Lim_Ei(1)
+       call fill_sv_logs(C1Lim%muf(1)**2,4*EC**2,sv_logs)
+
+       z5  = C1Lim%Lim_z(1)
+       s15 = C1Lim%Lim_sij(1,5)
+
+       !-- subtract plus, leg 1, damp = one
+       eta61 = C1Lim%Lim_KinInv(4)
+       intsub_1 = PqqNLO(1) - Pqq0_R(1) * log(eta61)
+       intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
+       intsub_1 = - intsub_1
+
+       !-- subtract plus, leg 2, damp = zero
+       intsub_2 = PqqNLO(1)
+       intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
+       intsub_2 = - intsub_2
+
+       intsub_pls = intsub_1 + intsub_2
+
+       !-- elastic component
+       intsub_els = 4*zeta2 - 3*sv_logs
+
+       !-- total, damp_qed = one
+       respdf = CF * (intsub_pls + intsub_els) * respdf * C1Lim%wgt &
+              * 2/s15 * Pqg(z5)/(one-z5)
+       respdf = -respdf
+
+       FintNNLO_s_ns_oewk(14) = respdf(1)
+       kin(10) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                          Collinear Limit 52                           !!
+    !!-----------------------------------------------------------------------!!
+    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(C2Lim)
+
+    if (C2Lim%makecut) then
+
+       FintNNLO_s_ns_oewk(15) = zero
+       kin(11) = zero
+
+    else
+       
+       if (oldcode) then
+          call res_tree_qqb(C2Lim%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          call get_respdf(ns_lumi,1,1,C2Lim,res_nlo_old,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
+          res_lo_ischarges2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,C2Lim,res_lo_ischarges2,respdf)
+       endif
+
+       EC = C2Lim%Lim_Ei(1)
+       call fill_sv_logs(C2Lim%muf(1)**2,4*EC**2,sv_logs)
+
+       z5  = C2Lim%Lim_z(2)
+       s25 = C2Lim%Lim_sij(2,5)
+
+       !-- subtract plus, leg 1, damp = zero
+       intsub_1 = PqqNLO(1)
+       intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
+       intsub_1 = - intsub_1
+
+       !-- subtract plus, leg 2, damp = one
+       eta62 = C2Lim%Lim_KinInv(4)
+       intsub_2 = PqqNLO(1) - Pqq0_R(1) * log(eta62)
+       intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
+       intsub_2 = - intsub_2
+
+       intsub_pls = intsub_1 + intsub_2
+
+       !-- elastic component
+       intsub_els = 4*zeta2 - 3*sv_logs
+
+       !-- total
+       respdf = CF * (intsub_pls + intsub_els) * respdf * C2Lim%wgt &
+              * 2/s25 * Pqg(z5)/(one-z5)
+       respdf = - respdf
+
+       FintNNLO_s_ns_oewk(15) = respdf(1)
+       kin(11) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+    !!                           Soft-Photon Limit                           !!
+    !!-----------------------------------------------------------------------!!
+    SLim%ids(1:4) = [0,0,id_el,-id_el]
+    call cut_histo(SLim)
+
+    if (SLim%makecut) then
+
+       FintNNLO_s_ns_oewk(16:18) = zero
+       kin(12) = zero
+
+    else
+
+
+
+    !! ------------------------------- SLim -------------------------------- !!
+       E5 = SLim%Lim_Ei(2)
+       E5sq = E5**2
+       eta51 = SLim%Lim_etaij(1,5)
+       eta52 = SLim%Lim_etaij(2,5)
+
+       if (oldcode) then
+          call res_tree_qqb(SLim%AmpMom,res_tmp)
+          call get_qed_eik(charges,SLim%Lim_etaij,[1,2,3,4],5,eik_qed)
+          eik_qed = eik_qed/E5sq
+          res_nlo_old(:,1) = eik_qed(1:2) * res_tmp(:,1)
+          res_nlo_old(:,2) = eik_qed(3:4) * res_tmp(:,2)
+          call get_respdf(ns_lumi,1,1,SLim,res_nlo_old,respdf_1)
+       else
+          call res_tree_qqb_gen(SLim%AmpMom,res_lo)
+          call get_qed_eik_gen(res_lo,SLim%Lim_etaij,[1,2,3,4],5,res_lo_eikqed)
+          res_lo_eikqed = res_lo_eikqed/E5sq
+          call get_respdf_gen(1,1,SLim,res_lo_eikqed,respdf_1)
+       endif
+
+
+
+       call partition_nlo_qed(SLim,damp_qed,12)
+
+       SLim%Lim_etaij(:,6) = SLim%Lim_etaij(:,5)
+
+       EC = SLim%Lim_Ei(1)
+       call fill_sv_logs(SLim%muf(1)**2,4*EC**2,sv_logs)
+
+       !-- subtract plus, leg 1
+       SLim%Lim_etaij(1,5) = zero
+       SLim%Lim_etaij(2,5) = SLim%Lim_etaij(1,2)
+       SLim%Lim_etaij(3,5) = SLim%Lim_etaij(1,3)
+       SLim%Lim_etaij(4,5) = SLim%Lim_etaij(1,4)
+
+       call partition_nnlo_fact(SLim,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=1,i_qed=1)
+       eta61 = SLim%Lim_etaij(1,6)
+       intsub_1 = PqqNLO(1) - Pqq0_R(1) * log(eta61) * damp
+       intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
+       intsub_1 = - intsub_1
+
+       !-- subtract plus, leg 2
+       SLim%Lim_etaij(1,5) = SLim%Lim_etaij(1,2)
+       SLim%Lim_etaij(2,5) = zero
+       SLim%Lim_etaij(3,5) = SLim%Lim_etaij(2,3)
+       SLim%Lim_etaij(4,5) = SLim%Lim_etaij(2,4)
+
+       call partition_nnlo_fact(SLim,damp,&
+            iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],i_qcd=2,i_qed=2)
+       eta62 = SLim%Lim_etaij(2,6)
+       intsub_2 = PqqNLO(1) - Pqq0_R(1) * log(eta62) * damp
+       intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
+       intsub_2 = - intsub_2
+
+       intsub_pls = intsub_1 + intsub_2
+
+       !-- elastic component
+       intsub_els = 4*zeta2 - 3*sv_logs
+
+       !-- total
+       respdf_1 = CF * (intsub_pls + intsub_els) * respdf_1 * SLim%wgt * damp_qed
+       respdf_1 = - respdf_1
+
+       FintNNLO_s_ns_oewk(16) = respdf_1(1)
+
+       !! ------------------------------- SC1Lim ------------------------------ !!
+       if (oldcode) then
+          res_nlo_old(:,1) = Qdn2 * res_tmp(:,1)
+          res_nlo_old(:,2) = Qup2 * res_tmp(:,2)
+
+          call get_respdf(ns_lumi,1,1,SLim,res_nlo_old,respdf_bak)
+       else
+          res_lo_ischarges1 = multiply_IS_charges(res_lo,1)
+          call get_respdf_gen(1,1,SLim,res_lo_ischarges1,respdf_bak)
+       endif
+       
+       !-- subtract plus, leg 1
+       !-- damp = one
+       eta61  = SC1Lim%Lim_KinInv(4)
+       intsub_1 = PqqNLO(1) - Pqq0_R(1) * log(eta61)
+       intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
+       intsub_1 = - intsub_1
+
+       !-- subtract plus, leg 2
+       !-- damp = zero
+       intsub_2 = PqqNLO(1)
+       intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
+       intsub_2 = - intsub_2
+
+       intsub_pls = intsub_1 + intsub_2
+
+       !-- damp_qed = one
+       respdf_2 = CF * (intsub_pls + intsub_els) * respdf_bak * SC1Lim%wgt &
+                * one/eta51/E5sq
+
+       FintNNLO_s_ns_oewk(17) = respdf_2(1)
+
+    !! ------------------------------- SC2Lim ------------------------------ !!
+
+       !-- subtract plus, leg 1
+       !-- damp = zero
+       intsub_1 = PqqNLO(1)
+       intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
+       intsub_1 = - intsub_1
+
+       !-- subtract plus, leg 2
+       !-- damp = one
+       eta62  = SC2Lim%Lim_KinInv(4)
+       intsub_2 = PqqNLO(1) - Pqq0_R(1) * log(eta62)
+       intsub_2 = intsub_2 + Pqq0_R(1)*sv_logs
+       intsub_2 = - intsub_2
+
+       intsub_pls = intsub_1 + intsub_2
+
+       !-- damp_qed = one
+
+       if (.not. oldcode) then
+          res_lo_ischarges2 = multiply_IS_charges(res_lo,2)
+          call get_respdf_gen(1,1,SLim,res_lo_ischarges2,respdf_bak)
+       endif
+
+       respdf_3 = CF * (intsub_pls + intsub_els) * respdf_bak * SC2Lim%wgt &
+                * one/eta52/E5sq
+
+       FintNNLO_s_ns_oewk(18) = respdf_3(1)
+
+    !! ------------------------------- Total ------------------------------- !!
+
+       respdf = respdf_1 + respdf_2 + respdf_3
+       kin(12) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+
+    !!-----------------------------------------------------------------------!!
+
+
+    ff(1) = sum(kin)
+    print *, product(FintNNLO_s_ns_oewk)
+    if (product(FintNNLO_s_ns_oewk) .ne. zero) then
+       print *, "kin",kin
+       print *, "FintNNLO_s_ns_oewk", FintNNLO_s_ns_oewk(1:18)
+       print *, "ff",ff(1)
+       stop
+    endif
+
+    call close_histo()
+
+    call check_ff(ff,xx,kin)
+
+#if(_withchecks == 1)
+    FintNNLO_s_ns_onlo = FintNNLO_s_ns_oewk
+#endif
+
+    
+  end function xsect_nnlo_s_ns_oewk_is_raoul
 
 end module mod_xsects_nnlo_s_ns
