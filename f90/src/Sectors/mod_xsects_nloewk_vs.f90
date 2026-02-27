@@ -44,7 +44,7 @@ contains
     integer :: i, j 
     logical :: oldcode
 
-    oldcode = .false.
+    oldcode = .true.
 
     xsect_nloewk_v_ns = 0
     res_loop(:,:) = 0
@@ -90,7 +90,7 @@ contains
           call res_ewkloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
           call get_respdf_gen(0,1,LOProc,res_loop,respdf)
        endif 
-
+       
        respdf = respdf*LOProc%wgt
        kin(1) = respdf(1)
 
@@ -178,10 +178,12 @@ contains
     !--
     real(dp)    :: res_lo(-5:7,-5:7), res_lo_tmp(-5:7,-5:7)
     !--
+    real(dp) :: eta(4,4), fin_elasticZ_dn, fin_elasticZ_up, fin_elasticW_du, fin_elasticW_ud
+
     integer :: i, j
     logical :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
     
     
     res_lo_old(:,:) = 0
@@ -245,8 +247,31 @@ contains
              respdf_3 = respdf_3*LOproc%wgt
        
        else 
-            print*, 'NOT IMPLEMENTED YET'
-            call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
+             print*, 'NOT IMPLEMENTED YET'
+             call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
+            
+             !-- z-dependent bit
+             call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_tmp,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+             respdf_1 = respdf_1*LOProc%wgt   ! do we need to multiply by the splitting color factor?
+
+             call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_tmp,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+             respdf_2 = respdf_2*LOProc%wgt   ! do we need to multiply by the splitting color factor?
+
+
+             !-- FLM[1,2] bit, assuming E1 = E2 = E3 = E4 = Emax = sqrt(q2)/2
+             eta = get_eta(LOProc%AmpMom(:,:), 4)    
+
+#if (_Vcharge == 0)
+             fin_elasticZ_dn = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qdn,Q_lep,-Q_lep)
+             fin_elasticZ_up = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qup,Qup,Q_lep,-Q_lep)
+#elif (_Vcharge == +1)
+             fin_elasticW_du = one
+             fin_elasticW_ud = one
+#elif (_Vcharge == -1)
+             fin_elasticW_du = one
+             fin_elasticW_ud = one
+#endif
+             stop
        endif 
 
        respdf = respdf_1 + respdf_2 + respdf_3
@@ -267,6 +292,144 @@ contains
 #endif
 
   end function xsect_nloewk_s_ns
+
+
+
+
+  !-----------------------------------------------------------------
+  !--- generic routines
+  !-----------------------------------------------------------------
+
+  function get_eta(p, n) result(eta)
+  implicit none
+  integer,  intent(in)  :: n
+  real(dp), intent(in)  :: p(:,:)          ! expected shape (dim, n)
+  real(dp)              :: eta(n,n)
+
+  integer :: i, j
+
+  do i = 1, n
+     do j = i, n
+        eta(i,j) = scr(p(:,i), p(:,j)) / ( p(1,i) * p(1,j) * two )
+        eta(j,i) = eta(i,j)
+     end do
+  end do
+
+  end function get_eta
+
+
+  function get_subtra_elastic_ewk_qqbllb_gen(i1,i2,i3,i4,Lij,Emax,mu,PolyLogij,Qq,Qqbp,Ql,Qlb) result(res)
+  implicit none
+
+  integer, intent(in)   :: i1,i2,i3,i4
+  real(dp), intent(in)  :: Lij(:,:)
+  real(dp), intent(in)  :: Emax, mu
+  real(dp), intent(in)  :: PolyLogij(:,:)
+  real(dp) :: res
+
+  real(dp) :: Qq, Qqbp, Ql, Qlb
+  real(dp) :: logETAbit,logENERGYbit,polylogbit,constantbit
+
+  !---------------------------------------------------
+  ! Compute logarithmic pieces
+  !---------------------------------------------------
+  ! Log[eta_ij]
+  logETAbit  = ewk_log_ETA_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Lij)
+  ! Log[2EC/mu]
+  logENERGYbit = ewk_log_ENERGY_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Emax, mu)
+  ! PolyLog[1-eta_ij]
+  polylogbit = ewk_polylog_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, PolyLogij)
+  ! pi^2 + const
+  constantbit = ewk_constant_bit(Qq, Qqbp, Ql, Qlb)
+
+  res = 3.0_dp*logETAbit + logENERGYbit + two*polylogbit + constantbit 
+
+contains
+
+  !---------------------------------------------------
+  ! Log-eta contribution
+  !---------------------------------------------------
+  function ewk_log_ETA_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Lij) result(val)
+    implicit none
+    real(dp), intent(in) :: Qq, Qqbp, Ql, Qlb
+    integer, intent(in)  :: i1, i2, i3, i4
+    real(dp), intent(in) :: Lij(:,:) ! eta[i,j]
+    real(dp)             :: val
+
+    val = - Qq *Qqbp*Lij(i1,i2) + Ql *Qq  *Lij(i1,i3) &
+          + Qlb*Qq  *Lij(i1,i4) + Ql *Qqbp*Lij(i2,i3) &
+          + Qlb*Qqbp*Lij(i2,i4) - Ql *Qlb *Lij(i3,i4)
+
+  end function ewk_log_ETA_bit
+
+
+  !---------------------------------------------------
+  ! Log-energy contribution
+  !---------------------------------------------------
+  function ewk_log_ENERGY_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Emax, mu) result(val)
+    implicit none
+    real(dp), intent(in) :: Qq, Qqbp, Ql, Qlb
+    integer, intent(in)  :: i1, i2, i3, i4
+    real(dp), intent(in) :: Emax, mu
+    real(dp)             :: logtwoEConMu
+    real(dp)             :: val
+
+    logtwoEConMu= Log(two*Emax/mu)
+
+    val = two * (Ql + Qlb - Qq - Qqbp)**2 * logtwoEConMu**2  &
+          + ( Ql**2 + two * Ql * (Qlb - Qq - Qqbp) &
+          + two * Qq * Qqbp - two * Qlb * (Qq + Qqbp) ) * logtwoEConMu
+
+  end function ewk_log_ENERGY_bit
+
+  !---------------------------------------------------
+  ! Constant contribution
+  !---------------------------------------------------
+  function ewk_constant_bit(Qq, Qqbp, Ql, Qlb) result(val)
+    implicit none
+    real(dp), intent(in) :: Qq, Qqbp, Ql, Qlb
+    real(dp)             :: val
+
+    val = 13.0_dp/6.0_dp * Ql**2 + 13.0_dp/6.0_dp * Qlb**2  &
+          - 5.0_dp/6.0_dp * Ql**2 - 5.0_dp/6.0_dp * Qlb**2  &
+          - 1.0_dp/6.0_dp * Qq**2 - 1.0_dp/6.0_dp * Qqbp**2 &
+          - Ql * Qlb - Qq * Qqbp 
+
+  end function ewk_constant_bit
+
+  !---------------------------------------------------
+  ! PolyLog contribution
+  !---------------------------------------------------
+  function ewk_polylog_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, PolyLogij) result(val)
+    implicit none
+    real(dp), intent(in) :: Qq, Qqbp, Ql, Qlb
+    integer, intent(in)  :: i1, i2, i3, i4
+    real(dp), intent(in) :: PolyLogij(:,:) ! PolyLog(1-eta[i,j])
+    real(dp)             :: val
+
+    val = - Qq *Qqbp*PolyLogij(i1,i2) + Ql *Qq  *PolyLogij(i1,i3) &
+          + Qlb*Qq  *PolyLogij(i1,i4) + Ql *Qqbp*PolyLogij(i2,i3) &
+          + Qlb*Qqbp*PolyLogij(i2,i4) - Ql *Qlb *PolyLogij(i3,i4)
+
+  end function ewk_polylog_bit
+
+end function get_subtra_elastic_ewk_qqbllb_gen
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   !--
 
