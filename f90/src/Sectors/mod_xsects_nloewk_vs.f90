@@ -176,18 +176,37 @@ contains
     real(dp)    :: kin(1),respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_3(ipdf)
     real(dp)    :: res_lo_old(2,2),res_lo_tmp_old(2,2),bit1,bit2,eta13,eta14
     !--
-    real(dp)    :: res_lo(-5:7,-5:7), res_lo_tmp(-5:7,-5:7)
+    real(dp)    :: res_lo(-5:7,-5:7), res_lo_tmp(-5:7,-5:7), res_lo_tmp1(-5:7,-5:7), res_lo_tmp2(-5:7,-5:7)
     !--
-    real(dp) :: eta(4,4), fin_elasticZ_dn, fin_elasticZ_up, fin_elasticW_du, fin_elasticW_ud
+    integer, parameter :: n = 4 ! number of momenta
+    real(dp) :: eta(n,n), PolyLogij(n,n), Lij(n,n) 
+    real(dp) :: fin_elasticZ_dn, fin_elasticZ_up, fin_elasticW_du, fin_elasticW_ud
+
+    real(dp) :: Emax
+    integer, parameter :: nf = 5
+    real*8 :: charge_factor(nf)
+    real*8 :: factor
+    integer :: a, b, fa, fb
+    real*8 :: Qcharge(nf)
+    real*8 :: Q2(nf)
 
     integer :: i, j
     logical :: oldcode
 
-    oldcode = .false.
+    oldcode = .true.
     
+    Qcharge = (/ Qdn, Qup, Qdn, Qup, Qdn /)
+    Q2 = Qcharge**2
     
     res_lo_old(:,:) = 0
     res_lo_tmp_old(:,:) = 0
+    
+    res_lo(:,:) = zero
+    res_lo_tmp(:,:) = zero
+    res_lo_tmp1(:,:) = zero
+    res_lo_tmp2(:,:) = zero 
+
+    
     xsect_nloewk_s_ns = 0
 
     ff(1) = zero
@@ -201,6 +220,12 @@ contains
        print *, 'overriding input'
     endif
 #endif
+
+    xx = (/ 5.7767012882822426D-002, &
+        0.24444789910714418D0, &
+        0.94960547288538688D0, &
+        1.3608257177144900D-002, &
+        3.5008535261739970D-002 /)
 
     call open_histo()
 
@@ -221,16 +246,17 @@ contains
        kin(1) = zero
        
     else    
- 
+        
         if (oldcode) then 
-            call res_tree_qqb(LOProc%AmpMom,res_lo_old)
-            res_lo_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
-            res_lo_tmp_old(:,2) = res_lo_old(:,2) * Qup2
 
-            !-- z-dependent bit
+             call res_tree_qqb(LOProc%AmpMom,res_lo_old)
+             res_lo_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
+             res_lo_tmp_old(:,2) = res_lo_old(:,2) * Qup2
+
+             !-- z-dependent bit
              call get_respdf_hoppet(xPij,PDFs,ns_lumi,0,1,LOProc,res_lo_tmp_old,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
              respdf_1 = respdf_1*LOProc%wgt
-
+             
              call get_respdf_hoppet(PDFs,xPij,ns_lumi,0,1,LOProc,res_lo_tmp_old,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
              respdf_2 = respdf_2*LOProc%wgt
 
@@ -243,36 +269,105 @@ contains
              res_lo_tmp_old(1,:) = (Q_lep2 * bit1 + four*Q_lep*[Qdn,Qup] * bit2)*res_lo_old(1,:)
              res_lo_tmp_old(2,:) = (Q_lep2 * bit1 - four*Q_lep*[Qdn,Qup] * bit2)*res_lo_old(2,:)
 
+             !print*, ''
+             !print*, 'log(eta13/eta14)*(three/two)*four*Q_lep*Qdn= ', log(eta13/eta14)*(three/two)*four*Q_lep*Qdn
+             !print*, 'log(eta13/eta14)*(three/two)*four*Q_lep*Qup= ', log(eta13/eta14)*(three/two)*four*Q_lep*Qup
+             !print*, '-log(eta13/eta14)*(three/two)*four*Q_lep*Qdn= ', -log(eta13/eta14)*(three/two)*four*Q_lep*Qdn
+             !print*, '-log(eta13/eta14)*(three/two)*four*Q_lep*Qup= ', -log(eta13/eta14)*(three/two)*four*Q_lep*Qup
+
+             !print*, ''
+
+             !print*, 'polylog= ', (real(dilog2(one-eta13),kind=dp)-real(dilog2(one-eta14),kind=dp))*(-four*Q_lep*Qdn)
+             !print*, 'polylog= ', (real(dilog2(one-eta13),kind=dp)-real(dilog2(one-eta14),kind=dp))*(-four*Q_lep*Qup)
+
+             !print*, 'four*Q_lep*Qdn * bit2= ', four*Q_lep*Qdn * bit2
+             !print*, 'four*Q_lep*Qup * bit2= ', four*Q_lep*Qup * bit2
+
+
              call get_respdf(ns_lumi,0,1,LOProc,res_lo_tmp_old,respdf_3)
              respdf_3 = respdf_3*LOproc%wgt
        
        else 
-             print*, 'NOT IMPLEMENTED YET'
              call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
-            
+
+             do a = -nf, nf
+               if (a == 0) cycle
+               fa = abs(a)
+               do b = -nf, nf
+                 if (b == 0) cycle
+                 fb = abs(b)
+                 res_lo_tmp1(a,b) = Q2(fa) * res_lo(a,b)
+                 res_lo_tmp2(a,b) = Q2(fb) * res_lo(a,b)
+               end do
+             end do
+
              !-- z-dependent bit
-             call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_tmp,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-             respdf_1 = respdf_1*LOProc%wgt   ! do we need to multiply by the splitting color factor?
+             call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_tmp1,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+             respdf_1 = respdf_1*LOProc%wgt  
 
-             call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_tmp,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-             respdf_2 = respdf_2*LOProc%wgt   ! do we need to multiply by the splitting color factor?
-
-
-             !-- FLM[1,2] bit, assuming E1 = E2 = E3 = E4 = Emax = sqrt(q2)/2
-             eta = get_eta(LOProc%AmpMom(:,:), 4)    
+             call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_tmp2,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+             respdf_2 = respdf_2*LOProc%wgt   
+             
+             !-- FLM[1,2] bit, assuming E1 = E2 = E3 = E4 = Emax
+             Emax = LOProc%AmpMom(1,1)
+             eta = get_eta(LOProc%AmpMom(:,:), n)    
+             do i = 1, n
+                do j = 1, n
+                if (i .eq. j) cycle
+                Lij(i,j) = log(eta(i,j))
+                PolyLogij(i,j) = real(dilog2(one-eta(i,j)),kind=dp)
+                enddo
+             enddo
 
 #if (_Vcharge == 0)
-             fin_elasticZ_dn = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qdn,Q_lep,-Q_lep)
-             fin_elasticZ_up = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qup,Qup,Q_lep,-Q_lep)
+             fin_elasticZ_dn = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qdn,Q_lep,-Q_lep)
+             fin_elasticZ_up = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qup,Qup,Q_lep,-Q_lep)
 #elif (_Vcharge == +1)
-             fin_elasticW_du = one
-             fin_elasticW_ud = one
+             fin_elasticW_du = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qup,0d0,-Q_lep)
+             fin_elasticW_ud = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qup,-Qdn,0d0,-Q_lep)
 #elif (_Vcharge == -1)
-             fin_elasticW_du = one
-             fin_elasticW_ud = one
+             fin_elasticW_du = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qdn,-Qup,Q_lep,0d0)
+             fin_elasticW_ud = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qup,Qdn,Q_lep,0d0)
 #endif
-             stop
+
+             ! --- Define Z-type factors
+             charge_factor(1) = fin_elasticZ_dn   ! d
+             charge_factor(2) = fin_elasticZ_up   ! u
+             charge_factor(3) = fin_elasticZ_dn   ! s
+             charge_factor(4) = fin_elasticZ_up   ! c
+             charge_factor(5) = fin_elasticZ_dn   ! b
+
+             do a = -nf, nf
+                if (a == 0) cycle
+                   do b = -nf, nf
+                      if (b == 0) cycle
+
+                         fa = abs(a)
+                         fb = abs(b)
+
+                         ! --- Default: Z-type factor (diagonal etc.)
+                         factor = charge_factor(fa)
+
+                         ! --- W off-diagonal overrides
+                         if (fa == 1 .and. fb == 2) then
+                            factor = fin_elasticW_du
+                         else if (fa == 2 .and. fb == 1) then
+                            factor = fin_elasticW_ud
+                         end if
+
+                      res_lo(a,b) = res_lo(a,b) * factor
+
+                   end do
+             end do
+      
+             call get_respdf_gen(0,1,LOProc,res_lo,respdf_3)
+             respdf_3 = respdf_3*LOproc%wgt
+             
        endif 
+
+       print*, 'respdf_1= ', respdf_1
+       print*, 'respdf_2= ', respdf_2
+       print*, 'respdf_3= ', respdf_3
 
        respdf = respdf_1 + respdf_2 + respdf_3
        
@@ -286,10 +381,12 @@ contains
     call close_histo()
 
     call check_ff(ff,xx,kin)
-    
+
 #if(_withchecks == 1)
     FintNLOEWK_vs = kin
 #endif
+
+  stop
 
   end function xsect_nloewk_s_ns
 
@@ -335,15 +432,22 @@ contains
   !---------------------------------------------------
   ! Log[eta_ij]
   logETAbit  = ewk_log_ETA_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Lij)
-  ! Log[2EC/mu]
-  logENERGYbit = ewk_log_ENERGY_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Emax, mu)
+  ! Log[2EC/mu] -> actually this is always proportional to the sum on the charges
+  ! which by charge conservation is zero
+  !logENERGYbit = ewk_log_ENERGY_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Emax, mu)
   ! PolyLog[1-eta_ij]
   polylogbit = ewk_polylog_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, PolyLogij)
   ! pi^2 + const
   constantbit = ewk_constant_bit(Qq, Qqbp, Ql, Qlb)
 
-  res = 3.0_dp*logETAbit + logENERGYbit + two*polylogbit + constantbit 
+  res = 3.0_dp*logETAbit &
+          !+ logENERGYbit 
+  + two*polylogbit + constantbit 
 
+  print*, 'constantbit= ', constantbit
+  !print*, 'logENERGYbit= ', logENERGYbit
+  print*, 'polylogbit= ', two*polylogbit
+  print*, 'logETAbit= ', 3.0_dp*logETAbit
 contains
 
   !---------------------------------------------------
@@ -376,9 +480,8 @@ contains
 
     logtwoEConMu= Log(two*Emax/mu)
 
-    val = two * (Ql + Qlb - Qq - Qqbp)**2 * logtwoEConMu**2  &
-          + ( Ql**2 + two * Ql * (Qlb - Qq - Qqbp) &
-          + two * Qq * Qqbp - two * Qlb * (Qq + Qqbp) ) * logtwoEConMu
+    val = + 2.0_dp * (Ql + Qlb - Qq - Qqbp)**2 * logtwoEConMu**2  &
+          - 3.0_dp * (Ql + Qlb - Qq - Qqbp)**2 * logtwoEConMu
 
   end function ewk_log_ENERGY_bit
 
@@ -390,10 +493,10 @@ contains
     real(dp), intent(in) :: Qq, Qqbp, Ql, Qlb
     real(dp)             :: val
 
-    val = 13.0_dp/6.0_dp * Ql**2 + 13.0_dp/6.0_dp * Qlb**2  &
-          - 5.0_dp/6.0_dp * Ql**2 - 5.0_dp/6.0_dp * Qlb**2  &
-          - 1.0_dp/6.0_dp * Qq**2 - 1.0_dp/6.0_dp * Qqbp**2 &
-          - Ql * Qlb - Qq * Qqbp 
+    val = 13.0_dp/2.0_dp * Ql**2 + 13.0_dp/2.0_dp * Qlb**2  &
+          - ( 5.0_dp/6.0_dp * Ql**2 + 5.0_dp/6.0_dp * Qlb**2  &
+          + 1.0_dp/6.0_dp * Qq**2 + 1.0_dp/6.0_dp * Qqbp**2 &
+          + Ql * Qlb + Qq * Qqbp ) * pisq
 
   end function ewk_constant_bit
 
