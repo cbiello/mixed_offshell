@@ -193,7 +193,7 @@ contains
     integer :: i, j
     logical :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
     
     Qcharge = (/ Qdn, Qup, Qdn, Qup, Qdn /)
     Q2 = Qcharge**2
@@ -221,11 +221,11 @@ contains
     endif
 #endif
 
-    xx = (/ 5.7767012882822426D-002, &
-        0.24444789910714418D0, &
-        0.94960547288538688D0, &
-        1.3608257177144900D-002, &
-        3.5008535261739970D-002 /)
+    !xx = (/ 5.7767012882822426D-002, &
+    !    0.24444789910714418D0, &
+    !    0.94960547288538688D0, &
+    !    1.3608257177144900D-002, &
+    !    3.5008535261739970D-002 /)
 
     call open_histo()
 
@@ -365,9 +365,9 @@ contains
              
        endif 
 
-       print*, 'respdf_1= ', respdf_1
-       print*, 'respdf_2= ', respdf_2
-       print*, 'respdf_3= ', respdf_3
+       !print*, 'respdf_1= ', respdf_1
+       !print*, 'respdf_2= ', respdf_2
+       !print*, 'respdf_3= ', respdf_3
 
        respdf = respdf_1 + respdf_2 + respdf_3
        
@@ -386,7 +386,6 @@ contains
     FintNLOEWK_vs = kin
 #endif
 
-  stop
 
   end function xsect_nloewk_s_ns
 
@@ -432,22 +431,27 @@ contains
   !---------------------------------------------------
   ! Log[eta_ij]
   logETAbit  = ewk_log_ETA_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Lij)
+  
   ! Log[2EC/mu] -> actually this is always proportional to the sum on the charges
   ! which by charge conservation is zero
   !logENERGYbit = ewk_log_ENERGY_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, Emax, mu)
+  
   ! PolyLog[1-eta_ij]
   polylogbit = ewk_polylog_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, PolyLogij)
   ! pi^2 + const
-  constantbit = ewk_constant_bit(Qq, Qqbp, Ql, Qlb)
+  !constantbit = ewk_constant_bit(Qq, Qqbp, Ql, Qlb)
+  ! FIX THIS!!!!!!
+  constantbit = ewk_constant_bit(zero,zero, Ql, Qlb)
+
 
   res = 3.0_dp*logETAbit &
           !+ logENERGYbit 
   + two*polylogbit + constantbit 
 
-  print*, 'constantbit= ', constantbit
+  !print*, 'constantbit= ', constantbit
   !print*, 'logENERGYbit= ', logENERGYbit
-  print*, 'polylogbit= ', two*polylogbit
-  print*, 'logETAbit= ', 3.0_dp*logETAbit
+  !print*, 'polylogbit= ', two*polylogbit
+  !print*, 'logETAbit= ', 3.0_dp*logETAbit
 contains
 
   !---------------------------------------------------
