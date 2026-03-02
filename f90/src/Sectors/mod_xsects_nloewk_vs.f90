@@ -181,6 +181,8 @@ contains
     integer, parameter :: n = 4 ! number of momenta
     real(dp) :: eta(n,n), PolyLogij(n,n), Lij(n,n) 
     real(dp) :: fin_elasticZ_dn, fin_elasticZ_up, fin_elasticW_du, fin_elasticW_ud
+    real(dp) :: fin_elasticZ_ddx, fin_elasticZ_uux, fin_elasticZ_dxd, fin_elasticZ_uxu
+    real(dp) :: fin_elasticW_dxu, fin_elasticW_uxd, fin_elasticW_dux
 
     real(dp) :: Emax
     integer, parameter :: nf = 5
@@ -221,11 +223,11 @@ contains
     endif
 #endif
 
-    !xx = (/ 5.7767012882822426D-002, &
-    !    0.24444789910714418D0, &
-    !    0.94960547288538688D0, &
-    !    1.3608257177144900D-002, &
-    !    3.5008535261739970D-002 /)
+    xx = (/ 5.7767012882822426D-002, &
+        0.24444789910714418D0, &
+        0.94960547288538688D0, &
+        1.3608257177144900D-002, &
+        3.5008535261739970D-002 /)
 
     call open_histo()
 
@@ -269,22 +271,8 @@ contains
              res_lo_tmp_old(1,:) = (Q_lep2 * bit1 + four*Q_lep*[Qdn,Qup] * bit2)*res_lo_old(1,:)
              res_lo_tmp_old(2,:) = (Q_lep2 * bit1 - four*Q_lep*[Qdn,Qup] * bit2)*res_lo_old(2,:)
 
-             !print*, ''
-             !print*, 'log(eta13/eta14)*(three/two)*four*Q_lep*Qdn= ', log(eta13/eta14)*(three/two)*four*Q_lep*Qdn
-             !print*, 'log(eta13/eta14)*(three/two)*four*Q_lep*Qup= ', log(eta13/eta14)*(three/two)*four*Q_lep*Qup
-             !print*, '-log(eta13/eta14)*(three/two)*four*Q_lep*Qdn= ', -log(eta13/eta14)*(three/two)*four*Q_lep*Qdn
-             !print*, '-log(eta13/eta14)*(three/two)*four*Q_lep*Qup= ', -log(eta13/eta14)*(three/two)*four*Q_lep*Qup
-
-             !print*, ''
-
-             !print*, 'polylog= ', (real(dilog2(one-eta13),kind=dp)-real(dilog2(one-eta14),kind=dp))*(-four*Q_lep*Qdn)
-             !print*, 'polylog= ', (real(dilog2(one-eta13),kind=dp)-real(dilog2(one-eta14),kind=dp))*(-four*Q_lep*Qup)
-
-             !print*, 'four*Q_lep*Qdn * bit2= ', four*Q_lep*Qdn * bit2
-             !print*, 'four*Q_lep*Qup * bit2= ', four*Q_lep*Qup * bit2
-
-
              call get_respdf(ns_lumi,0,1,LOProc,res_lo_tmp_old,respdf_3)
+             
              respdf_3 = respdf_3*LOproc%wgt
        
        else 
@@ -301,13 +289,58 @@ contains
                end do
              end do
 
+             write(*,*)
+write(*,'(A)') 'res_lo matrix:'
+write(*,'(A)', advance='no') '      '
+do j = -5, 7
+   write(*,'(I10)', advance='no') j
+end do
+write(*,*)
+
+do i = -5, 7
+   write(*,'(I6)', advance='no') i
+   do j = -5, 7
+      write(*,'(ES10.3)', advance='no') res_lo(i,j)
+   end do
+   write(*,*)
+end do
+write(*,*)
+
+
+             write(*,*)
+write(*,'(A)') 'res_lo matrix:'
+write(*,'(A)', advance='no') '      '
+do j = -5, 7
+   write(*,'(I10)', advance='no') j
+end do
+write(*,*)
+
+do i = -5, 7
+   write(*,'(I6)', advance='no') i
+   do j = -5, 7
+      write(*,'(ES10.3)', advance='no') res_lo_tmp1(i,j)
+   end do
+   write(*,*)
+end do
+write(*,*)
+
+
+
+
              !-- z-dependent bit
              call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_tmp1,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+             print*, 'respdf_1= ', respdf_1
+             print*, 'LOProc%wgt= ', LOProc%wgt  
+
              respdf_1 = respdf_1*LOProc%wgt  
+
+             print*, 'respdf_1= ', respdf_1
 
              call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_tmp2,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
              respdf_2 = respdf_2*LOProc%wgt   
              
+             print*, 'respdf_2= ', respdf_2
+
              !-- FLM[1,2] bit, assuming E1 = E2 = E3 = E4 = Emax
              Emax = LOProc%AmpMom(1,1)
              eta = get_eta(LOProc%AmpMom(:,:), n)    
@@ -320,54 +353,54 @@ contains
              enddo
 
 #if (_Vcharge == 0)
-             fin_elasticZ_dn = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qdn,Q_lep,-Q_lep)
-             fin_elasticZ_up = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qup,Qup,Q_lep,-Q_lep)
-#elif (_Vcharge == +1)
-             fin_elasticW_du = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qup,0d0,-Q_lep)
-             fin_elasticW_ud = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qup,-Qdn,0d0,-Q_lep)
-#elif (_Vcharge == -1)
-             fin_elasticW_du = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qdn,-Qup,Q_lep,0d0)
-             fin_elasticW_ud = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qup,Qdn,Q_lep,0d0)
-#endif
-
-             ! --- Define Z-type factors
-             charge_factor(1) = fin_elasticZ_dn   ! d
-             charge_factor(2) = fin_elasticZ_up   ! u
-             charge_factor(3) = fin_elasticZ_dn   ! s
-             charge_factor(4) = fin_elasticZ_up   ! c
-             charge_factor(5) = fin_elasticZ_dn   ! b
-
-             do a = -nf, nf
-                if (a == 0) cycle
-                   do b = -nf, nf
-                      if (b == 0) cycle
-
-                         fa = abs(a)
-                         fb = abs(b)
-
-                         ! --- Default: Z-type factor (diagonal etc.)
-                         factor = charge_factor(fa)
-
-                         ! --- W off-diagonal overrides
-                         if (fa == 1 .and. fb == 2) then
-                            factor = fin_elasticW_du
-                         else if (fa == 2 .and. fb == 1) then
-                            factor = fin_elasticW_ud
-                         end if
-
-                      res_lo(a,b) = res_lo(a,b) * factor
-
-                   end do
+             fin_elasticZ_ddx = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qdn,-Qdn,Q_lep,-Q_lep)
+             fin_elasticZ_uux = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qup,-Qup,Q_lep,-Q_lep)
+             fin_elasticZ_dxd = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qdn,Q_lep,-Q_lep)
+             fin_elasticZ_uxu = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qup,Qup,Q_lep,-Q_lep)
+             ! down-type (1,3,5)
+             do i = 1,5,2
+                res_lo(i,-i) = res_lo(i,-i) * fin_elasticZ_ddx
+                res_lo(-i,i) = res_lo(-i,i) * fin_elasticZ_dxd
              end do
-      
+             ! up-type (2,4)
+             do i = 2,4,2
+                res_lo(i,-i) = res_lo(i,-i) * fin_elasticZ_uux
+                res_lo(-i,i) = res_lo(-i,i) * fin_elasticZ_uxu
+             end do
+
+#elif (_Vcharge == +1)
+             fin_elasticW_dxu = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qup,0d0,-Q_lep)
+             fin_elasticW_udx = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qup,-Qdn,0d0,-Q_lep)
+             ! u dbar  → fin_elasticW_udx
+             do i = 2,4,2              ! up-type: 2,4
+                j = i - 1              ! corresponding down-type: 1,3
+             res_lo(i,-j) = res_lo(i,-j) * fin_elasticW_udx
+             end do
+             ! dbar u  → fin_elasticW_dxu
+             do j = 1,3,2              ! down-type: 1,3
+                i = j + 1              ! corresponding up-type: 2,4
+                res_lo(-j,i) = res_lo(-j,i) * fin_elasticW_dxu
+             end do
+
+#elif (_Vcharge == -1)
+             fin_elasticW_dux = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qdn,-Qup,Q_lep,0d0)
+             fin_elasticW_uxd = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qup,Qdn,Q_lep,0d0)
+             ! d ubar → fin_elasticW_dux
+             do j = 1,3,2           ! down-type: 1,3
+                i = j + 1           ! corresponding up-type: 2,4
+                res_lo(j,-i) = res_lo(j,-i) * fin_elasticW_dux
+             end do
+             ! ubar d → fin_elasticW_uxd
+             do i = 2,4,2           ! up-type: 2,4
+                j = i - 1           ! corresponding down-type: 1,3
+                res_lo(-i,j) = res_lo(-i,j) * fin_elasticW_uxd
+             end do
+
+#endif
              call get_respdf_gen(0,1,LOProc,res_lo,respdf_3)
              respdf_3 = respdf_3*LOproc%wgt
              
        endif 
-
-       !print*, 'respdf_1= ', respdf_1
-       !print*, 'respdf_2= ', respdf_2
-       !print*, 'respdf_3= ', respdf_3
 
        respdf = respdf_1 + respdf_2 + respdf_3
        
@@ -386,6 +419,7 @@ contains
     FintNLOEWK_vs = kin
 #endif
 
+   stop
 
   end function xsect_nloewk_s_ns
 
@@ -439,10 +473,7 @@ contains
   ! PolyLog[1-eta_ij]
   polylogbit = ewk_polylog_bit(Qq, Qqbp, Ql, Qlb, i1, i2, i3, i4, PolyLogij)
   ! pi^2 + const
-  !constantbit = ewk_constant_bit(Qq, Qqbp, Ql, Qlb)
-  ! FIX THIS!!!!!!
-  constantbit = ewk_constant_bit(zero,zero, Ql, Qlb)
-
+  constantbit = ewk_constant_bit(Qq, Qqbp, Ql, Qlb)
 
   res = 3.0_dp*logETAbit &
           !+ logENERGYbit 
@@ -469,7 +500,6 @@ contains
           + Qlb*Qqbp*Lij(i2,i4) - Ql *Qlb *Lij(i3,i4)
 
   end function ewk_log_ETA_bit
-
 
   !---------------------------------------------------
   ! Log-energy contribution
@@ -502,6 +532,13 @@ contains
           + 1.0_dp/6.0_dp * Qq**2 + 1.0_dp/6.0_dp * Qqbp**2 &
           + Ql * Qlb + Qq * Qqbp ) * pisq
 
+  ! Important: in the convolutions by hoppet a factor two*zeta2
+  !            per each initial state spitting is already included
+  !            see line 136 in src/IntSub/mod_hoppet_nlo.f90 
+  !            we need to remove it here to avoid double counting
+
+  val = val - (two*zeta2) * Qq**2 - (two*zeta2) * Qqbp**2
+  
   end function ewk_constant_bit
 
   !---------------------------------------------------
