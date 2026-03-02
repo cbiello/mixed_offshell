@@ -347,6 +347,8 @@ contains
       real(dp) :: pref,mu2ref
       real(dp15) :: f1_dp15(-6:7),f2_dp15(-6:7)
 
+      integer :: k
+
       call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
 
       if (present(myPDFs1_Lmu)) then
@@ -385,6 +387,7 @@ contains
       real(dp) :: pref,mu2ref
       real(dp15) :: f1_dp15(-6:7),f2_dp15(-6:7)
 
+      integer :: k
       !-- central scale
       call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
 
@@ -675,20 +678,50 @@ contains
   !-- luminosities
 
 
-  function gen_lumi(res,f1,f2) result(respdf)
-    ! added by Raoul
-    real(dp), intent(in) :: res(-5:7,-5:7),f1(-6:),f2(-6:)
+!  function gen_lumi(res,f1,f2) result(respdf)
+!    ! added by Raoul
+!    real(dp), intent(in) :: res(-5:7,-5:7),f1(-6:),f2(-6:)
+!    real(dp) :: respdf
+!    integer  :: i1,i2
+!
+!    respdf = zero
+!    do i1= -5,7
+!       do i2 = -5,7
+!             respdf = respdf + f1(i1)*f2(i2)*res(i1,i2)
+!       enddo
+!    enddo
+!
+!  end function gen_lumi
+
+
+function gen_lumi(res,f1,f2) result(respdf)
+    real(dp), intent(in) :: res(-5:7,-5:7), f1(-6:), f2(-6:)
     real(dp) :: respdf
-    integer  :: i1,i2
+    integer :: i1,i2
+    real(dp) :: f1val, f2val
 
-    respdf = zero
-    do i1= -5,7
-       do i2 = -5,7
-          respdf = respdf + f1(i1)*f2(i2)*res(i1,i2)
-       enddo
-    enddo
+    respdf = 0d0
 
-  end function gen_lumi
+do i1 = -5, 7
+   do i2 = -5, 7
+       if (res(i1,i2) /= 0d0) then
+           f1val = f1(i1)
+           f2val = f2(i2)
+           ! Clip NaNs/Infs
+           if (.not.(f1val == f1val)) f1val = 0d0
+           if (f1val > 1d10) f1val = 0d0
+           if (f1val < -1d10) f1val = 0d0
+           if (.not.(f2val == f2val)) f2val = 0d0
+           if (f2val > 1d10) f2val = 0d0
+           if (f2val < -1d10) f2val = 0d0
+           respdf = respdf + f1val*f2val*res(i1,i2)
+       endif
+   enddo
+enddo
+
+
+end function gen_lumi
+
 
     
   
