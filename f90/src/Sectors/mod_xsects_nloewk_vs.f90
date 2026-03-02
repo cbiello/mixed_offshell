@@ -207,7 +207,6 @@ contains
     res_lo_tmp(:,:) = zero
     res_lo_tmp1(:,:) = zero
     res_lo_tmp2(:,:) = zero 
-
     
     xsect_nloewk_s_ns = 0
 
@@ -223,11 +222,11 @@ contains
     endif
 #endif
 
-    xx = (/ 5.7767012882822426D-002, &
-        0.24444789910714418D0, &
-        0.94960547288538688D0, &
-        1.3608257177144900D-002, &
-        3.5008535261739970D-002 /)
+!    xx = (/ 5.7767012882822426D-002, &
+!        0.24444789910714418D0, &
+!        0.94960547288538688D0, &
+!        1.3608257177144900D-002, &
+!        3.5008535261739970D-002 /)
 
     call open_histo()
 
@@ -289,57 +288,19 @@ contains
                end do
              end do
 
-             write(*,*)
-write(*,'(A)') 'res_lo matrix:'
-write(*,'(A)', advance='no') '      '
-do j = -5, 7
-   write(*,'(I10)', advance='no') j
-end do
-write(*,*)
-
-do i = -5, 7
-   write(*,'(I6)', advance='no') i
-   do j = -5, 7
-      write(*,'(ES10.3)', advance='no') res_lo(i,j)
-   end do
-   write(*,*)
-end do
-write(*,*)
-
-
-             write(*,*)
-write(*,'(A)') 'res_lo matrix:'
-write(*,'(A)', advance='no') '      '
-do j = -5, 7
-   write(*,'(I10)', advance='no') j
-end do
-write(*,*)
-
-do i = -5, 7
-   write(*,'(I6)', advance='no') i
-   do j = -5, 7
-      write(*,'(ES10.3)', advance='no') res_lo_tmp1(i,j)
-   end do
-   write(*,*)
-end do
-write(*,*)
-
-
-
-
              !-- z-dependent bit
              call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_tmp1,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-             print*, 'respdf_1= ', respdf_1
-             print*, 'LOProc%wgt= ', LOProc%wgt  
+!             print*, 'respdf_1= ', respdf_1
+!             print*, 'LOProc%wgt= ', LOProc%wgt  
 
              respdf_1 = respdf_1*LOProc%wgt  
 
-             print*, 'respdf_1= ', respdf_1
+!             print*, 'respdf_1= ', respdf_1
 
              call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_tmp2,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
              respdf_2 = respdf_2*LOProc%wgt   
              
-             print*, 'respdf_2= ', respdf_2
+!             print*, 'respdf_2= ', respdf_2
 
              !-- FLM[1,2] bit, assuming E1 = E2 = E3 = E4 = Emax
              Emax = LOProc%AmpMom(1,1)
@@ -419,7 +380,6 @@ write(*,*)
     FintNLOEWK_vs = kin
 #endif
 
-   stop
 
   end function xsect_nloewk_s_ns
 
