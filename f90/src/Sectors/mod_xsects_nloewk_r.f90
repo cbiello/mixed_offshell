@@ -180,7 +180,7 @@ contains
           call get_respdf(ns_lumi,0,1,C1Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
-          res_lo = multiply_IS_charges(res_lo,1)
+          res_lo = multiply_IS_charges_sq(res_lo,1)
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
        endif
 
@@ -217,7 +217,7 @@ contains
           call get_respdf(ns_lumi,0,1,C2Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
-          res_lo = multiply_IS_charges(res_lo,2)
+          res_lo = multiply_IS_charges_sq(res_lo,2)
           call get_respdf_gen(0,1,C2Lim,res_lo,respdf)
        endif
        
@@ -273,9 +273,9 @@ contains
           call get_respdf(ns_lumi,0,1,SLim,res_lo_tmp_old,respdf_tmp(:,2))
           respdf_tmp(:,3) = respdf_tmp(:,2)
        else
-          res_lo = multiply_IS_charges(res_lo_tmp,1)
+          res_lo = multiply_IS_charges_sq(res_lo_tmp,1)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,2))
-          res_lo = multiply_IS_charges(res_lo_tmp,2)
+          res_lo = multiply_IS_charges_sq(res_lo_tmp,2)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,3))
        endif
        
@@ -797,7 +797,7 @@ contains
           call get_respdf(aq_lumi,0,1,C1Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
-          res_lo = multiply_IS_charges(res_lo,1)
+          res_lo = multiply_IS_charges_sq(res_lo,1)
           res_lo = transition('ga -> q', 'none', res_lo)
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
        endif
@@ -845,7 +845,7 @@ contains
        else
           call res_treeAA_aa_gen(C2Lim%AmpMom,res_lo)
           res_lo = transition('none','q -> ga',  res_lo)
-          res_lo = multiply_IS_charges(res_lo,2)
+          res_lo = multiply_IS_charges_sq(res_lo,2)
 
           call get_respdf_gen(0,1,C2Lim,res_lo,respdf)
           respdf = respdf * Pqq(z) / (one-z)
@@ -886,8 +886,12 @@ contains
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintNLO_ns(3),kin(3)
     real(dp)    :: respdf(ipdf)
-    real(dp)    :: res_nlo(2,2),res_lo(2,2),res_tmp(2,2),res_loAA
+    real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_tmp(2,2),res_loAA,res_nlo(-5:7,-5:7), res_lo(-5:7,-5:7)
     real(dp)    :: z,s5i
+    logical     :: oldcode
+
+
+    oldcode = .false.
 
     xsect_nloewk_r_is_qa = 0
 
@@ -925,9 +929,14 @@ contains
 
     else    
 
-       call res_tree_a_qa(HardProc%AmpMom,res_nlo)
-       call get_respdf(qa_lumi,0,1,HardProc,res_nlo,respdf)
-
+       if (oldcode) then
+          call res_tree_a_qa(HardProc%AmpMom,res_nlo_old)
+          call get_respdf(qa_lumi,0,1,HardProc,res_nlo_old,respdf)
+       else
+          call res_tree_a_qa_gen(HardProc%AmpMom,res_nlo)
+          call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
+       endif
+       
        respdf = respdf*HardProc%wgt
 
        kin(1) = respdf(1)
@@ -950,16 +959,26 @@ contains
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
 
-       !-- here we use spin-averages since there are no spin correlations for the aa -> e-e+ amplitude
-       call res_treeAA_aa(C1Lim%AmpMom,res_loAA)
-       !-- 1=xn*aveqa/aveaa
-       res_loAA = res_loAA * Pqq(z)/(one-z) !-- use Pqq/(1-z) because of definition of z
-
-       res_tmp(1,:) = [Qdn2,Qup2] * res_loAA
-       res_tmp(2,:) = [Qdn2,Qup2] * res_loAA
-
-       call get_respdf(qa_lumi,0,1,C1Lim,res_tmp,respdf)
+       if (oldcode) then
+          !-- here we use spin-averages since there are no spin correlations for the aa -> e-e+ amplitude
+          call res_treeAA_aa(C1Lim%AmpMom,res_loAA)
+          !-- 1=xn*aveqa/aveaa
+          res_loAA = res_loAA * Pqq(z)/(one-z) !-- use Pqq/(1-z) because of definition of z
+          
+          res_tmp(1,:) = [Qdn2,Qup2] * res_loAA
+          res_tmp(2,:) = [Qdn2,Qup2] * res_loAA
        
+          call get_respdf(qa_lumi,0,1,C1Lim,res_tmp,respdf)
+       else
+          call res_treeAA_aa_gen(C1Lim%AmpMom,res_lo)
+          res_lo = transition('q -> ga','none', res_lo)
+          res_lo = multiply_IS_charges_sq(res_lo,1)
+
+          call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
+       endif
+       
+       respdf = respdf * Pqq(z) / (one-z)
+          
        respdf = (-one)*respdf*(two/s5i)&
             * C1Lim%wgt
 
@@ -982,12 +1001,19 @@ contains
 
        z   = C2Lim%Lim_KinInv(1)
        s5i = C2Lim%Lim_KinInv(2)
-       
-       call res_tree_qqb(C2Lim%AmpMom,res_lo)
-       res_lo(1,:) = [Qdn2,Qup2] * res_lo(1,:)
-       res_lo(2,:) = [Qdn2,Qup2] * res_lo(2,:)
 
-       call get_respdf(qa_lumi,0,1,C2Lim,res_lo,respdf)
+       if (oldcode) then
+          call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
+          res_lo_old(1,:) = [Qdn2,Qup2] * res_lo_old(1,:)
+          res_lo_old(2,:) = [Qdn2,Qup2] * res_lo_old(2,:)
+
+          call get_respdf(qa_lumi,0,1,C2Lim,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
+          res_lo = multiply_IS_charges_sq(res_lo,1)
+          res_lo = transition('none','ga -> q', res_lo)
+          call get_respdf_gen(0,1,C2Lim,res_lo,respdf)
+       endif
 
 
        !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]

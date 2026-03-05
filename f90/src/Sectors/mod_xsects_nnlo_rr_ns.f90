@@ -359,7 +359,7 @@ contains
        !-- prepare PDFs structures, CS6
 !       res_tmp_vect(:,1,2) = res_nlo(:,1) * Qdn2
        !       res_tmp_vect(:,2,2) = res_nlo(:,2) * Qup2
-       res_nlo_ischarges = multiply_IS_charges(res_nlo_tmp,i)
+       res_nlo_ischarges = multiply_IS_charges_sq(res_nlo_tmp,i)
        call get_respdf_gen(1,1,S6Lim,res_nlo_ischarges,respdf_tmp(:,2))
                  
 
@@ -409,7 +409,7 @@ contains
             i_qcd=i)
 
        call res_tree_g_qqb_gen(C6Lim%AmpMom,res_nlo_tmp)
-       res_nlo_ischarges = multiply_IS_charges(res_nlo_tmp,i)
+       res_nlo_ischarges = multiply_IS_charges_sq(res_nlo_tmp,i)
        call get_respdf_gen(1,1,C6Lim,res_nlo_ischarges,respdf)
 
        z   = C6Lim%Lim_z(2)
@@ -443,7 +443,7 @@ contains
        !-- Prepare for PDFs, S5S6
        call get_qcd_eik(Cf,S5S6Lim%Lim_etaij,[1,2],5,eik_qcd) 
        call get_qed_eik_gen(res_lo_tmp,S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
-       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
+       res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
        call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_tmp(:,1))
        call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_tmp(:,2))
        
@@ -507,7 +507,7 @@ contains
     else
 
        call res_tree_qqb_gen(TCLim%AmpMom,res_lo_tmp)
-       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
+       res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
 
        call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf_tmp(:,1))
 
@@ -553,7 +553,7 @@ contains
     else
 
        call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo_tmp)
-       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
+       res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
 
        call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_tmp(:,1))
        
@@ -596,7 +596,7 @@ contains
     else
 
        call res_tree_qqb_gen(TCS5Lim%AmpMom,res_lo_tmp)
-       res_lo_ischarges = multiply_IS_charges(res_lo_tmp,i)
+       res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
        call get_respdf_gen(1,1,TCS5Lim,res_lo_ischarges,respdf_tmp(:,1))
        
        !-- TCS5
@@ -967,7 +967,7 @@ contains
           call get_qcd_eik(Cf,S5S6Lim%Lim_etaij,[1,2],5,eik_qcd)
           call get_qed_eik_gen(res_lo,S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
           !-- Prepare for PDFs, TCS5S6
-          res_lo_ischarges = multiply_IS_charges(res_lo,i)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           
           call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect(1,:))      ! S5 S6
           call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_vect(2,:))   ! TC S5 S6
@@ -1048,7 +1048,7 @@ contains
        else
           
           call res_tree_qqb_gen(TCLim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,i)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf)
        endif
 
@@ -1109,7 +1109,7 @@ contains
           call get_respdf_vect(ns_lumi,1,1,TCS6Lim,res_tmp_vect_old(:,:,1:2),respdf_vect(1:2,:))
        else
           call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,i)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_vect(1,:))
 
           call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
@@ -1169,7 +1169,7 @@ contains
           call get_respdf(ns_lumi,1,1,TCS5Lim,res_tmp_old,respdf)
        else
           call res_tree_qqb_gen(TCS5Lim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,i)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           call get_respdf_gen(1,1,TCS5Lim,res_lo_ischarges,respdf)
        endif
        
@@ -1403,7 +1403,7 @@ contains
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
           call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect(1,:))
           
-          res_nlo_ischarges = multiply_IS_charges(res_nlo,j)
+          res_nlo_ischarges = multiply_IS_charges_sq(res_nlo,j)
           call get_respdf_gen(1,1,S6Lim,res_nlo_ischarges,respdf_vect(2,:))
        endif
           
@@ -1494,7 +1494,7 @@ contains
           call get_respdf(ns_lumi,1,1,C6Lim,res_nlo_old,respdf)
        else
           call res_tree_g_qqb_gen(C6Lim%AmpMom,res_nlo)
-          res_nlo_ischarges = multiply_IS_charges(res_nlo,j)
+          res_nlo_ischarges = multiply_IS_charges_sq(res_nlo,j)
           call get_respdf_gen(1,1,C6Lim,res_nlo_ischarges,respdf)
        endif
 
@@ -1531,7 +1531,7 @@ contains
           call get_respdf(ns_lumi,1,1,C5C6Lim,res_lo_old,respdf) 
        else
           call res_tree_qqb_gen(C5C6Lim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,j)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
           call get_respdf_gen(1,1,C5C6Lim,res_lo_ischarges,respdf)
        endif
        
@@ -1584,7 +1584,7 @@ contains
     else
        call res_tree_qqb_gen(C5S6Lim%AmpMom,res_lo)
        call get_qed_eik_gen(res_lo,S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)       
-       res_lo_ischarges = multiply_IS_charges(res_lo,j)
+       res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
        call get_respdf_gen(1,1,S6Lim,res_lo_eikqed,respdf_vect(1,:))
        call get_respdf_gen(1,1,S6Lim,res_lo_ischarges,respdf_vect(2,:))
     endif
@@ -1636,7 +1636,7 @@ contains
           call get_respdf(ns_lumi,1,1,C6S5Lim,res_lo,respdf)
        else
           call res_tree_qqb_gen(C6S5Lim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,j)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
           call get_respdf_gen(1,1,C6S5Lim,res_lo_ischarges,respdf)
        endif
 
@@ -1700,7 +1700,7 @@ contains
        else
           call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)       
-          res_lo_ischarges = multiply_IS_charges(res_lo,j)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
           call get_respdf_gen(1,1,S6Lim,res_lo_eikqed,respdf_vect(1,:))
           call get_respdf_gen(1,1,S6Lim,res_lo_ischarges,respdf_vect(2,:))
        endif
