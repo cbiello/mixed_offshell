@@ -10,6 +10,7 @@ module mod_int_sub_nnlo
   public :: fin_ns_vqcd
   public :: Pqqbqqb, Pqqbqqb_Lmu
   public :: calG_QqQl,calG_QqQl_L,calG_CF,calG_Q2
+  public :: calG_ONLOQCD_ns
 
   interface calG_CF
     module procedure calG_CF_hard, calG_CF_coll
@@ -115,8 +116,8 @@ contains
 
     a = 4*zeta2
     b = 2*(li213-li214-li223+li224) &
-      + (3._dp + 2*logEC3)*log(eta13/eta23) + (3._dp + 2*logEC4)*log(eta24/eta14)
-    c = 13._dp - 4*zeta2 + logE34**2 + (3._dp + 2*logEC3 + 2*logEC4)*log(eta34) + 2*li234
+      + (3._dp + 2*logEC3)*log(eta13/eta23) + (3._dp + 2*logEC4)*log(eta24/eta14)            ! eq 2.67, Geq^ij * two for some reason
+    c = 13._dp - 4*zeta2 + logE34**2 + (3._dp + 2*logEC3 + 2*logEC4)*log(eta34) + 2*li234    ! eq 2.67 of paper, G_e^2
 
     if(present(icoll)) then
       etai3 = proc%Lim_etaij(icoll,3)
@@ -263,5 +264,59 @@ contains
     calG_Q2 = a * Qcharges*Qcharges + b * Qcharges*Qlept + c*Qlept*Qlept
 
   end function calG_Q2
+
+
+  function calG_ONLOQCD_ns(proc,ampl,lmu,Qlept,ilept)
+    use mod_process, only: KinConfig
+    ! lmu  = log(mu^2/4/EC^2)
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:)
+    integer, intent(in)           :: ilept    ! this is the label of the charged lepton
+!    integer, optional, intent(in) :: icoll
+    real(dp) :: calG_ONLOQCD_ns(-5:7,-5:7,size(lmu))
+    real(dp) :: EC,El
+    real(dp) :: eta1l,eta2l,lECoEl,li2_ometa1l, li2_ometa2l
+    real(dp) :: leta1l,leta2l,li2_1l,li2_2l
+    real(dp) :: coeff_Qlsq(size(lmu)), coeff_QqQl(size(lmu)), coeff_QqbQl(size(lmu)),coeff_QqQqb(size(lmu))
+    integer  :: al,be
+
+
+    EC = proc%Lim_Ei(1)
+    El = proc%Lim_Ei(ilept)   ! for CC, specify the final state lepton
+
+    eta1l  = proc%Lim_etaij(1,ilept)
+    eta2l  = proc%Lim_etaij(2,ilept)
+
+
+    lECoEl = log(EC/El)
+
+    leta1l = log(eta1l)
+    leta2l = log(eta2l)
+    li2_ometa1l = real(dilog2(one-eta1l),kind=dp)
+    li2_ometa2l = real(dilog2(one-eta2l),kind=dp)
+
+    ! mu-independent part
+    coeff_QqQqb = -6.0_dp*LECoEl - two*pisq/three
+    coeff_Qlsq = 13.0_dp/two - two*LECoEl**2 - two*pisq/three
+    coeff_QqQl  = -three*LECoEl*(one + LECoEl) - leta1l*(three + two*LECoEl) - two*li2_ometa1l + pisq/three
+    coeff_QqbQl = -three*LECoEl*(one + LECoEl) - leta2l*(three + two*LECoEl) - two*li2_ometa2l + pisq/three
+
+    ! mu-dependent part
+    coeff_QqQqb = coeff_QqQqb + three*lmu
+    coeff_QqQl  = coeff_QqQl  + lmu*(three + two*lECoEl)
+    coeff_QqbQl = coeff_QqbQl + lmu*(three + two*lECoEl)
+    coeff_Qlsq  = coeff_Qlsq  + lmu*(three/two + two*lECoEl)
+
+
+    do al = -5,5
+       do be = -5,5
+          calG_ONLOQCD_ns(al,be, :) = ampl(al,be)* ( Qlept**2 * coeff_Qlsq(:) + &
+               Qlept*Q_IS(al)*coeff_QqQl(:) + Qlept*Q_IS(be)*coeff_QqbQl(:) + Q_IS(al)*Q_IS(be)*coeff_QqQqb(:) )
+       enddo
+    enddo
+
+
+  end function calG_ONLOQCD_ns
 
 end module mod_int_sub_nnlo
