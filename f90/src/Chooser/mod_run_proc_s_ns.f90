@@ -24,13 +24,16 @@ contains
     real(dp15), intent(out) :: vg_result,vg_error,vg_chi2
 
     call init_xPij_nnlo()
+    print *, sec
     if     (sec.eq.'s_12')   then; call vegas_integrate(kLO_max_full+1,xsect_nnlo_s_ns_s12,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_vqcd') then; call vegas_integrate(kLO_max_full,xsect_nnlo_s_ns_vqcd,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_vewk') then; call vegas_integrate(kLO_max_full,xsect_nnlo_s_ns_vewk,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_qqb')  then; call vegas_integrate(kLO_max_full,xsect_nnlo_s_ns_qqb,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_qq')   then; call vegas_integrate(kLO_max_full,xsect_nnlo_s_ns_qq,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_oqcd') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oqcd,vg_result,vg_error,vg_chi2)
+
     elseif (sec.eq.'s_oewk_is') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_is,vg_result,vg_error,vg_chi2)
+    elseif (sec.eq.'s_oewk_is_ra') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_is_raoul,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_oewk_fs_53') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_fs_53,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_oewk_fs_54') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_fs_54,vg_result,vg_error,vg_chi2)
     !-- nf
