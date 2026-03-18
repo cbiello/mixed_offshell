@@ -622,10 +622,10 @@ contains
     call random_number(xx(kNLO_max_full))
     z = buff+onet*real(yRnd(kNLO_max_full),dp)
 
-    ! debug
-    z = one-1E-6_dp
+    ! debug -- check limits
+!    z = one-1E-6_dp
 !    xx(xE) = 1E-6_dp
-    xx(xRHO)=one-1E-6_dp
+!    xx(xRHO)=1E-6_dp
 
 #if (_withchecks == 1)
     if (override) then
@@ -1148,10 +1148,9 @@ contains
           respdf_2 = (respdf_2 - 3*respdf_bak*sv_logs) * C1Lim%wgt &
                * CF * 2/s15 * Pqg(z5)/(one-z5)
 #else
-          respdf_1 = (intsub_1 * respdf_1 + intsub_2*respdf_2) * C1Lim%wgt &
+          respdf_1 = (intsub_1 * respdf_bak_1 + intsub_2*respdf_bak_2) * C1Lim%wgt &
                * CF * 2/s15 * Pqg(z5)/(one-z5)
-
-          call get_respdf_gen(1,1,C1Lim,res_lo_incl_int_sub,respdf_2)
+          respdf_2 = respdf_2 * C1Lim%wgt * CF * 2/s15 * Pqg(z5)/(one-z5)
 #       endif
 
           
