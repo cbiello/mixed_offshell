@@ -588,7 +588,7 @@ contains
     !--
     real(dp) :: xx(kNLO_max_full),z
     real(dp) :: kin(9),FintNNLO_s_ns_oqcd(9)
-    real(dp) :: damp,EC,eta51,eta52,s15,s25,z5
+    real(dp) :: damp,EC,El,eta51,eta52,s15,s25,z5
     real(dp) :: respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_bak(ipdf),respdf_bak_1(ipdf),respdf_bak_2(ipdf)
     real(dp) :: intsub(ipdf),intsub_1(ipdf),intsub_2(ipdf),sv_logs(ipdf)
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1)
@@ -608,9 +608,11 @@ contains
 #if (_Vcharge == -1)
     Qlept = -one
     ilept = 3    ! e- nubar
+    print *, "CC -"
 #elif (_Vcharge == +1)
     Qlept = +one
     ilept = 4    ! nu e+
+    print *, "CC+"
 #endif
     
     xsect_nnlo_s_ns_oqcd = 0
@@ -1024,7 +1026,38 @@ contains
           call get_respdf(ns_lumi,1,1,HardProc,res_nlo_old,respdf_bak)
 #else
           call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
+
+          print *, "ux d",res_nlo(-2,+1)
+
+          print *, "dx u",res_nlo(-1,+2)
+          
+          print *, "d ux",res_nlo(+1,-2)
+          
+          print *, "u dx",res_nlo(+2,-1)
+
+          El = HardProc%Lim_Ei(ilept)
+          print *, "ilept",ilept
+          print *, "el",el
+          call fill_sv_logs(HardProc%muf(1)**2,4*El**2,sv_logs)
           res_nlo_calG =  calG_ONLOQCD_ns(HardProc,res_nlo,sv_logs,Qlept,ilept)
+
+          print *, "EC",EC
+          print *, "mu",HardProc%muf(1)
+          print *, "El",HardProc%AmpMom(1,3)
+          print *, "Elb",HardProc%AmpMom(1,4)
+          print *, "eta13",HardProc%Lim_etaij(1,3)
+          print *, "eta14",HardProc%Lim_etaij(1,4)
+          print *, "eta23",HardProc%Lim_etaij(2,3)
+          print *, "eta24",HardProc%Lim_etaij(2,4)
+
+          print *, "ux d",res_nlo_calG(-2,+1,:)/res_nlo(-2,+1)                               
+          print *, "dx d",res_nlo_calG(-1,+1,:)/res_nlo(-1,+1)
+          print *, "dx u",res_nlo_calG(-1,+2,:)/res_nlo(-1,+2)                                 
+          print *, "d ux",res_nlo_calG(+1,-2,:)/res_nlo(+1,-2)                               
+          print *, "u dx",res_nlo_calG(+2,-1,:)/res_nlo(+2,-1)
+          stop
+
+          
           
           res_nlo_ischarges_1 = multiply_IS_charges_sq(res_nlo,1)
           res_nlo_ischarges_2 = multiply_IS_charges_sq(res_nlo,2)
@@ -1112,6 +1145,9 @@ contains
           call get_respdf(ns_lumi,1,1,C1Lim,res_nlo_old,respdf_bak)
 #else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
+          El = C1Lim%Lim_Ei(ilept)
+          call fill_sv_logs(C1Lim%muf(1)**2,4*El**2,sv_logs)
+          
           res_lo_calG =  calG_ONLOQCD_ns(C1Lim,res_lo,sv_logs,Qlept,ilept)
           res_lo_ischarges_1 = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges_2 = multiply_IS_charges_sq(res_lo,2)
@@ -1188,9 +1224,13 @@ contains
           call get_respdf(ns_lumi,1,1,C2Lim,res_nlo_old,respdf_bak)
 #else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
+          El = C2Lim%Lim_Ei(ilept)
+          call fill_sv_logs(C2Lim%muf(1)**2,4*El**2,sv_logs)
+          
           res_lo_calG =  calG_ONLOQCD_ns(C2Lim,res_lo,sv_logs,Qlept,ilept)
           res_lo_ischarges_1 = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges_2 = multiply_IS_charges_sq(res_lo,2)
+          
           call get_respdf_gen(1,1,C2Lim,res_lo_ischarges_1,respdf_bak_1)
           call get_respdf_gen(1,1,C2Lim,res_lo_ischarges_2,respdf_bak_2)
           call get_respdf_gen_mu(1,1,C2Lim,res_lo_calG,respdf_2)
