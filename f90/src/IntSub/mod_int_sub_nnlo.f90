@@ -281,7 +281,8 @@ contains
     real(dp) :: coeff_Qlsq(size(lmu)), coeff_QqQl(size(lmu)), coeff_QqbQl(size(lmu)),coeff_QqQqb(size(lmu))
     integer  :: al,be
 
-
+    calG_ONLOQCD_ns = zero
+    
     EC = proc%Lim_Ei(1)
     El = proc%Lim_Ei(ilept)   ! for CC, specify the final state lepton
 
