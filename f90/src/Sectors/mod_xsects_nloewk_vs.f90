@@ -182,7 +182,7 @@ contains
     real(dp) :: eta(n,n), PolyLogij(n,n), Lij(n,n) 
     real(dp) :: fin_elasticZ_dn, fin_elasticZ_up, fin_elasticW_du, fin_elasticW_ud
     real(dp) :: fin_elasticZ_ddx, fin_elasticZ_uux, fin_elasticZ_dxd, fin_elasticZ_uxu
-    real(dp) :: fin_elasticW_dxu, fin_elasticW_uxd, fin_elasticW_dux
+    real(dp) :: fin_elasticW_dxu, fin_elasticW_uxd, fin_elasticW_dux, fin_elasticW_udx
 
     real(dp) :: Emax
     integer, parameter :: nf = 5
