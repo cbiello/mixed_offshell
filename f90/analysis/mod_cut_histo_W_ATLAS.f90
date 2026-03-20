@@ -112,7 +112,7 @@ contains
     !----------------------------------------------------------
     !-- user-defined cuts below
     !----------------------------------------------------------
-    
+
     !-- dress leptons
     call recombine_photons(event,rec_mom,nreco,ids,leptons_recombined)
     !-- Recombination of leptons: reject event
@@ -120,7 +120,7 @@ contains
 
 
     !-- q qb -> l lx
-
+    
     !-- lepton pT
     if ( (event%part(3) .gt. 0) .and. (mod(event%part(3), 2) .eq. 0)) then
           !print*, '3 is a neutrino'
@@ -134,7 +134,6 @@ contains
           print*, 'where is the final state lepton?'
     
     endif
-
 
     !-- transverse mass
     dphiln = get_dphi(rec_mom(:,1),rec_mom(:,2))
