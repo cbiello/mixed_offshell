@@ -244,6 +244,8 @@ contains
 
     limval_nnlo = zero
 
+       print*, '5161A'
+        stop
     
 #if (_withchecks == 1)
     if (override) then
@@ -798,11 +800,72 @@ contains
          TCS5S6Lim = TCS5S6Lim, TCC5S5S6Lim = TCC5S5S6Lim, C5Lim = C5Lim, &
          opt_etas=[3,4])
 
+#if (_Vcharge == 0)
+    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
+    S5Lim%ids(1:5)    = [0,0,id_el,-id_el,id_a]
+    C5S5Lim%ids(1:5)  = [0,0,id_el,-id_el,id_a]
+    S6Lim%ids(1:5)    = [0,0,id_el,-id_el,id_g]
+    C5Lim%ids(1:5)    = [0,0,id_el,-id_el,id_a]
+    S5S6Lim%ids(1:4)  = [0,0,id_el,-id_el]    
+    TCLim%ids(1:4)    = [0,0,id_el,-id_el]
+    TCS6Lim%ids(1:4)  = [0,0,id_el,-id_el]
+    TCS5Lim%ids(1:4)  = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g,id_a]
+    S5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
+    C5S5Lim%part  = [id_q,-id_q,id_el,-id_el,id_a]
+    S6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
+    C5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
+    S5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
+    TCLim%part    = [id_q,-id_q,id_el,-id_el]
+    TCS6Lim%part  = [id_q,-id_q,id_el,-id_el]
+    TCS5Lim%part  = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
+    S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
+    S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
+    C6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
+    S5S6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    TCLim%ids(1:4)    = [0,0,id_el,-id_nue]
+    TCS6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    TCS5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
+    S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
+    S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
+    C6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
+    S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    TCLim%part    = [id_q,-id_qp,id_el,-id_nue]
+    TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
+    S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
+    S6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
+    C6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
+    S5S6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    TCLim%ids(1:4)    = [0,0,id_nue,-id_el]
+    TCS6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    TCS5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
+    S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
+    S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
+    C6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
+    S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    TCLim%part    = [id_q,-id_qp,id_nue,-id_el]
+    TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+
+#endif
+
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
+    ! HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -836,7 +899,7 @@ contains
     !!                             S5                                        !!
     !!-----------------------------------------------------------------------!!
 
-    S5Lim%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    ! S5Lim%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(S5Lim)
 
     if (S5Lim%makecut.or.S5Lim%flag) then
@@ -911,7 +974,7 @@ contains
     !!                                 S6                                    !!
     !!-----------------------------------------------------------------------!!
 
-    S6Lim%ids(1:5) = [0,0,id_el,-id_el,id_g]
+    ! S6Lim%ids(1:5) = [0,0,id_el,-id_el,id_g]
     call cut_histo(S6Lim)
 
     if (S6Lim%makecut.or.S6Lim%flag) then
@@ -953,7 +1016,7 @@ contains
     !!                             C5                                        !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    ! C5Lim%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(C5Lim)
 
     if (C5Lim%makecut.or.C5Lim%flag) then
@@ -990,7 +1053,7 @@ contains
     !!                      S5S6 + TCS5S6 + C5S5S6 + TCC5S5S6                !!
     !!-----------------------------------------------------------------------!!
 
-    S5S6Lim%ids(1:4) = [0,0,id_el,-id_el]
+    ! S5S6Lim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(S5S6Lim)
 
     if (S5S6Lim%makecut.or.S5S6Lim%flag) then
@@ -1090,7 +1153,7 @@ contains
     !!                              TC + TCC5                                !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids(1:4) = [0,0,id_el,-id_el]
+    ! TCLim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(TCLim)
 
     if (TCLim%makecut.or.TCLim%flag) then
@@ -1145,7 +1208,7 @@ contains
     !!                         TCS6 + TCC5S6 + C5S6                          !!
     !!-----------------------------------------------------------------------!!
 
-    TCS6Lim%ids(1:4) = [0,0,id_el,-id_el]
+    ! TCS6Lim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(TCS6Lim)
 
     if (TCS6Lim%makecut.or.TCS6Lim%flag) then
@@ -1212,7 +1275,7 @@ contains
     !!                           TCS5 + TCC5S5                               !!
     !!-----------------------------------------------------------------------!!
 
-    TCS5Lim%ids(1:4) = [0,0,id_el,-id_el]
+    ! TCS5Lim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(TCS5Lim)
 
     if (TCS5Lim%makecut.or.TCS5Lim%flag) then
