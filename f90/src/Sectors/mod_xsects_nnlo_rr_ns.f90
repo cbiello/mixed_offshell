@@ -583,8 +583,8 @@ contains
        z6 = TCLim%Lim_z(2)
        zi = TCLim%Lim_z(3)
 
-       respdf_tmp_part(:,1) = -respdf_tmp(:,1)*Cf*Pgaq(s56,-si5,-si6,z5,z6,zi)*TCLim%wgt
-       FintNNLO_ns(10) = respdf_tmp_part(1,1)
+       respdf_vect_part(:,1) = -respdf_tmp(:,1)*Cf*Pgaq(s56,-si5,-si6,z5,z6,zi)*TCLim%wgt
+       FintNNLO_ns(10) = respdf_vect_part(1,1)
 
        !-- TCC6
        z6 = TCC6Lim%Lim_z(2)
@@ -691,7 +691,8 @@ contains
        respdf_tmp_part(:,3) = -respdf_tmp(:,1)*(eik_qcd/e5**2)*(two*Pqg(z6)/si6)*C6S5Lim%wgt*damp
        FintNNLO_ns(16) = respdf_tmp_part(1,3)
 
-       respdf = sum(respdf_vect_part(:,1:3),2)
+       !       respdf = sum(respdf_vect_part(:,1:3),2)
+       respdf = sum(respdf_tmp_part(:,1:3),2)
        kin(8) = respdf(1)
        
        call fill_histo(respdf,vegasweight)
