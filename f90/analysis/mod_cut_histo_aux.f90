@@ -41,8 +41,13 @@ contains
           k = k + 1
        else
           mygamma = i
-          call recombine_lla(event%AmpMom(:,3),event%AmpMom(:,4),event%AmpMom(:,i),&
-            dressed_lep,nphot,lept_recomb,lboost)
+          if (event%ids(3) == -event%ids(4)) then
+             call recombine_lla(event%AmpMom(:,3),event%AmpMom(:,4),event%AmpMom(:,i),&
+              dressed_lep,nphot,lept_recomb,lboost)
+          else
+             call recombine_la([event%ids(3),event%ids(4)],event%AmpMom(:,3),event%AmpMom(:,4),event%AmpMom(:,i),&
+              dressed_lep,nphot,lept_recomb,lboost) 
+          endif 
           !-- Recombination of leptons: reject event
           if(lept_recomb) return
           recomb_mom(:,1) = dressed_lep(:,1)
@@ -102,5 +107,54 @@ contains
 
     return
   end subroutine recombine_lla
+
+
+  subroutine recombine_la(idx,pl1,pl2,pa,dress_lep,nphot,lept_recomb,lboost)
+  implicit none
+  integer,  intent(in) :: idx(2)
+  real(dp), intent(in) :: pl1(4),pl2(4),pa(4),lboost
+  real(dp), intent(out) :: dress_lep(4,2)
+  logical,  intent(inout) :: lept_recomb
+  integer,  intent(out) :: nphot
+
+  real(dp) :: r_vec(2)
+  integer  :: irmin(1)
+  logical :: phot_in_beam
+  logical :: nu1, nu2
+
+  phot_in_beam = .false.
+  dress_lep(:,1) = pl1
+  dress_lep(:,2) = pl2
+
+  !-- identify neutrino (your rule)
+  nu1 = (idx(1) .gt. 0) .and. (mod(idx(1),2) .eq. 0)
+  nu2 = (idx(2) .gt. 0) .and. (mod(idx(2),2) .eq. 0)
+
+  !--------------------------------------------------
+  ! Only one particle can recombine (the non-neutrino)
+  !--------------------------------------------------
+  if (nu1) then
+     !-- pl1 is neutrino → only pl2 can recombine
+     r_vec = [1d10, get_r(pl2,pa)]
+  else
+     !-- pl2 is neutrino → only pl1 can recombine
+     r_vec = [get_r(pl1,pa), 1d10]
+  endif
+
+  irmin = minloc(r_vec)
+
+  if(rec_phot_beam) phot_in_beam = abs((get_y(pa) + lboost)) > ya_beam
+
+  if((r_vec(irmin(1)).lt.R_phot) .and. (.not.phot_in_beam)) then
+     dress_lep(:,irmin(1)) = dress_lep(:,irmin(1)) + pa
+     nphot = 0
+  else
+     nphot = 1
+  endif
+
+  return
+end subroutine recombine_la
+
+
   
 end module mod_cut_histo_aux
