@@ -235,7 +235,7 @@ contains
           call get_respdf(gq_lumi,1,1,TCLim,res_tmp,respdf)
        else
           call res_tree_qqb_gen(TCLim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,1)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges = transition('g -> q', 'none', res_lo_ischarges)
           call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf)
        endif
@@ -281,7 +281,7 @@ contains
           call get_respdf(gq_lumi,1,1,TCS6Lim,res_tmp,respdf)
        else
           call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,1)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges = transition('g -> q', 'none', res_lo_ischarges)
           call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf)
        endif
@@ -474,7 +474,7 @@ contains
           call get_respdf(gq_lumi,1,1,TCLim,res_tmp,respdf_bak)
        else
           call res_tree_qqb_gen(TCLim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,1)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges = transition('g -> q', 'none', res_lo_ischarges)
           call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf_bak)
        endif
@@ -537,7 +537,7 @@ contains
           call get_respdf(gq_lumi,1,1,TCS6Lim,res_tmp,respdf_bak)
        else
           call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,1)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges = transition('g -> q', 'none', res_lo_ischarges)
           call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_bak)
        endif
@@ -839,7 +839,7 @@ contains
        else
           call res_tree_qqb_gen(TCLim%AmpMom,res_lo)
           res_lo = transition('g -> q', 'none', res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,1)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
           call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf_bak)
        endif
        
@@ -906,7 +906,7 @@ contains
          call get_respdf(gq_lumi,1,1,C6Lim,res_tmp,respdf)
       else
          call res_tree_g_gq_gen(C6Lim%AmpMom,res_lo)
-         res_lo = multiply_FSQ_charges(res_lo)
+         res_lo = multiply_FSQ_charges_sq(res_lo)
          call get_respdf_gen(1,1,C6Lim,res_lo,respdf)
       endif
          
@@ -944,7 +944,7 @@ contains
           call get_respdf(gq_lumi,1,1,C6S6Lim,res_tmp,respdf)
        else
           call res_tree_g_gq_gen(C6S6Lim%AmpMom,res_lo)
-         res_lo = multiply_FSQ_charges(res_lo)
+         res_lo = multiply_FSQ_charges_sq(res_lo)
          call get_respdf_gen(1,1,C6S6Lim,res_lo,respdf)
       endif
 
@@ -986,7 +986,7 @@ contains
        else
           call res_tree_qqb(TCS6Lim%AmpMom,res_lo)
           res_lo = transition('g -> q', 'none', res_lo)
-          res_lo_ischarges = multiply_IS_charges(res_lo,1)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
           call get_respdf_gen(1,1,TCS6Lim,res_lo,respdf_bak)
        endif
 
@@ -1189,7 +1189,7 @@ contains
          
          call get_respdf(gq_lumi,1,1,C6S6Lim,res_nlo_old,respdf_tmp(:,2))
       else
-         res_nlo_ischarges = multiply_IS_charges(res_nlo,2)
+         res_nlo_ischarges = multiply_IS_charges_sq(res_nlo,2)
          call get_respdf_gen(1,1,C6S6Lim,res_nlo_ischarges,respdf_tmp(:,2))
       endif
 
@@ -1232,7 +1232,7 @@ contains
          call get_respdf(gq_lumi,1,1,C6Lim,res_tmp,respdf)
       else
          call res_tree_g_gq_gen(C6Lim%AmpMom,res_nlo)
-         res_nlo_ischarges = multiply_IS_charges(res_nlo,2)
+         res_nlo_ischarges = multiply_IS_charges_sq(res_nlo,2)
          call get_respdf_gen(1,1,C6Lim,res_nlo_ischarges,respdf)
       endif
 
@@ -1314,7 +1314,7 @@ contains
          
          call get_respdf(gq_lumi,1,1,C5C6S6Lim,res_nlo_old,respdf_tmp(:,2))
       else
-         res_lo_ischarges = multiply_IS_charges(res_lo,2)
+         res_lo_ischarges = multiply_IS_charges_sq(res_lo,2)
          call get_respdf_gen(1,1,C5C6S6Lim,res_lo_ischarges,respdf_tmp(:,2))
       endif
          
@@ -1405,7 +1405,7 @@ contains
       else
          call res_tree_qqb_gen(C5C6Lim%AmpMom,res_lo)
          res_lo = transition('g -> q', 'none', res_lo)
-         res_lo_ischarges = multiply_IS_charges(res_lo,2)
+         res_lo_ischarges = multiply_IS_charges_sq(res_lo,2)
          call get_respdf_gen(1,1,C5C6Lim,res_lo_ischarges,respdf)
       endif
          

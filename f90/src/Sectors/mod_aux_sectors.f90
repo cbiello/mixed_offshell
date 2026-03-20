@@ -13,7 +13,7 @@ module mod_aux_sectors
   private
 
   public :: get_prefactor
-  public :: get_respdf,get_respdf_vect, get_respdf_gen
+  public :: get_respdf,get_respdf_vect, get_respdf_gen, get_respdf_gen_mu
   public :: get_respdf_hoppet
   public :: get_respdf_hoppet_gen
 
@@ -32,7 +32,7 @@ module mod_aux_sectors
 
   public :: gen_lumi
 
-  public :: multiply_IS_charges, multiply_FSQ_charges
+  public :: multiply_IS_charges_sq, multiply_FSQ_charges_sq
 
   public :: transition
   
@@ -59,7 +59,7 @@ contains
   end subroutine get_prefactor
 
 
-    subroutine get_respdf_gen(as_ord,aem_ord,proc,amp2,respdf)
+  subroutine get_respdf_gen(as_ord,aem_ord,proc,amp2,respdf)
 
     integer, intent(in) :: as_ord,aem_ord
     type(KinConfig), intent(in) :: proc
@@ -123,6 +123,74 @@ contains
       end subroutine get_respdf_three_gen
 
     end subroutine get_respdf_gen
+
+
+    subroutine get_respdf_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+      ! used for an amplitude that has been multipled by a int. subtr function, and now has mu-dependence
+      ! mu-dependence is in final index: 1=mu, 2=mu/2, 3=2*mu
+      ! needs to be multiplied by pdf evaluated using corresponding value of mu
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(-5:7,-5:7,ipdf)
+      real(dp), intent(out)       :: respdf(ipdf)
+
+      
+      if (ipdf == 1) then
+         call get_respdf_one_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+      elseif (ipdf == 3) then
+         call get_respdf_three_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+      endif
+
+    contains
+
+      subroutine get_respdf_one_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7,ipdf)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2(-5:7,-5:7,1),f1,f2)
+    
+      end subroutine get_respdf_one_gen_mu
+
+      subroutine get_respdf_three_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7,ipdf)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2(-5:7,-5:7,1),f1,f2)
+
+        !-- do not compute the other scales if we're not doing histograms
+        if (nohistos) then
+
+           respdf(2:) = zero
+
+        else
+               
+           !-- half
+           call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*half,f1,f2)
+           respdf(2) = pref*gen_lumi(amp2(-5:7,-5:7,2),f1,f2)
+           
+           !-- twice
+           call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*two,f1,f2)
+           respdf(3) = pref*gen_lumi(amp2(-5:7,-5:7,3),f1,f2)
+
+        endif
+    
+      end subroutine get_respdf_three_gen_mu
+      
+    end subroutine get_respdf_gen_mu
 
   subroutine get_respdf(lumi,as_ord,aem_ord,proc,amp2,respdf)
     interface
@@ -208,6 +276,8 @@ contains
 
     end subroutine get_respdf
 
+
+    
     
       
   !-- evolve PDFs once if we have more limits with same kinematics
@@ -1017,13 +1087,15 @@ end function gen_lumi
 
 
 
-  function multiply_IS_charges(res_in,leg) result(res_out)
+  function multiply_IS_charges_sq(res_in,leg) result(res_out)
+    ! multiply the matrix elements by the square of the charge on chosen leg
+    ! if leg is 1: msq(i,j) --> msq(i,j)*Qi^2
+    ! if leg is 2: msq(i,j) --> msq(i,j)*Qj^2
     real(dp), intent(in)  :: res_in(-5:7,-5:7)
     integer, intent(in)   :: leg
     real(dp) :: res_out(-5:7,-5:7)
     integer               :: i,j
-
-    
+   
 
     do i = -5,7
        do j = -5,7
@@ -1035,10 +1107,10 @@ end function gen_lumi
        enddo
     enddo
 
-  end function multiply_IS_charges
+  end function multiply_IS_charges_sq
 
 
-  function multiply_FSQ_charges(res_in) result(res_out)
+  function multiply_FSQ_charges_sq(res_in) result(res_out)
     real(dp), intent(in)  :: res_in(-5:7,-5:7)
     real(dp) :: res_out(-5:7,-5:7)
     integer               :: i,j
@@ -1052,7 +1124,7 @@ end function gen_lumi
        enddo
     enddo
 
-  end function multiply_FSQ_charges
+  end function multiply_FSQ_charges_sq
   !--
 
   !-- NaN checks
