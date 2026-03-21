@@ -766,7 +766,7 @@ contains
 
     ff(1) = zero
 
-    oldcode = .true.
+    oldcode = .false.
 
     xx(1:kNNLO_max)=buff+onet*real(yRnd(1:kNNLO_max),dp)
     call random_number(xx(kNNLO_max_full-1))
@@ -820,42 +820,46 @@ contains
     TCS5Lim%part  = [id_q,-id_q,id_el,-id_el]
 
 #elif  (_Vcharge == -1)
-    !HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
-    !S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
-    !S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
-    !C6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
-    !S5S6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
-    !TCLim%ids(1:4)    = [0,0,id_el,-id_nue]
-    !TCS6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
-    !TCS5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
-
-    !HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
-    !S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    !S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    !C6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    !S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    !TCLim%part    = [id_q,-id_qp,id_el,-id_nue]
-    !TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    !TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
+    S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
+    C5S5Lim%ids(1:5)  = [0,0,id_el,-id_nue,id_a]
+    S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
+    C5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
+    S5S6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    TCLim%ids(1:4)    = [0,0,id_el,-id_nue]
+    TCS6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    TCS5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    
+    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
+    S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
+    C5S5Lim%part  = [id_q,-id_qp,id_el,-id_nue,id_a]
+    S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
+    C5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
+    S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    TCLim%part    = [id_q,-id_qp,id_el,-id_nue]
+    TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
 #elif  (_Vcharge == +1)
-    !HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
-    !S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
-    !S6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
-    !C6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
-    !S5S6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
-    !TCLim%ids(1:4)    = [0,0,id_nue,-id_el]
-    !TCS6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
-    !TCS5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
-
-    !HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
-    !S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    !S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    !C6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    !S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    !TCLim%part    = [id_q,-id_qp,id_nue,-id_el]
-    !TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    !TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
+    S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
+    C5S5Lim%ids(1:5)  = [0,0,id_nue,-id_el,id_a]
+    S6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
+    C5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
+    S5S6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    TCLim%ids(1:4)    = [0,0,id_nue,-id_el]
+    TCS6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    TCS5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    
+    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
+    S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
+    C5S5Lim%part  = [id_q,-id_qp,id_nue,-id_el,id_a]
+    S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
+    C5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
+    S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    TCLim%part    = [id_q,-id_qp,id_nue,-id_el]
+    TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
 #endif
 
@@ -1144,9 +1148,6 @@ contains
     endif
 
 
-
-
-
     !!-----------------------------------------------------------------------!!
     !!                              TC + TCC5                                !!
     !!-----------------------------------------------------------------------!!
@@ -1233,7 +1234,6 @@ contains
           call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_vect(1,:))
-
           call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
           call get_respdf_gen(1,1,TCS6Lim,res_lo_eikqed,respdf_vect(2,:))
        endif
@@ -1322,7 +1322,8 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
-    
+   
+
     ff(1) = sum(kin)
     call close_histo()
 
@@ -1376,7 +1377,7 @@ contains
 
     ff(1) = zero
 
-    oldcode = .false.
+    oldcode = .true.
 
     xx(1:kNNLO_max)=buff+onet*real(yRnd(1:kNNLO_max),dp)
     call random_number(xx(kNNLO_max_full-1))
