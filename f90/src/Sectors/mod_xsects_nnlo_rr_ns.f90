@@ -244,9 +244,6 @@ contains
 
     limval_nnlo = zero
 
-       print*, '5161A'
-        stop
-    
 #if (_withchecks == 1)
     if (override) then
        xx(1:kNNLO_max_full) = yRnd(1:kNNLO_max_full)
@@ -823,42 +820,42 @@ contains
     TCS5Lim%part  = [id_q,-id_q,id_el,-id_el]
 
 #elif  (_Vcharge == -1)
-    HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
-    S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
-    S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
-    C6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
-    S5S6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
-    TCLim%ids(1:4)    = [0,0,id_el,-id_nue]
-    TCS6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
-    TCS5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    !HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
+    !S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
+    !S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
+    !C6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
+    !S5S6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    !TCLim%ids(1:4)    = [0,0,id_el,-id_nue]
+    !TCS6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
+    !TCS5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    TCLim%part    = [id_q,-id_qp,id_el,-id_nue]
-    TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    !HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
+    !S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
+    !S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
+    !C6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
+    !S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    !TCLim%part    = [id_q,-id_qp,id_el,-id_nue]
+    !TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
+    !TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
 #elif  (_Vcharge == +1)
-    HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
-    S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
-    S6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
-    C6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
-    S5S6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
-    TCLim%ids(1:4)    = [0,0,id_nue,-id_el]
-    TCS6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
-    TCS5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    !HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
+    !S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
+    !S6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
+    !C6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
+    !S5S6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    !TCLim%ids(1:4)    = [0,0,id_nue,-id_el]
+    !TCS6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
+    !TCS5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
 
-    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    TCLim%part    = [id_q,-id_qp,id_nue,-id_el]
-    TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    !HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
+    !S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
+    !S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
+    !C6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
+    !S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    !TCLim%part    = [id_q,-id_qp,id_nue,-id_el]
+    !TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
+    !TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
 #endif
 
