@@ -754,7 +754,7 @@ contains
     real(dp) :: FintNNLO_ns(16),kin(9)
     real(dp) :: res_lo_old(2,2),res_nlo_old(2,2),res_nnlo_old(2,2),res_tmp_old(2,2)
     real(dp) :: res_nnlo(-5:7,-5:7), res_nlo(-5:7,-5:7), res_lo(-5:7,-5:7), res_nlo_eikqed(-5:7,-5:7), res_nlo_ischarges(-5:7,-5:7), res_lo_eikqed(-5:7,-5:7), res_lo_ischarges(-5:7,-5:7)
-    real(dp) :: respdf(ipdf), respdf_tmp(ipdf,3)
+    real(dp) :: respdf(ipdf), respdf_tmp(ipdf,3), respdf_vect1(ipdf), respdf_vect2(ipdf), respdf_vect3(ipdf)
     real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect_old(2,2,imax_ipdf)
     real(dp) :: respdf_vect_part(imax_ilim,ipdf)
     real(dp) :: e5,e6,eta5i,eta6i,eik_qcd,eik_qed(4),si5,si6,s56
@@ -992,7 +992,6 @@ contains
           call get_qed_eik(charges,S6Lim%Lim_etaij,[1,2,3,4],6,eik_qed)
           res_tmp_old(1:2,1) = res_nlo_old(1:2,1) * eik_qed(1:2)
           res_tmp_old(1:2,2) = res_nlo_old(1:2,2) * eik_qed(3:4)
-
           call get_respdf(ns_lumi,1,1,S6Lim,res_tmp_old,respdf)
        else
           call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo)
@@ -1095,12 +1094,16 @@ contains
           !-- Prepare for PDFs, TCS5S6
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           
-          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect(1,:))      ! S5 S6
-          call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_vect(2,:))   ! TC S5 S6
+          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect1(:))      ! S5 S6
+          call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_vect2(:))   ! TC S5 S6
 
           ! Prepare for PDFS, C5 S5S6
           call get_qed_eik_gen(res_lo,C5S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
-          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect(3,:))      ! C5 S5 S6
+          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect3(:))      ! C5 S5 S6
+          respdf_vect(1,:) = respdf_vect1(:)
+          respdf_vect(2,:) = respdf_vect2(:)
+          respdf_vect(3,:) = respdf_vect3(:)
+
        endif
        
        !-- S5S6
@@ -1233,9 +1236,11 @@ contains
        else
           call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
-          call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_vect(1,:))
+          call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_vect1(:))
           call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
-          call get_respdf_gen(1,1,TCS6Lim,res_lo_eikqed,respdf_vect(2,:))
+          call get_respdf_gen(1,1,TCS6Lim,res_lo_eikqed,respdf_vect2(:))
+          respdf_vect(1,:) = respdf_vect1(:)
+          respdf_vect(2,:) = respdf_vect2(:)
        endif
 
        !-- TCS6

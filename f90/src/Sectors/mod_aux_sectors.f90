@@ -13,7 +13,9 @@ module mod_aux_sectors
   private
 
   public :: get_prefactor
-  public :: get_respdf,get_respdf_vect, get_respdf_gen, get_respdf_gen_mu
+  public :: get_respdf, get_respdf_gen
+  public :: get_respdf_vect, get_respdf_vect_gen
+  public :: get_respdf_gen_mu
   public :: get_respdf_hoppet
   public :: get_respdf_hoppet_gen
 
@@ -379,6 +381,88 @@ contains
     end subroutine get_respdf_vect_three
 
   end subroutine get_respdf_vect
+
+
+ !------- gen version
+
+
+  !-- evolve PDFs once if we have more limits with same kinematics
+  !-- amp2(q/qb,dn/up,i_limit)
+  !-- respdf(i_limit,ipdf), note the different order w.r.t. above
+  subroutine get_respdf_vect_gen(as_ord,aem_ord,proc,amp2,respdf)
+    integer, intent(in) :: as_ord,aem_ord
+    type(KinConfig), intent(in) :: proc
+    real(dp), intent(in)        :: amp2(:,:,:)
+    real(dp), intent(out)       :: respdf(:,:)
+    
+    if (ipdf == 1) then
+       call get_respdf_vect_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+    elseif (ipdf == 3) then
+       call get_respdf_vect_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+    endif
+
+  contains
+
+    subroutine get_respdf_vect_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(:,:,:)
+      real(dp), intent(out)       :: respdf(:,:)
+      real(dp) :: f1(-6:7),f2(-6:7),pref
+      integer  :: i 
+            
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+      call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+      
+      do i = 1,size(amp2,3)
+         respdf(i,1) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+      enddo
+      
+    end subroutine get_respdf_vect_one_gen
+
+    subroutine get_respdf_vect_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(:,:,:)
+      real(dp), intent(out)       :: respdf(:,:)
+      real(dp) :: f1(-6:7),f2(-6:7),pref
+      integer  :: i 
+
+      !-- central scale
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+      call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+      
+      do i = 1,size(amp2,3)
+         respdf(i,1) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+      enddo
+
+      !-- do not compute other scales if we're not doing histograms
+      if (nohistos) then
+         respdf(:,2:) = zero
+      else
+         
+         !-- half scale
+         call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+         call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*half,f1,f2)
+         
+         do i = 1,size(amp2,3)
+            respdf(i,2) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+         enddo
+         
+         !-- twice scale
+         call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+         call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*two,f1,f2)
+         
+         do i = 1,size(amp2,3)
+            respdf(i,3) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+         enddo
+
+      endif
+         
+    end subroutine get_respdf_vect_three_gen
+
+  end subroutine get_respdf_vect_gen
+
 
   !--
 
