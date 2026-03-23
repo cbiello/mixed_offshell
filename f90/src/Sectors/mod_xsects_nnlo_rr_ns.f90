@@ -1371,7 +1371,7 @@ contains
     real(dp) :: res_lo_old(2,2),res_nlo_old(2,2),res_nnlo_old(2,2)
     real(dp) :: res_lo(-5:7,-5:7),res_nlo(-5:7,-5:7),res_nnlo(-5:7,-5:7), res_nlo_eikqed(-5:7,-5:7), res_nlo_ischarges(-5:7,-5:7), res_lo_eikqed(-5:7,-5:7), res_lo_ischarges(-5:7,-5:7)
     real(dp) :: respdf(ipdf)
-    real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect(2,2,imax_ipdf)
+    real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect(2,2,imax_ipdf),respdf_vect_rev(ipdf,imax_ipdf)
     real(dp) :: respdf_vect_part(imax_ilim,ipdf)
     real(dp) :: e5,e6,eik_qcd,eik_qed(4),si5,sj6
     real(dp) :: z5,z6
@@ -1382,7 +1382,7 @@ contains
 
     ff(1) = zero
 
-    oldcode = .true.
+    oldcode = .false.
 
     xx(1:kNNLO_max)=buff+onet*real(yRnd(1:kNNLO_max),dp)
     call random_number(xx(kNNLO_max_full-1))
@@ -1529,10 +1529,12 @@ contains
        else
           call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo)
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
-          call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect(1,:))
+          call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect_rev(:,1))
           
           res_nlo_ischarges = multiply_IS_charges_sq(res_nlo,j)
-          call get_respdf_gen(1,1,S6Lim,res_nlo_ischarges,respdf_vect(2,:))
+          call get_respdf_gen(1,1,S6Lim,res_nlo_ischarges,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
        endif
           
 
@@ -1713,8 +1715,10 @@ contains
        call res_tree_qqb_gen(C5S6Lim%AmpMom,res_lo)
        call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)       
        res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
-       call get_respdf_gen(1,1,C5S6Lim,res_lo_eikqed,respdf_vect(1,:))
-       call get_respdf_gen(1,1,C5S6Lim,res_lo_ischarges,respdf_vect(2,:))
+       call get_respdf_gen(1,1,C5S6Lim,res_lo_eikqed,respdf_vect_rev(:,1))
+       call get_respdf_gen(1,1,C5S6Lim,res_lo_ischarges,respdf_vect_rev(:,2))
+       respdf_vect(1,:) = respdf_vect_rev(:,1)
+       respdf_vect(2,:) = respdf_vect_rev(:,2)
     endif
     
        !-- C5S6
@@ -1761,7 +1765,7 @@ contains
           res_lo_old(:,1) = res_lo_old(:,1) * Qdn2
           res_lo_old(:,2) = res_lo_old(:,2) * Qup2
 
-          call get_respdf(ns_lumi,1,1,C6S5Lim,res_lo,respdf)
+          call get_respdf(ns_lumi,1,1,C6S5Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C6S5Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
@@ -1829,8 +1833,10 @@ contains
           call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)       
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
-          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect(1,:))
-          call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_vect(2,:))
+          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect_rev(:,1))
+          call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
        endif
        
        !-- S5S6
@@ -1880,6 +1886,7 @@ contains
     call close_histo()
 
     call check_ff(ff,xx,FintNNLO_ns)
+    
 
 #if(_withchecks == 1)
     FintNNLO_rr_dc_ns = FintNNLO_ns
@@ -1915,7 +1922,7 @@ contains
     real(dp) :: res_lo_old(2,2),res_nlo_old(2,2),res_nnlo_old(2,2)
     real(dp) :: res_lo(-5:7,-5:7),res_nlo(-5:7,-5:7),res_nnlo(-5:7,-5:7), res_nlo_eikqed(-5:7,-5:7), res_nlo_fscharges(-5:7,-5:7), res_lo_eikqed(-5:7,-5:7), res_lo_fscharges(-5:7,-5:7)
     real(dp) :: respdf(ipdf)
-    real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect(2,2,imax_ipdf)
+    real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect(2,2,imax_ipdf),respdf_vect_rev(ipdf,imax_ipdf)
     real(dp) :: respdf_vect_part(imax_ilim,ipdf)
     real(dp) :: e5,e6,eik_qcd,eik_qed(4),si5,sk6,Qsq_FS(2)
     real(dp) :: z5,z6
@@ -2074,9 +2081,12 @@ contains
        else
           call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo)
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
-          call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect(1,:))
+          call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect_rev(:,1))
           res_nlo_fscharges = Qsq_Fs(k-2)**2 * res_nlo
-          call get_respdf_gen(1,1,S6Lim,res_nlo_fscharges,respdf_vect(2,:))
+          call get_respdf_gen(1,1,S6Lim,res_nlo_fscharges,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
+          
        endif
           
        !-- S6
@@ -2251,8 +2261,10 @@ contains
           call res_tree_qqb_gen(C5S6Lim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
           res_lo_fscharges = Qsq_Fs(k-2)**2 * res_lo
-          call get_respdf_gen(1,1,C5S6Lim,res_lo_eikqed,respdf_vect(1,:))
-          call get_respdf_gen(1,1,C5S6Lim,res_lo_fscharges,respdf_vect(2,:))
+          call get_respdf_gen(1,1,C5S6Lim,res_lo_eikqed,respdf_vect_rev(:,1))
+          call get_respdf_gen(1,1,C5S6Lim,res_lo_fscharges,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
        endif
        
        !-- C5S6
@@ -2364,9 +2376,11 @@ contains
        else
           call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
-          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect(1,:))
+          call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect_rev(:,1))
           res_lo_fscharges = Qsq_Fs(k-2)**2 * res_lo
-          call get_respdf_gen(1,1,S5S6Lim,res_lo_fscharges,respdf_vect(2,:))
+          call get_respdf_gen(1,1,S5S6Lim,res_lo_fscharges,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
        endif
        
        !-- S5S6
