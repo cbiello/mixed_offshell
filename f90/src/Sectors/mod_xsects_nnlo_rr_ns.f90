@@ -1986,8 +1986,8 @@ contains
             i_qcd=i,i_qed=k)
 
        if (oldcode) then
-          call res_tree_ga_qqb(HardProc%AmpMom,res_nnlo)
-          call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo,respdf)
+          call res_tree_ga_qqb(HardProc%AmpMom,res_nnlo_old)
+          call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo_old,respdf)
        else
           call res_tree_ga_qqb_gen(HardProc%AmpMom,res_nnlo)
           call get_respdf_gen(1,1,Hardproc,res_nnlo,respdf)
@@ -2309,7 +2309,7 @@ contains
        if (oldcode) then
           call res_tree_qqb(C6S5Lim%AmpMom,res_lo_old)
           res_lo_old = res_lo_old * Q_lep2
-          call get_respdf(ns_lumi,1,1,C6S5Lim,res_lo,respdf)
+          call get_respdf(ns_lumi,1,1,C6S5Lim,res_lo_old,respdf)
        else
           call res_tree_qqb_gen(C6S5Lim%AmpMom,res_lo)
           res_lo_fscharges = Qsq_Fs(k-2)**2 * res_lo
