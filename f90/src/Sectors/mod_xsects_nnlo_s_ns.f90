@@ -23,10 +23,11 @@ module mod_xsects_nnlo_s_ns
   public :: xsect_nnlo_s_ns_s12
   public :: xsect_nnlo_s_ns_vqcd,xsect_nnlo_s_ns_vewk
   public :: xsect_nnlo_s_ns_oqcd
-  public :: xsect_nnlo_s_ns_oewk_is ![WORK IN PROGRESS]
+  public :: xsect_nnlo_s_ns_oewk_is 
   public :: xsect_nnlo_s_ns_oewk_fs_53,xsect_nnlo_s_ns_oewk_fs_54
   public :: xsect_nnlo_s_ns_qqb,xsect_nnlo_s_ns_qq
-  public :: xsect_nnlo_s_ns_oewk_is_raoul ![WORK IN PROGRESS]
+  public :: xsect_nnlo_s_ns_oewk_is_raoul
+  public :: xsect_nnlo_s_ns_oewk_fs_53_raoul,xsect_nnlo_s_ns_oewk_fs_54_raoul ![WORK IN PROGRESS--limits checked for W- only]
 
   public :: xsect_nnlo_s_ns_vewknf
 
@@ -58,6 +59,23 @@ contains
     xsect_nnlo_s_ns_oewk_fs_54 = xsect_nnlo_s_ns_oewk_fs_5i(yRnd,ff,vegasweight,4,3)
 
   end function xsect_nnlo_s_ns_oewk_fs_54
+
+  
+  function xsect_nnlo_s_ns_oewk_fs_53_raoul(yRnd,ff,vegasweight)
+    integer :: xsect_nnlo_s_ns_oewk_fs_53_raoul
+    real(dp15) :: yRnd(30),ff(1),vegasweight
+
+    xsect_nnlo_s_ns_oewk_fs_53_raoul = xsect_nnlo_s_ns_oewk_fs_5i_raoul(yRnd,ff,vegasweight,3,4)
+
+  end function xsect_nnlo_s_ns_oewk_fs_53_raoul
+
+  function xsect_nnlo_s_ns_oewk_fs_54_raoul(yRnd,ff,vegasweight)
+    integer :: xsect_nnlo_s_ns_oewk_fs_54_raoul
+    real(dp15) :: yRnd(30),ff(1),vegasweight
+
+    xsect_nnlo_s_ns_oewk_fs_54_raoul = xsect_nnlo_s_ns_oewk_fs_5i_raoul(yRnd,ff,vegasweight,4,3)
+
+  end function xsect_nnlo_s_ns_oewk_fs_54_raoul
 
 
   !!*************************************************************************!!
@@ -2987,6 +3005,12 @@ contains
     call random_number(xx(kNLO_max_full))
     z = buff+onet*real(yRnd(kNLO_max_full),dp)
 
+   ! for checks  xx(xE)=1E-6_dp
+   ! for checks  xx(xRHO)=one-1E-7_dp
+   ! for checks  z=one-1E-7_dp
+
+!    print *, "xx",xx(xE),xx(xRHO),z
+
 #if (_withchecks == 1)
     if (override) then
        xx(1:kNLO_max_full) = yRnd(1:kNLO_max_full)
@@ -3587,6 +3611,7 @@ contains
        !-- elastic component
        intsub_els = 4*zeta2 - 3*sv_logs
 
+
        !-- total
        respdf = CF * (intsub_pls + intsub_els) * respdf * HardProc%wgt * damp_qed
 
@@ -3868,17 +3893,32 @@ contains
 
 
     ff(1) = sum(kin)
-    print *, product(FintNNLO_s_ns_oewk)
-    if (product(FintNNLO_s_ns_oewk) .ne. zero) then
-       print *, "kin",kin
-       print *, "FintNNLO_s_ns_oewk", FintNNLO_s_ns_oewk(1:18)
-       print *, "ff",ff(1)
-       stop
-    endif
+!    if (product(FintNNLO_s_ns_oewk) .ne. zero) then
+!       print *, "oldcode?", oldcode
+!       print *, "kin",kin
+!       print *, "FintNNLO_s_ns_oewk", FintNNLO_s_ns_oewk(1:18)
+!       print *, "ff",ff(1)
+!       stop
+!    endif
 
     call close_histo()
 
     call check_ff(ff,xx,kin)
+
+! for checks    if (product(kin) .ne. zero) then
+! for checks       print *, "boosted1 kin", kin(1:4), sum(kin(1:4))/kin(1)
+! for checks       print *, "boosted2 kin", kin(5:8), sum(kin(5:8))/kin(5)
+! for checks       print *, "unboosted kin", kin(9:12), sum(kin(9:12))/kin(9)
+! for checks       
+! for checks       print *, "z-subtr, hard", (kin(9)+kin(1)+kin(5))/kin(1)
+! for checks       print *, "z-subtr, c1",   (kin(10)+kin(2)+kin(6))/kin(2)
+! for checks       print *, "z-subtr, c2",   (kin(11)+kin(3)+kin(7))/kin(3)
+! for checks       print *, "z-subtr, soft",   (kin(12)+kin(4)+kin(8))/kin(4)
+! for checks       print *, "ff",ff(1)
+! for checks       pause
+! for checks    endif
+
+
 
 #if(_withchecks == 1)
     FintNNLO_s_ns_onlo = FintNNLO_s_ns_oewk
@@ -3922,6 +3962,10 @@ contains
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
     z = buff+onet*real(yRnd(kNLO_max_full),dp)
+
+    ! for checks  xx(xE)=1E-7_dp
+    ! for checks  xx(xRHO)=1E-8_dp
+    ! for checks  z=one-1E-7_dp
 
 #if (_withchecks == 1)
     if (override) then
@@ -4023,7 +4067,7 @@ contains
           call res_tree_qqb(CLim_z1%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,CLim_z1,res_nlo_old,respdf)
        else
-          call res_tree_qqb(CLim_z1%AmpMom,res_lo)
+          call res_tree_qqb_gen(CLim_z1%AmpMom,res_lo)
           res_lo = Qsq_Fs(icoll-2)**2 * res_lo
           call get_respdf_gen(1,1,CLim_z1,res_lo,respdf)
        endif
@@ -4213,7 +4257,7 @@ contains
           call res_tree_qqb(CLim_z2%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,CLim_z2,res_nlo_old,respdf)
        else
-          call res_tree_qqb(CLim_z2%AmpMom,res_lo)
+          call res_tree_qqb_gen(CLim_z2%AmpMom,res_lo)
           res_lo = Qsq_Fs(icoll-2)**2 * res_lo
           call get_respdf_gen(1,1,CLim_z2,res_lo,respdf)
        endif
@@ -4423,7 +4467,7 @@ contains
           call res_tree_qqb(CLim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,CLim,res_nlo_old,respdf)
        else
-          call res_tree_qqb(CLim%AmpMom,res_lo)
+          call res_tree_qqb_gen(CLim%AmpMom,res_lo)
           res_lo = Qsq_Fs(icoll-2)**2 * res_lo
           call get_respdf_gen(1,1,CLim,res_lo,respdf)
        endif
@@ -4577,16 +4621,31 @@ contains
 
     ff(1) = sum(kin)
 
-    if (product(FintNNLO_s_ns_oewk) .ne. zero) then
-       print *, "kin",kin
-       print *, "FintNNLO_s_ns_oewk", FintNNLO_s_ns_oewk(1:18)
-       print *, "ff",ff(1)
-       stop
-    endif
+!    if (product(FintNNLO_s_ns_oewk) .ne. zero) then
+!       print *, "kin",kin
+!       print *, "FintNNLO_s_ns_oewk", FintNNLO_s_ns_oewk(1:9)
+!       print *, "ff",ff(1)
+!       stop
+!    endif
 
     call close_histo()
 
     call check_ff(ff,xx,kin)
+
+! for checks     if (product(kin) .ne. zero) then
+! for checks        print *, "boosted1 kin", kin(1:3), sum(kin(1:3))/kin(1)
+! for checks        print *, "boosted2 kin", kin(4:6), sum(kin(4:6))/kin(4)
+! for checks        print *, "unboosted kin", kin(7:9), sum(kin(7:9))/kin(7)
+! for checks        
+! for checks        print *, "z-subtr, hard", (kin(4)+kin(1)+kin(7))/kin(1)
+! for checks        print *, "z-subtr, c",   (kin(5)+kin(2)+kin(8))/kin(2)
+! for checks        print *, "z-subtr, soft",   (kin(6)+kin(3)+kin(9))/kin(4)
+! for checks        print *, "Fint",FintNNLO_s_ns_oewk(1:4)
+! for checks        print *, "Fint",FintNNLO_s_ns_oewk(5:8)
+! for checks        print *, "Fint",FintNNLO_s_ns_oewk(9:12)
+! for checks        print *, "ff",ff(1)
+! for checks        pause
+! for checks     endif
 
 #if(_withchecks == 1)
     FintNNLO_s_ns_onlo(1:12) = FintNNLO_s_ns_oewk
