@@ -40,6 +40,7 @@ contains
     integer :: sizeseed
     integer, allocatable :: iseed(:)
     integer :: i,k
+    integer :: seednr
 
     if (log_val_opt('-h')) call print_usage(outdev)
     if (log_val_opt('-list')) call list_corr_ch_sec(outdev)
@@ -104,7 +105,8 @@ contains
     !----------------------------------------------------------------
     !--- set up and printout parameters
     !----------------------------------------------------------------
-    call set_outfile(pref,outputfile,gridfile)
+    seednr = int_val_opt('-seed',0)
+    call set_outfile(pref,outputfile,gridfile,seednr)
 
     call set_ew_parms_cms(ew_scheme,outdev)
     call set_qcd_parms()

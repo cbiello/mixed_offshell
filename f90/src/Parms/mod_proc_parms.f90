@@ -138,7 +138,8 @@ contains
     
     !-- buffers
     buff = real_val_opt('-buff',1E-12_dp)
-    buff_rr = real_val_opt('-buff_rr',1E-12_dp)
+    !buff_rr = real_val_opt('-buff_rr',1E-12_dp)
+    buff_rr = real_val_opt('-buff_rr',1E-10_dp)
     buff_rv = real_val_opt('-buff_rv',1E-12_dp)
     buff_z = real_val_opt('-buff_z',1E-12_dp)
     buff_r = real_val_opt('-buff_r',1E-12_dp)
@@ -199,10 +200,14 @@ contains
   end subroutine help_proc_parms
   
   !-- without the ``histo'' prefix and suffix
-  subroutine set_outfile(pref,myoutfile,mygridfile)
+  subroutine set_outfile(pref,myoutfile,mygridfile,seednr)
     character(*), intent(in) :: pref
     character(strlen) :: tmpfile,myoutfile,mygridfile
+    integer :: seednr
     character(4) :: ch_xmur,ch_xmuf
+    character(len=5) :: seedstr
+
+    write(seedstr, '(I5.5)') seednr
 
     if (pref.eq.'no') then
 #if defined(ANALYSIS)
@@ -221,7 +226,7 @@ contains
     endif
     write(ch_xmur,'(F4.2)') xmur
     write(ch_xmuf,'(F4.2)') xmuf
-    tmpfile = trim(tmpfile)//"_xMuR_"//trim(ch_xmur)//"_xMuF_"//trim(ch_xmuf)
+    tmpfile = trim(tmpfile)//"_xMuR_"//trim(ch_xmur)//"_xMuF_"//trim(ch_xmuf)//'_s'//trim(seedstr)
 
     if (myoutfile  .eq. 'auto') myoutfile  = tmpfile
     if (mygridfile .eq. 'auto') mygridfile = tmpfile
