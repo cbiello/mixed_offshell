@@ -34,8 +34,8 @@ contains
 
     elseif (sec.eq.'s_oewk_is') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_is,vg_result,vg_error,vg_chi2)
     elseif (sec.eq.'s_oewk_is_ra') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_is_raoul,vg_result,vg_error,vg_chi2)
-    elseif (sec.eq.'s_oewk_fs_53') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_fs_53,vg_result,vg_error,vg_chi2)
-    elseif (sec.eq.'s_oewk_fs_54') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_fs_54,vg_result,vg_error,vg_chi2)
+    elseif (sec.eq.'s_oewk_fs_53') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_fs_53_raoul,vg_result,vg_error,vg_chi2)
+    elseif (sec.eq.'s_oewk_fs_54') then; call vegas_integrate(kNLO_max_full,xsect_nnlo_s_ns_oewk_fs_54_raoul,vg_result,vg_error,vg_chi2)
     !-- nf
     elseif (sec.eq.'s_vewknf') then
       call ew_renorm_nf_1L()
