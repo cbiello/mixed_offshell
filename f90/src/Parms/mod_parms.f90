@@ -394,7 +394,14 @@ contains
     character(*), intent(in) :: my_ew_scheme
     integer, intent(in) :: outdev
 
-    write(outdev,*) '# PROCESS  = ', _Vcharge
+#if (_Vcharge==0)     
+    write(outdev,*) '# PROCESS  = NEUTRAL CURRENT'
+#elif (_Vcharge==-1)     
+    write(outdev,*) '# PROCESS  = -ve CHARGE'
+#elif (_Vcharge==+1)     
+    write(outdev,*) '# PROCESS  = +ve CHARGE'
+#endif
+    
     write(outdev,*) '#'
 
     write(outdev,*) '# complex mass scheme = ', cm_scheme
