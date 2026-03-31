@@ -621,16 +621,12 @@ contains
 
     oldcode = .false.
 
-    print *, "old code ?", oldcode
-
 #if (_Vcharge == -1)
     Qlept = -one
     ilept = 3    ! e- nubar
-    print *, "CC -"
 #elif (_Vcharge == +1)
     Qlept = +one
     ilept = 4    ! nu e+
-    print *, "CC+"
 #endif
     
     xsect_nnlo_s_ns_oqcd = 0
@@ -642,10 +638,9 @@ contains
     call random_number(xx(kNLO_max_full))
     z = buff+onet*real(yRnd(kNLO_max_full),dp)
 
-    ! debug -- check limits
-!    z = one-1E-6_dp
-!    xx(xE) = 1E-6_dp
-!    xx(xRHO)=1E-6_dp
+! for check    z = one-1E-5_dp
+! for check    xx(xE) = 1E-5_dp
+! for check    xx(xRHO)=1E-6_dp
 
 #if (_withchecks == 1)
     if (override) then
@@ -686,7 +681,6 @@ contains
     !!-----------------------------------------------------------------------!!
         ! define process specific partons
 #if (_Vcharge == 0)
-    print *, "nc"
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
@@ -695,7 +689,6 @@ contains
     C1Lim%part = [id_q,-id_q,id_el,-id_el]
     C2Lim%part = [id_q,-id_q,id_el,-id_el]
 #elif  (_Vcharge == -1)
-    print *, "cc -1"
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
     C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
@@ -705,7 +698,6 @@ contains
     C2Lim%part = [id_q,-id_qp,id_el,-id_nue]
 
 #elif  (_Vcharge == +1)
-    print *, "cc+1"
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
     C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
@@ -865,9 +857,6 @@ contains
 
     endif
 
-    if (kin(1)*kin(2)*kin(3) .ne. zero) then
-       print *, "z1 kin", kin(1:3), sum(kin(1:3))/kin(1)
-    endif
 
     !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
     !!                        FLM[1_q,z.2_qb,3,4|5_g]                        !!
@@ -1012,9 +1001,6 @@ contains
 
     endif
 
-    if (kin(4)*kin(5)*kin(6) .ne. zero) then
-       print *, "z2 kin", kin(4:6), sum(kin(4:6))/kin(4)
-    endif
 
     !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
     !!                         FLM[1_q,2_qb,3,4|5_g]                         !!
@@ -1045,38 +1031,10 @@ contains
 #else
           call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
 
-          print *, "ux d",res_nlo(-2,+1)
-
-          print *, "dx u",res_nlo(-1,+2)
-          
-          print *, "d ux",res_nlo(+1,-2)
-          
-          print *, "u dx",res_nlo(+2,-1)
-
           El = HardProc%Lim_Ei(ilept)
-          print *, "ilept",ilept
-          print *, "el",el
           call fill_sv_logs(HardProc%muf(1)**2,4*El**2,sv_logs)
           res_nlo_calG =  calG_ONLOQCD_ns(HardProc,res_nlo,sv_logs,Qlept,ilept)
 
-          print *, "EC",EC
-          print *, "mu",HardProc%muf(1)
-          print *, "El",HardProc%AmpMom(1,3)
-          print *, "Elb",HardProc%AmpMom(1,4)
-          print *, "eta13",HardProc%Lim_etaij(1,3)
-          print *, "eta14",HardProc%Lim_etaij(1,4)
-          print *, "eta23",HardProc%Lim_etaij(2,3)
-          print *, "eta24",HardProc%Lim_etaij(2,4)
-
-          print *, "ux d",res_nlo_calG(-2,+1,:)/res_nlo(-2,+1)                               
-          print *, "dx d",res_nlo_calG(-1,+1,:)/res_nlo(-1,+1)
-          print *, "dx u",res_nlo_calG(-1,+2,:)/res_nlo(-1,+2)                                 
-          print *, "d ux",res_nlo_calG(+1,-2,:)/res_nlo(+1,-2)                               
-          print *, "u dx",res_nlo_calG(+2,-1,:)/res_nlo(+2,-1)
-          stop
-
-          
-          
           res_nlo_ischarges_1 = multiply_IS_charges_sq(res_nlo,1)
           res_nlo_ischarges_2 = multiply_IS_charges_sq(res_nlo,2)
           call get_respdf_gen(1,1,HardProc,res_nlo_ischarges_1,respdf_bak_1)
@@ -1085,7 +1043,7 @@ contains
 #endif
           
 
-!       call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
+       call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
        
        !-- subtract plus, leg 1
        HardProc%Lim_etaij(1,6) = zero
@@ -1099,7 +1057,7 @@ contains
        intsub_1 = PqqNLO(1) - Pqq0_R(1) * log(eta51) * damp
        intsub_1 = intsub_1 + Pqq0_R(1)*sv_logs
        intsub_1 = - intsub_1
-       
+
        !-- subtract plus, leg 2
        HardProc%Lim_etaij(1,6) = HardProc%Lim_etaij(1,2)
        HardProc%Lim_etaij(2,6) = zero
@@ -1174,7 +1132,8 @@ contains
           call get_respdf_gen_mu(1,1,C1Lim,res_lo_calG,respdf_2)
 #endif
 
-
+       EC = C1Lim%Lim_Ei(1)
+       call fill_sv_logs(C1Lim%muf(1)**2,4*EC**2,sv_logs)
 
 
        z5  = C1Lim%Lim_z(1)
@@ -1255,7 +1214,9 @@ contains
 #endif
 
 
-
+       EC = C2Lim%Lim_Ei(1)              
+       call fill_sv_logs(C2Lim%muf(1)**2,4*EC**2,sv_logs)
+       
        z5  = C2Lim%Lim_z(2)
        s25 = C2Lim%Lim_sij(2,5)
 
@@ -1302,15 +1263,18 @@ contains
 
     ff(1) = sum(kin)
 
-    if (kin(7)*kin(8)*kin(9) .ne. zero) then
-       print *, "unboosted kin", kin(7:9), sum(kin(7:9))/kin(7)
-       
-       print *, "z-subtr, hard", (kin(7)+kin(1)+kin(4))
-       print *, "z-subtr, c1",   (kin(8)+kin(2)+kin(5))
-       print *, "z-subtr, c2",   (kin(9)+kin(3)+kin(6))
-       print *, "ff",ff(1)
-       pause
-    endif
+! for checks    if (product(kin) .ne. zero) then
+! for checks       print *, "boosted1 kin", kin(1:3), sum(kin(1:3))/kin(1)
+! for checks       print *, "boosted2 kin", kin(4:6), sum(kin(4:6))/kin(4)
+! for checks       print *, "unboosted kin", kin(7:9), sum(kin(7:9))/kin(7)
+! for checks       
+! for checks       print *, "z-subtr, hard", (kin(7)+kin(1)+kin(4))/kin(1)
+! for checks       print *, "z-subtr, coll",   (kin(8)+kin(2)+kin(5))/kin(2)
+! for checks       print *, "z-subtr, soft",   (kin(9)+kin(3)+kin(6))/kin(3)
+! for checks       print *, "ff",ff(1)
+! for checks       pause
+! for checks    endif
+
 
     !!-----------------------------------------------------------------------!!
 
