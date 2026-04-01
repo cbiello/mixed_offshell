@@ -1,0 +1,119 @@
+ # ./mixed_ll -dynscale F -corr nloewk -sec s
+ # 
+ # Git version: e968950c6d5adeed0b291129636b253f1ab67bd9-dirty
+ # Analysis: V_minimal
+ # 
+ # vegasIt0 =            5
+ # vegasNc0 =        10000
+ #
+ # vegasIt1 =           10
+ # vegasNc1 =        50000
+ #
+ # seed =            0
+ #
+ # gridfile = ./grid/V_minimal_nloewk_ns_s_fixscale_xMuR_1.00_xMuF_1.00.grid                                      
+ # writegrid =  F
+ # readgrid  =  F
+ #
+ # PROCESS  =           -1
+ #
+ # complex mass scheme =  T
+ #
+ # only_up =  F
+ #
+ # Using the Gmu scheme
+ # Input Gf      =    1.1663900000000000E-005
+ # Derived 1/aem =    132.27711281929365     
+ # 
+ # Input mz_in =    91.187600000000003     
+ # Input mw_in =    80.397999999999996     
+ # Input mz =    91.153480619182758     
+ # Input mw =    80.370446885516444     
+ # Input mh =    125.00000000000000     
+ # Input mb =    0.0000000000000000     
+ # Input mt =    173.19999999999999     
+ # Input Gf =    1.1663900000000000E-005
+ # Input gaz =    2.4952000000000001     
+ # Input gaw =    2.1053999999999999     
+ # Input gah =    4.1650000000000003E-003
+ #
+ # Derived vev    246.21845810181634     
+ # Derived gw    0.65311829961663148     
+ # Derived sw2   0.22267085263639197     
+ # Derived cw2   0.77732914736360803     
+ #
+ # Input nup  =            2
+ # Input ndn  =            3
+ # Input nle  =            3
+ # Input nne  =            3
+ # Derived nf =            5
+ #
+ # sqrt(sh) =    14000.000000000000     
+ #
+ # corr = nloewk
+ # sec  = s
+ # ch   = ns
+ #
+ # pdfset = NNPDF31_nnlo_as_0118_luxqed
+ # pdfmem =            0
+ #
+ # using fixed scale
+ # mu =    91.187600000000003     
+ # xmuR =           1.0000000000000000     
+ # xmuF =           1.0000000000000000     
+ #
+ # alphasPDF(mu) =   0.11800215829284905     
+ #
+ # qmin =    200.00000000000000     
+ # qmax =    14000.000000000000     
+ # taumode =            1
+ #
+ # technical cut on qmin =    200.00000000000000     
+ # technical cut on qmax =    14000.000000000000     
+ #
+ # ptlep_cut =    20.000000000000000     
+ # ylep_cut  =    2.5000000000000000     
+ #
+ # R_phot =  0.10000000000000001      # for isolation
+ #
+ # buff =         9.9999999999999998E-013
+ # buff_rr =         9.9999999999999998E-013
+ # buff_rv =         9.9999999999999998E-013
+ # buff_z  =         9.9999999999999998E-013
+ # buff_r  =         9.9999999999999998E-013
+ #
+ # lepton charge =   -1.0000000000000000     
+ # lepton cL =  -0.66658696497813397     
+ # lepton cR =   0.53521635379716770     
+ #
+ # out = ./histo/V_minimal_nloewk_ns_s_fixscale_xMuR_1.00_xMuF_1.00.histo                                    
+ #
+ #
+ # Iteration, NaN points:                                    0
+ # Iteration, Points failing the technical cuts:             0
+ # Iteration, Good points passing technical cuts:        41472
+ # Iteration, Points passing physical cuts:              41472
+ # Iteration, Acceptance:                            1.0000000000000000     
+ #
+ # NaN points:                                    0
+ # Points failing the technical cuts:             0
+ # Good points passing technical cuts:       414208
+ # Points passing physical cuts:             414208
+ # Acceptance:                            1.0000000000000000     
+ #
+ # Units: fb
+ # 
+ # final run,  iteration          10
+ # 
+ # Iteration result:      -12.505708921016220     
+ # Iteration error:        2.9404716485743752E-002
+ #
+ # Accumulated result:    -12.480175050126292     
+ # Accumulated error:      9.8377854805460838E-003
+ # Chi2/Iteration:   0.94531864065868554     
+ #
+ #
+ # ----------Obs=total          ----------------
+ # observable, bin number, left edge, result, error
+ 1    1    0.000E+00   -1.2479789176165008E+01    1.0228629991682539E-02     -1.4251384830762689E+01    1.1389053510948636E-02     -1.0078926212953082E+01    8.8133477525434070E-03 
+ 1    2    1.000E+00    0.0000000000000000E+00    0.0000000000000000E+00      0.0000000000000000E+00    0.0000000000000000E+00      0.0000000000000000E+00    0.0000000000000000E+00 
