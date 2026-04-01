@@ -41,6 +41,9 @@ contains
        deallocate(AKinConfig%part)
     endif
 
+    allocate(AKinConfig%part(nmax))
+    AKinConfig%part = 0
+
     AKinConfig%AmpMom = 0
     AKinConfig%LimMom = 0
     AKinConfig%Lim_etaij = 0
