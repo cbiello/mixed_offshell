@@ -38,6 +38,7 @@ contains
     logical :: oldcode
 
     oldcode = .false.
+    res_loop = 0
 
     xsect_nloqcd_v_ns = 0
 
@@ -74,6 +75,14 @@ contains
        
     else    
 
+
+       ! call ol_res_qcdloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
+       ! print*, 'res_loop (ol)= ', res_loop
+
+       ! call res_qcdloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
+       ! print*, 'res_loop (an)= ', res_loop
+       ! pause
+       
        if(oldcode) then
           call res_qcdloop_qqb(LOProc%AmpMom,res_tree_old,res_loop_old)
           call get_respdf(ns_lumi,1,0,LOProc,res_loop_old,respdf)

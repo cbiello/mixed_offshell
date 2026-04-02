@@ -465,13 +465,13 @@ contains
        endif
 
 
-       print*, 'res_nlo(-5,0) =', res_nlo(-5,0)
-       print*, 'res_nlo(0,-5) =', res_nlo(0,-5)
-       print*, 'res_nlo(5,0) =', res_nlo(5,0)
-       print*, 'res_nlo(0,5) =', res_nlo(0,5)
+       ! print*, 'res_nlo(-5,0) =', res_nlo(-5,0)
+       ! print*, 'res_nlo(0,-5) =', res_nlo(0,-5)
+       ! print*, 'res_nlo(5,0) =', res_nlo(5,0)
+       ! print*, 'res_nlo(0,5) =', res_nlo(0,5)
 
 
-       pause
+       ! pause
 
 
        respdf = respdf*HardProc%wgt
