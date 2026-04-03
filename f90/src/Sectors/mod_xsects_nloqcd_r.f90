@@ -120,13 +120,6 @@ contains
           call get_respdf(ns_lumi,1,0,HardProc,res_nlo_old,respdf)
        else 
           call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
-          
-          ! print*, 'res_nlo'
-          ! do i = -5, 7
-          !    do j = -5, 7
-          !        write(*,'(2I4,1X,ES24.16)') i, j, res_nlo(i,j)
-          !    end do
-          ! end do
        
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
        endif
@@ -301,28 +294,6 @@ contains
           call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)          
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
        endif
-
-
-
-      
-      
-
-
-       print*, 'res_nlo(-5,0) =', res_nlo(-5,0)
-       print*, 'res_nlo(0,-5) =', res_nlo(0,-5)
-       print*, 'res_nlo(5,0) =', res_nlo(5,0)
-       print*, 'res_nlo(0,5) =', res_nlo(0,5)
-
-
-
-   !do i = -5, 7
-   !    do j = -5, 7
-   !       write(*,'(2I4,1X,ES24.16)') i, j, res_nlo(i,j)
-   !    end do
-   ! end do
-
-
-
       
        respdf = respdf*HardProc%wgt
 
@@ -464,16 +435,6 @@ contains
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
        endif
 
-
-       ! print*, 'res_nlo(-5,0) =', res_nlo(-5,0)
-       ! print*, 'res_nlo(0,-5) =', res_nlo(0,-5)
-       ! print*, 'res_nlo(5,0) =', res_nlo(5,0)
-       ! print*, 'res_nlo(0,5) =', res_nlo(0,5)
-
-
-       ! pause
-
-
        respdf = respdf*HardProc%wgt
 
        kin(1) = respdf(1)
@@ -576,21 +537,8 @@ function xsect_nloqcd_r_is_ns_wp(yRnd,ff,vegasweight)
 
     else
 
-       !TEST MADGRAPH
-       !MG ps
-       !HardProc%AmpMom(:,1) = (/0.5000000E+03,  0.0000000E+00,  0.0000000E+00,  0.5000000E+03/)
-       !HardProc%AmpMom(:,2) = (/0.5000000E+03,  0.0000000E+00,  0.0000000E+00,  -0.5000000E+03/)
-       !HardProc%AmpMom(:,3) = (/0.4585788E+03,  0.1694532E+03,  0.3796537E+03,  -0.1935025E+03/)
-       !HardProc%AmpMom(:,4) = (/0.3640666E+03, -0.1832987E+02, -0.3477043E+03,  0.1063496E+03/)
-       !HardProc%AmpMom(:,5) = (/0.1773546E+03, -0.1511234E+03, -0.3194936E+02,  0.8715287E+02/)
-
        call res_tree_g_qqb_wp(HardProc%AmpMom,res_nlo)
        call get_respdf(qQpb_lumi_wp,1,0,HardProc,res_nlo,respdf)
-
-
-       !print*, 'res11= ', res_nlo(1,1)
-       !print*, 'res12= ', res_nlo(1,2)
-       !stop
               
        respdf = respdf*HardProc%wgt
 
@@ -659,16 +607,6 @@ function xsect_nloqcd_r_is_ns_wp(yRnd,ff,vegasweight)
     
     call close_histo()
 
-
-!    if(FintNLO_ns(1) .ne. zero  ) then
-!            print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
-!            print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), '', FintNLO_ns(2)/FintNLO_ns(1)
-!            print*, 'FintNLO_ns(3) = ', FintNLO_ns(3), '', FintNLO_ns(3)/FintNLO_ns(1)
-!
-!            pause
-!    endif
-
-
     call check_ff(ff,xx,FintNLO_ns)
 
 #if(_withchecks == 1)
@@ -726,14 +664,6 @@ function xsect_nloqcd_r_is_ns_wm(yRnd,ff,vegasweight)
        FintNLO_ns(1) = zero
 
     else
-
-       !TEST MADGRAPH
-       !MG ps
-       !HardProc%AmpMom(:,1) = (/0.5000000E+03,  0.0000000E+00,  0.0000000E+00,  0.5000000E+03/)
-       !HardProc%AmpMom(:,2) = (/0.5000000E+03,  0.0000000E+00,  0.0000000E+00,  -0.5000000E+03/)
-       !HardProc%AmpMom(:,3) = (/0.4585788E+03,  0.1694532E+03,  0.3796537E+03,  -0.1935025E+03/)
-       !HardProc%AmpMom(:,4) = (/0.3640666E+03, -0.1832987E+02, -0.3477043E+03,  0.1063496E+03/)
-       !HardProc%AmpMom(:,5) = (/0.1773546E+03, -0.1511234E+03, -0.3194936E+02,  0.8715287E+02/)
 
        call res_tree_g_qqb_wm(HardProc%AmpMom,res_nlo)
        call get_respdf(qQpb_lumi_wm,1,0,HardProc,res_nlo,respdf)
@@ -806,15 +736,6 @@ function xsect_nloqcd_r_is_ns_wm(yRnd,ff,vegasweight)
     call close_histo()
 
     call check_ff(ff,xx,FintNLO_ns)
-
-
-!        if(FintNLO_ns(1) .ne. zero  ) then
-!            print*, 'FintNLO_ns(1) = ', FintNLO_ns(1)
-!            print*, 'FintNLO_ns(2) = ', FintNLO_ns(2), '', FintNLO_ns(2)/FintNLO_ns(1)
-!            print*, 'FintNLO_ns(3) = ', FintNLO_ns(3), '', FintNLO_ns(3)/FintNLO_ns(1)
-!
-!            pause
-!    endif
 
 
 #if(_withchecks == 1)

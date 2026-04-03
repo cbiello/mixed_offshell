@@ -74,14 +74,6 @@ contains
        kin(1) = zero
        
     else    
-
-
-       ! call ol_res_qcdloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
-       ! print*, 'res_loop (ol)= ', res_loop
-
-       ! call res_qcdloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
-       ! print*, 'res_loop (an)= ', res_loop
-       ! pause
        
        if(oldcode) then
           call res_qcdloop_qqb(LOProc%AmpMom,res_tree_old,res_loop_old)
