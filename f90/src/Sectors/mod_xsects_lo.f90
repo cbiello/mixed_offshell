@@ -127,6 +127,9 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+    LOProc%part(1:4) = [22,22,id_el,-id_el]
+    
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
