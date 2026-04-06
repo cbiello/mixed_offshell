@@ -20,8 +20,8 @@ module mod_xsects_nloewk_vs
 
   private
 
-  public :: xsect_nloewk_v_ns ![WORK IN PROGRESS]
-  public :: xsect_nloewk_s_ns ![WORK IN PROGRESS]
+  public :: xsect_nloewk_v_ns
+  public :: xsect_nloewk_s_ns
 
   public :: xsect_nloewk_v_aa
   public :: xsect_nloewk_s_aa
@@ -44,7 +44,7 @@ contains
     integer :: i, j 
     logical :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
 
     xsect_nloewk_v_ns = 0
     res_loop(:,:) = 0
@@ -69,10 +69,13 @@ contains
     ! define process specific partons
 #if (_Vcharge == 0)
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
 #elif  (_Vcharge == -1)
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+    LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
 #elif  (_Vcharge == +1)
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
 #endif
 
     call cut_histo(LOProc)
@@ -135,6 +138,10 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+    LOProc%part(1:4) = [22,22,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -222,22 +229,19 @@ contains
     endif
 #endif
 
-!    xx = (/ 5.7767012882822426D-002, &
-!        0.24444789910714418D0, &
-!        0.94960547288538688D0, &
-!        1.3608257177144900D-002, &
-!        3.5008535261739970D-002 /)
-
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
        ! define process specific partons
 #if (_Vcharge == 0)
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
 #elif  (_Vcharge == -1)
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+    LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
 #elif  (_Vcharge == +1)
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
 #endif
 
     call cut_histo(LOProc)
@@ -290,18 +294,12 @@ contains
 
              !-- z-dependent bit
              call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_tmp1,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-!             print*, 'respdf_1= ', respdf_1
-!             print*, 'LOProc%wgt= ', LOProc%wgt  
 
              respdf_1 = respdf_1*LOProc%wgt  
-
-!             print*, 'respdf_1= ', respdf_1
 
              call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_tmp2,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
              respdf_2 = respdf_2*LOProc%wgt   
              
-!             print*, 'respdf_2= ', respdf_2
-
              !-- FLM[1,2] bit, assuming E1 = E2 = E3 = E4 = Emax
              Emax = LOProc%AmpMom(1,1)
              eta = get_eta(LOProc%AmpMom(:,:), n)    
@@ -384,8 +382,6 @@ contains
   end function xsect_nloewk_s_ns
 
 
-
-
   !-----------------------------------------------------------------
   !--- generic routines
   !-----------------------------------------------------------------
@@ -439,10 +435,6 @@ contains
           !+ logENERGYbit 
   + two*polylogbit + constantbit 
 
-  !print*, 'constantbit= ', constantbit
-  !print*, 'logENERGYbit= ', logENERGYbit
-  !print*, 'polylogbit= ', two*polylogbit
-  !print*, 'logETAbit= ', 3.0_dp*logETAbit
 contains
 
   !---------------------------------------------------
@@ -520,21 +512,6 @@ contains
 end function get_subtra_elastic_ewk_qqbllb_gen
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   !--
 
   function xsect_nloewk_s_aa(yRnd,ff,vegasweight)
@@ -563,6 +540,10 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+    LOProc%part(1:4) = [22,22,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -627,6 +608,18 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+    LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
+#endif
+    
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -696,6 +689,18 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+    LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
+#endif
+    
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then

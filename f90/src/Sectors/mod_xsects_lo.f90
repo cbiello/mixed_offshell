@@ -61,10 +61,13 @@ contains
     ! define process specific partons
 #if (_Vcharge == 0)
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
 #elif  (_Vcharge == -1)
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+    LOProc%ids(1:4) = [0,0,id_el,-id_nue]
 #elif  (_Vcharge == +1)
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
 #endif
 
     call cut_histo(LOProc)
@@ -129,6 +132,7 @@ contains
     call kinematics_lo(xx,LOProc)
 
     LOProc%part(1:4) = [22,22,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
     
     call cut_histo(LOProc)
 
