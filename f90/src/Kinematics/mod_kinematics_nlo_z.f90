@@ -447,7 +447,8 @@ contains
           HardProc%Lim_Ei(1) = half*sqrts
 
           HardProc%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-                       * flux/z1/z2 * jac
+               * flux/z1/z2 * jac
+          HardProc%wgt = HardProc%wgt/z1/z2
 
        endif
 
@@ -491,7 +492,9 @@ contains
           CLim%Lim_sij(icoll,5) = si5
 
           CLim%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-                   * flux/z1/z2 * jac
+               * flux/z1/z2 * jac
+
+          CLim%wgt = CLim%wgt/z1/z2
        endif
 
     !!-----------------------------------------------------------------------!!
@@ -532,7 +535,9 @@ contains
           enddo
 
           SLim%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-                   * flux/z1/z2 * jac
+               * flux/z1/z2 * jac
+
+          SLim%wgt = SLim%wgt/z1/z2
 
           SLim%Lim_KinInv(1) = e5
           SLim%Lim_Ei(1) = half*sqrts
@@ -540,7 +545,8 @@ contains
 
           !-- SC
           SCLim%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-                    * flux/z1/z2 * jac
+               * flux/z1/z2 * jac
+          SCLim%wgt = SCLim%wgt/z1/z2
 
           SCLim%Lim_etaij(1,2) = one
           SCLim%Lim_etaij(1,5) = half*(one - ni(3,5))
