@@ -1339,8 +1339,8 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5S6Lim%ids = [0,0,id_el,-id_el,id_a,0]
-    C5S6Lim%npart = 5
+    C5Lim%ids = [0,0,id_el,-id_el,id_a,0]
+    C5Lim%npart = 5
 
     call cut_histo(C5Lim)
 
