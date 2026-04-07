@@ -62,9 +62,9 @@ contains
 
     call initialize_config(HardProc)
 
-    HardProc%Lim_etaij(1,2) = one
-    HardProc%Lim_etaij(1,5) = x2
-    HardProc%Lim_etaij(2,5) = one-x2
+    HardProc%Lim_etaij(1,2) = one;    HardProc%Lim_etaij(2,1) = one;
+    HardProc%Lim_etaij(1,5) = x2;     HardProc%Lim_etaij(5,1) = x2;
+    HardProc%Lim_etaij(2,5) = one-x2; HardProc%Lim_etaij(5,2) = one-x2;
 
     eta51 = HardProc%Lim_etaij(1,5)
     eta52 = HardProc%Lim_etaij(2,5)
@@ -103,14 +103,16 @@ contains
           ni(:,5) = [sin5*cos(phi5),sin5*sin(phi5),cos5]
           do i = 3,4
              HardProc%Lim_etaij(i,5) = half*(one-dot_product(ni(:,i),ni(:,5)))
+             HardProc%Lim_etaij(5,i) = HardProc%Lim_etaij(i,5)
           enddo
           c = sqrt(dot_product(ni(:,3)+ni(:,4),ni(:,3)+ni(:,4)))
           y = c**2/((one + (one + c))*((one - c) + one))
-          HardProc%Lim_etaij(1,3) = half*(one-ni(3,3))
-          HardProc%Lim_etaij(2,3) = half*(one+ni(3,3))
-          HardProc%Lim_etaij(1,4) = half*(one-ni(3,4))
-          HardProc%Lim_etaij(2,4) = half*(one+ni(3,4))
-          HardProc%Lim_etaij(3,4) = one/(one+y)
+          HardProc%Lim_etaij(1,3) = half*(one-ni(3,3)); HardProc%Lim_etaij(3,1) = HardProc%Lim_etaij(1,3)
+          HardProc%Lim_etaij(2,3) = half*(one+ni(3,3)); HardProc%Lim_etaij(3,2) = HardProc%Lim_etaij(2,3)
+          HardProc%Lim_etaij(1,4) = half*(one-ni(3,4)); HardProc%Lim_etaij(4,1) = HardProc%Lim_etaij(1,4)
+          HardProc%Lim_etaij(2,4) = half*(one+ni(3,4)); HardProc%Lim_etaij(4,2) = HardProc%Lim_etaij(2,4)
+          HardProc%Lim_etaij(3,4) = one/(one+y);        HardProc%Lim_etaij(4,3) = HardProc%Lim_etaij(3,4)
+          !--
           HardProc%Lim_KinInv(5)  = y/(one+y) ! 1-eta34
        endif
 
@@ -123,9 +125,9 @@ contains
 
        call initialize_config(C1Lim)
 
-       C1Lim%Lim_etaij(1,2) = one
-       C1Lim%Lim_etaij(1,5) = zero
-       C1Lim%Lim_etaij(2,5) = one
+       C1Lim%Lim_etaij(1,2) = one;  C1Lim%Lim_etaij(2,1) = one
+       C1Lim%Lim_etaij(1,5) = zero; C1Lim%Lim_etaij(5,1) = zero
+       C1Lim%Lim_etaij(2,5) = one;  C1Lim%Lim_etaij(5,2) = one
 
        eta51 = C1Lim%Lim_etaij(1,5)
        eta52 = C1Lim%Lim_etaij(2,5)
@@ -167,14 +169,15 @@ contains
              ni(:,5) = [zero,zero,one]
              do i = 3,4
                 C1Lim%Lim_etaij(i,5) = half*(one-dot_product(ni(:,i),ni(:,5)))
+                C1Lim%Lim_etaij(5,i) = C1Lim%Lim_etaij(i,5)
              enddo
              c = sqrt(dot_product(ni(:,3)+ni(:,4),ni(:,3)+ni(:,4)))
              y = c**2/((one + (one + c))*((one - c) + one))
-             C1Lim%Lim_etaij(1,3) = half*(one-ni(3,3))
-             C1Lim%Lim_etaij(2,3) = half*(one+ni(3,3))
-             C1Lim%Lim_etaij(1,4) = half*(one-ni(3,4))
-             C1Lim%Lim_etaij(2,4) = half*(one+ni(3,4))
-             C1Lim%Lim_etaij(3,4) = one/(one+y)
+             C1Lim%Lim_etaij(1,3) = half*(one-ni(3,3)); C1Lim%Lim_etaij(3,1) = C1Lim%Lim_etaij(1,3)
+             C1Lim%Lim_etaij(2,3) = half*(one+ni(3,3)); C1Lim%Lim_etaij(3,2) = C1Lim%Lim_etaij(2,3)
+             C1Lim%Lim_etaij(1,4) = half*(one-ni(3,4)); C1Lim%Lim_etaij(4,1) = C1Lim%Lim_etaij(1,4)
+             C1Lim%Lim_etaij(2,4) = half*(one+ni(3,4)); C1Lim%Lim_etaij(4,2) = C1Lim%Lim_etaij(2,4)
+             C1Lim%Lim_etaij(3,4) = one/(one+y);        C1Lim%Lim_etaij(4,3) = C1Lim%Lim_etaij(3,4)
              C1Lim%Lim_KinInv(5)  = y/(one+y) ! 1-eta34
           endif
 
@@ -188,9 +191,9 @@ contains
 
        call initialize_config(C2Lim)
 
-       C2Lim%Lim_etaij(1,2) = one
-       C2Lim%Lim_etaij(1,5) = one
-       C2Lim%Lim_etaij(2,5) = zero
+       C2Lim%Lim_etaij(1,2) = one;  C2Lim%Lim_etaij(2,1) = one
+       C2Lim%Lim_etaij(1,5) = one;  C2Lim%Lim_etaij(5,1) = one
+       C2Lim%Lim_etaij(2,5) = zero; C2Lim%Lim_etaij(5,2) = zero
 
        eta51 = C2Lim%Lim_etaij(1,5)
        eta52 = C2Lim%Lim_etaij(2,5)
@@ -232,14 +235,15 @@ contains
              ni(:,5) = [zero,zero,-one]
              do i = 3,4
                 C2Lim%Lim_etaij(i,5) = half*(one-dot_product(ni(:,i),ni(:,5)))
+                C2Lim%Lim_etaij(5,i) = C2Lim%Lim_etaij(i,5)
              enddo
              c = sqrt(dot_product(ni(:,3)+ni(:,4),ni(:,3)+ni(:,4)))
              y = c**2/((one + (one + c))*((one - c) + one))
-             C2Lim%Lim_etaij(1,3) = half*(one-ni(3,3))
-             C2Lim%Lim_etaij(2,3) = half*(one+ni(3,3))
-             C2Lim%Lim_etaij(1,4) = half*(one-ni(3,4))
-             C2Lim%Lim_etaij(2,4) = half*(one+ni(3,4))
-             C2Lim%Lim_etaij(3,4) = one/(one+y)
+             C2Lim%Lim_etaij(1,3) = half*(one-ni(3,3)); C2Lim%Lim_etaij(3,1) = C2Lim%Lim_etaij(1,3)
+             C2Lim%Lim_etaij(2,3) = half*(one+ni(3,3)); C2Lim%Lim_etaij(3,2) = C2Lim%Lim_etaij(2,3)
+             C2Lim%Lim_etaij(1,4) = half*(one-ni(3,4)); C2Lim%Lim_etaij(4,1) = C2Lim%Lim_etaij(1,4)
+             C2Lim%Lim_etaij(2,4) = half*(one+ni(3,4)); C2Lim%Lim_etaij(4,2) = C2Lim%Lim_etaij(2,4)
+             C2Lim%Lim_etaij(3,4) = one/(one+y);        C2Lim%Lim_etaij(4,3) = C2Lim%Lim_etaij(3,4)
              C2Lim%Lim_KinInv(5)  = y/(one+y) ! 1-eta34
           endif
 
@@ -253,9 +257,9 @@ contains
 
        call initialize_config(SLim)
 
-       SLim%Lim_etaij(1,2) = one
-       SLim%Lim_etaij(1,5) = x2
-       SLim%Lim_etaij(2,5) = one-x2
+       SLim%Lim_etaij(1,2) = one;    SLim%Lim_etaij(2,1) = one
+       SLim%Lim_etaij(1,5) = x2;     SLim%Lim_etaij(5,1) = x2
+       SLim%Lim_etaij(2,5) = one-x2; SLim%Lim_etaij(5,2) = one-x2
 
        eta51 = SLim%Lim_etaij(1,5)
        eta52 = SLim%Lim_etaij(2,5)
@@ -288,6 +292,7 @@ contains
              do j = i+1,5
                 if (i.lt.3 .and. j.eq. 5) cycle
                 SLim%Lim_etaij(i,j) = half*(one-dot_product(ni(:,i),ni(:,j)))
+                SLim%Lim_etaij(j,i) = SLim%Lim_etaij(i,j)
              enddo
           enddo
 
@@ -302,8 +307,8 @@ contains
              call initialize_config(SC1Lim)
              SC1Lim%npart = SLim%npart
 
-             SC1Lim%Lim_etaij(1,5) = zero
-             SC1Lim%Lim_etaij(2,5) = one
+             SC1Lim%Lim_etaij(1,5) = zero; SC1Lim%Lim_etaij(5,1) = zero
+             SC1Lim%Lim_etaij(2,5) = one;  SC1Lim%Lim_etaij(5,2) = one
 
              SC1Lim%wgt = jac * ((kallenF/32._dp/pi) * (x1*spart/mv2))/z1/z2
 
@@ -316,8 +321,8 @@ contains
              call initialize_config(SC2Lim)
              SC2Lim%npart = SLim%npart
 
-             SC2Lim%Lim_etaij(1,5) = one
-             SC2Lim%Lim_etaij(2,5) = zero
+             SC2Lim%Lim_etaij(1,5) = one;  SC2Lim%Lim_etaij(5,1) = one
+             SC2Lim%Lim_etaij(2,5) = zero; SC2Lim%Lim_etaij(5,2) = zero
 
              SC2Lim%wgt = jac * ((kallenF/32._dp/pi) * (x1*spart/mv2))/z1/z2
 
@@ -439,15 +444,16 @@ contains
              else
                 HardProc%Lim_etaij(i,5) = half*(one-dot_product(ni(:,i),ni(:,5)))
              endif
+             HardProc%Lim_etaij(5,i) = HardProc%Lim_etaij(i,5)
           enddo
 
-          HardProc%Lim_etaij(1,2) = one
-          HardProc%Lim_etaij(1,5) = half*(one - ni(3,5))
-          HardProc%Lim_etaij(2,5) = half*(one + ni(3,5))
+          HardProc%Lim_etaij(1,2) = one;                  HardProc%Lim_etaij(2,1) = HardProc%Lim_etaij(1,2)
+          HardProc%Lim_etaij(1,5) = half*(one - ni(3,5)); HardProc%Lim_etaij(5,1) = HardProc%Lim_etaij(1,5)
+          HardProc%Lim_etaij(2,5) = half*(one + ni(3,5)); HardProc%Lim_etaij(5,2) = HardProc%Lim_etaij(2,5)
           HardProc%Lim_Ei(1) = half*sqrts
 
           HardProc%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-               * flux/z1/z2 * jac
+                       * flux/z1/z2 * jac
           HardProc%wgt = HardProc%wgt/z1/z2
 
        endif
@@ -484,17 +490,17 @@ contains
           CLim%Lim_KinInv(1:2) = [z,si5]
           CLim%Lim_Ei(1) = half*sqrts
 
-          CLim%Lim_etaij(1,2) = one
-          CLim%Lim_etaij(1,5) = half*(one - ni(3,icoll))
-          CLim%Lim_etaij(2,5) = half*(one + ni(3,icoll))
+          CLim%Lim_etaij(1,2) = one;                      CLim%Lim_etaij(2,1) = CLim%Lim_etaij(1,2)
+          CLim%Lim_etaij(1,5) = half*(one - ni(3,icoll)); CLim%Lim_etaij(5,1) = CLim%Lim_etaij(1,5)
+          CLim%Lim_etaij(2,5) = half*(one + ni(3,icoll)); CLim%Lim_etaij(5,2) = CLim%Lim_etaij(2,5)
 
           CLim%Lim_z(1) = z
           CLim%Lim_sij(icoll,5) = si5
 
           CLim%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-               * flux/z1/z2 * jac
-
+                   * flux/z1/z2 * jac
           CLim%wgt = CLim%wgt/z1/z2
+
        endif
 
     !!-----------------------------------------------------------------------!!
@@ -531,12 +537,12 @@ contains
                 else
                    SLim%Lim_etaij(i,j) = half*(one-dot_product(ni(:,i),ni(:,j)))
                 endif
+                SLim%Lim_etaij(j,i) = SLim%Lim_etaij(i,j)
              enddo
           enddo
 
           SLim%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-               * flux/z1/z2 * jac
-
+                   * flux/z1/z2 * jac
           SLim%wgt = SLim%wgt/z1/z2
 
           SLim%Lim_KinInv(1) = e5
@@ -544,14 +550,15 @@ contains
           SLim%Lim_Ei(2) = E5
 
           !-- SC
+          SCLim%npart = SLim%npart
           SCLim%wgt = slocal/4 * ei/s_qi/twopi * x1 &
-               * flux/z1/z2 * jac
+                    * flux/z1/z2 * jac
           SCLim%wgt = SCLim%wgt/z1/z2
 
-          SCLim%Lim_etaij(1,2) = one
-          SCLim%Lim_etaij(1,5) = half*(one - ni(3,5))
-          SCLim%Lim_etaij(2,5) = half*(one + ni(3,5))
-          SCLim%Lim_etaij(icoll,5) = x2
+          SCLim%Lim_etaij(1,2) = one;                  SCLim%Lim_etaij(2,1) = SCLim%Lim_etaij(1,2)
+          SCLim%Lim_etaij(1,5) = half*(one - ni(3,5)); SCLim%Lim_etaij(5,1) = SCLim%Lim_etaij(1,5)
+          SCLim%Lim_etaij(2,5) = half*(one + ni(3,5)); SCLim%Lim_etaij(5,2) = SCLim%Lim_etaij(2,5)
+          SCLim%Lim_etaij(icoll,5) = x2;               SCLim%Lim_etaij(5,icoll) = x2
 
           !-- pass e5 and eta5i
           SCLim%Lim_KinInv(1:2) = [e5,x2]

@@ -71,6 +71,8 @@ contains
     real(dp) :: nlept(3,2), ns(4,6)
     real(dp) :: eta5i, eta6i, eta5j, eta6j
     real(dp) :: eta51, eta61, eta52, eta62, eta65
+    integer  :: l,m
+
 
     !-- process-dependent part
     call get_tauy(yr(1:tauy_max),tau,ylab,jac)
@@ -141,12 +143,12 @@ contains
     eta65 = half*(one - sin5i*sin6j*cos(phi5-phi6) - cos5i*cos6j)
 
     !! set eta variables in the limit
-    HardProc%Lim_etaij(1,2) = one
-    HardProc%Lim_etaij(i,5) = eta5i
-    HardProc%Lim_etaij(j,5) = eta5j
-    HardProc%Lim_etaij(i,6) = eta6i
-    HardProc%Lim_etaij(j,6) = eta6j
-    HardProc%Lim_etaij(5,6) = eta65
+    HardProc%Lim_etaij(1,2) = one;   HardProc%Lim_etaij(2,1) = one
+    HardProc%Lim_etaij(i,5) = eta5i; HardProc%Lim_etaij(5,i) = eta5i
+    HardProc%Lim_etaij(j,5) = eta5j; HardProc%Lim_etaij(5,j) = eta5j
+    HardProc%Lim_etaij(i,6) = eta6i; HardProc%Lim_etaij(6,i) = eta6i
+    HardProc%Lim_etaij(j,6) = eta6j; HardProc%Lim_etaij(6,j) = eta6j
+    HardProc%Lim_etaij(5,6) = eta65; HardProc%Lim_etaij(6,5) = eta65
 
     eta51 = HardProc%Lim_etaij(1,5)
     eta52 = HardProc%Lim_etaij(2,5)
@@ -415,6 +417,13 @@ contains
         C5Lim%Lim_sij(i,5) = spart*x1*HardProc%Lim_etaij(i,5)
 
         if(present(opt_etas)) call fill_etas(C5Lim,ns,opt_etas)
+        
+        do l = 1, 5
+          do m = l+1, 6
+            C5Lim%Lim_etaij(m,l) = C5Lim%Lim_etaij(l,m)
+          enddo
+        enddo
+
 
         C5Lim%wgt = one/8.0_dp/pi * kallenF &
              * (spart/two)**2 & 
