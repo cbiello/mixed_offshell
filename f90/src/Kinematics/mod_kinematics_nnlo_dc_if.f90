@@ -166,8 +166,11 @@ contains
 
     !! set eta variables in the limit
     HardProc%Lim_etaij(1,2) = one
+    HardProc%Lim_etaij(2,1) = one
     HardProc%Lim_etaij(i,5) = eta5i
+    HardProc%Lim_etaij(5,i) = eta5i
     HardProc%Lim_etaij(j,5) = eta5j
+    HardProc%Lim_etaij(5,j) = eta5j
 
     eta51 = HardProc%Lim_etaij(1,5)
     eta52 = HardProc%Lim_etaij(2,5)
@@ -220,17 +223,24 @@ contains
         HardProc%AmpMom(:,l) = pl
 
         HardProc%Lim_etaij(1,6) = (one - ns(4,6))*half
+        HardProc%Lim_etaij(6,1) = HardProc%Lim_etaij(1,6)
+
         HardProc%Lim_etaij(2,6) = (one + ns(4,6))*half
+        HardProc%Lim_etaij(6,2) = HardProc%Lim_etaij(2,6)
+
         HardProc%Lim_etaij(5,6) = (one - dot_product(ns(2:4,5),ns(2:4,6)))*half
+        HardProc%Lim_etaij(6,5) = HardProc%Lim_etaij(5,6)
 
         if(present(opt_etas)) call fill_etas(HardProc,ns,opt_etas)
 
         HardProc%Lim_etaij(k,6) = x4
+        HardProc%Lim_etaij(6,k) = x4
 
         HardProc%wgt = one/(2*spart)      &
           * x1 * spart**2/mv2             &
           * (x2/pi) * (Ek/Jf) * (Emax**2) &
           * jac
+        HardProc%wgt = HardProc%wgt/2
 
       endif
     !! -------------------------------- S6 --------------------------------- !!
@@ -280,6 +290,7 @@ contains
             * x1 * spart**2/mv2             &
             * (x2/pi) * (Ek/Jf) * (Emax**2) &
             * jac
+          S6Lim%wgt = S6Lim%wgt/2
 
     !! ------------------------------ S6 + C6k ----------------------------- !!
           if(present(C6S6Lim)) then
@@ -353,6 +364,7 @@ contains
             * x1 * spart**2/mv2             &
             * (x2/pi) * (Ek/Jf) * (Emax**2) &
             * jac
+          C6Lim%wgt = C6Lim%wgt/2
 
         endif
       endif
@@ -424,6 +436,7 @@ contains
           * x1 * spart**2/mv2             &
           * (x2/pi) * (Ek/Jf) * (Emax**2) &
           * jac
+        S5Lim%wgt = S5Lim%wgt/2
 
       endif
     !! -------------------------------- S6 --------------------------------- !!
@@ -471,6 +484,7 @@ contains
             * x1 * spart**2/mv2             &
             * (x2/pi) * (Ek/Jf) * (Emax**2) &
             * jac
+          S5S6Lim%wgt = S5S6Lim%wgt/2
 
     !! ------------------------------ S6 + C6k ----------------------------- !!
           if(present(C6S5S6Lim)) then
@@ -545,6 +559,7 @@ contains
             * x1 * spart**2/mv2             &
             * (x2/pi) * (Ek/Jf) * (Emax**2) &
             * jac
+          C6S5Lim%wgt = C6S5Lim%wgt/2
 
         endif
       endif
@@ -636,6 +651,7 @@ contains
             * x1 * spart**2/mv2             &
             * (x2/pi) * (Ek/Jf) * (Emax**2) &
             * jac
+          C5Lim%wgt = C5Lim%wgt/2
 
         endif
     !! -------------------------------- S6 --------------------------------- !!
@@ -685,6 +701,7 @@ contains
               * 4 * x1 * spart/mv2            &
               * (x2/pi) * (Ek/Jf) * (Emax**2) &
               * spart/4 * jac
+            C5S6Lim%wgt = C5S6Lim%wgt/2
 
     !! ------------------------------ S6 + C6k ----------------------------- !!
             if(present(C5C6S6Lim)) then
@@ -762,6 +779,7 @@ contains
               * x1 * spart**2/mv2             &
               * (x2/pi) * (Ek/Jf) * (Emax**2) &
               * jac
+            C5C6Lim%wgt = C5C6Lim%wgt/2
 
           endif
         endif
@@ -838,6 +856,7 @@ contains
           * x1 * spart**2/mv2             &
           * (x2/pi) * (Ek/Jf) * (Emax**2) &
           * jac
+        C5S5Lim%wgt = C5S5Lim%wgt/2
 
       endif
     !! -------------------------------- S6 --------------------------------- !!
@@ -888,6 +907,7 @@ contains
             * x1 * spart**2/mv2             &
             * (x2/pi) * (Ek/Jf) * (Emax**2) &
             * jac
+          C5S5S6Lim%wgt = C5S5S6Lim%wgt/2
 
     !! ------------------------------ S6 + C6k ----------------------------- !!
           if(present(C5C6S5S6Lim)) then
@@ -964,6 +984,7 @@ contains
             * x1 * spart**2/mv2             &
             * (x2/pi) * (Ek/Jf) * (Emax**2) &
             * jac
+          C5C6S5Lim%wgt = C5C6S5Lim%wgt/2
 
         endif
       endif
