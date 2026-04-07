@@ -2260,6 +2260,7 @@ contains
     type(KinConfig) :: HardProc_z1,CLim_z1,SLim_z1,SCLim_z1
     type(KinConfig) :: HardProc_z2,CLim_z2,SLim_z2,SCLim_z2
     !--
+    integer, parameter :: imax_ipdf = 2, imax_ilim = 4
     real(dp) :: xx(kNLO_max_full),z
     real(dp) :: kin(9),FintNNLO_s_ns_oewk(12)
     real(dp) :: damp,damp_qed,EC,E5,E5sq,eta5i,eta61,eta62,si5,z5
@@ -2268,7 +2269,7 @@ contains
     real(dp) :: intsub_pls(ipdf),intsub_els(ipdf)
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1)
     real(dp) :: res_nlo(2,2),res_lo(2,2),eik_qed(4)
-    real(dp) :: res_tmp_vect(2,2,2),respdf_vect(2,ipdf)
+    real(dp) :: res_tmp_vect(2,2,2),respdf_vect(imax_ipdf,ipdf),respdf_vect_rev(ipdf,imax_ipdf)
 
     xsect_nnlo_s_ns_oewk_fs_5i = 0
 
@@ -3008,6 +3009,89 @@ contains
     Pqq0_R = PqqAP_0_R(z)
     PqqNLO = Pqq_NLO(z)
 
+#if (_Vcharge == 0)
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_el,-id_el]
+    C2Lim_z1%ids(1:4)    = [0,0,id_el,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_el]
+    HardProc_z2%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    C1Lim_z2%ids(1:4)    = [0,0,id_el,-id_el]
+    C2Lim_z2%ids(1:4)    = [0,0,id_el,-id_el]
+    SLim_z2%ids(1:4)     = [0,0,id_el,-id_el]
+    HardProc%ids(1:5)    = [0,0,id_el,-id_el,id_a]
+    C1Lim%ids(1:4)       = [0,0,id_el,-id_el]
+    C2Lim%ids(1:4)       = [0,0,id_el,-id_el]
+    SLim%ids(1:4)        = [0,0,id_el,-id_el]
+
+    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
+    C1Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
+    C2Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
+    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
+    HardProc_z2%part = [id_q,-id_q,id_el,-id_el,id_a]
+    C1Lim_z2%part    = [id_q,-id_q,id_el,-id_el]
+    C2Lim_z2%part    = [id_q,-id_q,id_el,-id_el]
+    SLim_z2%part     = [id_q,-id_q,id_el,-id_el]
+    HardProc%part    = [id_q,-id_q,id_el,-id_el,id_a]
+    C1Lim%part       = [id_q,-id_q,id_el,-id_el]
+    C2Lim%part       = [id_q,-id_q,id_el,-id_el]
+    SLim%part        = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_el,-id_nue]
+    C2Lim_z1%ids(1:4)    = [0,0,id_el,-id_nue]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_nue]
+    HardProc_z2%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    C1Lim_z2%ids(1:4)    = [0,0,id_el,-id_nue]
+    C2Lim_z2%ids(1:4)    = [0,0,id_el,-id_nue]
+    SLim_z2%ids(1:4)     = [0,0,id_el,-id_nue]
+    HardProc%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
+    C1Lim%ids(1:4)       = [0,0,id_el,-id_nue]
+    C2Lim%ids(1:4)       = [0,0,id_el,-id_nue]
+    SLim%ids(1:4)        = [0,0,id_el,-id_nue]
+
+    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    C1Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
+    C2Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
+    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
+    HardProc_z2%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    C1Lim_z2%part    = [id_q,-id_qp,id_el,-id_nue]
+    C2Lim_z2%part    = [id_q,-id_qp,id_el,-id_nue]
+    SLim_z2%part     = [id_q,-id_qp,id_el,-id_nue]
+    HardProc%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
+    C1Lim%part       = [id_q,-id_qp,id_el,-id_nue]
+    C2Lim%part       = [id_q,-id_qp,id_el,-id_nue]
+    SLim%part        = [id_q,-id_qp,id_el,-id_nue]
+
+#elif  (_Vcharge == +1)
+    HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    C1Lim_z1%ids(1:4)    = [0,0,id_nue,-id_el]
+    C2Lim_z1%ids(1:4)    = [0,0,id_nue,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_nue,-id_el]
+    HardProc_z2%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    C1Lim_z2%ids(1:4)    = [0,0,id_nue,-id_el]
+    C2Lim_z2%ids(1:4)    = [0,0,id_nue,-id_el]
+    SLim_z2%ids(1:4)     = [0,0,id_nue,-id_el]
+    HardProc%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
+    C1Lim%ids(1:4)       = [0,0,id_nue,-id_el]
+    C2Lim%ids(1:4)       = [0,0,id_nue,-id_el]
+    SLim%ids(1:4)        = [0,0,id_nue,-id_el]
+
+    HardProc_z1%part = [id_qp,-id_q,id_nue,-id_el,id_a]
+    C1Lim_z1%part    = [id_qp,-id_q,id_nue,-id_el]
+    C2Lim_z1%part    = [id_qp,-id_q,id_nue,-id_el]
+    SLim_z1%part     = [id_qp,-id_q,id_nue,-id_el]
+    HardProc_z2%part = [id_qp,-id_q,id_nue,-id_el,id_a]
+    C1Lim_z2%part    = [id_qp,-id_q,id_nue,-id_el]
+    C2Lim_z2%part    = [id_qp,-id_q,id_nue,-id_el]
+    SLim_z2%part     = [id_qp,-id_q,id_nue,-id_el]
+    HardProc%part    = [id_qp,-id_q,id_nue,-id_el,id_a]
+    C1Lim%part       = [id_qp,-id_q,id_nue,-id_el]
+    C2Lim%part       = [id_qp,-id_q,id_nue,-id_el]
+    SLim%part        = [id_qp,-id_q,id_nue,-id_el]
+
+#endif
+
     !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
     !!                        FLM[z.1_q,2_qb,3,4|5_a]                        !!
     !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
@@ -3015,7 +3099,8 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    
+    !HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(HardProc_z1)
 
     if (HardProc_z1%makecut) then
@@ -3066,7 +3151,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    !C1Lim_z1%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(C1Lim_z1)
 
     if (C1Lim_z1%makecut) then
@@ -3113,7 +3198,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    !C2Lim_z1%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(C2Lim_z1)
 
     if (C2Lim_z1%makecut) then
@@ -3159,7 +3244,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                           Soft-Photon Limit                           !!
     !!-----------------------------------------------------------------------!!
-    SLim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    !SLim_z1%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(SLim_z1)
 
     if (SLim_z1%makecut) then
@@ -3267,7 +3352,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc_z2%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    !HardProc_z2%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(HardProc_z2)
 
     if (HardProc_z2%makecut) then
@@ -3316,7 +3401,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    !C1Lim_z2%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(C1Lim_z2)
 
     if (C1Lim_z2%makecut) then
@@ -3363,7 +3448,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    !C2Lim_z2%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(C2Lim_z2)
 
     if (C2Lim_z2%makecut) then
@@ -3410,7 +3495,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                           Soft-Photon Limit                           !!
     !!-----------------------------------------------------------------------!!
-    SLim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    !SLim_z2%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(SLim_z2)
 
     if (SLim_z2%makecut) then
@@ -3519,7 +3604,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    !HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -3589,7 +3674,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    !C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(C1Lim)
 
     if (C1Lim%makecut) then
@@ -3647,7 +3732,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    !C2Lim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(C2Lim)
 
     if (C2Lim%makecut) then
@@ -3705,7 +3790,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                           Soft-Photon Limit                           !!
     !!-----------------------------------------------------------------------!!
-    SLim%ids(1:4) = [0,0,id_el,-id_el]
+    !SLim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(SLim)
 
     if (SLim%makecut) then
@@ -3902,6 +3987,7 @@ contains
     type(KinConfig) :: HardProc_z1,CLim_z1,SLim_z1,SCLim_z1
     type(KinConfig) :: HardProc_z2,CLim_z2,SLim_z2,SCLim_z2
     !--
+    integer, parameter :: imax_ipdf = 2, imax_ilim = 4
     real(dp) :: xx(kNLO_max_full),z
     real(dp) :: kin(9),FintNNLO_s_ns_oewk(12)
     real(dp) :: damp,damp_qed,EC,E5,E5sq,eta5i,eta61,eta62,si5,z5,Qsq_FS(2)
@@ -3910,9 +3996,10 @@ contains
     real(dp) :: intsub_pls(ipdf),intsub_els(ipdf)
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1)
     real(dp) :: res_nlo_old(2,2),res_lo_old(2,2),eik_qed(4)
-    real(dp) :: res_tmp_vect(2,2,2),respdf_vect(2,ipdf)
+    real(dp) :: res_tmp_vect(2,2,2),respdf_vect(2,ipdf), respdf_vect_rev(ipdf,imax_ipdf)
     real(dp) :: res_lo(-5:7,-5:7),res_nlo(-5:7,-5:7),res_lo_fscharges(-5:7,-5:7),res_lo_eikqed(-5:7,-5:7)
     logical  :: oldcode
+
 
     xsect_nnlo_s_ns_oewk_fs_5i_raoul = 0
 
@@ -3961,6 +4048,73 @@ contains
     Pqq0_R = PqqAP_0_R(z)
     PqqNLO = Pqq_NLO(z)
 
+#if (_Vcharge == 0)
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    CLim_z1%ids(1:4)     = [0,0,id_el,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_el]
+    HardProc_z2%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    CLim_z2%ids(1:4)     = [0,0,id_el,-id_el]
+    SLim_z2%ids(1:4)     = [0,0,id_el,-id_el]
+    HardProc%ids(1:5)    = [0,0,id_el,-id_el,id_a]
+    CLim%ids(1:4)        = [0,0,id_el,-id_el]
+    SLim%ids(1:4)        = [0,0,id_el,-id_el]
+
+    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
+    CLim_z1%part     = [id_q,-id_q,id_el,-id_el]
+    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
+    HardProc_z2%part = [id_q,-id_q,id_el,-id_el,id_a]
+    CLim_z2%part     = [id_q,-id_q,id_el,-id_el]
+    SLim_z2%part     = [id_q,-id_q,id_el,-id_el]
+    HardProc%part    = [id_q,-id_q,id_el,-id_el,id_a]
+    CLim%part        = [id_q,-id_q,id_el,-id_el]
+    SLim%part        = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+
+    HardProc_z1%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    CLim_z1%ids(1:4)     = [0,0,id_el,-id_nue]
+    SLim_z1%ids(1:4)     = [0,0,id_el,-id_nue]
+    HardProc_z2%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    CLim_z2%ids(1:4)     = [0,0,id_el,-id_nue]
+    SLim_z2%ids(1:4)     = [0,0,id_el,-id_nue]
+    HardProc%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
+    CLim%ids(1:4)        = [0,0,id_el,-id_nue]
+    SLim%ids(1:4)        = [0,0,id_el,-id_nue]
+
+    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    CLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
+    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
+    HardProc_z2%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    CLim_z2%part     = [id_q,-id_qp,id_el,-id_nue]
+    SLim_z2%part     = [id_q,-id_qp,id_el,-id_nue]
+    HardProc%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
+    CLim%part        = [id_q,-id_qp,id_el,-id_nue]
+    SLim%part        = [id_q,-id_qp,id_el,-id_nue]
+
+#elif  (_Vcharge == +1)
+    HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    CLim_z1%ids(1:4)     = [0,0,id_nue,-id_el]
+    SLim_z1%ids(1:4)     = [0,0,id_nue,-id_el]
+    HardProc_z2%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    CLim_z2%ids(1:4)     = [0,0,id_nue,-id_el]
+    SLim_z2%ids(1:4)     = [0,0,id_nue,-id_el]
+    HardProc%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
+    CLim%ids(1:4)        = [0,0,id_nue,-id_el]
+    SLim%ids(1:4)        = [0,0,id_nue,-id_el]
+    
+    HardProc_z1%part = [id_qp,-id_q,id_nue,-id_el,id_a]
+    CLim_z1%part     = [id_qp,-id_q,id_nue,-id_el]
+    SLim_z1%part     = [id_qp,-id_q,id_nue,-id_el]
+    HardProc_z2%part = [id_qp,-id_q,id_nue,-id_el,id_a]
+    CLim_z2%part     = [id_qp,-id_q,id_nue,-id_el]
+    SLim_z2%part     = [id_qp,-id_q,id_nue,-id_el]
+    HardProc%part    = [id_qp,-id_q,id_nue,-id_el,id_a]
+    CLim%part        = [id_qp,-id_q,id_nue,-id_el]
+    SLim%part        = [id_qp,-id_q,id_nue,-id_el]
+
+#endif
+
+
     !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
     !!                        FLM[z.1_q,2_qb,3,4|5_a]                        !!
     !!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!!
@@ -3968,7 +4122,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    !HardProc_z1%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(HardProc_z1)
 
     if (HardProc_z1%makecut) then
@@ -4017,7 +4171,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 5i                           !!
     !!-----------------------------------------------------------------------!!
-    CLim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    !CLim_z1%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(CLim_z1)
 
     if (CLim_z1%makecut) then
@@ -4069,7 +4223,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                           Soft-Photon Limit                           !!
     !!-----------------------------------------------------------------------!!
-    SLim_z1%ids(1:4) = [0,0,id_el,-id_el]
+    !SLim_z1%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(SLim_z1)
 
     if (SLim_z1%makecut) then
@@ -4097,9 +4251,13 @@ contains
           call res_tree_qqb_gen(SLim_z1%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,SLim_z1%Lim_etaij,[1,2,3,4],5,res_lo_eikqed)
           res_lo_eikqed = res_lo_eikqed/E5sq
-          call get_respdf_gen(1,1,SLim_z1,res_lo_eikqed,respdf_vect(1,:))
+          !call get_respdf_gen(1,1,SLim_z1,res_lo_eikqed,respdf_vect(1,:))
+          call get_respdf_gen(1,1,SLim_z1,res_lo_eikqed,respdf_vect_rev(:,1))
           res_lo = res_lo*Qsq_Fs(icoll-2)**2
-          call get_respdf_gen(1,1,SLim_z1,res_lo,respdf_vect(2,:))
+          !call get_respdf_gen(1,1,SLim_z1,res_lo,respdf_vect(2,:))
+          call get_respdf_gen(1,1,SLim_z1,res_lo,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
        endif
 
 
@@ -4158,7 +4316,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc_z2%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    !HardProc_z2%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(HardProc_z2)
 
     if (HardProc_z2%makecut) then
@@ -4207,7 +4365,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 5i                           !!
     !!-----------------------------------------------------------------------!!
-    CLim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    !CLim_z2%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(CLim_z2)
 
     if (CLim_z2%makecut) then
@@ -4257,7 +4415,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                           Soft-Photon Limit                           !!
     !!-----------------------------------------------------------------------!!
-    SLim_z2%ids(1:4) = [0,0,id_el,-id_el]
+    !SLim_z2%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(SLim_z2)
 
     if (SLim_z2%makecut) then
@@ -4266,8 +4424,6 @@ contains
        kin(6) = zero
 
     else
-
-
 
        E5 = SLim_z2%Lim_Ei(2)
        E5sq = E5**2
@@ -4290,9 +4446,13 @@ contains
           call res_tree_qqb_gen(SLim_z2%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,SLim_z2%Lim_etaij,[1,2,3,4],5,res_lo_eikqed)
           res_lo_eikqed = res_lo_eikqed/E5sq
-          call get_respdf_gen(1,1,SLim_z2,res_lo_eikqed,respdf_vect(1,:))
+          !call get_respdf_gen(1,1,SLim_z2,res_lo_eikqed,respdf_vect(1,:))
+          call get_respdf_gen(1,1,SLim_z2,res_lo_eikqed,respdf_vect_rev(:,1))
           res_lo = res_lo*Qsq_Fs(icoll-2)**2
-          call get_respdf_gen(1,1,SLim_z2,res_lo,respdf_vect(2,:))
+          !call get_respdf_gen(1,1,SLim_z2,res_lo,respdf_vect(2,:))
+          call get_respdf_gen(1,1,SLim_z2,res_lo,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
        endif
 
     !! ------------------------------- SLim -------------------------------- !!
@@ -4349,7 +4509,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    !HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -4417,7 +4577,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 5i                           !!
     !!-----------------------------------------------------------------------!!
-    CLim%ids(1:4) = [0,0,id_el,-id_el]
+    !CLim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(CLim)
 
     if (CLim%makecut) then
@@ -4472,7 +4632,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                           Soft-Photon Limit                           !!
     !!-----------------------------------------------------------------------!!
-    SLim%ids(1:4) = [0,0,id_el,-id_el]
+    !SLim%ids(1:4) = [0,0,id_el,-id_el]
     call cut_histo(SLim)
 
     if (SLim%makecut) then
@@ -4481,8 +4641,6 @@ contains
        kin(9) = zero
 
     else
-
-
 
        SLim%Lim_etaij(:,6) = SLim%Lim_etaij(:,5)
 
@@ -4506,9 +4664,13 @@ contains
           call res_tree_qqb_gen(SLim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,SLim%Lim_etaij,[1,2,3,4],5,res_lo_eikqed)
           res_lo_eikqed = res_lo_eikqed/E5sq
-          call get_respdf_gen(1,1,SLim,res_lo_eikqed,respdf_vect(1,:))
+          !call get_respdf_gen(1,1,SLim,res_lo_eikqed,respdf_vect(1,:))
+          call get_respdf_gen(1,1,SLim,res_lo_eikqed,respdf_vect_rev(:,1))
           res_lo = res_lo*Qsq_Fs(icoll-2)**2
-          call get_respdf_gen(1,1,SLim,res_lo,respdf_vect(2,:))
+          !call get_respdf_gen(1,1,SLim,res_lo,respdf_vect(2,:))
+          call get_respdf_gen(1,1,SLim,res_lo,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
        endif
 
        EC = SLim%Lim_Ei(1)

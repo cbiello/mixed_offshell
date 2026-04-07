@@ -610,6 +610,10 @@ contains
     CLim%ids(1:4)     = [0,0,id_el,-id_el]
     SLim%ids(1:4)     = [0,0,id_el,-id_el]
 
+    HardProc%part = [id_a,id_a,id_el,-id_el,id_a]
+    CLim%part     = [id_a,id_a,id_el,-id_el]
+    SLim%part     = [id_a,id_a,id_el,-id_el]
+
     !-- Hard
     call cut_histo(HardProc)
     if (HardProc%makecut.or.HardProc%flag) then
