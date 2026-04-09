@@ -159,7 +159,7 @@ contains
 
        call res_tree_qqb(LOProc_z%AmpMom,res_lo)
 
-       gq_int_sub = reshape(calG_QqQl(LOProc_z,z,[Qdn,-Qdn, Qup,-Qup],Q_lep,1),[2,2])
+       gq_int_sub = reshape(calG_QqQl(LOProc_z,z,[Qdn,-Qdn, Qup,-Qup],Q_lep,icoll=1,chrg=+1),[2,2])
 
        res_lo(:,1) = gq_int_sub(:,1) * res_lo(:,1)
        res_lo(:,2) = gq_int_sub(:,2) * res_lo(:,2)
