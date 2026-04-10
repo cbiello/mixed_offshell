@@ -99,17 +99,65 @@ contains
     !----------------------------------------------------------
     !-- user-defined cuts below
     !----------------------------------------------------------
+    ids = zero
+    rec_mom=zero
     
     !-- dress leptons
+    ! event%AmpMom(:,1) = (/  798.06420531584774d0, 0.0000000000000000d0, 0.0000000000000000d0, 798.06420531584774d0 /)
+    ! event%AmpMom(:,2) = (/  127.57101050969145d0, 0.0000000000000000d0, 0.0000000000000000d0,-127.57101050969145d0 /)
+    ! event%AmpMom(:,3) = (/  265.97206901739384d0, 180.28423149815876d0, 162.88975797582353d0, 108.19271748638741d0 /)
+    ! event%AmpMom(:,4) = (/  50.008455315253954d0, 32.447290400659341d0, 29.312734016323539d0, 24.264842327146926d0 /)
+    ! event%AmpMom(:,5) = (/ 609.65469149288845d0, -212.73152189881932d0,-192.20249199214814d0, 538.03563499261782d0 /)
+
+    ! print*, 'ids= ', ids
+    ! print*, 'mom before= ', event%AmpMom(:,:)
+    ! print*, 'ids before= ', event%ids(:)
+    
     call recombine_photons(event,rec_mom,nreco,ids,leptons_recombined)
+    
+    !print*, 'momprima= ', event%AmpMom(:,:)
+    !print*, 'ids before= ', event%ids(:)
+    !print*, 'rec_mom= ', rec_mom(:,:)
+    !print*, '-----'
+    
     !-- Recombination of leptons: reject event
+       ! print*, 'mom(1)= ', event%AmpMom(:,1)
+       ! print*, 'mom(2)= ', event%AmpMom(:,2)
+       ! print*, 'mom(3)= ', event%AmpMom(:,3)
+       ! print*, 'mom(4)= ', event%AmpMom(:,4)
+       ! print*, 'mom(5)= ', event%AmpMom(:,5)
+       ! print*, 'rec_mom= ', rec_mom(:,:)
+       ! print*, 'ids= ', ids       
+
+    if(leptons_recombined) then
+
+       ! TURN OFF THE LEPTON RECOMB STOP TO MATCH PWG
+       
+       ! print*, 'mom(1)= ', event%AmpMom(:,1)
+       ! print*, 'mom(2)= ', event%AmpMom(:,2)
+       ! print*, 'mom(3)= ', event%AmpMom(:,3)
+       ! print*, 'mom(4)= ', event%AmpMom(:,4)
+       ! print*, 'mom(5)= ', event%AmpMom(:,5)
+       ! print*, 'rec_mom= ', rec_mom(:,:)
+       ! print*, 'ids= ', ids       
+       ! stop
+
+    endif
+
+    ! print*, leptons_recombined
+    ! print*, '*********'
+    ! pause
+    
     if(leptons_recombined) return
     
     !-- compute lepton observables and cut on them
     pv(:) = rec_mom(:,1) + rec_mom(:,2)
     
     mll = sqrt(scr(pv,pv))
-    if (mll.le.qmin .or. mll.ge.qmax) return
+    if (mll.le.qmin .or. mll.ge.qmax) then
+       print*, 'rejected event'
+       return
+    endif
 
 #if (_Vcharge == 0)
     ptlm  = get_pt(rec_mom(:,1))

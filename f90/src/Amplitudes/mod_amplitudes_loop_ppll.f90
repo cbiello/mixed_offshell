@@ -185,7 +185,10 @@ contains
     real(dp) :: res0loop(-5:7,-5:7)
     !-- debug
     real(dp) :: finiteZdn,finiteZup
-    real(dp) :: finiteWdu,finiteWud 
+    real(dp) :: finiteWdu,finiteWud
+    logical :: debug
+
+    debug = .true.
 
     p_ol(:,3:4) = p(:,3:4)
 
@@ -196,7 +199,12 @@ contains
     do i = 1,2
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
        do j = 1,3
-          call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+          if(debug) then
+             call evaluate_tree(OL_id(j),p_ol,res0_ol(i,j))
+             res1(:,i,j)=0d0
+          else
+             call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+          endif
        enddo
     enddo
 #else
@@ -204,7 +212,12 @@ contains
                ! therefore we don't need to obtain the results via crossing
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
        do j = 1,2
-          call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+          if(debug) then
+             call evaluate_tree(OL_id(j),p_ol,res0_ol(i,j))
+             res1(:,1,j)0d0
+          else
+             call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
+          endif
        enddo
     enddo
 #endif
@@ -316,12 +329,22 @@ contains
     real(dp15) :: p_ol(4,4)
     real(dp15) :: res1(0:2),acc,res0_ol
     real(dp) :: Lij(4,4),Lij2(4,4)
+    logical :: debug
+
+    debug=.true.
 
 #if(_Vcharge==0)
     
     p_ol = p
+
+    if(debug) then
+       call evaluate_tree(OL_id(1),p_ol,res0_ol)
+       res1=0d0
+    else
+       call evaluate_loop(OL_id(1),p_ol,res0_ol,res1,acc)
+    endif
+
     
-    call evaluate_loop(OL_id(1),p_ol,res0_ol,res1,acc)
     res0 = real(res0_ol,kind=dp)
     
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
