@@ -16,11 +16,12 @@ contains
   !-- recombine photons, return list of final state momenta and the number of
   !-- total reconstructed particles
   !-- only works with up to 1 extra photon
-  subroutine recombine_photons(event,recomb_mom,nreco,ids,lept_recomb,boost)
+  subroutine recombine_photons(event,recomb_mom,nreco,ids,lept_recomb,boost,n_phot)
     type(KinConfig), intent(in) :: event
     real(dp), intent(out) :: recomb_mom(4,4)
     integer, intent(out) :: nreco,ids(4)
     logical, intent(inout) :: lept_recomb
+    integer, optional, intent(out) :: n_phot
     real(dp), optional, intent(in) :: boost
     real(dp) :: dressed_lep(4,2), lboost
     integer :: i,n,k,mygamma,nphot
@@ -70,7 +71,9 @@ contains
     ids(2) = -id_el
 
     nreco = k - 1
-           
+
+    if(present(n_phot)) n_phot = nphot
+
   end subroutine recombine_photons
 
   subroutine recombine_lla(pl1,pl2,pa,dress_lep,nphot,lept_recomb,lboost)

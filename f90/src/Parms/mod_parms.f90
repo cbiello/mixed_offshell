@@ -386,7 +386,11 @@ contains
     vcur = (I3up - 2*sw2*Qup)/(2*cw*sw)
 
     !-- photon anomalous dimension
-    gamma_a = -two/3 * (xn*(nup*Qup2+ndn*Qdn2) + nle*Qel2)
+    if(ew_scheme.eq.'a0') then
+      gamma_a = zero
+    else
+      gamma_a = -two/3 * (xn*(nup*Qup2+ndn*Qdn2) + nle*Qel2)
+    endif
 
   end subroutine set_ew_parms_cms
   
