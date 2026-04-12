@@ -188,7 +188,9 @@ contains
     real(dp) :: finiteWdu,finiteWud
     logical :: debug
 
-    debug = .true.
+    !debug true set H1=0 in SCET (or MSbar scheme)
+    !this was useful to speed the debugging against PWG
+    debug = .false.
 
     p_ol(:,3:4) = p(:,3:4)
 
@@ -214,7 +216,7 @@ contains
        do j = 1,2
           if(debug) then
              call evaluate_tree(OL_id(j),p_ol,res0_ol(i,j))
-             res1(:,1,j)0d0
+             res1(:,1,j)=0d0
           else
              call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
           endif
@@ -331,7 +333,8 @@ contains
     real(dp) :: Lij(4,4),Lij2(4,4)
     logical :: debug
 
-    debug=.true.
+    !debug true set H1=0 finite reminder in SCET scheme
+    debug=.false.
 
 #if(_Vcharge==0)
     
