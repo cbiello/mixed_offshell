@@ -2681,7 +2681,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
+    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -2800,7 +2800,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
+    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then

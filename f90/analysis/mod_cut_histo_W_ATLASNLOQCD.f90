@@ -1,4 +1,4 @@
-module mod_cut_histo_W_ATLAS
+module mod_cut_histo_W_ATLASNLOQCD
   use mod_types
   use mod_consts_dp
   use mod_parms
@@ -187,7 +187,6 @@ contains
     ! endif
     
     ylm = get_y(rec_mom(:,1)) + rap_boost
-
     if (abs(ylm).ge.ylep_cut) return
 
     ylp = get_y(rec_mom(:,2)) + rap_boost
@@ -195,7 +194,7 @@ contains
 
     !-- compute scale
     if (dynscale) then
-       event%mu = massT/two
+       event%mu = invmass/two
     else
        event%mu = mu
     endif
@@ -253,4 +252,4 @@ contains
 
   end subroutine cut_histo
   
-end module mod_cut_histo_W_ATLAS 
+end module mod_cut_histo_W_ATLASNLOQCD

@@ -1243,12 +1243,13 @@ contains
     integer :: xsect_nnlo_rr_526k_qg, k, l
     real(dp15) :: yRnd(30), ff(1), vegasweight
     !--
-    integer, parameter :: imax_ipdf = 2
+    integer, parameter :: imax_ipdf = 2, imax_ilim = 2
     type(KinConfig) :: HardProc
     type(KinConfig) :: C6Lim, S6Lim, C6S6Lim, C5Lim, C5C6Lim, C5S6Lim, C5C6S6Lim
     real(dp)  :: xx(kNNLO_max_full)
     real(dp)  :: FintNNLO_qg(8),kin(1:6)
-    real(dp)  :: respdf(ipdf),respdf_tmp(ipdf,2),respdf_vect(imax_ipdf,ipdf)
+    real(dp)  :: respdf(ipdf),respdf_vect(imax_ipdf,ipdf)
+    real(dp)  :: respdf_vect_part(imax_ilim,ipdf)
     real(dp)  :: res_tmp(2,2),res_tmp_vect(2,2,imax_ipdf)
     real(dp)  :: eik_qed(4)
     real(dp)  :: z5,z6,s25,sk6,E6,E6sq,damp
@@ -1315,6 +1316,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                                 Soft 6                                !!
     !!-----------------------------------------------------------------------!!
+
     S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
     call cut_histo(S6Lim)
 
@@ -1336,8 +1338,7 @@ contains
       res_tmp_vect(:,2,1) = res_tmp(:,2) * eik_qed(3:4)
 
       !-- prepare PDFs structures, C6S6
-      res_tmp_vect(:,1,2) = res_tmp(:,1)
-      res_tmp_vect(:,2,2) = res_tmp(:,2)
+      res_tmp_vect(:,:,2) = res_tmp(:,:) * Q_lep2
 
       call get_respdf_vect(qg_lumi,1,1,S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
 
@@ -1345,9 +1346,8 @@ contains
 
       call partition_nnlo_fact(S6Lim,damp,iconf_qed=[1,5,3,4,6],i_qed=k)
 
-      respdf_tmp(:,1) =  respdf_vect(1,:) * S6Lim%wgt * damp
-      respdf_tmp(:,1) = -respdf_tmp(:,1)
-      FintNNLO_qg(2)  =  respdf_tmp(1,1)
+      respdf_vect_part(1,:) =  - respdf_vect(1,:) * S6Lim%wgt * damp
+      FintNNLO_qg(2) = respdf_vect_part(1,1)
 
     !! ------------------------------ C6 + S6 ------------------------------ !!
       z6  = C6S6Lim%Lim_z(2)
@@ -1355,10 +1355,10 @@ contains
 
       call partition_nnlo_fact(C6S6Lim,damp,iconf_qed=[1,5,3,4,6],i_qed=k)
 
-      respdf_tmp(:,2) = respdf_vect(2,:) * (4*Q_lep2/z6/sk6) * C6S6Lim%wgt * damp
-      FintNNLO_qg(3)  = respdf_tmp(1,2)
+      respdf_vect_part(2,:) = respdf_vect(2,:) * (4*Q_lep2/z6/sk6) * C6S6Lim%wgt * damp
+      FintNNLO_qg(3)  = respdf_vect_part(2,1)
 
-      respdf = respdf_tmp(1,1) + respdf_tmp(1,2)
+      respdf = sum(respdf_vect_part(1:2,:),1)
 
       kin(2) = respdf(1)
       call fill_histo(respdf,vegasweight)
@@ -1455,8 +1455,7 @@ contains
       res_tmp_vect(:,2,1) = res_tmp(:,2) * eik_qed(3:4)
 
       !-- prepare PDFs structures, C5C6S6
-      res_tmp_vect(:,1,2) = res_tmp(:,1)
-      res_tmp_vect(:,2,2) = res_tmp(:,2)
+      res_tmp_vect(:,:,2) = res_tmp(:,:) * Q_lep2
 
       call get_respdf_vect(qg_lumi,1,1,C5S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
 
@@ -1467,10 +1466,10 @@ contains
 
       call partition_nnlo_fact(C5S6Lim,damp,iconf_qed=[1,5,3,4,6],i_qed=k)
 
-      respdf_tmp(:,1) = respdf_vect(1,:) &
-                      * (2/s25) * Tr * Pqq(z5) * C5S6Lim%wgt * damp
+      respdf_vect_part(1,:) = respdf_vect(1,:) &
+                            * (2/s25) * Tr * Pqq(z5) * C5S6Lim%wgt * damp
 
-      FintNNLO_qg(6) = respdf_tmp(1,1)
+      FintNNLO_qg(6) = respdf_vect_part(1,1)
 
     !! --------------------------- C5 + C6 + S6 ---------------------------- !!
 
@@ -1480,15 +1479,14 @@ contains
       sk6 = C5C6S6Lim%Lim_sij(k,6)
 
       !-- damp = one
-      respdf_tmp(:,2) = respdf_vect(2,:) &
-                      * (4*Q_lep2/z6/sk6) &
-                      * (two/s25) * Tr * Pqq(z5) &
-                      * C5C6S6Lim%wgt
-      respdf_tmp(:,2) = - respdf_tmp(:,2)
+      respdf_vect_part(2,:) = - respdf_vect(2,:) &
+                            * (4*Q_lep2/z6/sk6) &
+                            * (two/s25) * Tr * Pqq(z5) &
+                            * C5C6S6Lim%wgt
 
-      FintNNLO_qg(7) = respdf_tmp(1,2)
+      FintNNLO_qg(7) = respdf_vect_part(2,1)
 
-      respdf = respdf_tmp(1,1) + respdf_tmp(1,2)
+      respdf = sum(respdf_vect_part(1:2,:),1)
       kin(5) = respdf(1)
 
       call fill_histo(respdf,vegasweight)

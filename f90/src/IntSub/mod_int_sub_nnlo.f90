@@ -81,17 +81,18 @@ contains
 
   end function Pqqbqqb_Lmu
 
-  function calG_QqQl(proc,z,Qcharges,Qlept,icoll)
+  function calG_QqQl(proc,z,Qcharges,Qlept,icoll,chrg)
     use mod_process, only: KinConfig
     implicit none
     type(KinConfig),   intent(in) :: proc
     real(dp),          intent(in) :: z,Qcharges(:),Qlept
-    integer, optional, intent(in) :: icoll
+    integer, optional, intent(in) :: icoll, chrg
     real(dp) :: calG_QqQl(size(Qcharges))
     real(dp) :: EC,E3,E4
     real(dp) :: etai3,etai4,eta13,eta14,eta23,eta24,eta34,eta34b
     real(dp) :: logEC3,logEC4,logE34,li213,li214,li223,li224,li234
     real(dp) :: a,b,c
+    integer  :: mychrg
 
     EC = proc%Lim_Ei(1)
     E3 = proc%Lim_Ei(3)
@@ -119,10 +120,13 @@ contains
       + (3._dp + 2*logEC3)*log(eta13/eta23) + (3._dp + 2*logEC4)*log(eta24/eta14)            ! eq 2.67, Geq^ij * two for some reason
     c = 13._dp - 4*zeta2 + logE34**2 + (3._dp + 2*logEC3 + 2*logEC4)*log(eta34) + 2*li234    ! eq 2.67 of paper, G_e^2
 
+    mychrg = 1
+    if(present(chrg)) mychrg = chrg
+
     if(present(icoll)) then
       etai3 = proc%Lim_etaij(icoll,3)
       etai4 = proc%Lim_etaij(icoll,4)
-      b = b - 2*log(z) * log(E3/E4 * etai3/etai4)
+      b = b - 2*log(z) * log(E3/E4 * etai3/etai4) * mychrg
       a = a - 4*zeta2
     endif
 
