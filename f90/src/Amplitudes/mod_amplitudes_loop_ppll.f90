@@ -214,7 +214,7 @@ contains
        do j = 1,2
           if(debug) then
              call evaluate_tree(OL_id(j),p_ol,res0_ol(i,j))
-             res1(:,1,j)0d0
+             res1(:,1,j) = 0d0
           else
              call evaluate_loop(OL_id(j),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
           endif
