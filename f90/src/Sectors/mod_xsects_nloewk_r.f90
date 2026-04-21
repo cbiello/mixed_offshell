@@ -813,7 +813,6 @@ contains
           res_lo = multiply_IS_charges_sq(res_lo,1)
           res_lo = transition('ga -> q', 'none', res_lo)
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
-          print*, 'respdf= ', respdf
        endif
           
        z   = C1Lim%Lim_KinInv(1)
@@ -874,10 +873,10 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
+#endif
     
     ff(1) = sum(kin)
     call close_histo()
-#endif
     
     call check_ff(ff,xx,FintNLO_ns)
     
