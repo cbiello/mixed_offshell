@@ -760,12 +760,22 @@ contains
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_a,-id_q,id_el,-id_el,id_q]
+    C1Lim%part     = [id_q,-id_q,id_el,-id_el]
+    C2Lim%part     = [id_q,-id_q,id_el,-id_el]
 #elif  (_Vcharge == -1)
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,-id_q]
     C1Lim%ids(1:4)     = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_a,-id_qp,id_el,-id_el,-id_q]
+    C1Lim%part     = [id_q,-id_qp,id_el,-id_el]
 #elif  (_Vcharge == +1)
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,-id_q]
     C1Lim%ids(1:4)     = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_a,-id_qp,id_el,-id_el,-id_q]
+    C1Lim%part     = [id_q,-id_qp,id_el,-id_el]
 #endif
     
     !-- Hard
@@ -935,12 +945,22 @@ contains
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_a,-id_q,id_el,-id_el,id_q]
+    C1Lim%part     = [id_q,-id_q,id_el,-id_el]
+    C2Lim%part     = [id_q,-id_q,id_el,-id_el]
 #elif  (_Vcharge == -1)
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_qp]
     C2Lim%ids(1:4)     = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_q,id_a,id_el,-id_el,id_qp]
+    C2Lim%part     = [id_q,-id_qp,id_el,-id_el]
 #elif  (_Vcharge == +1)
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_qp]
     C2Lim%ids(1:4)     = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_q,id_a,id_el,-id_el,id_qp]
+    C2Lim%part     = [id_q,-id_qp,id_el,-id_el]
 #endif
     
     !-- Hard
