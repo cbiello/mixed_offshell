@@ -590,7 +590,17 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf_vect(1:2,ipdf),respdf(ipdf)
     real(dp)    :: res_lo(2,2)
+    logical     :: oldcode
+    integer :: a, b, fa, fb
+    real*8 :: Qcharge(nf)
+    real*8 :: Q2(nf)
+    real(dp)    :: res_lo_new(-5:7,-5:7)
 
+    oldcode = .false.
+    
+    Qcharge = (/ Qdn, Qup, Qdn, Qup, Qdn /)
+    Q2 = Qcharge**2
+    
     xsect_nloewk_s_aq = 0
 
     ff(1) = zero
@@ -626,22 +636,42 @@ end function get_subtra_elastic_ewk_qqbllb_gen
 
        kin(1) = zero
        
-    else    
-
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
-
-       !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
-       call get_respdf_hoppet(xPij,PDFs,ns_lumi,0,1,LOProc,res_lo,respdf_vect(1,:),myPDFs1_Lmu=[xPij_Lmu])
-       respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
+    else
+       
+       if(oldcode) then
+          call res_tree_qqb(LOProc%AmpMom,res_lo)
+          res_lo(:,1) = Qdn2 * res_lo(:,1)
+          res_lo(:,2) = Qup2 * res_lo(:,2)
+          !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
+          call get_respdf_hoppet(xPij,PDFs,ns_lumi,0,1,LOProc,res_lo,respdf_vect(1,:),myPDFs1_Lmu=[xPij_Lmu])
+          respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_lo_new)
+          do a = -nf, nf
+               if (a == 0) cycle
+               fa = abs(a)
+               do b = -nf, nf
+                 if (b == 0) cycle
+                 fb = abs(b)
+                 res_lo_new(a,b) = Q2(fa) * res_lo_new(a,b)
+                 res_lo_new(a,b) = Q2(fb) * res_lo_new(a,b)
+               end do
+            end do
+          !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
+          call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_new,respdf_vect(1,:),myPDFs1_Lmu=[xPij_Lmu])
+          respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
+       endif          
 
        !--
 
+#if(_Vcharge == 0)
        !-- Paq*sigma_aa, quark charges already in the luminosity
        call res_treeAA_aa(LOProc%AmpMom,res_lo(1,1))
        call get_respdf_hoppet(PDFs,xPij_2,aa_lumi,0,1,LOProc,res_lo,respdf_vect(2,:),myPDFs2_Lmu=[xPij_2_Lmu])
        respdf_vect(2,:) = respdf_vect(2,:)*LOProc%wgt
+#else
+       respdf_vect(2,:) = 0
+#endif
 
        respdf = sum(respdf_vect(1:2,:),1)
        
@@ -671,6 +701,16 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf_vect(2,ipdf),respdf(ipdf)
     real(dp)    :: res_lo(2,2)
+    logical     :: oldcode
+    integer :: a, b, fa, fb
+    real*8 :: Qcharge(nf)
+    real*8 :: Q2(nf)
+    real(dp)    :: res_lo_new(-5:7,-5:7)
+
+    oldcode = .false.
+
+    Qcharge = (/ Qdn, Qup, Qdn, Qup, Qdn /)
+    Q2 = Qcharge**2
 
     xsect_nloewk_s_qa = 0
 
@@ -709,20 +749,41 @@ end function get_subtra_elastic_ewk_qqbllb_gen
        
     else    
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       res_lo(1,:) = [Qdn2,Qup2] * res_lo(1,:)
-       res_lo(2,:) = [Qdn2,Qup2] * res_lo(2,:)
+       if(oldcode) then
+           call res_tree_qqb(LOProc%AmpMom,res_lo)
+           res_lo(1,:) = [Qdn2,Qup2] * res_lo(1,:)
+           res_lo(2,:) = [Qdn2,Qup2] * res_lo(2,:)
 
-       !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
-       call get_respdf_hoppet(PDFs,xPij,ns_lumi,0,1,LOProc,res_lo,respdf_vect(1,:),myPDFs2_Lmu=[xPij_Lmu])
-       respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
+           !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
+           call get_respdf_hoppet(PDFs,xPij,ns_lumi,0,1,LOProc,res_lo,respdf_vect(1,:),myPDFs2_Lmu=[xPij_Lmu])
+           respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_lo_new)
+          do a = -nf, nf
+               if (a == 0) cycle
+               fa = abs(a)
+               do b = -nf, nf
+                 if (b == 0) cycle
+                 fb = abs(b)
+                 res_lo_new(a,b) = Q2(fa) * res_lo_new(a,b)
+                 res_lo_new(a,b) = Q2(fb) * res_lo_new(a,b)
+               end do
+            end do
+           !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
+           call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_new,respdf_vect(1,:),myPDFs2_Lmu=[xPij_Lmu])
+           respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
+       endif    
 
        !--
 
+#if(_Vcharge == 0)
        !-- Paq*sigma_aa, quark charges already in the luminosity
        call res_treeAA_aa(LOProc%AmpMom,res_lo(1,1))
        call get_respdf_hoppet(xPij_2,PDFs,aa_lumi,0,1,LOProc,res_lo,respdf_vect(2,:),myPDFs1_Lmu=[xPij_2_Lmu])
        respdf_vect(2,:) = respdf_vect(2,:)*LOProc%wgt
+#else
+       respdf_vect(2,:) = 0
+#endif
 
        respdf = sum(respdf_vect(1:2,:),1)
 
