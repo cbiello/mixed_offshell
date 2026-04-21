@@ -755,10 +755,19 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,&
          C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
+
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
-
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,-id_q]
+    C1Lim%ids(1:4)     = [0,0,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,-id_q]
+    C1Lim%ids(1:4)     = [0,0,id_nue,-id_el]
+#endif
+    
     !-- Hard
     call cut_histo(HardProc)
     if (HardProc%makecut.or.HardProc%flag) then
@@ -804,9 +813,9 @@ contains
           res_lo = multiply_IS_charges_sq(res_lo,1)
           res_lo = transition('ga -> q', 'none', res_lo)
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
+          print*, 'respdf= ', respdf
        endif
           
-
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
 
@@ -823,7 +832,8 @@ contains
 
     endif
 
-    !-- C2
+    !-- C2 -> only present in the neutral-change case
+#if (_Vcharge == 0)
     call cut_histo(C2Lim)
     
     if (C2Lim%makecut.or.C2Lim%flag) then
@@ -867,7 +877,8 @@ contains
     
     ff(1) = sum(kin)
     call close_histo()
-
+#endif
+    
     call check_ff(ff,xx,FintNLO_ns)
     
 #if(_withchecks == 1)
@@ -920,10 +931,19 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,&
          C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
+
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
-
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_qp]
+    C2Lim%ids(1:4)     = [0,0,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_qp]
+    C2Lim%ids(1:4)     = [0,0,id_nue,-id_el]
+#endif
+    
     !-- Hard
     call cut_histo(HardProc)
     if (HardProc%makecut.or.HardProc%flag) then
@@ -950,7 +970,8 @@ contains
 
     endif
 
-    !-- C1
+    !-- C1 -> only present in the neutral-change case
+#if (_Vcharge == 0)
     call cut_histo(C1Lim)
     
     if (C1Lim%makecut.or.C1Lim%flag) then
@@ -992,6 +1013,7 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
+#endif
 
     !-- C2
     call cut_histo(C2Lim)
