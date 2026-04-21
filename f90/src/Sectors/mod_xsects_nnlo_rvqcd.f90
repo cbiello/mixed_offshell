@@ -82,13 +82,6 @@ contains
     
     call open_histo()
 
-       !xx = (/ 0.99951487081002888, 0.47571792312703243, 6.7303863735479502E-002, &
-       ! 0.81854681184849698, 0.38085384870942979, 0.39113399521056669, &
-       ! 8.2011227069332560E-002, 0.92965007063683558 /)
-
-       !xx = (/ 0.99922551982900198, 0.41831209588268015, 0.38755448588078756, 0.63371322263644092, &
-        !0.17620324293505132, 0.76335680543548756, 0.58376812554588986, 0.23931202704567811 /)
-
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,&
          C1Lim=C1Lim,C2Lim=C2Lim,SLim=SLim,SC1Lim=SC1Lim,SC2Lim=SC2Lim,compute_etas=.true.)
@@ -354,15 +347,24 @@ contains
     integer :: xsect_nnlo_rvqcd_fs_5i_ns,icoll,jother
     real(dp15) :: yRnd(30),ff(1),vegasweight
     type(KinConfig) :: HardProc,CLim,CSLim,SLim
+    integer, parameter :: imax_ipdf = 2, imax_ilim = 4
     !--
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintRV_ns(4),kin(3)
     real(dp)    :: respdf(ipdf),respdf_tmp(ipdf,2)
-    real(dp)    :: res0(2,2),res1(2,2),res0red(2,2),res1red(2,2)
-    real(dp)    :: res1gen(-5:7,-5:7)
-    real(dp)    :: res_tmp_vect(2,2,2),respdf_vect(2,ipdf)
+    !--
+    real(dp)    :: res0_old(2,2),res1_old(2,2)
+    real(dp)    :: res0(-5:7,-5:7),res1(-5:7,-5:7), res_eikqed(-5:7,-5:7)
+    real(dp)    :: res0red_old(2,2),res1red_old(2,2),res_tmp_old(2,2)
+    real(dp)    :: res0red(-5:7,-5:7),res1red(-5:7,-5:7),res_tmp(-5:7,-5:7), res1red_fs_charge(-5:7,-5:7)
+    real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect(2,2,imax_ipdf),respdf_vect_rev(ipdf,imax_ipdf)
+    !--
     real(dp)    :: z,s5i,eik(4),e5,eta5i
     real(dp)    :: damp
+    logical :: oldcode
+    integer :: i
+
+    oldcode = .false.
 
     xsect_nnlo_rvqcd_fs_5i_ns = 0
 
@@ -370,6 +372,7 @@ contains
 
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
+
 
 #if (_withchecks == 1)
     if (override) then
@@ -385,10 +388,55 @@ contains
     
     call open_histo()
 
+    ! for check
+    ! z = one-1E-5_dp
+    ! for check
+    ! xx(xE) = 1E-5_dp
+    ! for check
+    ! xx(xRHO)=1E-6_dp
+
+    !xx = [ &
+    !0.27384198205924926_dp, &
+    !0.29177341328902862_dp, &
+    !2.6509538461396708E-002_dp, &
+    !0.16909047503513841_dp, &
+    !0.69571821718859106_dp, &
+    !0.43621888932298258_dp, &
+    !0.80514737395748393_dp, &
+    !0.66869645956556378_dp  &
+    !]
+
     call kinematics_nlo_fs(xx,icoll,jother,HardProc,CLim,CSLim,SLim)
+
+        ! define process specific partons
+#if (_Vcharge == 0)
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
-    CLim%ids(1:4)     = [0,0,id_el,-id_el]
+    CLim%ids(1:4) = [0,0,id_el,-id_el]
     SLim%ids(1:4)     = [0,0,id_el,-id_el]
+
+    HardProc%part = [id_q,-id_q,id_el,-id_el,id_a]
+    CLim%part = [id_q,-id_q,id_el,-id_el]
+    SLim%part = [id_q,-id_q,id_el,-id_el]
+
+#elif  (_Vcharge == -1)
+    HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_a]
+    CLim%ids(1:4) = [0,0,id_el,-id_nue]
+    SLim%ids(1:4) = [0,0,id_el,-id_nue]
+
+    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_a]
+    CLim%part = [id_q,-id_qp,id_el,-id_nue]
+    SLim%part = [id_q,-id_qp,id_el,-id_nue]
+
+#elif  (_Vcharge == +1)
+    HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_a]
+    CLim%ids(1:4) = [0,0,id_nue,-id_el]
+    SLim%ids(1:4) = [0,0,id_nue,-id_el]
+
+    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_a]
+    CLim%part = [id_q,-id_qp,id_nue,-id_el]
+    SLim%part = [id_q,-id_qp,id_nue,-id_el]
+#endif
+
 
     !-- Hard
     call cut_histo(HardProc)
@@ -398,10 +446,14 @@ contains
        FintRV_ns(1) = zero
 
     else
-
-       call ol_res_qcdloop_a_qqb_gen(HardProc%AmpMom,res0,res1gen)
-       call res_qcdloop_a_qqb(HardProc%AmpMom,res0,res1)
-       call get_respdf(ns_lumi,1,1,HardProc,res1,respdf)
+      
+       if ( oldcode ) then
+          call res_qcdloop_a_qqb(HardProc%AmpMom,res0_old,res1_old)
+          call get_respdf(ns_lumi,1,1,HardProc,res1_old,respdf)
+       else 
+          call ol_res_qcdloop_a_qqb_gen(HardProc%AmpMom,res0,res1)
+          call get_respdf_gen(1,1,HardProc,res1,respdf)
+       endif
 
        call partition_nlo_qed(HardProc,damp,icoll)
        
@@ -424,8 +476,13 @@ contains
 
     else
 
-       call res_qcdloop_qqb(CLim%AmpMom,res0red,res1red)
-       call get_respdf(ns_lumi,1,1,CLim,res1red,respdf)
+       if ( oldcode ) then
+          call res_qcdloop_qqb(CLim%AmpMom,res0red_old,res1red_old)
+          call get_respdf(ns_lumi,1,1,CLim,res1red_old,respdf)
+       else
+          call res_qcdloop_qqb_gen(CLim%AmpMom,res0red,res1red)
+          call get_respdf_gen(1,1,CLim,res1red,respdf)
+       endif
 
        z   = CLim%Lim_KinInv(1)
        s5i = CLim%Lim_KinInv(2)
@@ -437,7 +494,7 @@ contains
 
        FintRV_ns(2) = respdf(1)
        kin(2) = respdf(1)
-       
+
        call fill_histo(respdf,vegasweight)
 
     endif
@@ -452,19 +509,33 @@ contains
 
     else
 
-       call res_qcdloop_qqb(SLim%AmpMom,res0red,res1red)
+       if ( oldcode ) then
+          call res_qcdloop_qqb(SLim%AmpMom,res0red_old,res1red_old)
 
-       !-- prepare PDFs structures, S
-       call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
-       res_tmp_vect(:,1,1) = res1red(:,1) * eik(1:2) !-- dn
-       res_tmp_vect(:,2,1) = res1red(:,2) * eik(3:4) !-- dn
+          !-- prepare PDFs structures, S
+          call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
+          res_tmp_vect(:,1,1) = res1red_old(:,1) * eik(1:2) !-- dn
+          res_tmp_vect(:,2,1) = res1red_old(:,2) * eik(3:4) !-- dn
 
-       !-- prepare PDFs structures, CS
-       res_tmp_vect(:,:,2) = res1red(:,:) * Q_lep2
+          !-- prepare PDFs structures, CS
+          res_tmp_vect(:,:,2) = res1red_old(:,:) * Q_lep2
 
-       !-- get PDFs for all of them
-       call get_respdf_vect(ns_lumi,1,1,SLim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
-      
+          !-- get PDFs for all of them
+          call get_respdf_vect(ns_lumi,1,1,SLim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
+       else
+          call res_qcdloop_qqb_gen(SLim%AmpMom,res0red,res1red)
+          call get_qed_eik_gen(res1red,SLim%Lim_etaij,[1,2,3,4],5,res_eikqed)
+          call get_respdf_gen(1,1,SLim,res_eikqed,respdf_vect_rev(:,1))
+         
+          res1red_fs_charge(:,:) = res1red(:,:) * Q_lep2
+          call get_respdf_gen(1,1,SLim,res1red_fs_charge,respdf_vect_rev(:,2))
+          
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
+
+       endif
+
+
        !-- S
        call partition_nlo_qed(SLim,damp,icoll)
        
@@ -489,6 +560,15 @@ contains
     call close_histo()
 
     call check_ff(ff,xx,FintRV_ns)
+
+    !if (product(kin) .ne. zero) then
+    !   print*,  "hard         ", FintRV_ns(1) 
+    !   print *, "collinear    ", FintRV_ns(2), FintRV_ns(2)/FintRV_ns(1)
+    !   print *, "soft         ", FintRV_ns(3), FintRV_ns(3)/FintRV_ns(1)
+    !   print *, "soft-coll    ", FintRV_ns(4), FintRV_ns(4)/FintRV_ns(1)
+    !   print *, "ff",ff(1)
+    !   pause
+    !endif
 
 #if(_withchecks == 1)
     FintRVQCD_ns(1:4) = FintRV_ns

@@ -236,7 +236,7 @@ contains
     real(dp) :: damp
     logical  :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
 
     xsect_nnlo_rr_5i6ia_ns_ga = 0
 

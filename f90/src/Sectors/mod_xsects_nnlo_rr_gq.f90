@@ -1455,7 +1455,7 @@ contains
     real(dp)  :: xx(kNNLO_max_full)
     real(dp)  :: FintNNLO_gq(8),kin(1:6)
     real(dp)  :: respdf(ipdf),respdf_tmp(imax_ipdf,ipdf)
-    real(dp)  :: respdf_vect(imax_ilim,ipdf)
+    real(dp)  :: respdf_vect(imax_ilim,ipdf), respdf_vect_part(imax_ilim,ipdf)
     real(dp) :: res_nnlo(-5:7,-5:7), res_nlo(-5:7,-5:7), res_lo(-5:7,-5:7), res_nlo_eikqed(-5:7,-5:7),  res_lo_eikqed(-5:7,-5:7), res_lo_ischarges(-5:7,-5:7), res_nlo_ischarges(-5:7,-5:7)
     real(dp)  :: res_tmp(2,2),res_tmp_vect(2,2,imax_ipdf)
     real(dp)  :: eik_qed(4), Qsq_FS(2)
