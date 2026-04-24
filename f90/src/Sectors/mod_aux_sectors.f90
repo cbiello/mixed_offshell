@@ -1203,7 +1203,7 @@ end function gen_lumi
     
     do i = -5,7
        do j = -5,7
-          FSQ_charge = Q_IS(1) + Q_IS(2) - Q3 - Q4
+          FSQ_charge = Q_IS(i) + Q_IS(j) - Q3 - Q4
           res_out(i,j) = res_in(i,j)*FSQ_charge**2
        enddo
     enddo
