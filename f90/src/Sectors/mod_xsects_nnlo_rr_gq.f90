@@ -339,7 +339,6 @@ contains
     real(dp) :: damp
     logical  :: oldcode
 
-
     oldcode = .false.
 
     xsect_nnlo_rr_5161c_gq = 0
@@ -662,6 +661,7 @@ contains
     endif
 
     !!-----------------------------------------------------------------------!!
+
     ff(1) = sum(kin)
     call close_histo()
 
@@ -701,8 +701,8 @@ contains
     logical   :: oldcode
 
 
-    oldcode = .true.
-    
+    oldcode = .false.
+
     xsect_nnlo_rr_5161bd_gq = 0
 
     ff(1) = zero
@@ -837,8 +837,8 @@ contains
           call get_respdf(gq_lumi,1,1,TCLim,res_tmp,respdf_bak)
        else
           call res_tree_qqb_gen(TCLim%AmpMom,res_lo)
-          res_lo = transition('g -> q', 'none', res_lo)
-          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
+          res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)                    
+          res_lo_ischarges = transition('g -> q', 'none', res_lo_ischarges)
           call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf_bak)
        endif
        
@@ -983,10 +983,11 @@ contains
           
           call get_respdf(gq_lumi,1,1,TCS6Lim,res_tmp,respdf_bak)
        else
-          call res_tree_qqb(TCS6Lim%AmpMom,res_lo)
-          res_lo = transition('g -> q', 'none', res_lo)
+          call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,1)
-          call get_respdf_gen(1,1,TCS6Lim,res_lo,respdf_bak)
+          res_lo_ischarges = transition('g -> q', 'none', res_lo_ischarges)
+
+          call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_bak)
        endif
 
       z5  = TCS6Lim%Lim_z(1)
@@ -1066,7 +1067,7 @@ contains
 
     oldcode = .false.
 
-    xsect_nnlo_rr_5162_gq = 0
+        xsect_nnlo_rr_5162_gq = 0
 
     ff(1) = zero
 
@@ -1455,7 +1456,7 @@ contains
     real(dp)  :: xx(kNNLO_max_full)
     real(dp)  :: FintNNLO_gq(8),kin(1:6)
     real(dp)  :: respdf(ipdf),respdf_tmp(imax_ipdf,ipdf)
-    real(dp)  :: respdf_vect(imax_ilim,ipdf), respdf_vect_part(imax_ilim,ipdf)
+    real(dp)  :: respdf_vect(imax_ilim,ipdf), respdf_vect_part(imax_ilim,ipdf),respdf_vect1(ipdf), respdf_vect2(ipdf)
     real(dp) :: res_nnlo(-5:7,-5:7), res_nlo(-5:7,-5:7), res_lo(-5:7,-5:7), res_nlo_eikqed(-5:7,-5:7),  res_lo_eikqed(-5:7,-5:7), res_lo_ischarges(-5:7,-5:7), res_nlo_ischarges(-5:7,-5:7)
     real(dp)  :: res_tmp(2,2),res_tmp_vect(2,2,imax_ipdf)
     real(dp)  :: eik_qed(4), Qsq_FS(2)
@@ -1562,10 +1563,12 @@ contains
        else
           call res_tree_g_gq_gen(S6Lim%AmpMom,res_nlo)
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[2,3,4,5],6,res_nlo_eikqed)
-          call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect(1,:))
-          respdf_vect(1,:) = respdf_vect(1,:) / E6sq                    
+          call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect1)
+          respdf_vect1 = respdf_vect1 / E6sq                    
           res_nlo = Qsq_Fs(k-2)**2 * res_nlo
-          call get_respdf_gen(1,1,S6Lim,res_nlo,respdf_vect(2,:))
+          call get_respdf_gen(1,1,S6Lim,res_nlo,respdf_vect2)
+          respdf_vect(1,:) = respdf_vect1(:)
+         respdf_vect(2,:) = respdf_vect2(:)
        endif
           
     !! --------------------------------- S6 -------------------------------- !!
@@ -1712,10 +1715,12 @@ contains
           call res_tree_qqb_gen(C5S6Lim%AmpMom,res_lo)
           res_lo = transition('g -> q', 'none', res_lo)
           call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[2,3,4,5],6,res_lo_eikqed)
-          call get_respdf_gen(1,1,C5S6Lim,res_lo_eikqed,respdf_vect(1,:))
-          respdf_vect(1,:) = respdf_vect(1,:) / E6sq
+          call get_respdf_gen(1,1,C5S6Lim,res_lo_eikqed,respdf_vect1)
+          respdf_vect1 = respdf_vect1 / E6sq
           res_lo = Qsq_Fs(k-2)**2 * res_lo
-          call get_respdf_gen(1,1,S6Lim,res_lo,respdf_vect(2,:))
+          call get_respdf_gen(1,1,C5S6Lim,res_lo,respdf_vect2)
+          respdf_vect(1,:) = respdf_vect1(:)
+          respdf_vect(2,:) = respdf_vect2(:)
        endif
 
     !! ------------------------------ C5 + S6 ------------------------------ !!
@@ -1810,7 +1815,7 @@ contains
     endif
 
     !!-----------------------------------------------------------------------!!
-
+       
     ff(1) = sum(kin)
     call close_histo()
 
