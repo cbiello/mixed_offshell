@@ -268,7 +268,12 @@ contains
     real(dp) :: respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_tmp(ipdf)
     real(dp) :: intsub(ipdf),sv_logs(ipdf)
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1),gq_int_sub(2,2)
-    real(dp) :: res_nlo(2,2),res_nlo_1(2,2),res_nlo_2(2,2),res_nlo_tmp(2,2),res_lo(2,2)
+    real(dp) :: res_nlo_old(2,2),res_nlo_1(2,2),res_nlo_2(2,2),res_nlo_tmp(2,2),res_lo_old(2,2)
+    real(dp) :: res_lo(-5:7,-5:7) , res_nlo(-5:7,-5:7)
+    real(dp) :: res_nlo_ischarges(-5:7,-5:7),res_lo_ischarges(-5:7,-5:7)
+    logical  :: oldcode
+
+    oldcode = .false.
 
     xsect_nnlo_s_gq_oqcd = 0
 
@@ -322,12 +327,17 @@ contains
 
     else
 
-       call res_tree_g_gq(HardProc_z%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(gq_lumi,1,1,HardProc_z,res_nlo,respdf)
-
+       if (oldcode) then
+          call res_tree_g_gq(HardProc_z%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          call get_respdf(gq_lumi,1,1,HardProc_z,res_nlo_old,respdf)
+       else
+          call res_tree_g_gq_gen(HardProc_z%AmpMom,res_nlo)
+          res_nlo = multiply_IS_charges_sq(res_nlo,2)
+          call get_respdf_gen(1,1,HardProc_z,res_nlo,respdf)
+       endif
+          
        EC = HardProc_z%Lim_Ei(1)
        call fill_sv_logs(HardProc_z%muf(1)**2,4*EC**2,sv_logs)
 
@@ -355,11 +365,16 @@ contains
 
     else
 
-       call res_tree_qqb(C1Lim_z%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
-
-       call get_respdf(gq_lumi,1,1,C1Lim_z,res_lo,respdf)
+       if (oldcode) then
+          call res_tree_qqb(C1Lim_z%AmpMom,res_lo_old)
+          res_lo_old(:,1) = Qdn2 * res_lo_old(:,1)
+          res_lo_old(:,2) = Qup2 * res_lo_old(:,2)
+          call get_respdf(gq_lumi,1,1,C1Lim_z,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim_z%AmpMom,res_lo)
+          res_lo = multiply_IS_charges_sq(res_lo,2)
+          call get_respdf_gen(1,1,C1Lim_z,res_lo,respdf)
+       endif
 
        EC  = C1Lim_z%Lim_Ei(1)
        s15 = C1Lim_z%Lim_sij(1,5)
@@ -397,23 +412,33 @@ contains
 
     else
 
-       call res_tree_g_gq(HardProc%AmpMom,res_nlo_tmp)
-       res_nlo_1(:,1) = Qdn2 * res_nlo_tmp(:,1)
-       res_nlo_1(:,2) = Qup2 * res_nlo_tmp(:,2)
-
        !-- subtract plus
        EC = HardProc%Lim_Ei(1)
        call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
-
-       call get_respdf(gq_lumi,1,1,HardProc,res_nlo_1,respdf_tmp)
-
+       
+       if (oldcode) then
+          call res_tree_g_gq(HardProc%AmpMom,res_nlo_tmp)
+          res_nlo_1(:,1) = Qdn2 * res_nlo_tmp(:,1)
+          res_nlo_1(:,2) = Qup2 * res_nlo_tmp(:,2)          
+          call get_respdf(gq_lumi,1,1,HardProc,res_nlo_1,respdf_tmp)
+       else
+          call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)
+          res_nlo = multiply_IS_charges_sq(res_nlo,2)
+          call get_respdf_gen(1,1,HardProc,res_nlo,respdf_tmp)
+       endif
+          
        intsub = PqqNLO(1) + Pqq0_R(1)*sv_logs
        intsub = -intsub
 
        respdf_1 = intsub * respdf_tmp 
 
        !-- add elastic component
+#if (_Vcharge == 0) 
        gq_int_sub = reshape(calG_Q2(HardProc,[Qdn,-Qdn, Qup,-Qup],Q_lep,1,2,.false.),[2,2])
+#else
+       print *, "error: unboosted part of ONLO_g in gq channel not implemented, stopping."
+       stop
+#endif       
 
        res_nlo_2(:,1) = gq_int_sub(:,1) * res_nlo_tmp(:,1)
        res_nlo_2(:,2) = gq_int_sub(:,2) * res_nlo_tmp(:,2)
@@ -446,15 +471,21 @@ contains
 
     else
 
-       call res_tree_qqb(C1Lim%AmpMom,res_nlo_tmp)
-       res_nlo_1(:,1) = Qdn2 * res_nlo_tmp(:,1)
-       res_nlo_1(:,2) = Qup2 * res_nlo_tmp(:,2)
-
        !-- subtract plus
        EC = C1Lim%Lim_Ei(1)
        call fill_sv_logs(C1Lim%muf(1)**2,4*EC**2,sv_logs)
 
-       call get_respdf(gq_lumi,1,1,C1Lim,res_nlo_1,respdf_tmp)
+       if (oldcode) then
+          call res_tree_qqb(C1Lim%AmpMom,res_nlo_tmp)
+          res_nlo_1(:,1) = Qdn2 * res_nlo_tmp(:,1)
+          res_nlo_1(:,2) = Qup2 * res_nlo_tmp(:,2)
+          call get_respdf(gq_lumi,1,1,C1Lim,res_nlo_1,respdf_tmp)
+       else
+          call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
+          res_lo = multiply_IS_charges_sq(res_lo,2)
+          call get_respdf_gen(1,1,C1Lim,res_lo,respdf_tmp)
+       endif
+
 
        intsub = PqqNLO(1) + Pqq0_R(1)*sv_logs
        intsub = -intsub
@@ -463,8 +494,14 @@ contains
 
        !-- add elastic component
        C1Lim%Lim_etaij(1,5) = C1Lim%Lim_KinInv(4)
+       
+#if (_Vcharge == 0)       
        gq_int_sub = reshape(calG_Q2(C1Lim,[Qdn,-Qdn, Qup,-Qup],Q_lep,1,2,.true.),[2,2])
-
+#else
+       print *, "error: unboosted part of ONLO_g in gq channel not implemented, stopping."
+       stop
+#endif
+       
        res_nlo_2(:,1) = gq_int_sub(:,1) * res_nlo_tmp(:,1)
        res_nlo_2(:,2) = gq_int_sub(:,2) * res_nlo_tmp(:,2)
 
