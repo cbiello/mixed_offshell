@@ -1,0 +1,65 @@
+#---------------------------------
+# Optional configuration options.
+# No spaces
+#---------------------------------
+
+# Fortran compiler, e.g.: gfortran, ifort, gcc.
+# Default=gfortran
+FC=gfortran
+
+# If MPI=true is required, the following will be selected as the compiler.
+# Default=mpif90
+FCmpi=mpif90
+
+# Compiler flags.
+# Default='-O3 -ffree-line-length-1000'
+FFLAGS='-O3 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000'
+#FFLAGS='-O0 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000'
+
+#Include the choice of the boson
+Vcharge=-1
+
+#Configure with checks: true/false. Default=true
+CHECKS=true
+
+#Configure with mpi: true/false. Default=true
+MPI=false
+
+#Include the 2L amplitudes
+With2L=false
+
+#use quadruple precision, for checking limits
+Useqp=true
+
+# Include hoppet
+WithHoppet=true
+
+
+#Analysis
+analysis=PC_ATLAS_160601736
+#analysis=W_ATLAS
+
+#---------------------------------
+# Mandatory configuration options
+# If you have a paht, automatically linked to makefile
+#---------------------------------
+
+# LHAPDF installation path
+# LHAPDF=/usr/local/lib
+LHAPDF=/home/raoul/Work/Software/Install/LHAPDF-6.2.3/lib
+
+# OpenLoops installation path
+OPENLOOPS=/home/raoul/Work/Software/OpenLoops/public-beta/OpenLoops
+
+# Hoppet installation path
+HOPPET=/home/raoul/Work/Software/Install/hoppet-1.2.0/
+
+# PolyLogs
+# GINAC=/Users/fabrizio/tools/lib
+HANDYG=/home/raoul/Work/Software/Install/handyg/
+#HANDYG=/users/ttp/signorile/Desktop/tools
+
+# Other libraries
+# CHAPLIN=/Users/fabrizio/tools/lib
+# QCDLOOP=/Users/fabrizio/tools/lib
+# COLLIER=/Users/fabrizio/tools/COLLIER-1.2.4

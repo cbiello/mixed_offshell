@@ -86,6 +86,7 @@ BasicDef = \
 	mod_types.o \
 	mod_consts_dp.o \
 	mod_mpi_common.o \
+        mod_limvals.o \
 
 OBJS_genproc = \
 	mod_process.o \
@@ -195,6 +196,8 @@ OBJS_vegas = \
 
 OBJS_check = \
 	mod_checks.o \
+	mod_check_amp.o \
+	mod_check_lim.o \
 
 OBJS_chooser = \
 	mod_run_proc_lonlo.o \
@@ -215,6 +218,8 @@ OBJS_chooser = \
 	mod_run_proc_s_ga.o \
 	mod_run_proc_vv.o \
 	mod_run_proc.o \
+        mod_lim_proc_nlo.o \
+        mod_lim_proc.o \
 	mod_sects_list.o \
 
 OBJS_gen = \

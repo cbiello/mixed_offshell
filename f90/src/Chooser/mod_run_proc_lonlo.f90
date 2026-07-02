@@ -29,8 +29,17 @@ contains
     if (corr.eq.'lo') then
 
        if     (ch.eq.'ns' .and. sec.eq.'na') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns,vg_result,vg_error,vg_chi2)
-       elseif (ch.eq.'ns' .and. sec.eq.'wp') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns_wp,vg_result,vg_error,vg_chi2)
-       elseif (ch.eq.'aa' .and. sec.eq.'na') then; call vegas_integrate(LOdim_vegas,xsect_lo_aa,vg_result,vg_error,vg_chi2)
+!       elseif (ch.eq.'ns' .and. sec.eq.'wp') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns_wp,vg_result,vg_error,vg_chi2)
+       elseif (ch.eq.'aa' .and. sec.eq.'na') then
+#if _Vcharge == 0
+          call vegas_integrate(LOdim_vegas,xsect_lo_aa,vg_result,vg_error,vg_chi2)
+#else
+          write(*,*) '------- ERROR in Chooser ------'
+          write(*,*) 'The aa channel is not present  '
+          write(*,*) 'in charged DY production       '
+          write(*,*) '-------------------------------'
+          stop
+#endif
        else
           print *, 'wrong sector/channel for lo -> -sec na -ch ns,aa'
           stop
@@ -41,20 +50,20 @@ contains
        if (ch.eq.'ns') then
           if     (sec.eq.'r_is') then
              call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns,vg_result,vg_error,vg_chi2)
-          elseif     (sec.eq.'r_is_wp') then
-             call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_wp,vg_result,vg_error,vg_chi2)
-          elseif     (sec.eq.'r_is_wm') then
-             call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_wm,vg_result,vg_error,vg_chi2)
+          ! elseif     (sec.eq.'r_is_wp') then
+          !    call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_wp,vg_result,vg_error,vg_chi2)
+          ! elseif     (sec.eq.'r_is_wm') then
+          !    call vegas_integrate(NLOdim_vegas,xsect_nloqcd_r_is_ns_wm,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'s')    then
              call init_xPij_nlo()
              call vegas_integrate(LOdim_vegas,xsect_nloqcd_s_ns,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'v')    then
              call vegas_integrate(LOdim_vegas,xsect_nloqcd_v_ns,vg_result,vg_error,vg_chi2)
-          elseif (sec.eq.'s_wp')    then
-             call init_xPij_nlo()
-             call vegas_integrate(LOdim_vegas,xsect_nloqcd_s_ns_wp,vg_result,vg_error,vg_chi2)
-          elseif (sec.eq.'v_wp')    then
-             call vegas_integrate(LOdim_vegas,xsect_nloqcd_v_ns_wp,vg_result,vg_error,vg_chi2)
+          ! elseif (sec.eq.'s_wp')    then
+          !    call init_xPij_nlo()
+          !    call vegas_integrate(LOdim_vegas,xsect_nloqcd_s_ns_wp,vg_result,vg_error,vg_chi2)
+          ! elseif (sec.eq.'v_wp')    then
+          !    call vegas_integrate(LOdim_vegas,xsect_nloqcd_v_ns_wp,vg_result,vg_error,vg_chi2)
           else
              print *, 'wrong sector for nloqcd ns -> -sec r_is,s,v'
              stop
@@ -89,10 +98,10 @@ contains
        if (ch.eq.'ns') then
           if     (sec.eq.'r_is') then
              call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_is_ns,vg_result,vg_error,vg_chi2)
-          elseif (sec.eq.'r_is_wp') then
-             call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_is_ns_wp,vg_result,vg_error,vg_chi2)
-          elseif (sec.eq.'r_is_wm') then
-             call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_is_ns_wm,vg_result,vg_error,vg_chi2)
+          ! elseif (sec.eq.'r_is_wp') then
+          !    call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_is_ns_wp,vg_result,vg_error,vg_chi2)
+          ! elseif (sec.eq.'r_is_wm') then
+          !    call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_is_ns_wm,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'r_fs_53') then
              call vegas_integrate(NLOdim_vegas,xsect_nloewk_r_fs_53_ns,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'r_fs_54') then
@@ -127,6 +136,7 @@ contains
              stop
           endif
        elseif (ch.eq.'aa') then
+#if _Vcharge == 0
           if (sec.eq.'v') then
              call vegas_integrate(LOdim_vegas,xsect_nloewk_v_aa,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'r_fs_53') then
@@ -136,6 +146,13 @@ contains
           elseif (sec.eq.'s')    then
              call vegas_integrate(LOdim_vegas,xsect_nloewk_s_aa,vg_result,vg_error,vg_chi2)
           endif
+#else
+          write(*,*) '------- ERROR in Chooser ------'
+          write(*,*) 'The aa channel is not present  '
+          write(*,*) 'in charged DY production       '
+          write(*,*) '-------------------------------'
+          stop
+#endif
        else
           print *, 'wrong channel for nloqewk -> -ch ns aq qa aa'
           stop
@@ -151,21 +168,17 @@ contains
   subroutine help_run_proc_lonlo(idev)
     integer, intent(in) :: idev
 
-    write(idev,*) 'Z: -corr lo -ch ns/aa -sec na'
+    write(idev,*) '-corr lo -ch ns/aa -sec na'
     write(idev,*) ''
-    write(idev,*) 'W: -corr lo -ch ns -sec w'
+    write(idev,*) '-corr nloqcd -ch ns -sec r_is s v'
+    write(idev,*) '-corr nloqcd -ch gq -sec r_is s'
+    write(idev,*) '-corr nloqcd -ch qg -sec r_is s'
     write(idev,*) ''
-    write(idev,*) 'Z: -corr nloqcd -ch ns -sec r_is s v'
-    write(idev,*) '   -corr nloqcd -ch gq -sec r_is s'
-    write(idev,*) '   -corr nloqcd -ch qg -sec r_is s'
+    write(idev,*) '-corr nloewk -ch ns -sec r_is r_fs_5[3,4] s v'
+    write(idev,*) '-corr nloewk -ch aq -sec r_is s'
+    write(idev,*) '-corr nloewk -ch qa -sec r_is s'
     write(idev,*) ''
-    write(idev,*) 'W: -corr nloqcd -ch ns -sec r_is_w'
-    write(idev,*) ''
-    write(idev,*) 'Z: -corr nloewk -ch ns -sec r_is r_fs_5[3,4] s v'
-    write(idev,*) '   -corr nloewk -ch aq -sec r_is s'
-    write(idev,*) '   -corr nloewk -ch qa -sec r_is s'
-    write(idev,*) ''
-    write(idev,*) 'Z: -corr nloewk -ch aa -sec r_fs_5[3,4] s v'
+    write(idev,*) '-corr nloewk -ch aa -sec r_fs_5[3,4] s v'
     write(idev,*) ''
     
   end subroutine help_run_proc_lonlo

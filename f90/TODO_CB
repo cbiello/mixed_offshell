@@ -1,0 +1,6 @@
+TODO Christian:
+
+1- make oldcode global
+3- compare PWG and NSC for NLO EW e+e-
+
+4- extend recombine_photon routine in NSC in the case of W in order to avoid the recombination of the photon with the neutrino (as in the current W analysis!)

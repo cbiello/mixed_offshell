@@ -1,0 +1,42 @@
+./configure --cfgfile=cfgchiara.txt
+
+
+
+
+
+Here some instructions and tricks
+1) to run CCDY be sure you set    oldcode = .false. 
+   [useful for debugging]
+
+2) the process can be set via the configure file
+   0 : Z boson
+  -1 : W- exchange
+  +1 : W+ exchange
+  -----> this is set via the Vcharge flag
+  -----> the analysis has to be set accordingly
+
+  (?) whay to set automatically the correct analysis?  
+
+3) The order of the partons is always: q qp > l lx
+   namely: d ux > w- > e- vex
+           dx u > w+ > ve e+
+
+
+
+
+******************************************
+
+Old routines that should be deleted
+- xsect_nloewk_r_is_ns_wp
+- xsect_nloewk_r_is_ns_wm
+- xsect_nloewk_r_fs_53_ns_wp 
+- xsect_nloewk_r_fs_54_ns_wp
+- xsect_nloqcd_v_ns_wp
+- xsect_nloqcd_s_ns_wp
+
+
+******************************************
+
+27.12.2025
+The NLO QCD implementation of (real-CT) and virtual 
+for Z, W is complete. Integrated collinear is still work in progress

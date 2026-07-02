@@ -15,17 +15,21 @@ FCmpi=mpif90
 # Default='-O3 -ffree-line-length-1000'
 FFLAGS='-O3 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000'
 
+#Include the choice of the boson
+Vcharge=-1
+
 #Configure with checks: true/false. Default=true
 CHECKS=true
 
 #Configure with mpi: true/false. Default=true
-MPI=true
+MPI=false
 
 #Include the 2L amplitudes
 With2L=false
 
 #Analysis
-analysis=fb_ATLAS_160601736
+#analysis=PC_ATLAS_160601736
+analysis=W_ATLAS
 
 #---------------------------------
 # Mandatory configuration options
@@ -33,17 +37,17 @@ analysis=fb_ATLAS_160601736
 #---------------------------------
 
 # LHAPDF installation path
-LHAPDF=/usr/local/lib
+LHAPDF=/users/ttp/signorile/Desktop/tools/lhapdf-install/lib64
 
 # OpenLoops installation path
 OPENLOOPS=/users/ttp/signorile/Desktop/tools/OpenLoops
 
 # Hoppet installation path
-HOPPET=/users/ttp/signorile/Desktop/tools
+HOPPET=/users/ttp/signorile/Desktop/tools/hoppet-install
 
 # PolyLogs
 # GINAC=/Users/fabrizio/tools/lib
-HANDYG=/users/ttp/signorile/Desktop/tools
+HANDYG=/users/ttp/signorile/Desktop/tools/handyg-install
 
 # Other libraries
 # CHAPLIN=/Users/fabrizio/tools/lib

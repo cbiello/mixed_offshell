@@ -49,7 +49,9 @@ contains
     !1/(two*mv2) is flux factor, extra z1,z2 from the jacobian
     LOConfig%wgt  = one/8.0_dp/pi*kallenF/(two*mv2)*jac/z1/z2
 
-    LOConfig%npart  = 4 
+    LOConfig%npart  = 4
+
+    allocate(LOConfig%part(LOConfig%npart))
     
     LOConfig%mu2ref = mv2 !-- for hoppet
 

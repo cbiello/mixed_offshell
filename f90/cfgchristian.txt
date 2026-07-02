@@ -24,8 +24,11 @@ MPI=true
 #Include the 2L amplitudes
 With2L=false
 
+#Include the choice of the boson
+Vcharge=0
+
 #Analysis
-analysis=w_dflt
+analysis=V_minimal
 
 #---------------------------------
 # Mandatory configuration options

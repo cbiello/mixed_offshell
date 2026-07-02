@@ -1,4 +1,4 @@
-# mixed_ll
+# mixed_ll and mixed_nul
 
 ## External dependencies
 In order to properly install and run `mixed_ll` the following packages must be available:

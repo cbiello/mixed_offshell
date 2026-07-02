@@ -23,6 +23,7 @@ module mod_kinematics_nlo
 
   public :: kinematics_nlo_is, kinematics_nlo_fs
 
+  
 contains
   
   !-- both 51 and 52
@@ -95,6 +96,9 @@ contains
 
        HardProc%mu2ref = slocal !-- for hoppet
 
+       if ( .not. allocated(HardProc%part) ) allocate(HardProc%part(5))
+
+
        if (compute_etas) then
 
           ni(:,1) = [0,0, 1]
@@ -108,7 +112,7 @@ contains
           HardProc%Lim_etaij(2,5) = one-x2
 
        endif
-       
+     
     endif
 
     !-- C1
@@ -123,7 +127,7 @@ contains
        if (xi1.gt.one .or. xi2.gt.one) then
           
           C1Lim%flag = .true.
-          
+
        else
           
           C1Lim%PartFrac = [xi1,xi2]
@@ -154,14 +158,17 @@ contains
 
           C1Lim%mu2ref = slocal !-- for hoppet
 
+          if ( .not. allocated(C1Lim%part))  allocate(C1Lim%part(4))
+
        endif
+
     endif
 
     !-- C2
     if (present(C2Lim)) then
-
-       call initialize_config(C2Lim)
        
+       call initialize_config(C2Lim)
+
        xi1 = sqrt(tau/(one-x1)) * exp(+ylab) * sqrt(one-x1)
        xi2 = sqrt(tau/(one-x1)) * exp(-ylab) / sqrt(one-x1)
        xi1xi2jac = one/(one-x1)
@@ -169,7 +176,7 @@ contains
        if (xi1.gt.one .or. xi2.gt.one) then
           
           C2Lim%flag = .true.
-          
+
        else
           
           C2Lim%PartFrac = [xi1,xi2]
@@ -200,9 +207,14 @@ contains
 
           C2Lim%mu2ref = slocal !-- for hoppet
 
+          if ( .not. allocated(C2Lim%part))  allocate(C2Lim%part(4))
+
        endif
+          
+
     endif
-       
+      
+
     !-- S, SC1, SC2
     if (present(SLim)) then
 
@@ -252,7 +264,9 @@ contains
           
           SLim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac
           SLim%npart = 4
-          
+         
+          if ( .not. allocated(SLim%part))  allocate(SLim%part(4))
+
           !-- now prepare the soft-collinar
           if (present(SC1Lim)) then
 
@@ -262,6 +276,8 @@ contains
              SC1Lim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac 
              SC1Lim%npart = SLim%npart
 
+             if ( .not. allocated(SC1Lim%part))  allocate(SC1Lim%part(4))
+             
           endif
 
           if (present(SC2Lim)) then
@@ -271,6 +287,8 @@ contains
              SC2Lim%Lim_KinInv(1:2) = [half*sqrts*x1,one-x2] !-- E5,eta
              SC2Lim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac
              SC2Lim%npart = SLim%npart
+          
+             if ( .not. allocated(SC2Lim%part))  allocate(SC2Lim%part(4))
 
           endif
        

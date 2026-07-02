@@ -133,6 +133,10 @@ while(<$CFGFILE>){
 	my ($key, $value) = split(/=/, $_);
         $with2L = $value;
     }
+    if($_=~/^Vcharge=/) {
+	my ($key, $value) = split(/=/, $_);
+        $Vchargevalue = $value;
+    }
     if($_=~/^analysis=/) {
 	my ($key, $value) = split(/=/, $_);
         $analysis = $value;
@@ -235,6 +239,7 @@ if($with2L eq "true") {
 my $WITHMPI    = "-D_MPIbuild=" . $withMPIvalue . "\n";
 my $WITHCHECKS = "-D_withchecks=" . $withCHECKSvalue . "\n";
 my $WITH2L     = "-D_with2L=" . $with2Lvalue . "\n";
+my $Vcharge    = $Vchargevalue . "\n";
 my $ANALYSIS   = "-DANALYSIS=" . "\\\"" . $analysis . "\\\"" . "\n";
 
 my $configcfgfile = './config.cfg';
@@ -261,6 +266,7 @@ print "C++ compiler flags..................: " . $CXXFLAGS . "\n";
 print "Configuring with MPI................: " . $withMPI . "\n";
 print "Configuring with Checks.............: " . $withCHECKS . "\n";
 print "Configuring with 2L amplitudes......: " . $with2L . "\n";
+print "Configuring charge of boson.........: " . $Vcharge . "\n";
 print "Using analysis......................: " . $analysis . "\n";
 print "LHAPDF installation path selected...: " . $LHAPDFPATH . "\n";
 print "HOPPET installation path selected...: " . $HOPPETPATH . "\n";
@@ -270,6 +276,7 @@ print "HANDYG installation path selected...: " . $HANDYGPATH . "\n";
 print "OpenLoops installation path selected: " . $OLPATH . "\n";
 
 #prepare makefile.inc
+my $cfgVcharge  = "Vcharge=" . $Vcharge . "\n";
 my $cfgPY       = "PYCMD=" . $PY . "\n";
 my $cfgF95      = "F95=" . $FC . " " . $PPflag . " @\$(ConfigFile) " . $PPflag . " -DGIT_VERSION=\\\"\$(GIT_VERSION)\\\"\n";
 my $cfgFC       = "FC=" . $FC . "\n";
@@ -301,6 +308,7 @@ if(-e $makeincfile) { unlink $makeincfile;}
 
 open(MFI, '>>', $makeincfile) or die $!;
 
+print MFI $cfgVcharge;
 print MFI $cfgPY;
 print MFI $cfgF95;
 print MFI $cfgOPT;
@@ -353,6 +361,7 @@ print LOG "FC=" . $FC . "\n";
 print LOG "FFLAGS='" . $FFLAGS . "'\n\n";
 print LOG "MPI=" . $withMPI. "\n";
 print LOG "CHECKS=" . $withCHECKS. "\n";
+print LOG "Vcharge= " . $Vcharge. "\n\n";
 print LOG "With2L=" . $with2L. "\n\n";
 print LOG "LHAPDF=" . $LHAPDFPATH . "\n";
 print LOG "OPENLOOPS=" . $OLPATH . "\n";

@@ -256,7 +256,7 @@ function PgqAP(z) result(res)
     res( 0) = one + z        !-- reg
     res( 0) = res(0) - 2/omz !-- plus
 
-    res(+1) = -2/omz         !-- plus
+    res(+1) = -2/omz         !-- "minus" component of the plus distribution
 
   end function PqqAP_0_R
 

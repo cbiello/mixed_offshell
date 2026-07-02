@@ -25,6 +25,23 @@ module mod_parms
 
   !chiara
   real(dp), public, save :: cLWud,cLWnue
+  real(dp), public, save :: cLW
+
+  ! raoul added
+
+  ! warning: all testing done with VCKM = 1, so diagonal elements only!
+  real(dp), public, parameter :: VCKM_ud = one
+  real(dp), public, parameter :: VCKM_us = zero
+  real(dp), public, parameter :: VCKM_ub = zero
+  real(dp), public, parameter :: VCKM_cd = zero
+  real(dp), public, parameter :: VCKM_cs = one
+  real(dp), public, parameter :: VCKM_cb = zero
+  real(dp), public, parameter :: VCKM_td = zero
+  real(dp), public, parameter :: VCKM_ts = zero
+  real(dp), public, parameter :: VCKM_tb = one
+  real(dp), public, parameter, dimension(3,3) :: VCKM(3,3)=reshape( [VCKM_ud,VCKM_cd,VCKM_td,VCKM_us,VCKM_cs,VCKM_ts,VCKM_ub,VCKM_cb,VCKM_tb],[3,3])
+  
+  
 
   
   !-- same for complex mass scheme
@@ -42,6 +59,7 @@ module mod_parms
 
   !chiara
   complex(dp), public, save :: cms_cLWud,cms_cLWnue
+  complex(dp), public, save :: cms_cLW
 
 
   !-- fixed parameters
@@ -60,7 +78,6 @@ module mod_parms
   real(dp), public, parameter :: Qnu2 = Qnu**2, Qel2=Qel**2
 
   !Mixing matrix elements
-  real(dp), public, parameter :: Vud  = one
   real(dp), public, parameter :: Vnue = one
 
   !--------------------------------------------------------------------------
@@ -95,6 +112,7 @@ module mod_parms
   !--------------------------------------------------------------------------
   !-- human numbers
   integer, public, parameter :: id_q = 1 !-- generic quark
+  integer, public, parameter :: id_qp = 2 !-- generic quark of different flavour
   integer, public, parameter :: id_b = 5 !-- b-quark
   integer, public, parameter :: id_g = 21
   integer, public, parameter :: id_a = 22
@@ -110,6 +128,15 @@ module mod_parms
   integer, public, parameter :: id_nutau = 15 !-- neutrino tau 
   !--------------------------------------------------------------------------
 
+  ! raoul added
+  !-- charges for final state leptons
+  real(dp), public, save  :: Q3
+  real(dp), public, save  :: Q4
+  !-- generation labels for quarks
+  real(dp), public, parameter  :: Qgeneration(-5:5)=[3,2,2,1,1,0,1,1,2,2,3]
+  real(dp), public, parameter  :: Q_IS(-5:7) = [-Qdn,-Qup,-Qdn,-Qup,-Qdn,zero,Qdn,Qup,Qdn,Qup,Qdn,Qup,zero]
+  real(dp), public, parameter  :: Qsq_IS(-5:7) = [Qdn2,Qup2,Qdn2,Qup2,Qdn2,zero,Qdn2,Qup2,Qdn2,Qup2,Qdn2,Qup2,zero]
+  ! ----- 
   public :: get_parms,help_parms
   public :: set_qcd_parms,set_ew_parms_cms
   public :: print_qcd_parms,print_ew_parms
@@ -159,6 +186,19 @@ contains
     Gf  = real_val_opt('-Gf',1.16639E-5_dp)        !-- for Gmu scheme
     alpha_0  = real_val_opt('-alpha_0',1/137._dp)  !-- for alpha(0) scheme
     alpha_mz = real_val_opt('-alpha_mz',1/128._dp) !-- for alpha(0) scheme
+
+    ! couplings of final state leptons
+#if (_Vcharge == 0)
+    Q3 = -one
+    Q4 = +one
+#elif  (_Vcharge == -1)
+    Q3 = -one
+    Q4 = zero
+#elif  (_Vcharge == +1)
+    Q3 = zero
+    Q4 = +one
+#endif
+    
     
   end subroutine get_parms
 
@@ -291,7 +331,8 @@ contains
     cms_cRnu = zero
 
     !chiara
-    cms_cLWud = 1/sqrt2/cms_sw*Vud
+    cms_cLWud = 1/sqrt2/cms_sw!*Vud
+    cms_cLW   = 1/sqrt2/cms_sw
     cms_cLWnue = 1/sqrt2/cms_sw*Vnue
 
     !-- now set the real values
@@ -315,10 +356,12 @@ contains
     !chiara
     !--
     swMG=sqrt( 0.22224648578577766_dp) 
-    cLWud  = 1/sqrt2/swMG*Vud
-    cLWnue = 1/sqrt2/swMG*Vnue
-    !cLWud  = real(cms_cLWud,dp)
-    !cLWnue = real(cms_cLWnue,dp)
+    !cLWud  = 1/sqrt2/swMG!*Vud
+    !cLW    = 1/sqrt2/swMG
+    !cLWnue = 1/sqrt2/swMG*Vnue
+    cLWud  = real(cms_cLWud,dp)
+    cLW  = real(cms_cLW,dp)
+    cLWnue = real(cms_cLWnue,dp)
 
 
     !-- axial and vector couplings, complex-mass scheme
@@ -343,13 +386,27 @@ contains
     vcur = (I3up - 2*sw2*Qup)/(2*cw*sw)
 
     !-- photon anomalous dimension
-    gamma_a = -two/3 * (xn*(nup*Qup2+ndn*Qdn2) + nle*Qel2)
+    if(ew_scheme.eq.'a0') then
+      gamma_a = zero
+    else
+      gamma_a = -two/3 * (xn*(nup*Qup2+ndn*Qdn2) + nle*Qel2)
+    endif
 
   end subroutine set_ew_parms_cms
   
   subroutine print_ew_parms(my_ew_scheme,outdev)
     character(*), intent(in) :: my_ew_scheme
     integer, intent(in) :: outdev
+
+#if (_Vcharge==0)     
+    write(outdev,*) '# PROCESS  = NEUTRAL CURRENT'
+#elif (_Vcharge==-1)     
+    write(outdev,*) '# PROCESS  = -ve CHARGE'
+#elif (_Vcharge==+1)     
+    write(outdev,*) '# PROCESS  = +ve CHARGE'
+#endif
+    
+    write(outdev,*) '#'
 
     write(outdev,*) '# complex mass scheme = ', cm_scheme
     write(outdev,*) '#'

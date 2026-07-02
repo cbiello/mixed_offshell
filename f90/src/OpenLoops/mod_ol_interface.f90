@@ -77,12 +77,6 @@ contains
           call register_red_qcd(1)
        elseif (corr.eq.'nloewk' .and. sec.eq.'v') then
           call register_red_ew(1)
-       elseif (corr.eq.'nloewk' .and. sec .eq.'r_is_wp') then
-          call register_red_ewreal(1)
-       elseif (corr.eq.'nloewk' .and. sec.eq.'r_is_wm') then
-          call register_red_ewreal(-1)
-       elseif (corr.eq.'nloewk' .and. sec.eq.'r_is') then
-          call register_red_ewreal(0)
        endif
 
     elseif (corr.eq.'nloewk' .and. sec.eq.'v' .and. ch.eq.'aa') then
@@ -97,20 +91,46 @@ contains
           if (sec .eq.'rvewk_is') then
              call register_red_ew(1)
              call set_orders_g_virtew()
+#if (_Vcharge == 0)
              OL_id(4) = register_process("1 -1 -> 11 -11 21",11)   ! d db > e-e+ g  + d <--> db from crossing, so that I keep the same cache
              OL_id(5) = register_process("2 -2 -> 11 -11 21",11)   ! u ub > e-e+ g  + u <--> ub
              OL_id(6) = register_process("5 -5 -> 11 -11 21",11)   ! b bb > e-e+ g -- only needed for EW
+#elif (_Vcharge == 1)
+             OL_id(3) = register_process("-1 2 -> 12 -11 21",11)
+             OL_id(4) = register_process("2 -1 -> 12 -11 21",11)
+             ! b t > absent
+#elif (_Vcharge == -1)
+             OL_id(3) = register_process("1 -2 -> 11 -12 21",11)
+             OL_id(4) = register_process("-2 1 -> 11 -12 21",11)
+             ! b t > absent             
+#endif
           elseif (sec .eq.'rvewknf_is') then
              call set_parameter("approximation","ewnf") !-- select 1L-ewk nf amplitudes from OpenLoops
              call register_red_ew(1)
              call set_orders_g_virtew()
+#if (_Vcharge == 0)
              OL_id(4) = register_process("1 -1 -> 11 -11 21",11)   ! d db > e-e+ g  + d <--> db from crossing, so that I keep the same cache
              OL_id(5) = register_process("2 -2 -> 11 -11 21",11)   ! u ub > e-e+ g  + u <--> ub
+#elif (_Vcharge == 1)
+             OL_id(3) = register_process("-1 2 -> 12 -11 21",11)
+             OL_id(4) = register_process("2 -1 -> 12 -11 21",11)
+#elif (_Vcharge == -1)
+             OL_id(3) = register_process("1 -2 -> 11 -12 21",11)
+             OL_id(4) = register_process("-2 1 -> 11 -12 21",11)
+#endif       
           elseif (sec(1:5).eq.'rvqcd') then
              call register_red_qcd(1)
              call set_orders_a_virtqcd()
-             OL_id(3) = register_process("1 -1 -> 11 -11 22",11)   ! d db > e-e+ a  + d <--> db from crossina, so that I keep the same cache
+#if (_Vcharge == 0)
+             OL_id(3) = register_process("1 -1 -> 11 -11 22",11)   ! d db > e-e+ a  + d <--> db from crossing, so that I keep the same cache
              OL_id(4) = register_process("2 -2 -> 11 -11 22",11)   ! u ub > e-e+ a  + u <--> ub
+#elif (_Vcharge == 1)
+             OL_id(3) = register_process("2 -1 -> 12 -11 22",11)
+             OL_id(4) = register_process("-1 2 -> 12 -11 22",11)
+#elif (_Vcharge == -1)
+             OL_id(3) = register_process("1 -2 -> 11 -12 22",11)
+             OL_id(4) = register_process("-2 1 -> 11 -12 22",11)
+#endif
           else
              print *, 'unrecognized option for ol, nnlo, ns'
           endif
@@ -118,63 +138,107 @@ contains
        elseif (ch.eq.'gq' .and. sec .eq.'rvewk_is') then
           call register_red_ew(1)
           call set_orders_g_virtew()
+#if (_Vcharge == 0)
           OL_id(4) = register_process("21 -1 -> 11 -11 -1",11) !-- ask federico about crossing
           OL_id(5) = register_process("21 -2 -> 11 -11 -2",11)
           OL_id(6) = register_process("21 -5 -> 11 -11 -5",11)
-
+          !
           OL_id(7) = register_process("21 1 -> 11 -11 1",11) !-- ask federico about crossing
           OL_id(8) = register_process("21 2 -> 11 -11 2",11)
           OL_id(9) = register_process("21 5 -> 11 -11 5",11)
-
+#elif (_Vcharge == 1)
+          OL_id(3) = register_process("21 2 -> 12 -11 1",11)
+          OL_id(4) = register_process("21 -1 -> 12 -11 -2",11)
+          ! g b > W t has a different signature
+#elif (_Vcharge == -1)
+          OL_id(3) = register_process("21 -2 -> 11 -12 -1",11)
+          OL_id(4) = register_process("21 1 -> 11 -12 2",11)
+          ! g b > W t has a different signature
+#endif
        elseif (ch.eq.'qg' .and. sec .eq.'rvewk_is') then
           call register_red_ew(1)
           call set_orders_g_virtew()
+#if (_Vcharge == 0)
           OL_id(4) = register_process("1 21  -> 11 -11 1",11) !-- ask federico about crossing
           OL_id(5) = register_process("2 21  -> 11 -11 2",11)
           OL_id(6) = register_process("5 21  -> 11 -11 5",11)
-          
+          !
           OL_id(7) = register_process("-1 21 -> 11 -11 -1",11) !-- ask federico about crossing
           OL_id(8) = register_process("-2 21 -> 11 -11 -2",11)
           OL_id(9) = register_process("-5 21 -> 11 -11 -5",11)
-
+#elif (_Vcharge == 1)
+          OL_id(3) = register_process("2 21 -> 12 -11 1",11)
+          OL_id(4) = register_process("-1 21 -> 12 -11 -2",11)
+#elif (_Vcharge == -1)
+          OL_id(3) = register_process("-2 21 -> 11 -12 -1",11)
+          OL_id(4) = register_process("1 21 -> 11 -12 2",11)
+#endif
        elseif (ch.eq.'gq' .and. sec .eq.'rvewknf_is') then
           call set_parameter("approximation","ewnf") !-- select 1L-ewk nf amplitudes from OpenLoops
           call register_red_ew(1)
           call set_orders_g_virtew()
+#if (_Vcharge == 0)
           OL_id(4) = register_process("21 -1 -> 11 -11 -1",11) !-- ask federico about crossing
           OL_id(5) = register_process("21 -2 -> 11 -11 -2",11)
-
+          !
           OL_id(7) = register_process("21 1 -> 11 -11 1",11) !-- ask federico about crossing
           OL_id(8) = register_process("21 2 -> 11 -11 2",11)
-
+#elif (_Vcharge == 1)
+          OL_id(3) = register_process("21 2 -> 12 -11 1",11)
+          OL_id(4) = register_process("21 -1 -> 12 -11 -2",11)
+#elif (_Vcharge == -1)
+          OL_id(3) = register_process("21 -2 -> 11 -12 -1",11)
+          OL_id(4) = register_process("21 1 -> 11 -12 2",11)
+#endif    
        elseif (ch.eq.'qg' .and. sec .eq.'rvewknf_is') then
           call set_parameter("approximation","ewnf") !-- select 1L-ewk nf amplitudes from OpenLoops
           call register_red_ew(1)
           call set_orders_g_virtew()
+#if (_Vcharge == 0)
           OL_id(4) = register_process("1 21  -> 11 -11 1",11) !-- ask federico about crossing
           OL_id(5) = register_process("2 21  -> 11 -11 2",11)
-          
+          !
           OL_id(7) = register_process("-1 21 -> 11 -11 -1",11) !-- ask federico about crossing
           OL_id(8) = register_process("-2 21 -> 11 -11 -2",11)
-
+#elif (_Vcharge == 1)
+          OL_id(3) = register_process("2 21 -> 12 -11 1",11)
+          OL_id(4) = register_process("-1 21 -> 12 -11 -2",11)
+#elif (_Vcharge == -1)
+          OL_id(3) = register_process("-2 21 -> 11 -12 -1",11)
+          OL_id(4) = register_process("1 21 -> 11 -12 2",11)
+#endif
        elseif (ch.eq.'aq' .and. sec(1:5).eq.'rvqcd') then
           call register_red_qcd(1)
           call set_orders_a_virtqcd()
+#if (_Vcharge == 0)
           OL_id(3) = register_process("22 -1 -> 11 -11 -1",11) !-- ask federico about crossing
           OL_id(4) = register_process("22 -2 -> 11 -11 -2",11)
-
+          !
           OL_id(5) = register_process("22 1 -> 11 -11 1",11) !-- ask federico about crossing
           OL_id(6) = register_process("22 2 -> 11 -11 2",11)
-
+#elif (_Vcharge == 1)
+          OL_id(3) = register_process("22 -1 -> 12 -11 -2",11)
+          OL_id(4) = register_process("22 2 -> 12 -11 1",11)
+#elif (_Vcharge == -1)
+          OL_id(3) = register_process("22 -2 -> 11 -12 -1",11)
+          OL_id(4) = register_process("22 1 -> 11 -12 2",11)
+#endif
        elseif (ch.eq.'qa' .and. sec(1:5).eq.'rvqcd') then
           call register_red_qcd(1)
           call set_orders_a_virtqcd()
+#if (_Vcharge == 0)
           OL_id(3) = register_process("1 22  -> 11 -11 1",11) !-- ask federico about crossing
           OL_id(4) = register_process("2 22  -> 11 -11 2",11)
-          
+          !          
           OL_id(5) = register_process("-1 22 -> 11 -11 -1",11) !-- ask federico about crossing
           OL_id(6) = register_process("-2 22 -> 11 -11 -2",11)
-
+#elif	(_Vcharge == 1)
+          OL_id(3) = register_process("2 22 -> 12 -11 1",11)
+          OL_id(4) = register_process("-1 22 -> 12 -11 -2",11)
+#elif (_Vcharge == -1)
+          OL_id(3) = register_process("1 22 -> 11 -12 2",11)
+          OL_id(4) = register_process("-2 22 -> 11 -12 -1",11)
+#endif
        endif
 
     elseif (corr.eq.'nnlo' .and. sec(1:2).eq.'rr') then
@@ -183,25 +247,40 @@ contains
 
       if(ch.eq.'ns_qqb_w') then
 
+#if (_Vcharge == 0)
         OL_rr_id(istart_rr)   = register_process(" 2 -2 -> 11 -11 1 -1",1) !-- d  db -> e- e+ u ub
         OL_rr_id(istart_rr+1) = register_process("-2  2 -> 11 -11 1 -1",1) !-- db d  -> e- e+ u ub
         OL_rr_id(istart_rr+2) = register_process(" 1 -1 -> 11 -11 2 -2",1) !-- u  ub -> e- e+ d db
         OL_rr_id(istart_rr+3) = register_process("-1  1 -> 11 -11 2 -2",1) !-- ub u  -> e- e+ d db
+#else
+        print*, 'TO IMPLEMENT OL rr for W in the 4q case'
+        stop
+#endif
 
       elseif(ch.eq.'ns_qqp_w') then
 
+#if (_Vcharge == 0)
         OL_rr_id(istart_rr+4) = register_process(" 2  1 -> 11 -11  2  1",1) !-- d  u  -> e- e+ d  u
         OL_rr_id(istart_rr+5) = register_process("-2 -1 -> 11 -11 -2 -1",1) !-- db ub -> e- e+ db ub
         OL_rr_id(istart_rr+6) = register_process(" 1  2 -> 11 -11  2  1",1) !-- u  d  -> e- e+ d  u
         OL_rr_id(istart_rr+7) = register_process("-1 -2 -> 11 -11 -2 -1",1) !-- ub db -> e- e+ db ub
-
+#else
+        print*, 'TO IMPLEMENT OL rr for W in the 4q case'
+        stop
+#endif
+        
       elseif(ch.eq.'ns_qqpb_w') then
 
+#if (_Vcharge == 0)
         OL_rr_id(istart_rr+8)  = register_process(" 2 -1 -> 11 -11  2 -1",1)  !-- d  ub -> e- e+ d  ub
         OL_rr_id(istart_rr+9)  = register_process("-2  1 -> 11 -11 -2  1",1)  !-- db u  -> e- e+ db u
         OL_rr_id(istart_rr+10) = register_process("-1  2 -> 11 -11  2 -1",1)  !-- ub d  -> e- e+ d  ub
         OL_rr_id(istart_rr+11) = register_process(" 1 -2 -> 11 -11 -2  1",1)  !-- u  db -> e- e+ db u
-
+#else
+        print*, 'TO IMPLEMENT OL rr for W in the 4q case'
+        stop
+#endif
+        
       endif
 
    elseif (corr .eq. 'nnlo' .and. sec(1:4) .eq. 'subv') then
@@ -238,23 +317,46 @@ contains
       call set_parameter("loop_order_ew", 2) !-- one-loop
       call set_parameter("loop_order_qcd",1) !-- one-loop
       !
+#if (_Vcharge == 0)
       OL_id(istart  ) = register_process("1 -1 -> 11 -11",11) !-- d db -> e- e+
       OL_id(istart+1) = register_process("2 -2 -> 11 -11",11) !-- u ub -> e- e+ 
+#endif
+
+#if (_Vcharge == 1)
+      OL_id(istart  ) = register_process("2 -1 -> 12 -11",11) !--
+      OL_id(istart+1) = register_process("-1 2 -> 12 -11",11) !-- crossed channel
+#endif
+
+#if (_Vcharge == -1)
+      OL_id(istart  ) = register_process("1 -2 -> 11 -12",11) !--
+      OL_id(istart+1) = register_process("-2 1 -> 11 -12",11) !-- crossed channel
+#endif
       
     end subroutine register_red_qcd
 
-    !-- q qb -> e- e+ [NLO EW]
+    !-- quark-quark > lep lep photon [NLO EW]
     subroutine register_red_ew(istart)
       integer, intent(in) :: istart
       call set_parameter("order_ew", 2)  !-- tree-level
       call set_parameter("order_qcd", 0) !-- tree-level
       call set_parameter("loop_order_ew", 3) !-- one-loop
       call set_parameter("loop_order_qcd",0) !-- one-loop
-      !
+
+#if (_Vcharge == 0)
+      !-- q qb -> e- e+ 
       OL_id(istart  ) = register_process("1 -1  -> 11 -11",11) !-- d db -> e- e+
       OL_id(istart+1) = register_process("2 -2  -> 11 -11",11) !-- u ub -> e- e+
       OL_id(istart+2) = register_process("5 -5  -> 11 -11",11) !-- b bb -> e- e+
-
+#elif (_Vcharge == 1)
+      !-- q q' > W+ > v l+
+      OL_id(istart) = register_process("-1 2  -> 12 -11",11) !-- db u -> ve e+
+      OL_id(istart+1) = register_process("2 -1  -> 12 -11",11) !-- u db -> ve e+
+#elif (_Vcharge == -1)
+      !-- q q' > W- > l- v~
+      OL_id(istart) = register_process("1 -2  -> 11 -12",11) !-- d ub -> e- ve~ 
+      OL_id(istart+1) = register_process("-2 1  -> 11 -12",11) !-- ub d -> e- ve~
+#endif
+      
     end subroutine register_red_ew
 
     !-- q qpb -> l nu [NLO EW]
@@ -263,16 +365,20 @@ contains
       call set_parameter("order_ew", 3)  !-- tree-level
       !call set_parameter("order_qcd", 0) !-- tree-level --CB: turned off in order to avoid problem in the process registration
 
-      if(iw.eq.0) then
+#if (_Vcharge == 0)
          OL_id(1  ) = register_process("1 -1  -> 11 -11 22",11) !-- d db -> e- e+ a
          OL_id(2  ) = register_process("2 -2  -> 11 -11 22",11) !-- u ub -> e- e+ a
-      elseif(iw.eq.1) then 
+#endif
+
+#if (_Vcharge == 1)
          OL_id(1  ) = register_process("2 -1  -> -11 12 22",11) !-- u db -> e+ nu a
          OL_id(2  ) = register_process("-1 2  -> -11 12 22",11) !-- db u -> e+ nu a
-      elseif(iw.eq.-1) then
+#endif
+
+#if (_Vcharge == -1)
          OL_id(1  ) = register_process("1 -2  -> 11 -12 22",11) !-- d ub -> e+ nu a
-         OL_id(2  ) = register_process("-2 1  -> 11 -12 22",11) !-- ub d -> e+ nu a    
-      endif
+         OL_id(2  ) = register_process("-2 1  -> 11 -12 22",11) !-- ub d -> e+ nu a
+#endif
       
     end subroutine register_red_ewreal
 
@@ -284,12 +390,14 @@ contains
       call set_parameter("order_qcd", 0) !-- tree-level
       call set_parameter("loop_order_ew", 3) !-- one-loop
       call set_parameter("loop_order_qcd",0) !-- one-loop
-      !
+
+#if (_Vcharge == 0)
       if (ew_scheme.eq.'a0') then
          OL_id(istart) = register_process("2002 2002 -> 11 -11",11)   !-- a a   -> e- e+
       else
          OL_id(istart) = register_process("-2002 -2002 -> 11 -11",11) !-- a* a* -> e- e+
       endif
+#endif
 
     end subroutine register_red_ew_aa
 

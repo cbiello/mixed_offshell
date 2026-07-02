@@ -33,8 +33,12 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf)
-    real(dp)    :: res_lo(2,2)
+    real(dp)    :: res_lo(-5:7,-5:7)
+    real(dp)    :: res_lo_old(2,2)
+    logical :: oldcode
 
+    oldcode = .false.
+    
     xsect_lo_ns = 0
 
     ff(1) = zero
@@ -42,6 +46,7 @@ contains
     xx(1:kLO_max)=buff+onet*real(yRnd(1:kLO_max),dp)
     call random_number(xx(kLO_max_full))
 
+    
 #if (_withchecks == 1)
     if (override) then
        xx(1:kLO_max_full) = yRnd(1:kLO_max_full)
@@ -52,6 +57,19 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+    ! define process specific partons
+#if (_Vcharge == 0)
+    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+#elif  (_Vcharge == -1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
+    LOProc%ids(1:4) = [0,0,id_el,-id_nue]
+#elif  (_Vcharge == +1)
+    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
+#endif
+
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -60,8 +78,13 @@ contains
 
     else
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       call get_respdf(ns_lumi,0,0,LOProc,res_lo,respdf)
+       if(oldcode) then
+          call res_tree_qqb(LOProc%AmpMom,res_lo_old)
+          call get_respdf(ns_lumi,0,0,LOProc,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
+          call get_respdf_gen(0,0,LOProc,res_lo,respdf)
+       endif
 
        respdf = respdf*LOProc%wgt
 
@@ -107,6 +130,10 @@ contains
     call open_histo()
 
     call kinematics_lo(xx,LOProc)
+
+    LOProc%part(1:4) = [22,22,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    
     call cut_histo(LOProc)
 
     if (LOProc%makecut.or.LOProc%flag) then
@@ -149,6 +176,12 @@ contains
     real(dp)    :: kin(1),respdf(ipdf)
     real(dp)    :: res_lo(1,2)
 
+
+
+    print*, 'I am in xsect_lo_ns_wp'
+
+
+    stop
     xsect_lo_ns_wp = 0
 
     ff(1) = zero
@@ -173,8 +206,9 @@ contains
        kin(1) = zero
        
     else    
+
+       call res_tree_qqb_wp(LOProc%AmpMom,res_lo)
        
-       call res_tree_qqb_w(LOProc%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wp,0,0,LOProc,res_lo,respdf)
 
        respdf = respdf*LOProc%wgt
@@ -231,8 +265,8 @@ contains
        kin(1) = zero
        
     else    
-       
-       call res_tree_qqb_w(LOProc%AmpMom,res_lo)
+
+       call res_tree_qqb_wm(LOProc%AmpMom,res_lo)
        call get_respdf(qQpb_lumi_wm,0,0,LOProc,res_lo,respdf)
 
        respdf = respdf*LOProc%wgt

@@ -13,8 +13,11 @@ module mod_aux_sectors
   private
 
   public :: get_prefactor
-  public :: get_respdf,get_respdf_vect
+  public :: get_respdf, get_respdf_gen
+  public :: get_respdf_vect, get_respdf_vect_gen
+  public :: get_respdf_gen_mu
   public :: get_respdf_hoppet
+  public :: get_respdf_hoppet_gen
 
   public :: fill_sv_logs
 
@@ -28,6 +31,17 @@ module mod_aux_sectors
   public :: gq_lumi_splitb,qg_lumi_splitb
 
   public :: check_ff
+
+  public :: gen_lumi
+
+  public :: multiply_IS_charges_sq, multiply_FSQ_charges_sq
+
+  public :: transition
+  
+  interface transition
+        module procedure transition_res
+        module procedure transition_res_sping
+    end interface
 
 contains
 
@@ -45,6 +59,140 @@ contains
     pref = pref * units
 
   end subroutine get_prefactor
+
+
+  subroutine get_respdf_gen(as_ord,aem_ord,proc,amp2,respdf)
+
+    integer, intent(in) :: as_ord,aem_ord
+    type(KinConfig), intent(in) :: proc
+    real(dp), intent(in)        :: amp2(-5:7,-5:7)
+    real(dp), intent(out)       :: respdf(ipdf)
+
+
+    if (ipdf == 1) then
+       call get_respdf_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+    elseif (ipdf == 3) then
+       call get_respdf_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+    endif
+
+    contains
+
+      subroutine get_respdf_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2,f1,f2)
+    
+      end subroutine get_respdf_one_gen
+
+      subroutine get_respdf_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2,f1,f2)
+
+        !-- do not compute the other scales if we're not doing histograms
+        if (nohistos) then
+
+           respdf(2:) = zero
+
+        else
+               
+           !-- half
+           call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*half,f1,f2)
+           respdf(2) = pref*gen_lumi(amp2,f1,f2)
+           
+           !-- twice
+           call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*two,f1,f2)
+           respdf(3) = pref*gen_lumi(amp2,f1,f2)
+
+        endif
+    
+      end subroutine get_respdf_three_gen
+
+    end subroutine get_respdf_gen
+
+
+    subroutine get_respdf_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+      ! used for an amplitude that has been multipled by a int. subtr function, and now has mu-dependence
+      ! mu-dependence is in final index: 1=mu, 2=mu/2, 3=2*mu
+      ! needs to be multiplied by pdf evaluated using corresponding value of mu
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(-5:7,-5:7,ipdf)
+      real(dp), intent(out)       :: respdf(ipdf)
+
+      
+      if (ipdf == 1) then
+         call get_respdf_one_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+      elseif (ipdf == 3) then
+         call get_respdf_three_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+      endif
+
+    contains
+
+      subroutine get_respdf_one_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7,ipdf)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2(-5:7,-5:7,1),f1,f2)
+    
+      end subroutine get_respdf_one_gen_mu
+
+      subroutine get_respdf_three_gen_mu(as_ord,aem_ord,proc,amp2,respdf)
+        integer, intent(in) :: as_ord,aem_ord
+        type(KinConfig), intent(in) :: proc
+        real(dp), intent(in)        :: amp2(-5:7,-5:7,ipdf)
+        real(dp), intent(out)       :: respdf(:)
+        real(dp) :: f1(-6:7),f2(-6:7),pref
+        
+        !-- central scale
+        call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+        call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+        respdf(1) = pref*gen_lumi(amp2(-5:7,-5:7,1),f1,f2)
+
+        !-- do not compute the other scales if we're not doing histograms
+        if (nohistos) then
+
+           respdf(2:) = zero
+
+        else
+               
+           !-- half
+           call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*half,f1,f2)
+           respdf(2) = pref*gen_lumi(amp2(-5:7,-5:7,2),f1,f2)
+           
+           !-- twice
+           call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+           call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*two,f1,f2)
+           respdf(3) = pref*gen_lumi(amp2(-5:7,-5:7,3),f1,f2)
+
+        endif
+    
+      end subroutine get_respdf_three_gen_mu
+      
+    end subroutine get_respdf_gen_mu
 
   subroutine get_respdf(lumi,as_ord,aem_ord,proc,amp2,respdf)
     interface
@@ -129,6 +277,10 @@ contains
       end subroutine get_respdf_three
 
     end subroutine get_respdf
+
+
+    
+    
       
   !-- evolve PDFs once if we have more limits with same kinematics
   !-- amp2(q/qb,dn/up,i_limit)
@@ -230,7 +382,257 @@ contains
 
   end subroutine get_respdf_vect
 
+
+ !------- gen version
+
+
+  !-- evolve PDFs once if we have more limits with same kinematics
+  !-- amp2(q/qb,dn/up,i_limit)
+  !-- respdf(i_limit,ipdf), note the different order w.r.t. above
+  subroutine get_respdf_vect_gen(as_ord,aem_ord,proc,amp2,respdf)
+    integer, intent(in) :: as_ord,aem_ord
+    type(KinConfig), intent(in) :: proc
+    real(dp), intent(in)        :: amp2(:,:,:)
+    real(dp), intent(out)       :: respdf(:,:)
+    
+    if (ipdf == 1) then
+       call get_respdf_vect_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+    elseif (ipdf == 3) then
+       call get_respdf_vect_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+    endif
+
+  contains
+
+    subroutine get_respdf_vect_one_gen(as_ord,aem_ord,proc,amp2,respdf)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(:,:,:)
+      real(dp), intent(out)       :: respdf(:,:)
+      real(dp) :: f1(-6:7),f2(-6:7),pref
+      integer  :: i 
+            
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+      call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+      
+      do i = 1,size(amp2,3)
+         respdf(i,1) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+      enddo
+      
+    end subroutine get_respdf_vect_one_gen
+
+    subroutine get_respdf_vect_three_gen(as_ord,aem_ord,proc,amp2,respdf)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(:,:,:)
+      real(dp), intent(out)       :: respdf(:,:)
+      real(dp) :: f1(-6:7),f2(-6:7),pref
+      integer  :: i 
+
+      !-- central scale
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+      call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1),f1,f2)
+      
+      do i = 1,size(amp2,3)
+         respdf(i,1) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+      enddo
+
+      !-- do not compute other scales if we're not doing histograms
+      if (nohistos) then
+         respdf(:,2:) = zero
+      else
+         
+         !-- half scale
+         call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+         call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*half,f1,f2)
+         
+         do i = 1,size(amp2,3)
+            respdf(i,2) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+         enddo
+         
+         !-- twice scale
+         call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+         call get_pdf_qed(proc%PartFrac(1),proc%PartFrac(2),proc%muf(1)*two,f1,f2)
+         
+         do i = 1,size(amp2,3)
+            respdf(i,3) = pref*gen_lumi(amp2(:,:,i),f1,f2)
+         enddo
+
+      endif
+         
+    end subroutine get_respdf_vect_three_gen
+
+  end subroutine get_respdf_vect_gen
+
+
   !--
+
+    subroutine get_respdf_hoppet_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+    use hoppet_v1, except => dp
+    interface
+       function lumi(res,f1,f2)
+         use mod_types
+         real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
+         real(dp) :: lumi
+       end function lumi
+    end interface
+    type(pdf_table), intent(in)           :: myPDFs1,myPDFs2
+    type(pdf_table), intent(in), optional :: myPDFs1_Lmu(:),myPDFs2_Lmu(:)
+    integer, intent(in) :: as_ord,aem_ord
+    type(KinConfig), intent(in) :: proc
+    real(dp), intent(in)        :: amp2(:,:)
+    real(dp), intent(out)       :: respdf(:)
+
+    if (ipdf == 1) then
+       call get_respdf_hoppet_one_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+    elseif (ipdf == 3) then
+       call get_respdf_hoppet_three_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+    endif
+
+  contains
+
+  subroutine get_respdf_hoppet_one_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+      use hoppet_v1, except => dp
+      type(pdf_table), intent(in)           :: myPDFs1,myPDFs2
+      type(pdf_table), intent(in), optional :: myPDFs1_Lmu(:),myPDFs2_Lmu(:)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(-5:7,-5:7)
+      real(dp), intent(out)       :: respdf(:)
+      real(dp) :: pref,mu2ref
+      real(dp15) :: f1_dp15(-6:7),f2_dp15(-6:7)
+
+      integer :: k
+
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+
+      if (present(myPDFs1_Lmu)) then
+         mu2ref = proc%mu2ref
+         if (present(myPDFs2_Lmu)) then
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         endif
+      elseif (present(myPDFs2_Lmu)) then
+         mu2ref = proc%mu2ref
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+              myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+      else
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15)
+      endif
+
+      respdf(1) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+
+    end subroutine get_respdf_hoppet_one_gen
+
+    subroutine get_respdf_hoppet_three_gen(myPDFs1,myPDFs2,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
+      use hoppet_v1, except => dp
+      type(pdf_table), intent(in)           :: myPDFs1,myPDFs2
+      type(pdf_table), intent(in), optional :: myPDFs1_Lmu(:),myPDFs2_Lmu(:)
+      integer, intent(in) :: as_ord,aem_ord
+      type(KinConfig), intent(in) :: proc
+      real(dp), intent(in)        :: amp2(-5:7,-5:7)
+      real(dp), intent(out)       :: respdf(:)
+      real(dp) :: pref,mu2ref
+      real(dp15) :: f1_dp15(-6:7),f2_dp15(-6:7)
+
+      integer :: k
+      !-- central scale
+      call get_prefactor(proc%mur(1),as_ord,aem_ord,pref)
+
+      if (present(myPDFs1_Lmu)) then
+         mu2ref = proc%mu2ref
+         if (present(myPDFs2_Lmu)) then
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         endif
+      elseif (present(myPDFs2_Lmu)) then
+         mu2ref = proc%mu2ref
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15,&
+              myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+      else
+         call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+              real(proc%muf(1),kind=dp15),f1_dp15,f2_dp15)
+      endif
+
+      respdf(1) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+
+      !-- do not compute the other scales if we're not doing histograms
+      if (nohistos) then
+
+         respdf(2:) = zero
+
+      else
+      
+         !-- half
+         call get_prefactor(proc%mur(1)*half,as_ord,aem_ord,pref)
+         
+         if (present(myPDFs1_Lmu)) then
+            mu2ref = proc%mu2ref
+            if (present(myPDFs2_Lmu)) then
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            else
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            endif
+         elseif (present(myPDFs2_Lmu)) then
+            mu2ref = proc%mu2ref
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*half,kind=dp15),f1_dp15,f2_dp15)
+         endif
+         
+         respdf(2) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+         
+         !-- two
+         call get_prefactor(proc%mur(1)*two,as_ord,aem_ord,pref)
+         
+         if (present(myPDFs1_Lmu)) then
+            mu2ref = proc%mu2ref
+            if (present(myPDFs2_Lmu)) then
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            else
+               call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                    real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15,&
+                    myPDFs1_Lmu=myPDFs1_Lmu,mu2ref=real(mu2ref,kind=dp15))
+            endif
+         elseif (present(myPDFs2_Lmu)) then
+            mu2ref = proc%mu2ref
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15,&
+                 myPDFs2_Lmu=myPDFs2_Lmu,mu2ref=real(mu2ref,kind=dp15))
+         else
+            call get_pdf_hoppet_qed(myPDFs1,myPDFs2,real(proc%PartFrac(1),kind=dp15),real(proc%PartFrac(2),kind=dp15),&
+                 real(proc%muf(1)*two,kind=dp15),f1_dp15,f2_dp15)
+         endif
+         
+         respdf(3) = pref*gen_lumi(amp2,real(f1_dp15,kind=dp),real(f2_dp15,kind=dp))
+
+      endif
+         
+    end subroutine get_respdf_hoppet_three_gen
+ 
+  end subroutine get_respdf_hoppet_gen
+
 
   subroutine get_respdf_hoppet(myPDFs1,myPDFs2,lumi,as_ord,aem_ord,proc,amp2,respdf,myPDFs1_Lmu,myPDFs2_Lmu)
     use hoppet_v1, except => dp
@@ -428,6 +830,54 @@ contains
   end subroutine fill_sv_logs
 
   !-- luminosities
+
+
+!  function gen_lumi(res,f1,f2) result(respdf)
+!    ! added by Raoul
+!    real(dp), intent(in) :: res(-5:7,-5:7),f1(-6:),f2(-6:)
+!    real(dp) :: respdf
+!    integer  :: i1,i2
+!
+!    respdf = zero
+!    do i1= -5,7
+!       do i2 = -5,7
+!             respdf = respdf + f1(i1)*f2(i2)*res(i1,i2)
+!       enddo
+!    enddo
+!
+!  end function gen_lumi
+
+
+function gen_lumi(res,f1,f2) result(respdf)
+    real(dp), intent(in) :: res(-5:7,-5:7), f1(-6:), f2(-6:)
+    real(dp) :: respdf
+    integer :: i1,i2
+    real(dp) :: f1val, f2val
+
+    respdf = 0d0
+
+do i1 = -5, 7
+   do i2 = -5, 7
+       if (res(i1,i2) /= 0d0) then
+           f1val = f1(i1)
+           f2val = f2(i2)
+           ! Clip NaNs/Infs
+           if (.not.(f1val == f1val)) f1val = 0d0
+           if (f1val > 1d10) f1val = 0d0
+           if (f1val < -1d10) f1val = 0d0
+           if (.not.(f2val == f2val)) f2val = 0d0
+           if (f2val > 1d10) f2val = 0d0
+           if (f2val < -1d10) f2val = 0d0
+           respdf = respdf + f1val*f2val*res(i1,i2)
+       endif
+   enddo
+enddo
+
+
+end function gen_lumi
+
+
+    
   
   function ns_lumi(res,f1,f2) result(respdf)
     real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
@@ -718,6 +1168,47 @@ contains
     respdf = res(1,1)*f1(7)*f2(0)
   end function ag_lumi
 
+
+
+
+  function multiply_IS_charges_sq(res_in,leg) result(res_out)
+    ! multiply the matrix elements by the square of the charge on chosen leg
+    ! if leg is 1: msq(i,j) --> msq(i,j)*Qi^2
+    ! if leg is 2: msq(i,j) --> msq(i,j)*Qj^2
+    real(dp), intent(in)  :: res_in(-5:7,-5:7)
+    integer, intent(in)   :: leg
+    real(dp) :: res_out(-5:7,-5:7)
+    integer               :: i,j
+   
+
+    do i = -5,7
+       do j = -5,7
+          if (leg .eq. 1) then
+             res_out(i,j) = res_in(i,j)*Qsq_IS(i)
+          elseif (leg .eq. 2) then
+             res_out(i,j) = res_in(i,j)*Qsq_IS(j)
+          endif
+       enddo
+    enddo
+
+  end function multiply_IS_charges_sq
+
+
+  function multiply_FSQ_charges_sq(res_in) result(res_out)
+    real(dp), intent(in)  :: res_in(-5:7,-5:7)
+    real(dp) :: res_out(-5:7,-5:7)
+    integer               :: i,j
+    real(dp)  :: FSQ_charge
+
+    
+    do i = -5,7
+       do j = -5,7
+          FSQ_charge = Q_IS(i) + Q_IS(j) - Q3 - Q4
+          res_out(i,j) = res_in(i,j)*FSQ_charge**2
+       enddo
+    enddo
+
+  end function multiply_FSQ_charges_sq
   !--
 
   !-- NaN checks
@@ -750,4 +1241,102 @@ contains
 
   end subroutine check_ff
 
+
+  ! >--------------------------------------------------------------------------
+  ! | module procedures of function transision
+  ! | - transition_res for argument res(-6:6,-6:6)
+  ! | - transition_res_sping for argument res_sping(-1:1,-1:1,-6:6,-6:6)
+  ! >--------------------------------------------------------------------------
+  !-- private helper function that generates the transition matrices
+  subroutine get_transisition_matrix(trans, trans_matrix)
+    implicit none
+    
+    real(dp), intent(out) :: trans_matrix(-5:7,-5:7)
+    character(len=*), intent(in) :: trans
+    
+    integer :: i1, i2
+    
+    trans_matrix = zero
+    
+    select case (trans)
+    case ('none')
+       do i1 = -5, 7, 1
+          trans_matrix(i1,i1) = one
+       end do
+    case ('g -> q')
+       do i1 = -5, 7, 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(0,i1) = one
+       end do
+    case ('ga -> q')
+       do i1 = -5, 7, 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(7,i1) = one
+       end do
+    case ('q -> q')
+       do i1 = -int(Nf), int(Nf), 1
+          do i2 = -int(Nf), int(Nf), 1
+             if ((i1 .ne. 0) .and. (i2 .ne. 0) .and. (i1 .ne. 7) .and. (i2 .ne. 7)) trans_matrix(i1,i2) = one
+          end do
+       end do
+    case ('q -> qb')
+       do i1 = -6, 6, 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(i1,-i1) = one
+       end do
+    case ('q -> g')
+       do i1 = -int(Nf), int(Nf), 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(i1,0) = one
+       end do
+    case ('q -> ga')
+       do i1 = -int(Nf), int(Nf), 1
+          if (i1 .ne. 0 .and. i1 .ne. 7) trans_matrix(i1,7) = one
+       end do
+    case default
+       print *, 'error: transition function called with unknown splitting.'
+       stop
+    end select
+    
+    return
+    
+
+  end subroutine get_transisition_matrix
+  
+  function transition_res(beam_1, beam_2, res)
+    implicit none
+    
+    real(dp) :: transition_res(-6:6,-6:6)
+    character(len=*), intent(in) :: beam_1
+    character(len=*), intent(in) :: beam_2
+    real(dp), intent(in) :: res(-6:6,-6:6)
+    real(dp) :: trans_matrix_b1(-6:6,-6:6), trans_matrix_b2(-6:6,-6:6)
+    
+    call get_transisition_matrix(beam_1, trans_matrix_b1)
+    call get_transisition_matrix(beam_2, trans_matrix_b2)
+    
+    transition_res = matmul(matmul(trans_matrix_b1, res), transpose(trans_matrix_b2))
+    
+    return
+  end function transition_res
+  
+  function transition_res_sping(beam_1, beam_2, res_sping)
+    implicit none
+    complex(dp) :: transition_res_sping(-1:1,-1:1,-6:6,-6:6)
+    character(len=*), intent(in) :: beam_1
+    character(len=*), intent(in) :: beam_2
+    complex(dp), intent(in) :: res_sping(-1:1,-1:1,-6:6,-6:6)
+    real(dp) :: trans_matrix_b1(-6:6,-6:6), trans_matrix_b2(-6:6,-6:6)
+    integer :: h1, h2
+    
+    call get_transisition_matrix(beam_1, trans_matrix_b1)
+    call get_transisition_matrix(beam_1, trans_matrix_b2)
+    
+    do h1 = -1, 1, 2
+       do h2 = -1, 1, 2
+          transition_res_sping(h1,h2,:,:) = matmul(matmul(trans_matrix_b1, res_sping(h1,h2,:,:)), transpose(trans_matrix_b2))
+       end do
+    end do
+    
+    return
+  end function transition_res_sping
+  
+
+ 
 end module mod_aux_sectors

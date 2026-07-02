@@ -190,12 +190,12 @@ contains
 
     eta65 = x3*(one-x4)**2/NN
 
-    HardProc%Lim_etaij(1,2) = one
-    HardProc%Lim_etaij(i,5) = eta5i
-    HardProc%Lim_etaij(i,6) = eta6i
-    HardProc%Lim_etaij(j,5) = eta5j
-    HardProc%Lim_etaij(j,6) = eta6j
-    HardProc%Lim_etaij(5,6) = eta65
+    HardProc%Lim_etaij(1,2) = one;   HardProc%Lim_etaij(2,1) = one
+    HardProc%Lim_etaij(i,5) = eta5i; HardProc%Lim_etaij(5,i) = eta5i
+    HardProc%Lim_etaij(i,6) = eta6i; HardProc%Lim_etaij(6,i) = eta6i
+    HardProc%Lim_etaij(j,5) = eta5j; HardProc%Lim_etaij(5,j) = eta5j
+    HardProc%Lim_etaij(j,6) = eta6j; HardProc%Lim_etaij(6,j) = eta6j
+    HardProc%Lim_etaij(5,6) = eta65; HardProc%Lim_etaij(6,5) = eta65
 
     eta51 = HardProc%Lim_etaij(1,5)
     eta52 = HardProc%Lim_etaij(2,5)

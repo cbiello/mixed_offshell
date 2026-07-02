@@ -19,8 +19,13 @@ module mod_process
      real(dp) :: mu2ref !-- reference scale^2, for Lmu terms in the subtraction
      real(dp) :: wgt
      integer  :: npart  !-- how many particles in this configuration
-     logical :: flag    !-- technical flag from kinematic generation
-     logical :: makecut !-- actual fiducial cuts
+     logical  :: flag    !-- technical flag from kinematic generation
+     logical  :: makecut !-- actual fiducial cuts
+     integer, allocatable :: part(:) ! part = (id_1, id_2, id_3, ... id_6)
+                           !         id_3 = ( +/- id_el, +/- id_nu )
+                           ! in Parms/mod_parms.f90 
+                           ! integer, public, parameter :: id_el = 11 !-- + is always particle
+
   end type KinConfig
 
 contains
@@ -28,7 +33,17 @@ contains
   subroutine initialize_config(AKinConfig)
     !set all properties of KinConfig to initial values (mostly zero)
     type(KinConfig) :: AKinConfig
-    
+   
+    !----------------------------------
+    ! Deallocate dynamic components
+    !----------------------------------
+    if (allocated(AKinConfig%part)) then
+       deallocate(AKinConfig%part)
+    endif
+
+    allocate(AKinConfig%part(nmax))
+    AKinConfig%part = 0
+
     AKinConfig%AmpMom = 0
     AKinConfig%LimMom = 0
     AKinConfig%Lim_etaij = 0
@@ -45,7 +60,7 @@ contains
     AKinConfig%ids = -99
     AKinConfig%flag    = .false.
     AKinConfig%makecut = .true.
-    
+
   end subroutine initialize_config
     
 end module mod_process

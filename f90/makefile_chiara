@@ -1,0 +1,347 @@
+
+#####################################################################
+
+EXEC = mixed_ll
+ConfigFile = config.cfg
+
+TWOLOOPDIR=src/TwoLoop
+OBJSDIR = objects
+MODDIR = modules
+HISTODIR = histo
+GRIDDIR = grid
+BINDIR = bin
+
+myOS := $(shell uname -s)
+
+VPATH = src $(OBJSDIR) src/BasicDef src/Parms src/Parser src/AuxFunctions src/HoppetTools src/Amplitudes $(TWOLOOPDIR) src/Kinematics src/SingLimits src/IntSub src/Sectors \
+	src/Histograms src/Vegas src/OpenLoops src/Checks src/GenProc src/Chooser analysis 
+
+GIT_VERSION := $(shell git describe --abbrev=50 --dirty --always --tags)
+
+#####################################################################
+
+-include config.cfg
+-include makefile.inc
+
+#####################################################################
+
+Here = $(PWD)
+
+#####################################################################
+
+LIBS=
+ifeq ($(WithLHAPDF),Yes) 
+ LIBS +=-L$(LHAPDF) -lLHAPDF
+endif
+
+ifeq ($(WithHoppet),Yes) 
+ LIBS +=-L$(HOPPETLIB) -lhoppet_v1
+ LIBS +=-I$(HOPPETINC)
+endif
+
+ifeq ($(WithChaplin),Yes) 
+ LIBS +=-L$(CHAPLIN) -lchaplin
+endif
+
+ifeq ($(WithGiNaC),Yes)
+ LIBS +=-L$(GINAC)/lib -lcln
+ LIBS +=-L$(CLN)/lib -lginac
+endif
+
+ifeq ($(WithHandyG),Yes) 
+ LIBS +=-L$(HANDYG)/lib -lhandyg
+ LIBS +=-I$(HANDYG)/include
+endif
+
+ifeq ($(WithQCDLoop),Yes) 
+ LIBS +=-L $(QCDLOOP) -lff -lqcdloop
+endif
+
+ifeq ($(WithCollier),Yes) 
+ LIBS +=-L $(COLLIER) -lcollier
+ LIBS +=-I $(COLLIER)/modules
+endif
+
+ifeq ($(WithOpenLoops),Yes)
+ ifeq ($(myOS),Linux)
+  LIBS += "-Wl,-rpath=$(OPENLOOPS)/lib"
+ endif
+ LIBS +=-L$(OPENLOOPS)/lib -lopenloops
+ LIBS +=-I$(OPENLOOPS)/lib_src/openloops/mod
+endif
+
+ifeq ($(-D_with2L),1)
+LIBS += -lstdc++ -lm
+endif
+
+#####################################################################
+
+SETFFOUT = -c -o
+
+#####################################################################
+
+MAIN = src/main.f90
+
+BasicDef = \
+	mod_types.o \
+	mod_consts_dp.o \
+	mod_mpi_common.o \
+
+OBJS_genproc = \
+	mod_process.o \
+
+OBJS_Parser = \
+	mod_parser.o \
+
+OBJS_parms = \
+	mod_parms.o \
+	mod_proc_parms.o \
+	mod_vegas_parms.o \
+
+OBJS_AuxFunctions = \
+	cpolylog_main.o \
+	mod_auxfunctions.o \
+	mod_kinfunctions.o \
+	mod_lumi.o \
+
+OBJS_HoppetTools = \
+	mod_hoppet_tools.o \
+
+OBJS_openloops = \
+	mod_ol_interface.o \
+
+OBJS_amp = \
+	mod_coupl.o \
+	mod_amplitudes_tree_ppnul.o \
+	mod_amplitudes_tree_ppll.o \
+	mod_amplitudes_loop_ppll.o \
+	mod_amplitudes_loop_pplnu.o \
+	mod_amplitudes_twol_nf_ppll.o \
+
+ifeq ($(-D_with2L),1)
+OBJS_2L = \
+	vv_nonfact.a \
+	handyG_cpp.o \
+	handyG_fortran.o
+else
+OBJS_2L = 
+endif
+
+OBJS_kin = \
+	mod_aux_kinematics.o \
+	mod_kinematics_gen.o \
+	mod_kinematics_lept.o \
+	mod_kinematics_lo.o \
+	mod_kinematics_lo_z.o \
+	mod_kinematics_nlo.o \
+	mod_kinematics_nlo_z.o \
+	mod_kinematics_nnlo_tc_is_eu_abcd.o \
+	mod_kinematics_nnlo_tc_is_eu_ac.o \
+	mod_kinematics_nnlo_dc_ii.o \
+	mod_kinematics_nnlo_dc_if.o \
+
+OBJS_SingLimits = \
+	mod_splittings_bare.o \
+	mod_eikonals.o \
+	mod_limits_rv.o \
+
+OBJS_IntSub = \
+	mod_hoppet_nlo.o \
+	mod_hoppet_nnlo.o \
+	mod_int_sub_nnlo.o \
+
+OBJS_sector = \
+	mod_partitions.o \
+	mod_aux_sectors.o \
+	mod_xsects_lo.o \
+	mod_xsects_nloqcd_r.o \
+	mod_xsects_nloqcd_vs.o \
+	mod_xsects_nloewk_r.o \
+	mod_xsects_nloewk_vs.o \
+	mod_xsects_nnlo_rvewk.o \
+	mod_xsects_nnlo_rvqcd.o \
+	mod_xsects_nnlo_rr_ns.o \
+	mod_xsects_nnlo_rr_gq.o \
+	mod_xsects_nnlo_rr_qg.o \
+	mod_xsects_nnlo_rr_aq.o \
+	mod_xsects_nnlo_rr_qa.o \
+	mod_xsects_nnlo_rr_ag.o \
+	mod_xsects_nnlo_rr_ga.o \
+	mod_xsects_nnlo_s_ns.o \
+	mod_xsects_nnlo_s_gq.o \
+	mod_xsects_nnlo_s_qg.o \
+	mod_xsects_nnlo_s_aq.o \
+	mod_xsects_nnlo_s_qa.o \
+	mod_xsects_nnlo_s_ag.o \
+	mod_xsects_nnlo_s_ga.o \
+	mod_xsects_nnlo_vv.o \
+	mod_xsects_checklim_nlo.o \
+	mod_xsects_checklim_nnlo_ns.o \
+	mod_xsects_checklim_gen.o \
+
+OBJS_histo = \
+	mod_proc_histo.o \
+	mod_histo.o \
+	mod_cut_histo_aux.o \
+	mod_cut_histo_W_ATLAS.o \
+        mod_cut_histo_PC_ATLAS_160601736.o \
+        mod_cut_histo.o \
+	# mod_cut_histo_$(analysis).o \
+	mod_cut_histo_W_ATLAS.o \
+	mod_cut_histo_PC_ATLAS_160601736.o \
+	mod_cut_histo.o \
+	mod_cut_histo_W_ATLAS.o \
+
+OBJS_vegas = \
+	mod_my_vegas.o \
+	mod_random.o \
+	mod_vegas_common.o \
+	mod_vegas_user.o \
+	mod_vegas_mpi.o \
+
+OBJS_check = \
+	mod_checks.o \
+	mod_check_amp.o \
+
+OBJS_chooser = \
+	mod_run_proc_lonlo.o \
+	mod_run_proc_rr_ns.o \
+	mod_run_proc_rr_gq.o \
+	mod_run_proc_rr_qg.o \
+	mod_run_proc_rr_aq.o \
+	mod_run_proc_rr_qa.o \
+	mod_run_proc_rr_ag.o \
+	mod_run_proc_rr_ga.o \
+	mod_run_proc_rv.o \
+	mod_run_proc_s_ns.o \
+	mod_run_proc_s_gq.o \
+	mod_run_proc_s_qg.o \
+	mod_run_proc_s_aq.o \
+	mod_run_proc_s_qa.o \
+	mod_run_proc_s_ag.o \
+	mod_run_proc_s_ga.o \
+	mod_run_proc_vv.o \
+	mod_run_proc.o \
+	mod_sects_list.o \
+
+OBJS_gen = \
+	mod_chooser.o \
+
+OBJS = $(BasicDef) $(OBJS_Parser) $(OBJS_parms) $(OBJS_AuxFunctions) $(OBJS_HoppetTools) $(OBJS_genproc) \
+	$(OBJS_openloops) $(OBJS_amp) $(OBJS_SingLimits) $(OBJS_IntSub) $(OBJS_kin) \
+	$(OBJS_histo) $(OBJS_sector) $(OBJS_2L) $(OBJS_vegas) $(OBJS_check) $(OBJS_chooser) $(OBJS_gen)
+
+ifeq ($(-D_with2L),1)
+	TWOLINSTDIR=$(Here)/src/TwoLoop/twoloop_mixqcdewk_ll
+	TWOLINSTOBJ=$(Here)/src/TwoLoop/handyG_cpp.o
+else
+	TWOLINSTDIR=$(Here)/src/TwoLoop/tmptwoloopdir.log
+	TWOLINSTOBJ=$(Here)/src/TwoLoop/tmptwoloopobj.log
+endif
+
+#####################################################################
+
+$(EXEC): $(MAIN) $(TWOLINSTDIR) $(TWOLINSTOBJ) $(OBJS) $(HISTODIR) $(GRIDDIR) $(BINDIR)
+	$(F95) -D_Vcharge=$(Vcharge) $(FOPTS) $(patsubst %,$(OBJSDIR)/%,$(OBJS)) $(LIBS) $(MAIN) -o $(EXEC)
+
+$(OBJSDIR):
+	mkdir -p $(OBJSDIR)
+
+$(MODDIR):
+	mkdir -p $(MODDIR)
+
+$(HISTODIR):
+	mkdir -p $(HISTODIR)
+
+$(GRIDDIR):
+	mkdir -p $(GRIDDIR)
+
+$(BINDIR):
+	mkdir -p $(BINDIR)
+	gfortran -o bin/nsc-hsummer aux/nsc-hsummer.f90
+	cp aux/nsc-combine_histos.tmpl bin/nsc-combine_histos && chmod +x bin/nsc-combine_histos
+	cp aux/nsc-setup_mcrun.tmpl bin/nsc-setup_mcrun && chmod +x bin/nsc-setup_mcrun
+
+$(TWOLINSTDIR):
+ifeq ($(-D_with2L),1)
+	$(info Downloading and compiling two-loop amplitudes)
+	@rm -f src/TwoLoop/*.o
+	@wget https://users.ox.ac.uk/~phys2058/projects/mix_qcdewk_ll/twoloopamp_x183L4a08DgW6j2/twoloop_mixqcdewk_ll.tar.gz
+	@mv twoloop_mixqcdewk_ll.tar.gz src/TwoLoop && cd src/TwoLoop && rm -rf twoloop_mixqcdewk_ll && tar xf twoloop_mixqcdewk_ll.tar.gz && cd ../..
+	@rm -f src/TwoLoop/*.tar.gz
+else
+	touch $(Here)/src/TwoLoop/tmptwoloopdir.log
+endif
+
+$(TWOLINSTOBJ):
+ifeq ($(-D_with2L),1)
+	$(info Compiling two-loop amplitudes)
+	@cd src/TwoLoop/twoloop_mixqcdewk_ll/ && make && cp *.o ../ && cp *.a ../ && cp -r auto_generated ../../../ && cd ../../../
+else
+	touch $(Here)/src/TwoLoop/tmptwoloopobj.log
+endif
+
+#`-' -> don't complain if it's not there
+-include makedep.inc
+
+makedep.inc:
+	$(PYCMD) get_dep.py
+
+
+#%.o %.mod --> create both in single pass
+%.o %.mod: %.f90 | $(OBJSDIR) $(MODDIR)
+	$(F95) -D_Vcharge=$(Vcharge) $(FOPTS) $(LIBS) $(SETFFOUT) $(OBJSDIR)/$@ $<
+
+%.o: %.F | $(OBJSDIR) $(MODDIR)
+	$(F95) -D_Vcharge=$(Vcharge) $(FOPTS) $(LIBS) $(SETFFOUT) $(OBJSDIR)/$@ $<
+
+#####################################################################
+
+ifeq ($(-D_with2L),1)
+objects/handyG_cpp.o: src/TwoLoop/handyG_cpp.o
+	@cp src/TwoLoop/handyG_cpp.o objects/handyG_cpp.o
+
+objects/handyG_fortran.o: src/TwoLoop/handyG_fortran.o
+	@cp src/TwoLoop/handyG_fortran.o objects/handyG_fortran.o
+
+objects/vv_nonfact.a: src/TwoLoop/vv_nonfact.a
+	@cp src/TwoLoop/vv_nonfact.a objects/vv_nonfact.a
+endif
+
+#####################################################################
+
+#execute even if there is an up-to-date ``remove'' file
+.PHONY: clean remove wipe
+.SILENT: clean remove wipe
+
+update2L:
+#	$(info Updating two-loop amplitudes)
+#	@rm -f src/TwoLoop/*.o
+#	@wget https://users.ox.ac.uk/~phys2058/projects/mix_qcdewk_ll/twoloopamp_x183L4a08DgW6j2/twoloop_mixqcdewk_ll.tar.gz
+#	@mv twoloop_mixqcdewk_ll.tar.gz src/TwoLoop && cd src/TwoLoop && rm -rf twoloop_mixqcdewk_ll && tar xf twoloop_mixqcdewk_ll.tar.gz && cd ../..
+#	@rm -f src/TwoLoop/*.tar.gz
+
+clean:
+	echo 'Removing *~ files'
+	for i in $(VPATH); do rm -f $$i/*~; done
+	rm -f *~
+
+remove: clean
+	echo 'Removing executable, objects, modules and dependencies'
+	rm -f $(EXEC)
+	rm -f $(OBJSDIR)/*
+	rm -f $(MODDIR)/*
+	rm -f $(TWOLOOPDIR)/*.o
+	rm -f $(TWOLOOPDIR)/*.a
+	rm -f $(TWOLOOPDIR)/*.log
+	rm -f makedep.inc
+
+wipe: clean remove
+	echo 'Removing histogram and grid files'
+	rm -f $(HISTODIR)/*
+	rm -f $(GRIDDIR)/*.grid
+	rm -f $(BINDIR)/*
+	rm -f config.log
+	rm -f config.cfg
+	rm -f makefile.inc
+	rm -f Analysis/mod_cut_histo.f90

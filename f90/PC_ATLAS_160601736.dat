@@ -1,0 +1,29 @@
+### Physical parameters
+-mz 91.1876
+-gaz 2.4952
+
+-mw 80.398
+-gaw 2.1054
+
+-mh 125
+-gah 0.004165
+
+-mt 173.2
+
+-Gf 1.16639E-5
+
+### Physical setup
+-ew_scheme Gmu
+-cm_scheme true
+
+-pdfset NNPDF31_nnlo_as_0118_luxqed
+-pdfmem 0
+
+### Collider setup
+-ecoll 13600
+
+### Fiducial cuts
+-qmin 200
+-ylep_cut 2.5
+-ptlep_cut 30
+-R_phot 0.1

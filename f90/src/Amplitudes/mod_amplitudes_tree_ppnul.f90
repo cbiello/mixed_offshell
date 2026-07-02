@@ -13,9 +13,12 @@ module mod_amplitudes_tree_ppnul
 
   !-- res_tree_emitted-particles_initial-state
   !-- res_tree   --> 0 -> q l nu qb
-  public :: res_tree_qqb_w 
-  public :: res_tree_g_qqb_w
-  public :: res_tree_a_qqb_w
+  public :: res_tree_qqb_wm
+  public :: res_tree_qqb_wp
+  public :: res_tree_g_qqb_wm
+  public :: res_tree_g_qqb_wp
+  public :: res_tree_a_qqb_wm
+  public :: res_tree_a_qqb_wp
   
   !master amplitudes
   public :: res_tree_j_qcd
@@ -33,33 +36,28 @@ contains
   !-- res(1,1)- = d ub -> W- -> em nueb
   !-- res(1,2)- = ub d -> W- -> em nueb
 
-  subroutine res_tree_qqb_w(p,res)
+  subroutine res_tree_qqb_wp(p,res)
     real(dp), intent(in)  :: p(:,:)
-    real(dp), intent(out) :: res(2,2)
+    real(dp), intent(out) :: res(1,2)
     real(dp) :: sprod(4,4)
     complex(dp) :: za(4,4),zb(4,4),coupl(1:2,-1:1,-1:1)
     complex(dp) :: amp
-    real(dp) :: aa,bb,cc(1:2),dd(1:2)
+    real(dp) :: aa,bb,cc
     integer  :: i1,i2,i3,i4
 
     ! u(1) db(2) -> W+ nue(4) ep(3)
     !res(1,1) = abs(amp(2,1,3,4)*coupl(1,-1,-1))**2
-
-    ! d(1) ub(2) -> W- nueb(4) em(3)
-    !res(1,2) = abs(amp(1,2,3,4)*coupl(2,-1,-1))**2
-
-    ! ub(1) d(2) -> W- nueb(4) em(3)
-    !res(2,1) = abs(amp(2,1,3,4)*coupl(2,-1,-1))**2
-
     ! db(1) u(2) -> W+ nue(4) ep(3)
     !res(2,2) = abs(amp(1,2,3,4)*coupl(1,-1,-1))**2
 
-    !res = res * xn * aveqq
-
-    !-- 0 --> q(1)^- qb(2) [V --> l(3)^- lb(4)]
+    !Be careful with the order of momenta
+    !We should decide if we want the neutrino in fourth position or not
+    !So far the NNLO subtraction is done with the neutrino in third position
+    !but having the neutrino in fourth makes the formulae more compact since
+    !the charged particles have indices that run from 1 to 3 insteat of i=1,..4 with i!=3
+    
     amp(i1,i2,i3,i4) = two * za(i1,i4)*zb(i3,i2)/sprod(i1,i2)
-    !CB: cheanged in order to have the nu in the fourth position
-
+    
     !Here we need to pass the new order of PS
     call spinoru(4,(/-p(:,1),-p(:,2),p(:,3),p(:,4)/),za,zb,sprod)
 
@@ -68,18 +66,58 @@ contains
     
     aa = abs(amp(2,1,3,4))**2
     bb = abs(amp(1,2,3,4))**2
-    cc(:) = abs(coupl(:,-1,-1))**2 + abs(coupl(:,+1,+1))**2
-    dd(:) = abs(coupl(:,-1,+1))**2 + abs(coupl(:,+1,-1))**2
+    cc= abs(coupl(1,-1,-1))**2 !W+
 
-    res(1,:) = aa * cc(:) + bb * dd(:)
-    res(2,:) = aa * dd(:) + bb * cc(:)
+    res(1,1) = aa * cc
+    res(1,2) = bb * cc
 
     res = res * xn * eesq2 * aveqq
 
     return
 
-  end subroutine res_tree_qqb_w
+  end subroutine res_tree_qqb_wp
 
+
+  subroutine res_tree_qqb_wm(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(1,2)
+    real(dp) :: sprod(4,4)
+    complex(dp) :: za(4,4),zb(4,4),coupl(1:2,-1:1,-1:1)
+    complex(dp) :: amp
+    real(dp) :: aa,bb,cc
+    integer  :: i1,i2,i3,i4
+
+    ! d(1) ub(2) -> W- nueb(4) em(3)
+    !res(1,2) = abs(amp(1,2,3,4)*coupl(2,-1,-1))**2
+    ! ub(1) d(2) -> W- nueb(4) em(3)
+    !res(2,1) = abs(amp(2,1,3,4)*coupl(2,-1,-1))**2
+    
+    !Be careful with the order of momenta
+    !We should decide if we want the neutrino in fourth position or not
+    !So far the NNLO subtraction is done with the neutrino in third position
+    !but having the neutrino in fourth makes the formulae more compact since
+    !the charged particles have indices that run from 1 to 3 insteat of i=1,..4 with i!=3
+
+    amp(i1,i2,i3,i4) = two * za(i1,i4)*zb(i3,i2)/sprod(i1,i2)
+    
+    !Here we need to pass the new order of PS
+    call spinoru(4,(/-p(:,1),-p(:,2),p(:,3),p(:,4)/),za,zb,sprod)
+
+    call get_coupl(sprod(1,2),[Qdn,Qup],[Q_lep,Q_lep],[cms_cLWud,cms_cLWud],[cms_cLWnue,cms_cLWnue],&
+         [cms_cRdn,cms_cRup],[cms_cR_lep,cms_cR_lep],coupl,1)
+    
+    aa = abs(amp(2,1,3,4))**2
+    bb = abs(amp(1,2,3,4))**2
+    cc = abs(coupl(2,-1,-1))**2 !W-
+
+    res(1,1) = bb * cc
+    res(1,2) = aa * cc
+
+    res = res * xn * eesq2 * aveqq
+
+    return
+
+  end subroutine res_tree_qqb_wm
 
   !----------------------------------------------------------------------
   !-- 5-point amplitudes
@@ -101,6 +139,29 @@ contains
 
   end subroutine res_tree_g_qqb_w
 
+
+  subroutine res_tree_g_qqb_wp(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(1,2)
+    real(dp) :: auxres(2,2)
+
+    call res_tree_g_qqb_w(p,auxres)
+    res(1,1)=auxres(1,1)
+    res(1,2)=auxres(2,2)
+
+  end subroutine res_tree_g_qqb_wp
+
+  subroutine res_tree_g_qqb_wm(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(1,2)
+    real(dp) :: auxres(2,2)
+
+    call res_tree_g_qqb_w(p,auxres)
+    res(1,1)=auxres(1,2)
+    res(1,2)=auxres(2,1)
+
+  end subroutine res_tree_g_qqb_wm
+
   subroutine res_tree_a_qqb_w(p,res)
     real(dp), intent(in)  :: p(:,:)
     real(dp), intent(out) :: res(2,2)
@@ -110,6 +171,32 @@ contains
     call res_tree_j_qed(p,iconf,aveqq,res)
 
   end subroutine res_tree_a_qqb_w
+
+  subroutine res_tree_a_qqb_wp(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(1,2)
+    real(dp) :: auxres(2,2)
+
+    call res_tree_a_qqb_w(p,auxres)
+    res(1,1)=auxres(1,1)
+    res(1,2)=auxres(2,2)
+
+  end subroutine res_tree_a_qqb_wp
+
+  subroutine res_tree_a_qqb_wm(p,res)
+    real(dp), intent(in)  :: p(:,:)
+    real(dp), intent(out) :: res(1,2)
+    real(dp) :: auxres(2,2)
+
+    call res_tree_a_qqb_w(p,auxres)
+    res(1,1)=auxres(1,2)
+    res(1,2)=auxres(2,1)
+
+  end subroutine res_tree_a_qqb_wm
+
+  !CB: TO BE IMPROVED. For now let's do it to try to recompile the code.
+  !Then we will use a nicer structure where we avoid to compute the 4 entrees and then
+  !use only two of them.
 
 
   !-- master amplitudes below
