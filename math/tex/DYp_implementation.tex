@@ -1,0 +1,344 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{underscore}   % lets us type _ literally inside \texttt{...}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\Vc}{\code{\_Vcharge}}
+\newcommand{\FLM}{\ensuremath{\mathrm{FLM}}}
+\newcommand{\FLVQCD}{\ensuremath{\mathrm{FLV}_{\mathrm{QCD}}}}
+\newcommand{\FLVEW}{\ensuremath{\mathrm{FLV}_{\mathrm{EW}}}}
+\newcommand{\Lms}{\ensuremath{L_{\mu s}}}
+\newcommand{\LmE}{\ensuremath{L_{\mu E}}}
+\newcommand{\Dz}{\ensuremath{D_0}}\newcommand{\Do}{\ensuremath{D_1}}
+\newcommand{\Dtwo}{\ensuremath{D_2}}\newcommand{\Dthree}{\ensuremath{D_3}}
+\newcommand{\zt}{\ensuremath{\zeta_2}}\newcommand{\ztt}{\ensuremath{\zeta_3}}
+
+\title{\bf Implementation map of the DY\,0 and DY${}^{+}$ finite remainders\\
+\large (non-singlet ``S'' sector) and the Mathematica cross-checks}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\noindent
+This note documents, term by term, \emph{where} each finite-remainder piece of the
+neutral-current (\textbf{DY0}) and charged-current (\textbf{DY${}^+$}, $W^+$) mixed
+QCD$\otimes$EW NNLO subtraction is implemented in the Fortran code, and which of the
+DY${}^+$ pieces were checked symbolically against the Mathematica notebook.
+The analytic definitions are the cells \code{FINITEDY0[1..7]} of \file{math/DY0\_qq.wl}
+and \code{FINITEDYp[1..7]}, \code{FINITEDYp[60]} of \file{math/DY+\_qq.wl}.
+
+\section{Conventions and switch}
+
+The neutral/charged current is selected at compile time by the preprocessor flag
+\Vc: \;$0=$ DY0 ($q\bar q\to\gamma^*/Z$), \;$+1=W^+$, \;$-1=W^-$.
+It drives \code{current\_charge} $\in\{0,\pm1\}$ (\file{src/Parms/mod\_proc\_parms.f90}).
+All CC routines follow the convention: implement the \code{\_Vcharge==0} branch (DY0)
+first, then \code{\_Vcharge==+1} ($W^+$); \code{\_Vcharge==-1} ($W^-$) currently executes a
+\code{stop} (``not yet implemented''). Only $W^+$ is implemented.
+
+Throughout, $s=4E_C^2=\hat s$, $\Lms=\ln(\mu^2/s)=\ln(\mu^2/4E_C^2)$,
+$D_k=\big[\ln^k(1-z)/(1-z)\big]_+$, and $E_C=M_V/2$.
+The two recurring $z$-brackets are
+\begin{align}
+B_1(z) &= 1-z+4\Do+(1+z-2\Dz)\Lms-\tfrac{2\ln z}{1-z}+(1+z)\big(-2\ln(1-z)+\ln z\big),
+\label{eq:B1}\\
+B_A(z) &= 1-z-2(1+z)\ln(1-z)+4\Do+(1+z-2\Dz)\,\ln\!\tfrac{\mu^2}{4E_C^2},
+\label{eq:BA}\\
+B_B(z) &= 1-z-2(1+z)\ln(1-z)+(1+z-2\Dz)\ln z+4\Do+(1+z-2\Dz)\Lms.
+\label{eq:BB}
+\end{align}
+$B_1$ is the bracket of \code{FINITEDY0[1]}, \code{FINITEDYp[1]}, \code{FINITEDY0[3]},
+\code{FINITEDYp[3]} (they all share it). $B_A$ is the collinear splitting of the
+single-boost ``term A'' (\code{[6]/[60]}); $B_B$ multiplies its ``term B''.
+
+\section{Building blocks (both channels)}
+\label{sec:blocks}
+
+\begin{center}\small
+\begin{longtable}{@{}p{4.9cm} p{3.3cm} p{6.6cm}@{}}
+\toprule
+\textbf{Object} & \textbf{File} & \textbf{Meaning / notes}\\
+\midrule
+\endhead
+\code{res\_tree\_qqb} \newline \code{res\_tree\_qqb\_gen}
+ & \file{mod\_amplitudes\_} \file{tree\_ppll.f90}
+ & Born \FLM. NC form returns $(2,2)$ [dn,up]; \code{\_gen} returns the $(-5{:}7,-5{:}7)$
+   flavour matrix and is CC-aware (selects entries with $Q_{\rm IS}(i)+Q_{\rm IS}(j)=$
+   \code{current\_charge}).\\
+\code{res\_qcdloop\_qqb} \newline \code{res\_qcdloop\_qqb\_gen}
+ & \file{mod\_amplitudes\_} \file{loop\_ppll.f90}
+ & QCD one-loop finite $\FLVQCD=-8\,C_F\,$Born. NC $(2,2)$ / CC $(-5{:}7,-5{:}7)$.\\
+\code{res\_ewkloop\_qqb} \newline \code{res\_ewkloop\_qqb\_gen}
+ & \file{mod\_amplitudes\_} \file{loop\_ppll.f90}
+ & EW one-loop finite $\FLVEW$ (OpenLoops). NC $(2,3)$ [dn,up,b] / CC $(-5{:}7,-5{:}7)$;
+   carries the electric charges internally.\\
+\code{multiply\_IS\_charges\_sq(r,leg)}
+ & \file{mod\_aux\_sectors.f90}
+ & $r(i,j)\!\to\! r(i,j)\,Q_{\rm IS}(i)^2$ (leg=1) or $\,Q_{\rm IS}(j)^2$ (leg=2).\\
+\code{get\_respdf\_hoppet} \newline \code{get\_respdf\_hoppet\_gen}
+ & \file{mod\_aux\_sectors.f90}
+ & PDF convolution with pre-boosted \code{pdf\_table}s (\code{xPij}$/$\code{PDFs}); NC uses an
+   explicit luminosity, \code{\_gen} uses \code{gen\_lumi} on the full flavour matrix.\\
+\code{get\_respdf\_gen\_mu}
+ & \file{mod\_aux\_sectors.f90}
+ & convolves an amplitude already multiplied by a $\mu$-dependent integrated-subtraction
+   matrix ($-5{:}7,-5{:}7,i_{\rm pdf}$).\\
+\code{fin\_ns\_vqcd} (l.\,26)
+ & \file{mod\_int\_sub\_nnlo.f90}
+ & DY0 elastic QCD $I$-operator: $[4(\mathrm{Li}_2(\bar\eta_{13})-\mathrm{Li}_2(\bar\eta_{14}))
+   -6\ln(\bar\eta_{13}/\bar\eta_{14})]\,Q_qQ_\ell+(13-4\zt)Q_\ell^2$.\\
+\code{calG\_QqQl} (l.\,87), \newline \code{calG\_QqQl\_L} (l.\,140)
+ & \file{mod\_int\_sub\_nnlo.f90}
+ & DY0 soft function $G_q[Q_q,Q_e]$ and the coefficient of $\Lms$ in $[7]$
+   (the latter \emph{excludes} the $Q_q^2$ piece).\\
+\code{calG\_ONLOQCD\_ns} (l.\,276)
+ & \file{mod\_int\_sub\_nnlo.f90}
+ & the \emph{real-emission} NLO-QCD soft (used by the $V\!+\!g$ sectors).
+   \textbf{Not} equal to \code{genGnloQCD} -- see \S\ref{sec:valid}.\\
+\code{genGnloQCD\_cc} (l.\,416), \newline \code{legfinalcalG\_cc} (l.\,458)
+ & \file{mod\_int\_sub\_nnlo.f90}
+ & CC elastic soft $=$ notebook \code{genGnloQCD} (validated), and
+   \code{legfinalcalG\_cc}$(\dots,i_{\rm leg})=$\code{genGnloQCD}$-3Q_{i}^2\ln(4E_C^2/\mu^2)$
+   $=$ notebook \code{leg1/leg2finalcalG}.\\
+\code{fin\_ns\_vqcd\_cc} (l.\,337)
+ & \file{mod\_int\_sub\_nnlo.f90}
+ & DY${}^+$ elastic QCD $I$-operator, \code{FINITEDYp[2]} (with the $Q^2$ shift, \S\ref{sec:shift}).\\
+\code{fin\_ns\_v7\_cc} (l.\,484)
+ & \file{mod\_int\_sub\_nnlo.f90}
+ & DY${}^+$ elastic soft, \code{FINITEDYp[7]}.\\
+\code{mySub\_ns} / \code{mySub\_ns\_Lmu}
+ & \file{mod\_hoppet\_nnlo.f90}
+ & kernels filling \code{xPij}$/$\code{xPij\_Lmu} for the \code{s\_v} sector (vqcd, vewk);
+   $B_1$-type. $\delta(1-z)$: \;$2\zt$ \,/\, $-3/2$ (``half per leg'').\\
+\code{mySub\_TCqq} / \code{\_Lmu} / \code{\_Lmu2}
+ & \file{mod\_hoppet\_nnlo.f90}
+ & kernels filling \code{xPij}$/$\code{xPij\_Lmu}$/$\code{xPij\_Lmu2} for the \code{s\_12} sector;
+   the big $Q_q^2$ $z$-space bracket of $[6]$. $\delta(1-z)$: $-\tfrac{2\pi^4}{45}$,
+   $-2(\pi^2\!+\!8\ztt)$, $\tfrac92-4\zt$.\\
+\code{xPij\_\{A,B,C,D\}\_\{1,2\}}
+ & \file{mod\_hoppet\_nnlo.f90}
+ & the four double-boost tables AA/BB/CC/DD of $[5]$ (kernel \code{mySub\_qq}).\\
+\bottomrule
+\end{longtable}
+\end{center}
+
+All three finite-remainder integrands live in
+\file{src/Sectors/mod\_xsects\_nnlo\_s\_ns.f90}:
+\code{xsect\_nnlo\_s\_ns\_vqcd} (l.\,480) $\to[1],[2]$;
+\code{xsect\_nnlo\_s\_ns\_vewk} (l.\,605) $\to[3],[4]$;
+\code{xsect\_nnlo\_s\_ns\_s12} (l.\,83) $\to[5],[6],[60],[7]$.
+The \code{s12} routine fills three histogram slots: \code{kin(1)} (elastic point, tables
+\code{respdf\_1..4}), \code{kin(2)} $=F[z_1p_1,p_2]$ (boosted leg 1), \code{kin(3)}
+$=F[p_1,z_2p_2]$ (boosted leg 2).
+
+\section{DY0 (neutral current): where each term is}
+\label{sec:dy0}
+
+\begin{center}\small
+\begin{longtable}{@{}c p{4.7cm} p{8.7cm}@{}}
+\toprule
+\textbf{Term} & \textbf{Location} & \textbf{Implementation}\\
+\midrule\endhead
+\code{[1]} & \code{vqcd}: \code{respdf\_2},\code{respdf\_3}
+ & $Q_q^2(\FLVQCD[z p_1,p_2]+\FLVQCD[p_1,z p_2])\,B_1$.
+   \code{res\_qcdloop\_qqb}$\to\FLVQCD$; charges $Q_{\rm dn}^2/Q_{\rm up}^2$; then
+   $F[z_1,\cdot]=$\code{get\_respdf\_hoppet(xPij,PDFs,\dots,[xPij\_Lmu])} and
+   $F[\cdot,z_2]=$\code{(PDFs,xPij)}. Kernel \code{mySub\_ns}.\\
+\code{[2]} & \code{vqcd}: \code{respdf\_1} \emph{and} $\delta$ of \code{respdf\_2/3}
+ & $(13-\tfrac{2\pi^2}{3})Q_e^2+\tfrac{2\pi^2}{3}Q_q^2-3Q_q^2\Lms+Q_eQ_q(\dots)$.
+   The $Q_e^2$ and $Q_eQ_q$ parts $=$ \code{fin\_ns\_vqcd}$\otimes\FLVQCD$ (\code{respdf\_1},
+   elastic \code{(PDFs,PDFs)}). The $\tfrac{2\pi^2}{3}Q_q^2$ and $-3Q_q^2\Lms$ parts come from
+   the $\delta(1-z)$ of \code{mySub\_ns}$/$\code{mySub\_ns\_Lmu} ($2\zt$, $-3/2$; per leg,
+   $\times Q_q^2$) delivered inside \code{respdf\_2/3}.\\
+\code{[3]} & \code{vewk}: \code{respdf\_1},\code{respdf\_2}
+ & $C_F(\FLVEW[z p_1,p_2]+\FLVEW[p_1,z p_2])\,B_1$. \code{res\_ewkloop\_qqb}$\to\FLVEW$;
+   \emph{no} charge weighting ($\FLVEW$ carries the charges); \code{ns\_lumi\_splitb};
+   overall $\times C_F$. Kernel \code{mySub\_ns}.\\
+\code{[4]} & \code{vewk}: $\delta$ of \code{respdf\_1/2}
+ & $C_F(\tfrac{2\pi^2}{3}-3\Lms)\FLVEW$, from the \code{mySub\_ns}$/$\code{\_Lmu}
+   $\delta(1-z)$ summed over the two legs (no charge weighting), $\times C_F$.\\
+\code{[5]} & \code{s12}: \code{kin(1)}, \code{respdf\_1}
+ & $2C_FQ_q^2\,\FLM[z_1p_1,z_2p_2](\mathrm{AA}{+}\mathrm{BB}{+}\mathrm{CC}{+}\mathrm{DD})$.
+   \code{respdf\_1}$=2\sum_{X}$\code{get\_respdf\_hoppet(xPij\_X\_1,xPij\_X\_2,\dots)}, $X\in\{A,B,C,D\}$;
+   \code{res\_tree\_qqb}$\times Q_{\rm dn}^2/Q_{\rm up}^2$; $\times C_F$.\\
+\code{[6]} & \code{s12}: \code{kin(2)} $+$ \code{respdf\_2,3,4} of \code{kin(1)}
+ & Leg-1 single boost, three pieces:\newline
+   \emph{A} ($G_q\!\cdot\!B_A$): \code{kin(2)} $=C_F\,S_1\,$\code{calG\_QqQl}$\cdot\FLM$
+   with $S_1=$\code{PqqNLO\_1(0)+Pqq0\_R\_1(0)}$\Lms$; its plus-endpoint is subtracted in
+   \code{kin(1) respdf\_3}$=(S_1^+{+}S_2^+)$\code{calG\_QqQl}$\FLM$, $S_i^+=-($\code{PqqNLO(1)+Pqq0\_R(1)}$\Lms)$.\newline
+   \emph{B} ($-2Q_eQ_q\,B_B\ln z\ln\tfrac{s_{24}}{s_{23}}$): \code{kin(1) respdf\_2},
+   \code{get\_respdf\_hoppet(xPij\_B\_1,PDFs,\dots)}$\times Q_eQ_q\times 2\ln(u/t)$.\newline
+   \emph{C} ($Q_q^2\times$ big $z$-space bracket): \code{kin(1) respdf\_2},
+   \code{get\_respdf\_hoppet(xPij,PDFs,\dots,[xPij\_Lmu,xPij\_Lmu2])}$\times Q_q^2$
+   (kernel \code{mySub\_TCqq}).\newline
+   (Leg 2: \code{kin(3)} for A, and the leg-2 halves of \code{respdf\_2}.)\\
+\code{[7]} & \code{s12}: \code{kin(1)}, \code{respdf\_4} $+$ $\delta$ of term C
+ & $C_F(4\zt-3\ln\tfrac{\mu^2}{4E_C^2})G_q\FLM
+   +C_FQ_q^2(-\tfrac{4\pi^4}{45}-(2\pi^2{+}32\ztt)\Lms+(9{-}\tfrac{4\pi^2}{3})\Lms^2)\FLM$.
+   \code{respdf\_4}$=4\zt\,$\code{calG\_QqQl}$\FLM+$\code{calG\_QqQl\_L}$\cdot\Lms\,\FLM$;
+   the pure-$Q_q^2$ ($\pi^4,\Lms,\Lms^2$) part is supplied by the $\delta(1-z)$ of
+   \code{mySub\_TCqq}$/$\code{\_Lmu}$/$\code{\_Lmu2} inside term C (\S\ref{sec:shift}).\\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{DY${}^+$ (charged current, $W^+$): where each term is}
+\label{sec:dyp}
+
+All entries are the \code{\_Vcharge==+1} branches of the same three routines. Leptonic ids
+are set to \code{[0,0,id\_nue,-id\_el]} ($\nu\,e^+$); the charged lepton is leg~4
+(\code{ilept=4}, \code{Qlept=+1}). Amplitudes use the \code{\_gen} $(-5{:}7,-5{:}7)$ forms;
+per-leg electric charges are applied by \code{multiply\_IS\_charges\_sq}.
+
+\begin{center}\small
+\begin{longtable}{@{}c p{4.7cm} p{8.7cm}@{}}
+\toprule
+\textbf{Term} & \textbf{Location} & \textbf{Implementation (differences vs DY0)}\\
+\midrule\endhead
+\code{[1]} & \code{vqcd}: \code{respdf\_2},\code{respdf\_3}
+ & $\big(Q_{q'}^2\FLVQCD[q,q'z]+Q_q^2\FLVQCD[qz,q']\big)B_1$.
+   \code{res\_qcdloop\_qqb\_gen}$\to\FLVQCD$; \emph{per-leg} charge:
+   $F[z_1,\cdot]=$\code{get\_respdf\_hoppet\_gen(xPij,PDFs,\dots)} on
+   \code{multiply\_IS\_charges\_sq($\cdot$,1)} ($Q_q^2$), $F[\cdot,z_2]$ on
+   \code{multiply\_IS\_charges\_sq($\cdot$,2)} ($Q_{q'}^2$). Same \code{xPij} (\code{mySub\_ns}).\\
+\code{[2]} & \code{vqcd}: \code{respdf\_1}
+ & \code{fin\_ns\_vqcd\_cc}$\otimes$\code{get\_respdf\_gen\_mu} (elastic). The full
+   charge-quadratic $G_p$ (in $Q_{\ell'}^2,Q_{\ell'}Q_q,Q_{\ell'}Q_{q'},Q_qQ_{q'}$) \emph{minus}
+   the spurious per-leg $Q^2$ shipped by the reused \code{xPij} $\delta$ (\S\ref{sec:shift}).\\
+\code{[3]} & \code{vewk}: \code{respdf\_1},\code{respdf\_2}
+ & $C_F(\FLVEW[qz,q']+\FLVEW[q,q'z])B_1$. \code{res\_ewkloop\_qqb\_gen}$\to\FLVEW$;
+   \code{get\_respdf\_hoppet\_gen}, $\times C_F$. \emph{No} charge weighting and \emph{no} $Q^2$
+   shift (identical structure to DY0\,$[3]$).\\
+\code{[4]} & \code{vewk}: $\delta$ of \code{respdf\_1/2}
+ & $C_F(\tfrac{2\pi^2}{3}-3\Lms)\FLVEW$ from the \code{xPij} $\delta$; identical to DY0\,$[4]$,
+   no compensation needed (no per-leg $Q^2$ weighting).\\
+\code{[5]} & \code{s12}: \code{kin(1)}, \code{respdf\_1}
+ & $C_F(Q_q^2+Q_{q'}^2)\FLM[z_1p_1,z_2p_2](\mathrm{AA}{+}\dots{+}\mathrm{DD})$.
+   \code{res\_tree\_qqb\_gen}$\to\FLM$; the $(Q_q^2{+}Q_{q'}^2)$ prefactor $=$
+   \code{multiply\_IS\_charges\_sq($\cdot$,1)+($\cdot$,2)} (the two QCD$\leftrightarrow$QED leg
+   assignments); $\sum_X$\code{get\_respdf\_hoppet\_gen(xPij\_X\_1,xPij\_X\_2,\dots)}, \emph{no}
+   factor 2.\\
+\code{[6]} & \code{s12}: \code{kin(2)} $+$ \code{respdf\_2,3,4}
+ & Leg-1 single boost:\newline
+   \emph{A}: \code{kin(2)} $=C_F\,S_1\,$\code{legfinalcalG\_cc($\cdot$,1)}$\FLM$ (via
+   \code{get\_respdf\_gen\_mu}); plus-endpoint in \code{kin(1) respdf\_3}
+   $=S_1^+$\code{legfinalcalG\_cc($\cdot$,1)}$+S_2^+$\code{legfinalcalG\_cc($\cdot$,2)}.\newline
+   \emph{B} ($-2Q_{\ell'}Q_q\ln z\ln\tfrac{s_{14}}{s_{12}}$): \code{kin(1) respdf\_2},
+   \code{get\_respdf\_hoppet\_gen(xPij\_B\_1,PDFs,\dots)} on $\FLM\cdot Q_{\rm IS}(al)$ (first
+   power), $\times(-2Q_{\ell'}\ln\tfrac{s_{14}}{s_{12}})$.\newline
+   \emph{C} ($Q_q^2\times$ big bracket): \code{kin(1) respdf\_2},
+   \code{get\_respdf\_hoppet\_gen(xPij,PDFs,\dots,[xPij\_Lmu,xPij\_Lmu2])} on
+   \code{multiply\_IS\_charges\_sq($\cdot$,1)} ($Q_q^2$).\\
+\code{[60]} & \code{s12}: \code{kin(3)} $+$ leg-2 halves
+ & Leg-2 mirror of $[6]$: \code{kin(3)} $=C_F\,S_2\,$\code{legfinalcalG\_cc($\cdot$,2)}$\FLM$;
+   term B $\to$ \code{(PDFs,xPij\_C\_2)} on $\FLM\cdot Q_{\rm IS}(be)$,
+   $\times(-2Q_{\ell'}\ln\tfrac{s_{24}}{s_{12}})$; term C $\to$
+   \code{multiply\_IS\_charges\_sq($\cdot$,2)} ($Q_{q'}^2$).\\
+\code{[7]} & \code{s12}: \code{kin(1)}, \code{respdf\_4} $+$ $\delta$ of term C
+ & \code{fin\_ns\_v7\_cc}$\otimes$\code{get\_respdf\_gen\_mu}:
+   $(4\zt-3\Lms)\,$\code{genGnloQCD\_cc}$+(\mathrm{EB}-\delta_C)$, where EB is the explicit
+   charge bracket of \code{FINITEDYp[7]} and $\delta_C$ removes the pure-$Q^2$ elastic already
+   shipped by term C's \code{xPij} $\delta$ (\S\ref{sec:shift}).\\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{The $\delta(1-z)$ book-keeping (``$Q^2$ shift'')}
+\label{sec:shift}
+
+The single/double-boost kernels reused from DY0 carry a $\delta(1-z)$ endpoint that, once
+weighted per initial leg by \code{multiply\_IS\_charges\_sq} ($\times Q_{\rm IS}^2$), delivers
+elastic contributions. For DY0 these are exactly the pure-$Q_q^2$ pieces of $[2]$ (from
+\code{mySub\_ns}) and $[7]$ (from \code{mySub\_TCqq}); this was verified directly against the
+notebook. For DY${}^+$ the situation differs term by term:
+
+\begin{itemize}
+\item \textbf{\code{vqcd} / \code{FINITEDYp[2]}:} $G_p$ has \emph{no} pure $Q_q^2/Q_{q'}^2$ term,
+  so the $2\zt$ / $-3/2$ deltas of \code{mySub\_ns}$/$\code{\_Lmu} (times $Q_{\rm IS}^2$ per leg)
+  are \emph{spurious}. \code{fin\_ns\_vqcd\_cc} subtracts them via
+  $\mathtt{coeff\_Qsq}=-2\zt+\tfrac32\Lms$ on $(Q_{\rm IS}(al)^2+Q_{\rm IS}(be)^2)$.
+\item \textbf{\code{vewk} / \code{FINITEDYp[4]}:} no per-leg charge weighting, so the deltas
+  reproduce $C_F(\tfrac{2\pi^2}{3}-3\Lms)\FLVEW$ exactly (as in DY0); \emph{no} compensation.
+\item \textbf{\code{s12} / \code{FINITEDYp[7]}:} $[7]$ \emph{does} contain pure
+  $Q_q^2/Q_{q'}^2$, and the \code{mySub\_TCqq} deltas ($-\tfrac{2\pi^4}{45}$,
+  $-2(\pi^2{+}8\ztt)$, $\tfrac92{-}4\zt$; per leg, $\times Q_{\rm IS}^2$) supply them.
+  \code{fin\_ns\_v7\_cc} therefore \emph{subtracts} exactly that combination
+  ($\delta_C$) from the explicit bracket EB so that
+  $\mathtt{respdf\_4}+(\text{term-C }\delta)=$ the notebook $[7]$.
+\end{itemize}
+
+The leg-$i$ soft function used in $[6]/[60]$ term A and in \code{respdf\_3} is
+$\texttt{legfinalcalG\_cc}(\dots,i)=\texttt{genGnloQCD}+3\,Q_{\rm IS}(\text{leg }i)^2\,\Lms
+=\texttt{genGnloQCD}-3Q_i^2\ln(4E_C^2/\mu^2)$.
+
+\section{Cross-checks against the Mathematica notebook}
+\label{sec:valid}
+
+The script \file{math/validate\_DYp7.wl} performs the symbolic checks below. It is run in a
+kernel that has first evaluated all input cells of \file{DY+\_qq.wl} (so that
+\code{genGnloQCD}, \code{FINITEDYp[7]}, \code{leg1finalcalG}, \code{leg2finalcalG} are defined).
+The runner (\code{run\_validate.wls}, invoked with \code{wolframscript -file}) does
+\[
+\code{Get["DY+\_qq.wl"]}\;\to\;\code{Cases[\ldots,Cell[BoxData[b],"Input"]\!:>\!b]}\;\to\;
+\code{ToExpression}\;\to\;\code{Get["validate\_DYp7.wl"]} .
+\]
+
+The Fortran expressions are transcribed with the map $Q_q\to Q_{\rm IS}(al)$,
+$Q_{q'}\to Q_{\rm IS}(be)$, $Q_{\ell'}\to Q_{\rm lept}$, $L\equiv\ln(\mu^2/4E_C^2)$,
+$\ell_E\equiv\ln(E_C/E_4)$, and the notebook is mapped to the same variables via its own
+leg-replacement rules
+$\ln(\text{twoEConMu})\to-L/2$, $\ln(\text{twoE4onMu})\to-\ell_E-L/2$, $\eta_{12}\to1$.
+
+\begin{center}\small
+\begin{longtable}{@{}c p{9.5cm} c@{}}
+\toprule
+\textbf{Check} & \textbf{What it compares} & \textbf{Result}\\
+\midrule\endhead
+1 & $\big[(4\zt-3L)\,\code{genGnloQCD}+\code{EBcode}\big]-\code{FINITEDYp[7]}$
+  (the $\code{genGnloQCD}$ cancels, so this isolates the explicit-bracket
+  transcription EB and the $\delta_C$ subtraction). & $=0$ \;PASS\\
+2 & the Fortran \code{genGnloQCD\_cc} charge-quadratic coefficients $-$ the notebook
+  \code{genGnloQCD} (mapped). & $=0$ \;PASS\\
+3 & \code{legfinalcalG\_cc}$(\cdot,1)$ $-$ notebook \code{leg1finalcalG}. & $=0$ \;PASS\\
+4 & \code{legfinalcalG\_cc}$(\cdot,2)$ $-$ notebook \code{leg2finalcalG}. & $=0$ \;PASS\\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\paragraph{Important finding.}
+Check~2 exposed that the real-emission soft \code{calG\_ONLOQCD\_ns} is \emph{not} equal to the
+elastic soft \code{genGnloQCD} (it carries an extra $-6\ln(E_C/E_4)$ in the $Q_qQ_{q'}$
+coefficient and sign-flipped $\eta$-terms). An earlier draft of the DY${}^+$ $[6]/[60]$
+term~A and $[7]$ that reused \code{calG\_ONLOQCD\_ns} was therefore incorrect; both now use
+\code{genGnloQCD\_cc}$/$\code{legfinalcalG\_cc}, which pass Checks~2--4.
+
+\paragraph{Coverage.} The checks validate, symbolically, the pieces that are pure
+integrated-subtraction functions: \code{FINITEDYp[7]} (Check~1), the CC soft
+\code{genGnloQCD} (Check~2) and the leg-$i$ soft functions of $[6]/[60]$ term~A
+(Checks~3--4). The remaining DY${}^+$ pieces ($[1]$--$[5]$, terms B/C of $[6]/[60]$)
+reuse the \emph{same} DY0 HOPPET tables (\code{xPij}, \code{xPij\_X}) with per-leg charges;
+their correctness rests on the DY0 implementation (checked against \code{oldcode}) plus the
+charge/kinematic factors given in \S\ref{sec:dyp}, and is not re-derived symbolically here.
+
+\section{Status}
+
+\begin{itemize}
+\item \textbf{Implemented and (where symbolic) validated for $W^+$:} \code{FINITEDYp[1..7]} and
+  \code{FINITEDYp[60]}.
+\item \textbf{Not implemented:} $W^-$ (\code{\_Vcharge==-1}) -- every routine executes a
+  \code{stop}.
+\item The secondary double-real flavour channels (\code{\_qq}, \code{\_qqb}) are separate
+  sectors and are \emph{not} part of \code{FINITEDYp[1..7,60]}.
+\end{itemize}
+
+\end{document}

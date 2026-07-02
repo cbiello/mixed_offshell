@@ -8,6 +8,9 @@ module mod_int_sub_nnlo
   private
 
   public :: fin_ns_vqcd
+  public :: fin_ns_vqcd_cc
+  public :: fin_ns_v7_cc
+  public :: genGnloQCD_cc, legfinalcalG_cc
   public :: Pqqbqqb, Pqqbqqb_Lmu
   public :: calG_QqQl,calG_QqQl_L,calG_CF,calG_Q2
   public :: calG_ONLOQCD_ns
@@ -323,5 +326,197 @@ contains
 
 
   end function calG_ONLOQCD_ns
+
+  !!=========================================================================!!
+  !!  FINITEDYp[2] : charged-current (W) elastic QCD-virtual I-operator.      !!
+  !!  CC analogue of fin_ns_vqcd. Returns FLVqcdfin(=ampl) * Gp, where Gp is  !!
+  !!  the charge-quadratic combination of DY+_qq.wl FINITEDYp[2] (eta12=1     !!
+  !!  for back-to-back initial partons). lmu = Log(mu^2/s), s = 4 EC^2.       !!
+  !!  Charge correlations use signed physical charges Q_IS (as calG_ONLOQCD): !!
+  !!    Qlp^2, Qlp*Q_IS(al), Qlp*Q_IS(be), Q_IS(al)*Q_IS(be).                 !!
+  function fin_ns_vqcd_cc(proc,ampl,lmu,Qlept,ilept)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:)
+    integer, intent(in)           :: ilept    ! label of the charged lepton
+    real(dp) :: fin_ns_vqcd_cc(-5:7,-5:7,size(lmu))
+    real(dp) :: eta12,eta14,eta24
+    real(dp) :: l12,l14,l24,li12,li14,li24
+    real(dp) :: coeff_Qlsq(size(lmu)),coeff_QqQl(size(lmu))
+    real(dp) :: coeff_QqbQl(size(lmu)),coeff_QqQqb(size(lmu))
+    real(dp) :: coeff_Qsq(size(lmu))
+    integer  :: al,be
+
+    fin_ns_vqcd_cc = zero
+
+    eta12 = proc%Lim_etaij(1,2)          ! = 1 (back-to-back beams)
+    eta14 = proc%Lim_etaij(1,ilept)      ! lepton wrt leg 1
+    eta24 = proc%Lim_etaij(2,ilept)      ! lepton wrt leg 2
+
+    l12 = log(eta12) ; li12 = real(dilog2(one-eta12),kind=dp)
+    l14 = log(eta14) ; li14 = real(dilog2(one-eta14),kind=dp)
+    l24 = log(eta24) ; li24 = real(dilog2(one-eta24),kind=dp)
+
+    ! mu-independent part  (1/6)*(...) expanded)
+    coeff_Qlsq  = 13.0_dp/two - two*pisq/three
+    coeff_QqQl  = -pisq/three + three*l14 + two*li14
+    coeff_QqbQl = -pisq/three + three*l24 + two*li24
+    coeff_QqQqb = -two*pisq/three - three*l12 - two*li12
+
+    ! mu-dependent part  (coefficient of Log(mu^2/s))
+    coeff_Qlsq  = coeff_Qlsq  + (three/two)*lmu
+    coeff_QqQl  = coeff_QqQl  - three*lmu
+    coeff_QqbQl = coeff_QqbQl - three*lmu
+    coeff_QqQqb = coeff_QqQqb + three*lmu
+
+    !!------------------------------------------------------------------------------------!!
+    !!  Q^2 shift: compensation for the reused DY0 xPij delta pieces.                       !!
+    !!------------------------------------------------------------------------------------!!
+    !!  In the DY0 (neutral-current) organisation, the pure-quark elastic terms of          !!
+    !!  FINITEDY0[2],  (2 pi^2/3) Qq^2  -  3 Qq^2 Log(mu^2/s),  are NOT put here in the      !!
+    !!  vqcd I-operator: they are instead carried by the delta(1-z) endpoint of the         !!
+    !!  splitting kernel that fills the xPij / xPij_Lmu tables                               !!
+    !!    mySub_ns_func      cc_DELTA -> 2*zeta2   (= pi^2/3)   [mod_hoppet_nnlo.f90]        !!
+    !!    mySub_ns_Lmu_func  cc_DELTA -> -3/2                                                !!
+    !!  and are applied per initial-state leg with a factor Q_IS(leg)^2 coming from          !!
+    !!  multiply_IS_charges_sq in the boosted FINITEDYp[1] convolutions respdf_2/respdf_3.   !!
+    !!  So respdf_2+respdf_3 automatically deliver, at the z=1 endpoint,                      !!
+    !!       ( 2*zeta2  -  (3/2) Log(mu^2/s) ) * ( Q_IS(al)^2 + Q_IS(be)^2 ) * FLVqcdfin.     !!
+    !!                                                                                        !!
+    !!  For DY0 this is exactly what FINITEDY0[2] wants (Q_IS(al)^2 = Q_IS(be)^2 = Qq^2).     !!
+    !!  For the charged current (W), FINITEDYp[2] has NO pure Q_IS^2 term at all -- the       !!
+    !!  quark charges enter only through the Q_IS(al)*Q_IS(be) initial-initial correlation   !!
+    !!  above. Since we reuse the SAME DY0 xPij here, those per-leg Q_IS^2 pieces are         !!
+    !!  spurious and must be removed. We subtract them from the elastic I-operator:          !!
+    coeff_Qsq = -two*zeta2 + (three/two)*lmu
+
+    do al = -5,5
+       do be = -5,5
+          fin_ns_vqcd_cc(al,be,:) = ampl(al,be)*( Qlept**2 * coeff_Qlsq(:) + &
+               Qlept*Q_IS(al)*coeff_QqQl(:) + Qlept*Q_IS(be)*coeff_QqbQl(:) + &
+               Q_IS(al)*Q_IS(be)*coeff_QqQqb(:) + &
+               (Q_IS(al)**2 + Q_IS(be)**2)*coeff_Qsq(:) )
+       enddo
+    enddo
+
+  end function fin_ns_vqcd_cc
+
+  !!=========================================================================!!
+  !!  FINITEDYp[7] : charged-current (W) elastic soft I-operator.             !!
+  !!  Returns  (4 zeta2 - 3 L) * genGnloQCD  +  ( EB - dC ) * FLM ,           !!
+  !!  with L = Log(mu^2/4EC^2), genGnloQCD = calG_ONLOQCD_ns (mu-dependent).  !!
+  !!  EB = the explicit charge bracket of DY+_qq.wl FINITEDYp[7] (2nd term).  !!
+  !!  dC = the pure Q_IS^2 elastic already shipped by term C's xPij delta     !!
+  !!       (mySub_TCqq/_Lmu/_Lmu2 delta pieces), subtracted here to avoid     !!
+  !!       double counting. Charges: Qq->Q_IS(al), Qqp->Q_IS(be), Qlp->Qlept. !!
+  !!  genGnloQCD (charged-current elastic soft), validated against DY+_qq.wl.
+  !!  Returns ampl * genGnloQCD as a (-5:7,-5:7,size(lmu)) matrix, with
+  !!  lmu = Log(mu^2/4EC^2), charges Qq->Q_IS(al), Qqp->Q_IS(be), Qlp->Qlept.
+  function genGnloQCD_cc(proc,ampl,lmu,Qlept,ilept) result(res)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:)
+    integer,           intent(in) :: ilept
+    real(dp) :: res(-5:7,-5:7,size(lmu))
+    real(dp) :: EC,El,lE,eta1l,eta2l,le1,le2,li1,li2
+    real(dp) :: Q1,Q2,Ql,L,cQlp2,cQlpQq,cQlpQqp,cQqQqp
+    integer  :: al,be,k
+
+    EC = proc%Lim_Ei(1)
+    El = proc%Lim_Ei(ilept)
+    lE = log(EC/El)
+    eta1l = proc%Lim_etaij(1,ilept)
+    eta2l = proc%Lim_etaij(2,ilept)
+    le1 = log(eta1l) ; le2 = log(eta2l)
+    li1 = real(dilog2(one-eta1l),kind=dp)
+    li2 = real(dilog2(one-eta2l),kind=dp)
+
+    res = zero
+    Ql = Qlept
+    do al = -5,5
+       do be = -5,5
+          Q1 = Q_IS(al) ; Q2 = Q_IS(be)
+          do k = 1,size(lmu)
+             L = lmu(k)
+             cQlp2   = 13._dp/2 + 3*lE + 2*lE**2 - two*pisq/three + (1.5_dp + 2*lE)*L
+             cQlpQq  = -3*lE - lE**2 + 3*le1 + 2*lE*le1 + 2*li1 - pisq/three - (3._dp+2*lE)*L
+             cQlpQqp = -3*lE - lE**2 + 3*le2 + 2*lE*le2 + 2*li2 - pisq/three - (3._dp+2*lE)*L
+             cQqQqp  = -two*pisq/three + 3*L
+             res(al,be,k) = ampl(al,be)*( Ql**2*cQlp2 + Ql*Q1*cQlpQq &
+                                        + Ql*Q2*cQlpQqp + Q1*Q2*cQqQqp )
+          enddo
+       enddo
+    enddo
+
+  end function genGnloQCD_cc
+
+  !!  leg-i finalcalG = genGnloQCD - 3 Qi^2 Log(4EC^2/mu^2)
+  !!                  = genGnloQCD + 3 Q_IS(leg-i)^2 * lmu    (lmu = Log(mu^2/4EC^2)).
+  !!  ileg = 1 (leg 1, Q_IS(al)^2) or 2 (leg 2, Q_IS(be)^2).
+  function legfinalcalG_cc(proc,ampl,lmu,Qlept,ilept,ileg) result(res)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:)
+    integer,           intent(in) :: ilept,ileg
+    real(dp) :: res(-5:7,-5:7,size(lmu))
+    real(dp) :: Qleg2
+    integer  :: al,be,k
+
+    res = genGnloQCD_cc(proc,ampl,lmu,Qlept,ilept)
+    do al = -5,5
+       do be = -5,5
+          if (ileg == 1) then
+             Qleg2 = Q_IS(al)**2
+          else
+             Qleg2 = Q_IS(be)**2
+          endif
+          do k = 1,size(lmu)
+             res(al,be,k) = res(al,be,k) + 3*lmu(k)*Qleg2*ampl(al,be)
+          enddo
+       enddo
+    enddo
+
+  end function legfinalcalG_cc
+
+  function fin_ns_v7_cc(proc,ampl,lmu,Qlept,ilept)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:)
+    integer,           intent(in) :: ilept
+    real(dp) :: fin_ns_v7_cc(-5:7,-5:7,size(lmu))
+    real(dp) :: genGmat(-5:7,-5:7,size(lmu))
+    real(dp) :: Q1,Q2,Ql,Qd,L,EB,dC
+    integer  :: al,be,k
+
+    !-- genGnloQCD (mu-dependent) * ampl
+    genGmat = genGnloQCD_cc(proc,ampl,lmu,Qlept,ilept)
+
+    fin_ns_v7_cc = zero
+    Ql = Qlept
+    do al = -5,5
+       do be = -5,5
+          Q1 = Q_IS(al) ; Q2 = Q_IS(be) ; Qd = Ql - Q1 - Q2
+          do k = 1,size(lmu)
+             L = lmu(k)
+             !-- explicit bracket EB  (FINITEDYp[7], 2nd term)
+             EB = -two/45._dp*(Q1**2+Q2**2)*pisq**2 &
+                + ( -6*Qd**2 - 16*(Q1**2+Q2**2)*L )*zeta3 &
+                + 0.25_dp*( -9*Ql**2 + (-9._dp-8*pisq/three)*Q1**2 - 18*Q1*Q2 &
+                            - (27._dp+8*pisq)/three*Q2**2 + 18*Ql*(Q1+Q2) )*L**2 &
+                - pisq*Qd**2*( -21._dp/8._dp - L )
+             !-- term-C xPij delta (per leg, x Q_IS^2): subtract to avoid double counting
+             dC = (Q1**2+Q2**2)*( -two*pisq**2/45._dp - two*(pisq+8*zeta3)*L &
+                                  + (4.5_dp-4*zeta2)*L**2 )
+             fin_ns_v7_cc(al,be,k) = (two*pisq/three - three*L)*genGmat(al,be,k) &
+                                   + (EB - dC)*ampl(al,be)
+          enddo
+       enddo
+    enddo
+
+  end function fin_ns_v7_cc
 
 end module mod_int_sub_nnlo
