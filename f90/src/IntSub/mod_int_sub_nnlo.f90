@@ -324,4 +324,64 @@ contains
 
   end function calG_ONLOQCD_ns
 
+
+  function calG_ONLOQCD_gq(proc,ampl,mu,Qlept,ilept,ig,iq)
+    use mod_process, only: KinConfig
+    ! set ig,iq=1,2 for gq channel; ig,iq=2,1 for qg channel
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),mu(:)
+    integer, intent(in)           :: ilept    ! this is the label of the charged lepton
+    integer, intent(in)           :: ig,iq    ! this is the label of the IS gluon and IS quark
+    !    integer, optional, intent(in) :: icoll
+    real(dp) :: calG_ONLOQCD_gq(-5:7,-5:7,size(mu))
+    real(dp)    :: Emax,Eq,Eg,El,E5,LE5oEmax,LE5oEl,LEloEq,LEmaxsqoEqEl,LEmaxsqoElE5,LEmaxsqoEqE5,Lmusqo4E2sq(size(mu))
+    real(dp)    :: etal5,etaql,etaq5,etag5,li2ometal5,li2ometaql,li2ometaq5,Qqp
+    real(dp)    :: coeff_Qqsq(size(mu)),coeff_Qqpsq(size(mu)),coeff_QqQqp(size(mu))
+    integer  :: al,be
+
+    calG_ONLOQCD_gq = zero
+    
+    Eg = proc%Lim_Ei(ig)       ! energy of IS gluon
+    Eq = proc%Lim_Ei(iq)       ! energy of IS quark
+    El = proc%Lim_Ei(ilept)   ! for CC, specify the final state lepton
+    E5 = proc%Lim_Ei(5)       ! energy of FS quark
+    Emax = Eq
+
+    LE5oEmax = log(E5/Emax)
+    LE5oEl = log(E5/El)
+    LEloEq = log(El/Eq)
+    LEmaxsqoEqEl = log(Emax**2/Eq/El)
+    LEmaxsqoElE5 = log(Emax**2/El/E5)
+    LEmaxsqoEqE5 = log(Emax**2/Eq/E5)
+    Lmusqo4E2sq = log(mu**2/four/Eq**2)
+
+    etal5  = proc%Lim_etaij(ilept,5)
+    etaql  = proc%Lim_etaij(iq,ilept)
+    etaq5  = proc%Lim_etaij(iq,5)
+    etag5  = proc%Lim_etaij(ig,5)
+
+    li2ometal5 = real(dilog2(one-etal5),kind=dp)
+    li2ometaql = real(dilog2(one-etaql),kind=dp)
+    li2ometaq5 = real(dilog2(one-etaq5),kind=dp)
+
+
+    ! mu-independent part
+    coeff_Qqsq =  13.0_dp/two + LEloEq**2 + two*li2ometaql - pisq + (three + two*LEmaxsqoEqEl)*Log(etaql)
+    coeff_Qqpsq = 13.0_dp + LE5oEl**2 + two*li2ometal5 - two*pisq/three + 3*ln2 - 4*LE5oEmax*ln2 + (three + two*LEmaxsqoElE5)*Log(etal5) + (three/two - two*LE5oEmax)*(Log(one - etag5) - Log(etag5))
+    coeff_QqQqp = -13.0_dp + two*LE5oEl*LEloEq - two*li2ometal5 + two*li2ometaq5 - two*li2ometaql + two*pisq/three - &
+         (three + two*LEmaxsqoElE5)*Log(etal5) - (three + two*LEmaxsqoEqEl)*Log(etaql) + (three + two*LEmaxsqoEqE5)*Log(etaq5)
+
+    ! mu-dependent part
+    coeff_Qqsq = coeff_Qqsq - three*Lmusqo4E2sq/two
+
+
+    do al = -5,5
+       Qqp = Q_IS(al) - Qlept
+       calG_ONLOQCD_gq(0,al,:) = ampl(0,al)* ( Q_IS(al)**2 * coeff_Qqsq(:)  + Qqp*Q_IS(al) * coeff_QqQqp(:) + Qqp**2 * coeff_Qqpsq(:))
+    enddo
+
+
+  end function calG_ONLOQCD_gq
+
 end module mod_int_sub_nnlo
