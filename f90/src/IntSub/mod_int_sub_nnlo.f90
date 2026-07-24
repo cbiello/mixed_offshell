@@ -13,7 +13,7 @@ module mod_int_sub_nnlo
   public :: genGnloQCD_cc, legfinalcalG_cc
   public :: Pqqbqqb, Pqqbqqb_Lmu
   public :: calG_QqQl,calG_QqQl_L,calG_CF,calG_Q2
-  public :: calG_ONLOQCD_ns
+  public :: calG_ONLOQCD_ns,calG_ONLOQCD_gq
 
   interface calG_CF
     module procedure calG_CF_hard, calG_CF_coll
@@ -327,36 +327,37 @@ contains
 
   end function calG_ONLOQCD_ns
 
-  function calG_ONLOQCD_gq(proc,ampl,mu,Qlept,ilept,ig,iq)
+  function calG_ONLOQCD_gq(proc,ampl,lmu,Qlept,ilept,ig,iq)
     use mod_process, only: KinConfig
     ! set ig,iq=1,2 for gq channel; ig,iq=2,1 for qg channel
+    ! lmu  = log(mu^2/4/Eq^2), Eq is energy of IS quark
     implicit none
     type(KinConfig),   intent(in) :: proc
-    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),mu(:)
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:)
     integer, intent(in)           :: ilept    ! this is the label of the charged lepton
     integer, intent(in)           :: ig,iq    ! this is the label of the IS gluon and IS quark
     !    integer, optional, intent(in) :: icoll
-    real(dp) :: calG_ONLOQCD_gq(-5:7,-5:7,size(mu))
-    real(dp)    :: Emax,Eq,Eg,El,E5,LE5oEmax,LE5oEl,LEloEq,LEmaxsqoEqEl,LEmaxsqoElE5,LEmaxsqoEqE5,Lmusqo4E2sq(size(mu))
+    real(dp) :: calG_ONLOQCD_gq(-5:7,-5:7,size(lmu))
+    real(dp)    :: Emax,Eq,Eg,El,E5,LE5oEmax,LE5oEl,LEloEq,LEmaxsqoEqEl,LEmaxsqoElE5,LEmaxsqoEqE5!,Llmusqo4E2sq(size(lmu))
     real(dp)    :: etal5,etaql,etaq5,etag5,li2ometal5,li2ometaql,li2ometaq5,Qqp
-    real(dp)    :: coeff_Qqsq(size(mu)),coeff_Qqpsq(size(mu)),coeff_QqQqp(size(mu))
+    real(dp)    :: coeff_Qqsq(size(lmu)),coeff_Qqpsq(size(lmu)),coeff_QqQqp(size(lmu))
     integer  :: al,be
 
     calG_ONLOQCD_gq = zero
     
-    Eg = proc%Lim_Ei(ig)       ! energy of IS gluon
-    Eq = proc%Lim_Ei(iq)       ! energy of IS quark
+    Eg = proc%Lim_Ei(1)       ! energy of IS gluon/quark (same)
+    Eq = Eg       ! energy of IS quark
     El = proc%Lim_Ei(ilept)   ! for CC, specify the final state lepton
-    E5 = proc%Lim_Ei(5)       ! energy of FS quark
+    E5 = proc%Lim_Ei(2)       ! energy of FS quark, labeled 2 for some reason
     Emax = Eq
-
+    
     LE5oEmax = log(E5/Emax)
     LE5oEl = log(E5/El)
     LEloEq = log(El/Eq)
     LEmaxsqoEqEl = log(Emax**2/Eq/El)
     LEmaxsqoElE5 = log(Emax**2/El/E5)
     LEmaxsqoEqE5 = log(Emax**2/Eq/E5)
-    Lmusqo4E2sq = log(mu**2/four/Eq**2)
+!    Lmusqo4E2sq = log(mu**2/four/Eq**2)
 
     etal5  = proc%Lim_etaij(ilept,5)
     etaql  = proc%Lim_etaij(iq,ilept)
@@ -366,8 +367,7 @@ contains
     li2ometal5 = real(dilog2(one-etal5),kind=dp)
     li2ometaql = real(dilog2(one-etaql),kind=dp)
     li2ometaq5 = real(dilog2(one-etaq5),kind=dp)
-
-
+    
     ! mu-independent part
     coeff_Qqsq =  13.0_dp/two + LEloEq**2 + two*li2ometaql - pisq + (three + two*LEmaxsqoEqEl)*Log(etaql)
     coeff_Qqpsq = 13.0_dp + LE5oEl**2 + two*li2ometal5 - two*pisq/three + 3*ln2 - 4*LE5oEmax*ln2 + (three + two*LEmaxsqoElE5)*Log(etal5) + (three/two - two*LE5oEmax)*(Log(one - etag5) - Log(etag5))
@@ -375,8 +375,7 @@ contains
          (three + two*LEmaxsqoElE5)*Log(etal5) - (three + two*LEmaxsqoEqEl)*Log(etaql) + (three + two*LEmaxsqoEqE5)*Log(etaq5)
 
     ! mu-dependent part
-    coeff_Qqsq = coeff_Qqsq - three*Lmusqo4E2sq/two
-
+    coeff_Qqsq = coeff_Qqsq - three*lmu/two
 
     do al = -5,5
        Qqp = Q_IS(al) - Qlept
@@ -385,7 +384,8 @@ contains
 
 
   end function calG_ONLOQCD_gq
-=======
+
+  
   !!=========================================================================!!
   !!  FINITEDYp[2] : charged-current (W) elastic QCD-virtual I-operator.      !!
   !!  CC analogue of fin_ns_vqcd. Returns FLVqcdfin(=ampl) * Gp, where Gp is  !!
@@ -577,6 +577,5 @@ contains
     enddo
 
   end function fin_ns_v7_cc
->>>>>>> 1ca22026fe015d00a200086508a4f949e3ccb255
 
 end module mod_int_sub_nnlo

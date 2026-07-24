@@ -272,12 +272,12 @@ contains
     real(dp) :: res_lo(-5:7,-5:7) , res_nlo(-5:7,-5:7)
     real(dp) :: res_nlo_ischarges(-5:7,-5:7),res_lo_ischarges(-5:7,-5:7),res_nlo_calG(-5:7,-5:7,ipdf),res_lo_calG(-5:7,-5:7,ipdf)
     real(dp) :: Qlept
-    integer  :: ilept
+    integer  :: ilept,i
     logical  :: oldcode
 
-    oldcode = .true.
+    oldcode = .false.
 
-    print *, "oldcode=",oldcode
+!    print *, "oldcode=",oldcode
 
 #if (_Vcharge == -1)
     Qlept = -one
@@ -295,6 +295,12 @@ contains
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
     z = buff+onet*real(yRnd(kNLO_max_full),dp)
+
+    ! for check z = one-1E-5_dp
+    ! for check xx(xE) = 1E-5_dp
+    ! for check xx(xRHO)=1E-10_dp
+
+
 
 #if (_withchecks == 1)
     if (override) then
@@ -436,8 +442,8 @@ contains
           call get_respdf(gq_lumi,1,1,HardProc,res_nlo_1,respdf_tmp)
 #else       
           call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)
-          res_nlo_ischarges_2 =  multiply_IS_charges_sq(res_nlo,2)
-          call get_respdf_gen(1,1,HardProc,res_nlo_ischarges_2,respdf_tmp)
+          res_nlo_ischarges =  multiply_IS_charges_sq(res_nlo,2)
+          call get_respdf_gen(1,1,HardProc,res_nlo_ischarges,respdf_tmp)
 #endif       
           
        intsub = PqqNLO(1) + Pqq0_R(1)*sv_logs
@@ -457,12 +463,10 @@ contains
        call fill_sv_logs(HardProc%muf(1)**2,EC**2,sv_logs)
        respdf_2 = respdf_2 - 1.5_dp * respdf_tmp * sv_logs
 #else
-       res_nlo_calG =  calG_ONLOQCD_gq(HardProc,res_nlo,HardProc%muf,Qlept,ilept,1,2)
+       call fill_sv_logs(HardProc%muf(1)**2,four*HardProc%Lim_Ei(2)**2,sv_logs)                   ! hard-coded that we use the quark energy, should be changed for qg channel
+       res_nlo_calG =  calG_ONLOQCD_gq(HardProc,res_nlo,sv_logs,Qlept,ilept,1,2)
        call get_respdf_gen_mu(1,1,HardProc,res_nlo_calG,respdf_2)
 #endif       
-
-       print *, "respdf_1, respdf_2", respdf_1, respdf_2
-
        respdf = (respdf_1 + respdf_2) * HardProc%wgt
 
        FintNNLO_s_gq_oqcd(3) = respdf(1)
@@ -496,9 +500,9 @@ contains
        call get_respdf(gq_lumi,1,1,C1Lim,res_nlo_1,respdf_tmp)
 #else
        call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
-       res_lo = multiply_IS_charges_sq(res_lo,2)
-       res_lo = transition('g -> q', 'none', res_lo)
-       call get_respdf_gen(1,1,C1Lim,res_lo,respdf_tmp)
+       res_lo_ischarges = multiply_IS_charges_sq(res_lo,2)
+       res_lo_ischarges = transition('g -> q', 'none', res_lo_ischarges)
+       call get_respdf_gen(1,1,C1Lim,res_lo_ischarges,respdf_tmp)
 #endif
 
 
@@ -522,10 +526,13 @@ contains
        respdf_2 = respdf_2 - 1.5_dp * respdf_tmp * sv_logs
 
 #else
-       res_lo_calG =  calG_ONLOQCD_gq(C1Lim,res_lo,C1Lim%muf,Qlept,ilept,1,2)
-       call get_respdf_gen_mu(1,1,HardProc,res_lo_calG,respdf_2)
+       call fill_sv_logs(C1Lim%muf(1)**2,four*C1Lim%Lim_Ei(2)**2,sv_logs)                   ! hard-coded that we use the quark energy, should be changed for qg channel
+       res_lo = transition('g -> q', 'none', res_lo)
+       res_lo_calG =  calG_ONLOQCD_gq(C1Lim,res_lo,sv_logs,Qlept,ilept,1,2)
+       call get_respdf_gen_mu(1,1,C1Lim,res_lo_calG,respdf_2)
+
 #endif
-       
+
 
        s15 = C1Lim%Lim_sij(1,5)
        z5  = C1Lim%Lim_z(1)
@@ -543,12 +550,22 @@ contains
 
     !!-----------------------------------------------------------------------!!
 
-    if (product(FintNNLO_s_gq_oqcd) .ne. zero) then
-       print *, "FintNNLO_s_gq_oqcd",FintNNLO_s_gq_oqcd
-       stop
-    endif
+!    if (product(FintNNLO_s_gq_oqcd) .ne. zero) then
+!       print *, "FintNNLO_s_gq_oqcd",FintNNLO_s_gq_oqcd
+!       stop
+!    endif
 
     ff(1) = sum(kin)
+
+! for checks    if (product(kin) .ne. zero) then
+! for checks       print *, "boosted1 kin", kin(1:2), sum(kin(1:2))/kin(1)
+! for checks       print *, "unboosted kin", kin(3:4), sum(kin(3:4))/kin(3)
+! for checks       
+! for checks       print *, "z-subtr, hard", (kin(1)+kin(3))/kin(1)
+! for checks       print *, "z-subtr, coll",   (kin(2)+kin(4))/kin(2)
+! for checks       print *, "ff",ff(1)
+! for checks       pause
+! for checks    endif
     call close_histo()
 
     call check_ff(ff,xx,kin)
