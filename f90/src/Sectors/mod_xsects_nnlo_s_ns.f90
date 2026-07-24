@@ -96,6 +96,10 @@ contains
     real(dp) :: ns_int_sub(2,2),sv_logs(ipdf),SplitF_1(ipdf),SplitF_2(ipdf)
     real(dp) :: Pqq0_R_1(-1:1),PqqNLO_1(-1:1),Pqq0_R_2(-1:1),PqqNLO_2(-1:1)
     real(dp) :: res_lo(2,2),res_tmp(2,2)
+    real(dp) :: res_lo_gen(-5:7,-5:7),amp_gen(-5:7,-5:7)
+    real(dp) :: res_calG(-5:7,-5:7,ipdf),El,Qlept
+    real(dp) :: s12,s14,s24
+    integer  :: ilept,ic,ia,ib
 
     xsect_nnlo_s_ns_s12 = 0
 
@@ -129,7 +133,13 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
+#if (_Vcharge == 0)
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
+#elif (_Vcharge == +1)
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
+#elif (_Vcharge == -1)
+    stop 'xsect_nnlo_s_ns_s12: W- (_Vcharge=-1) not yet implemented'
+#endif
     LOProc%npart = 4
 
     call cut_histo(LOProc)
@@ -140,6 +150,7 @@ contains
 
     else
 
+#if (_Vcharge == 0)
        call res_tree_qqb(LOProc%AmpMom,res_tmp)
        res_lo(:,1) = Qdn2 * res_tmp(:,1)
        res_lo(:,2) = Qup2 * res_tmp(:,2)
@@ -208,6 +219,95 @@ contains
        call get_respdf_hoppet(PDFs,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_bak)
        respdf_4 = respdf_4 + respdf_bak*sv_logs
 
+#elif (_Vcharge == +1)
+       !!-- Charged current W+: FINITEDYp[5] double-boosted piece only.
+       !!   FINITEDYp[5] = CF (Qq^2 + Qqp^2) FLM[z1.p1,z2.p2] (AA+BB+CC+DD).
+       !!   The (Qq^2+Qqp^2) prefactor = the two QCD<->QED leg assignments:
+       !!   (leg1 QCD, leg2 QED)->Qqp^2 + (leg1 QED, leg2 QCD)->Qq^2, i.e.
+       !!   multiply_IS_charges_sq(FLM,1)+(.,2). Replaces the DY0 "2*Qq^2".
+       call res_tree_qqb_gen(LOProc%AmpMom,res_lo_gen)
+       amp_gen = multiply_IS_charges_sq(res_lo_gen,1) + multiply_IS_charges_sq(res_lo_gen,2)
+
+       !-- F[z1.p1,z2.p2] : AA,BB,CC,DD
+       call get_respdf_hoppet_gen(xPij_A_1,xPij_A_2,1,1,LOProc,amp_gen,respdf_tmp(:,1),&
+          myPDFs1_Lmu=[xPij_A_1_Lmu],myPDFs2_Lmu=[xPij_A_2_Lmu])
+       call get_respdf_hoppet_gen(xPij_B_1,xPij_B_2,1,1,LOProc,amp_gen,respdf_tmp(:,2),&
+          myPDFs1_Lmu=[xPij_B_1_Lmu])
+       call get_respdf_hoppet_gen(xPij_C_1,xPij_C_2,1,1,LOProc,amp_gen,respdf_tmp(:,3),&
+          myPDFs2_Lmu=[xPij_C_2_Lmu])
+       call get_respdf_hoppet_gen(xPij_D_1,xPij_D_2,1,1,LOProc,amp_gen,respdf_tmp(:,4))
+
+       respdf_1 = sum(respdf_tmp,2)     !-- no factor 2: (Qq^2+Qqp^2) already in amp_gen
+
+       !!-- FINITEDYp[6]/[60] term B (single-boost QlpQq / QlpQqp):
+       !!     leg1:  -2 Qlp Q_IS(al) Log(s14/s12) * [xPij_B_1 kernel = (z-bracket_B) Logz]
+       !!     leg2:  -2 Qlp Q_IS(be) Log(s24/s12) * [xPij_C_2 kernel]
+       !!   Q_IS is a first-power (signed) leg charge, so weight FLM per leg by Q_IS directly.
+       Qlept = +one
+       s12 = 2*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,2))
+       s14 = 2*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,4))
+       s24 = 2*scr(LOProc%AmpMom(:,2),LOProc%AmpMom(:,4))
+
+       !-- leg 1: Q_IS(al) weighting
+       do ia = -5,7
+          do ib = -5,7
+             amp_gen(ia,ib) = res_lo_gen(ia,ib) * Q_IS(ia)
+          enddo
+       enddo
+       call get_respdf_hoppet_gen(xPij_B_1,PDFs,1,1,LOProc,amp_gen,respdf_tmp(:,1),&
+            myPDFs1_Lmu=[xPij_B_1_Lmu])
+
+       !-- leg 2: Q_IS(be) weighting
+       do ia = -5,7
+          do ib = -5,7
+             amp_gen(ia,ib) = res_lo_gen(ia,ib) * Q_IS(ib)
+          enddo
+       enddo
+       call get_respdf_hoppet_gen(PDFs,xPij_C_2,1,1,LOProc,amp_gen,respdf_tmp(:,2),&
+            myPDFs2_Lmu=[xPij_C_2_Lmu])
+
+       respdf_2 = -2*Qlept*( log(s14/s12)*respdf_tmp(:,1) + log(s24/s12)*respdf_tmp(:,2) )
+
+       !!-- FINITEDYp[6]/[60] term C (single-boost Qq^2 / Qqp^2 z-space bracket):
+       !!     leg1:  Q_IS(al)^2 * [xPij (=mySub_TCqq) kernel, with Lmu, Lmu2]
+       !!     leg2:  Q_IS(be)^2 * [xPij kernel]
+       !!   xPij(+xPij_Lmu,+xPij_Lmu2) encodes the big z-space bracket (D0..D3, Li2/Li3,
+       !!   Log(mu^2/s), Log(mu^2/s)^2). Per-leg charge^2 via multiply_IS_charges_sq.
+       amp_gen = multiply_IS_charges_sq(res_lo_gen,1)
+       call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,amp_gen,respdf_tmp(:,3),&
+            myPDFs1_Lmu=[xPij_Lmu,xPij_Lmu2])
+
+       amp_gen = multiply_IS_charges_sq(res_lo_gen,2)
+       call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,amp_gen,respdf_tmp(:,4),&
+            myPDFs2_Lmu=[xPij_Lmu,xPij_Lmu2])
+
+       respdf_2 = respdf_2 + respdf_tmp(:,3) + respdf_tmp(:,4)
+
+       !!-- FINITEDYp[7] elastic soft: (4 zeta2 - 3 Log(mu^2/4EC^2))*genGnloQCD + explicit bracket.
+       !!   fin_ns_v7_cc computes genGnloQCD directly (validated vs DY+_qq.wl) plus the explicit
+       !!   charge bracket, minus the pure Q_IS^2 elastic already delivered by term C's xPij delta.
+       ilept = 4
+       EC = LOProc%Lim_Ei(1)
+       call fill_sv_logs(LOProc%muf(1)**2,4*EC**2,sv_logs)     !-- L = Log(mu^2/4EC^2)
+       res_calG = fin_ns_v7_cc(LOProc,res_lo_gen,sv_logs,Qlept,ilept)
+       call get_respdf_gen_mu(1,1,LOProc,res_calG,respdf_4)
+
+       !!-- plus-subtraction for FINITEDYp[6]/[60] term A: the plus-distribution endpoint of the
+       !!   boosted term A (kin(2)/kin(3)) subtracted at z=1. Mirror of DY0's respdf_3, per leg:
+       !!     SplitF_i = -(PqqNLO(1) + Pqq0_R(1)*Log(mu^2/4EC^2))   (the plus coefficient)
+       !!     leg-i soft = legfinalcalG_cc(.,ileg=i) at the elastic point.
+       SplitF_1 = - (PqqNLO_1(1) + Pqq0_R_1(1)*sv_logs)
+       SplitF_2 = - (PqqNLO_2(1) + Pqq0_R_2(1)*sv_logs)
+
+       res_calG = legfinalcalG_cc(LOProc,res_lo_gen,sv_logs,Qlept,ilept,1)
+       call get_respdf_gen_mu(1,1,LOProc,res_calG,respdf_bak)
+       respdf_3 = SplitF_1 * respdf_bak
+
+       res_calG = legfinalcalG_cc(LOProc,res_lo_gen,sv_logs,Qlept,ilept,2)
+       call get_respdf_gen_mu(1,1,LOProc,res_calG,respdf_bak)
+       respdf_3 = respdf_3 + SplitF_2 * respdf_bak
+#endif
+
        !-- Total
        respdf = CF * (respdf_1 + respdf_2 + respdf_3 + respdf_4) * LOProc%wgt
 
@@ -220,6 +320,7 @@ contains
 
     !!-----------------------------------------------------------------------!!
 
+#if (_Vcharge == 0)
     !-- F[z1.p1,p2]
     LOProc_z1%ids(1:4) = [0,0,id_el,-id_el]
     LOProc_z1%npart = 4
@@ -252,9 +353,48 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
+#elif (_Vcharge == +1)
+    !!-- FINITEDYp[6] term A (leg-1 boosted): CF * (z-bracket_A) * leg1finalcalG * FLM[z1.p1,p2]
+    !!   z-bracket_A = SplitF_1 = PqqNLO(0) + Pqq0_R(0)*Log(mu^2/4EC^2).
+    !!   leg1finalcalG = genGnloQCD - 3 Qq^2 Log(4EC^2/mu^2)  (legfinalcalG_cc, ileg=1),
+    !!   with genGnloQCD computed directly (validated vs DY+_qq.wl, != calG_ONLOQCD_ns).
+    !!   Terms B (QlpQq) and C (Qq^2 z-space) are separate (kin(1) xPij) -- not here.
+    LOProc_z1%ids(1:4) = [0,0,id_nue,-id_el]
+    LOProc_z1%npart = 4
+
+    call cut_histo(LOProc_z1)
+    if (LOProc_z1%makecut) then
+
+       kin(2) = zero
+       FintNNLO_s_ns_s12(2) = zero
+
+    else
+
+       Qlept = +one
+       ilept = 4
+
+       call res_tree_qqb_gen(LOProc_z1%AmpMom,res_lo_gen)         !-- FLM
+
+       EC = LOProc_z1%Lim_Ei(1)
+       call fill_sv_logs(LOProc_z1%muf(1)**2,4*EC**2,sv_logs)     !-- L = Log(mu^2/4EC^2)
+       res_calG = legfinalcalG_cc(LOProc_z1,res_lo_gen,sv_logs,Qlept,ilept,1)
+       call get_respdf_gen_mu(1,1,LOProc_z1,res_calG,respdf)
+
+       !-- z-bracket_A
+       SplitF_1 = PqqNLO_1(0) + Pqq0_R_1(0)*sv_logs
+       respdf = CF * SplitF_1 * respdf * LOProc_z1%wgt
+
+       FintNNLO_s_ns_s12(2) = respdf(1)
+       kin(2) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+#endif
 
     !!-----------------------------------------------------------------------!!
 
+#if (_Vcharge == 0)
     !-- F[p1,z2.p2]
     LOProc_z2%ids(1:4) = [0,0,id_el,-id_el]
     LOProc_z2%npart = 4
@@ -287,6 +427,42 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
+#elif (_Vcharge == +1)
+    !!-- FINITEDYp[60] term A (leg-2 boosted): CF * (z-bracket_A) * leg2finalcalG * FLM[p1,z2.p2]
+    !!   Leg-2 mirror of FINITEDYp[6] term A. leg2finalcalG = genGnloQCD - 3 Qqp^2 Log(4EC^2/mu^2)
+    !!   (legfinalcalG_cc, ileg=2), genGnloQCD computed directly.  z-bracket_A = SplitF_2.
+    LOProc_z2%ids(1:4) = [0,0,id_nue,-id_el]
+    LOProc_z2%npart = 4
+
+    call cut_histo(LOProc_z2)
+    if (LOProc_z2%makecut) then
+
+       kin(3) = zero
+       FintNNLO_s_ns_s12(3) = zero
+
+    else
+
+       Qlept = +one
+       ilept = 4
+
+       call res_tree_qqb_gen(LOProc_z2%AmpMom,res_lo_gen)         !-- FLM
+
+       EC = LOProc_z2%Lim_Ei(2)
+       call fill_sv_logs(LOProc_z2%muf(1)**2,4*EC**2,sv_logs)     !-- L = Log(mu^2/4EC^2)
+       res_calG = legfinalcalG_cc(LOProc_z2,res_lo_gen,sv_logs,Qlept,ilept,2)
+       call get_respdf_gen_mu(1,1,LOProc_z2,res_calG,respdf)
+
+       !-- z-bracket_A
+       SplitF_2 = PqqNLO_2(0) + Pqq0_R_2(0)*sv_logs
+       respdf = CF * SplitF_2 * respdf * LOProc_z2%wgt
+
+       FintNNLO_s_ns_s12(3) = respdf(1)
+       kin(3) = respdf(1)
+
+       call fill_histo(respdf,vegasweight)
+
+    endif
+#endif
 
     !!-----------------------------------------------------------------------!!
 
@@ -312,6 +488,9 @@ contains
     real(dp) :: respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_3(ipdf)
     real(dp) :: etab13,etab14,IntSubs(2,2)
     real(dp) :: res_Isub(2,2),res_tree(2,2),res_nlo(2,2),kin(1)
+    real(dp) :: res0_gen(-5:7,-5:7),res1fin_gen(-5:7,-5:7),amp_gen(-5:7,-5:7)
+    real(dp) :: res_calG(-5:7,-5:7,ipdf),sv_logs(ipdf),EC,Qlept
+    integer  :: ilept
 
     xsect_nnlo_s_ns_vqcd = 0
 
@@ -333,7 +512,13 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
+#if (_Vcharge == 0)
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
+#elif (_Vcharge == +1)
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
+#elif (_Vcharge == -1)
+    stop 'xsect_nnlo_s_ns_vqcd: W- (_Vcharge=-1) not yet implemented'
+#endif
     LOProc%npart = 4
 
     call cut_histo(LOProc)
@@ -343,6 +528,8 @@ contains
 
     else
 
+#if (_Vcharge == 0)
+       !!-- Neutral current: FINITEDY0[1] (boosted) + FINITEDY0[2] (elastic I-op)
        call res_qcdloop_qqb(LOProc%AmpMom,res_tree,res_nlo)
 
        !-- Elastic contribution
@@ -365,6 +552,35 @@ contains
 
        !-- F[1,z2]
        call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_nlo,respdf_3,myPDFs2_Lmu=[xPij_Lmu])
+
+#elif (_Vcharge == +1)
+       !!-- Charged current W+: FINITEDYp[1] (boosted QCD-virtual piece).
+       !!   The z-bracket is charge/current independent and lives in the xPij table
+       !!   (reused verbatim from NC). The only CC difference is the per-leg charge:
+       !!   Qq^2 on boosted leg 1, Qqp^2 on boosted leg 2 -- applied via
+       !!   multiply_IS_charges_sq(.,leg). The gen amplitude selects the CC flavour
+       !!   entries through current_charge.
+       call res_qcdloop_qqb_gen(LOProc%AmpMom,res0_gen,res1fin_gen) !-- res1fin_gen = FLVQCDfin
+
+       !-- FINITEDYp[2] : elastic QCD-virtual I-operator (FLVqcdfin * Gp).
+       !!   Charged lepton (W+ -> nu e+): leg 4 = e+, Qlept = +1.
+       Qlept = +one
+       ilept = 4
+       !-- back-to-back initial partons: eta(2,l) = 1 - eta(1,l) (not set by kinematics_lo)
+       LOProc%Lim_etaij(2,ilept) = one - LOProc%Lim_etaij(1,ilept)
+       EC = LOProc%Lim_Ei(1)
+       call fill_sv_logs(LOProc%muf(1)**2,4*EC**2,sv_logs)     !-- sv_logs = Log(mu^2/s), s=4EC^2
+       res_calG = fin_ns_vqcd_cc(LOProc,res1fin_gen,sv_logs,Qlept,ilept)
+       call get_respdf_gen_mu(1,1,LOProc,res_calG,respdf_1)
+
+       !-- F[z1,.] : Qq^2 . FLV[q z, qp]  -> charge^2 of boosted leg 1
+       amp_gen = multiply_IS_charges_sq(res1fin_gen,1)
+       call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,amp_gen,respdf_2,myPDFs1_Lmu=[xPij_Lmu])
+
+       !-- F[.,z2] : Qqp^2 . FLV[q, qp z]  -> charge^2 of boosted leg 2
+       amp_gen = multiply_IS_charges_sq(res1fin_gen,2)
+       call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,amp_gen,respdf_3,myPDFs2_Lmu=[xPij_Lmu])
+#endif
 
        !-- Total
        respdf = (respdf_1 + respdf_2 + respdf_3) * LOProc%wgt
@@ -396,6 +612,7 @@ contains
     real(dp) :: xx(kLO_max_full)
     real(dp) :: respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf)
     real(dp) :: res_tree(2,3),res_nlo(2,3),kin(1)
+    real(dp) :: res_tree_gen(-5:7,-5:7),res_nlo_gen(-5:7,-5:7)
 
     xsect_nnlo_s_ns_vewk = 0
 
@@ -417,7 +634,13 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
+#if (_Vcharge == 0)
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
+#elif (_Vcharge == +1)
+    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
+#elif (_Vcharge == -1)
+    stop 'xsect_nnlo_s_ns_vewk: W- (_Vcharge=-1) not yet implemented'
+#endif
     LOProc%npart = 4
 
     call cut_histo(LOProc)
@@ -428,6 +651,8 @@ contains
 
     else
 
+#if (_Vcharge == 0)
+       !!-- Neutral current: FINITEDY0[3] (boosted) + FINITEDY0[4] (elastic, from xPij delta)
        call res_ewkloop_qqb(LOProc%AmpMom,res_tree,res_nlo)
 
        !-- F[z1,2]
@@ -435,6 +660,20 @@ contains
 
        !-- F[1,z2]
        call get_respdf_hoppet(PDFs,xPij,ns_lumi_splitb,1,1,LOProc,res_nlo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+#elif (_Vcharge == +1)
+       !!-- Charged current W+: FINITEDYp[3] (boosted EW-virtual) + FINITEDYp[4] (elastic).
+       !!   FLVewfin already carries the electric charges, so there is NO per-leg charge
+       !!   weighting (unlike vqcd): just CF*(FLVewfin[q z,qp] + FLVewfin[q,qp z])*zbracket.
+       !!   FINITEDYp[4] = CF (2 pi^2/3 - 3 Log(mu^2/s)) FLVewfin comes from the xPij delta,
+       !!   identical to FINITEDY0[4] (no Q^2 weighting => no Q^2-shift compensation needed here).
+       call res_ewkloop_qqb_gen(LOProc%AmpMom,res_tree_gen,res_nlo_gen) !-- res_nlo_gen = FLVewfin
+
+       !-- F[z1,.]
+       call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,res_nlo_gen,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+
+       !-- F[.,z2]
+       call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,res_nlo_gen,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+#endif
 
        !-- Total
        respdf = CF * (respdf_1 + respdf_2) * LOProc%wgt
