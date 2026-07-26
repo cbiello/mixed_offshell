@@ -912,20 +912,30 @@ contains
     !--
     real(dp) :: xx(kNLO_max_full),z
     real(dp) :: kin(3),FintNNLO_s_gq_oewk_fs(4)
-    real(dp) :: EC,damp,damp_ewk,eta51,eta5i,s5i,z5
+    real(dp) :: EC,damp,damp_ewk,eta51,eta5i,s5i,z5,Qsq_FS(2)
     real(dp) :: eik_qed(4),E5,E5sq
     real(dp) :: respdf(ipdf),intsub(ipdf),sv_logs(ipdf),PqgNLO(ipdf),Pqg0
     real(dp) :: respdf_tmp(ipdf,2),res_tmp_vect(2,2,2),respdf_vect(2,ipdf)
-    real(dp) :: res_nlo(2,2),res_lo(2,2)
+    real(dp) :: res_nlo_old(2,2),res_lo_old(2,2)
+    real(dp) :: res_lo(-5:7,-5:7),res_lo_eikqed(-5:7,-5:7),res_nlo(-5:7,-5:7),respdf_vect_rev(ipdf,2)
+    logical  :: oldcode
+
+    oldcode = .false.
+
+    print *, "oldcode", oldcode
 
     xsect_nnlo_s_gq_oewk_fs_5i = 0
 
     ff(1) = zero
     kin = 0
 
+    Qsq_FS = [Q3**2, Q4**2]
+    
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
     z = buff+onet*real(yRnd(kNLO_max_full),dp)
+    xx(xE) = 1E-7_dp
+    xx(xRHO)=1E-10_dp
 
 #if (_withchecks == 1)
     if (override) then
@@ -959,8 +969,14 @@ contains
 
     else
 
-       call res_tree_a_qqb(HardProc%AmpMom,res_nlo)
-       call get_respdf(gq_lumi,1,1,HardProc,res_nlo,respdf)
+       if (oldcode) then
+          call res_tree_a_qqb(HardProc%AmpMom,res_nlo_old)
+          call get_respdf(gq_lumi,1,1,HardProc,res_nlo_old,respdf)
+       else
+          call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo)
+          res_nlo = transition('g -> q', 'none', res_nlo)
+          call get_respdf_gen(1,1,HardProc,res_nlo,respdf)
+       endif
 
        EC    = HardProc%Lim_Ei(1)
        eta51 = HardProc%Lim_etaij(1,5)
@@ -994,9 +1010,15 @@ contains
 
     else
 
-       call res_tree_qqb(CLim%AmpMom,res_lo)
-
-       call get_respdf(gq_lumi,1,1,CLim,res_lo,respdf)
+       if (oldcode) then
+          call res_tree_qqb(CLim%AmpMom,res_lo_old)
+          call get_respdf(gq_lumi,1,1,CLim,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(CLim%AmpMom,res_lo)
+          res_lo = transition('g -> q', 'none', res_lo)
+          res_lo = Qsq_Fs(icoll-2)**2 * res_lo
+          call get_respdf_gen(1,1,CLim,res_lo,respdf)
+       endif
 
        EC = CLim%Lim_Ei(1)
        call fill_sv_logs(CLim%muf(1)**2,4*EC**2,sv_logs)
@@ -1008,8 +1030,14 @@ contains
        !-- damp_ewk = one
        s5i   = CLim%Lim_sij(icoll,5)
        z5    = CLim%Lim_z(1)
-       respdf = intsub * respdf * CLim%wgt &
-              * 2/s5i * Pqg(z5) * Q_lep2
+       if (oldcode) then
+          respdf = intsub * respdf * CLim%wgt &
+               * 2/s5i * Pqg(z5) * Q_lep2
+       else
+          respdf = intsub * respdf * CLim%wgt &
+               * 2/s5i * Pqg(z5)
+       endif
+       
        respdf = - respdf
 
        FintNNLO_s_gq_oewk_fs(2) = respdf(1)
@@ -1032,22 +1060,31 @@ contains
 
     else
 
-       call res_tree_qqb(SLim%AmpMom,res_lo)
-
        E5   = SLim%Lim_Ei(2)
        E5sq = E5*E5
-       call get_qed_eik(charges,SLim%Lim_etaij,ql_pos,5,eik_qed)
-       eik_qed = eik_qed/E5sq
-
-       res_tmp_vect(:,1,1) = res_lo(:,1) * eik_qed(1:2)
-       res_tmp_vect(:,2,1) = res_lo(:,2) * eik_qed(3:4)
-
-       !-- prepare PDFs structures, CS
-       res_tmp_vect(:,:,2) = res_lo(:,:) * Q_lep2
-
-       !-- get PDFs for all of them
-       call get_respdf_vect(gq_lumi,1,1,SLim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
-
+       if (oldcode) then
+          call res_tree_qqb(SLim%AmpMom,res_lo_old)
+          call get_qed_eik(charges,SLim%Lim_etaij,ql_pos,5,eik_qed)
+          eik_qed = eik_qed/E5sq
+          res_tmp_vect(:,1,1) = res_lo_old(:,1) * eik_qed(1:2)
+          res_tmp_vect(:,2,1) = res_lo_old(:,2) * eik_qed(3:4)
+          !-- prepare PDFs structures, CS
+          res_tmp_vect(:,:,2) = res_lo_old(:,:) * Q_lep2
+          !-- get PDFs for all of them
+          call get_respdf_vect(gq_lumi,1,1,SLim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
+       else
+          call res_tree_qqb_gen(SLim%AmpMom,res_lo)
+          call get_qed_eik_gen(res_lo,SLim%Lim_etaij,[1,2,3,4],5,res_lo_eikqed)
+          res_lo_eikqed = transition('g -> q', 'none', res_lo_eikqed)                          
+          res_lo_eikqed = res_lo_eikqed/E5sq
+          call get_respdf_gen(1,1,SLim,res_lo_eikqed,respdf_vect_rev(:,1))
+          
+          res_lo = transition('g -> q', 'none', res_lo)
+          res_lo = res_lo*Qsq_Fs(icoll-2)**2
+          call get_respdf_gen(1,1,SLim,res_lo,respdf_vect_rev(:,2))
+          respdf_vect(1,:) = respdf_vect_rev(:,1)
+          respdf_vect(2,:) = respdf_vect_rev(:,2)
+       endif
        !! ----------------------------- SLim ------------------------------- !!
        EC    = SLim%Lim_Ei(1)
        call fill_sv_logs(SLim%muf(1)**2,4*EC**2,sv_logs)
@@ -1085,7 +1122,23 @@ contains
 
     !!-----------------------------------------------------------------------!!
 
+!    if (product(FintNNLO_s_gq_oewk_fs) .ne. zero) then
+!       print *, "FintNNLO_s_gq_oewk_fs",FintNNLO_s_gq_oewk_fs
+!       stop
+!    endif
     ff(1) = sum(kin)
+
+    if (product(kin) .ne. zero) then
+       print *, "boosted1 kin", kin(1:3), sum(kin(1:3))/kin(1)
+       print *, "hard",FintNNLO_s_gq_oewk_fs(1)
+       print *, "coll1", FintNNLO_s_gq_oewk_fs(2)/FintNNLO_s_gq_oewk_fs(1)
+       print *, "soft", FintNNLO_s_gq_oewk_fs(3)/FintNNLO_s_gq_oewk_fs(1)
+       print *, "softcoll", FintNNLO_s_gq_oewk_fs(4)/FintNNLO_s_gq_oewk_fs(1)
+!       print *, "softcoll1", FintNNLO_s_gq_oewk_is(6)!/FintNNLO_s_gq_oewk_is(1)
+       print *, "ff",ff(1)
+       pause
+    endif
+
     call close_histo()
 
     call check_ff(ff,xx,kin)
