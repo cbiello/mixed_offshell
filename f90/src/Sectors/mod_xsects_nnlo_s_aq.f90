@@ -199,8 +199,12 @@ contains
     real(dp) :: EC,damp,eta51,eta52,s15,s25,z5,eik_qcd,E5
     real(dp) :: respdf(ipdf),intsub(ipdf),sv_logs(ipdf),PqgNLO_v(ipdf)
     real(dp) :: respdf_bak(ipdf),respdf_1(ipdf),respdf_2(ipdf),respdf_3(ipdf)
-    real(dp) :: Pqg0,PqgNLO,res_nlo(2,2),res_lo(2,2)
+    real(dp) :: Pqg0,PqgNLO,res_nlo_old(2,2),res_lo_old(2,2)
+    real(dp) :: res_nlo(-5:7,-5:7), res_lo(-5:7,-5:7)
+    logical  :: oldcode
 
+    oldcode = .true.
+    print *, "oldcode", oldcode
     xsect_nnlo_s_aq_oqcd = 0
 
     ff(1) = zero
@@ -244,12 +248,18 @@ contains
 
     else
 
-       call res_tree_g_qqb(HardProc%AmpMom,res_nlo)
-       res_nlo(:,1) = Qdn2 * res_nlo(:,1)
-       res_nlo(:,2) = Qup2 * res_nlo(:,2)
-
-       call get_respdf(aq_lumi,1,1,HardProc,res_nlo,respdf)
-
+       if (oldcode) then
+          call res_tree_g_qqb(HardProc%AmpMom,res_nlo_old)
+          res_nlo_old(:,1) = Qdn2 * res_nlo_old(:,1)
+          res_nlo_old(:,2) = Qup2 * res_nlo_old(:,2)
+          call get_respdf(aq_lumi,1,1,HardProc,res_nlo_old,respdf)
+       else
+          call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
+          res_nlo = multiply_IS_charges_sq(res_nlo,1)
+          res_nlo = transition('ga -> q', 'none', res_nlo)
+          call get_respdf_gen(1,1,HardProc,res_nlo,respdf)
+       endif
+       
        EC    = HardProc%Lim_Ei(1)
        eta51 = HardProc%Lim_etaij(1,5)
        eta52 = HardProc%Lim_etaij(2,5)
@@ -282,12 +292,17 @@ contains
        kin(2) = zero
 
     else
-
-       call res_tree_qqb(C1Lim%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
-
-       call get_respdf(aq_lumi,1,1,C1Lim,res_lo,respdf)
+       if (oldcode) then
+          call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
+          res_lo_old(:,1) = Qdn2 * res_lo_old(:,1)
+          res_lo_old(:,2) = Qup2 * res_lo_old(:,2)
+          call get_respdf(aq_lumi,1,1,C1Lim,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
+          res_lo = multiply_IS_charges_sq(res_lo,1)
+          res_lo = transition('ga -> q', 'none', res_lo)
+          call get_respdf_gen(1,1,C1Lim,res_lo,respdf)
+       endif
 
        !-- use etas from hard process
        eta51 = C1Lim%Lim_KinInv(4)
@@ -326,13 +341,18 @@ contains
        kin(3) = zero
 
     else
-
-       call res_tree_qqb(C2Lim%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
-
-       call get_respdf(aq_lumi,1,1,C2Lim,res_lo,respdf)
-
+       if (oldcode) then
+          call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
+          res_lo_old(:,1) = Qdn2 * res_lo_old(:,1)
+          res_lo_old(:,2) = Qup2 * res_lo_old(:,2)          
+          call get_respdf(aq_lumi,1,1,C2Lim,res_lo_old,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
+          res_lo = multiply_IS_charges_sq(res_lo,1)
+          res_lo = transition('ga -> q', 'none', res_lo)
+          call get_respdf_gen(1,1,C2Lim,res_lo,respdf)
+       endif
+       
        EC    = C2Lim%Lim_Ei(1)
        s25   = C2Lim%Lim_sij(2,5)
        z5    = C2Lim%Lim_z(2)
@@ -370,11 +390,17 @@ contains
     else
 
        !! ----------------------------- S5Lim ------------------------------ !!
-       call res_tree_qqb(S5Lim%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
-
-       call get_respdf(aq_lumi,1,1,S5Lim,res_lo,respdf_bak)
+       if (oldcode) then
+          call res_tree_qqb(S5Lim%AmpMom,res_lo_old)
+          res_lo_old(:,1) = Qdn2 * res_lo_old(:,1)
+          res_lo_old(:,2) = Qup2 * res_lo_old(:,2)
+          call get_respdf(aq_lumi,1,1,S5Lim,res_lo_old,respdf_bak)
+       else
+          call res_tree_qqb_gen(S5Lim%AmpMom,res_lo)
+          res_lo = multiply_IS_charges_sq(res_lo,1)
+          res_lo = transition('ga -> q', 'none', res_lo)
+          call get_respdf_gen(1,1,S5Lim,res_lo,respdf_bak)
+       endif
 
        call get_qcd_eik(CF,S5Lim%Lim_etaij,[1,2],5,eik_qcd)
        EC    = S5Lim%Lim_Ei(1)
@@ -436,6 +462,12 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
+
+    if (product(FintNNLO_s_aq_oqcd) .ne. zero) then
+       print *, "FintNNLO_s_aq_oqcd",FintNNLO_s_aq_oqcd
+       stop
+    endif
+    
 
     !!-----------------------------------------------------------------------!!
 
