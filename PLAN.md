@@ -70,8 +70,8 @@ silently returns neutral-current numbers.
 | N1 | NLO QCD ns/gq/qg and NLO EW ns: implemented for W±, benchmarked against POWHEG (commit `346fdea`) | – | ✅ |
 | N2 | NLO EW `aq`/`qa` `r_is` for W: limits checked with `-checklim` (2026-11-11). Z closes (ratio ~ sqrt(depth)); W does not, two bugs: (a) `qa` C2 uses the charge of leg 1, must be leg 2 (:1053); (b) `res_tree_a_aq_gen` / `res_tree_a_qa_gen` keep the b quark for W while the Born does not (missing `abs(.)==5` skip, see I8). Both fixed: all four W limits close, Z unchanged digit for digit. W+ aq/qa = 1.508(7)/1.494(6) fb, W- = 0.856(4)/0.847(3) fb (`W_ATLAS`) | `mod_xsects_nloewk_r.f90`, `mod_amplitudes_tree_ppll.f90` :484-550 | ✅ 2026-11-11 |
 | N3 | NLO EW `s_aq`/`s_qa`: double charge factor, fixed, see I16a. Redo the POWHEG comparison for the photon-induced channels (N5) | `mod_xsects_nloewk_vs.f90` | ✅ fixed, to re-benchmark |
-| N4 | NLO QCD `gq`/`qg` integrated collinear: "still work in progress" in `f90/README`; confirm closed | `mod_xsects_nloqcd_vs.f90` | 🟡 |
-| N5 | Redo the POWHEG comparison for W+ and W-, all channels including photon-induced: see C3.1, C3.2 | – | ❌ |
+| N4 | NLO QCD `gq`/`qg` integrated collinear: closed. The full NLO QCD (ns + gq + qg) agrees with POWHEG for W+ and W- at the 0.05% level (C3.1); gq + qg contribute 72 fb (W+), so they are tested to about 1% of their size | `mod_xsects_nloqcd_vs.f90` | ✅ 2026-11-11 |
+| N5 | POWHEG comparison for W+ and W-: LO and NLO QCD agree (C3.1). NLO EW: our numbers are ready, the POWHEG side is not usable as pushed (C3.2) | `f90/tests/powheg/` | ✅ QCD / ❌ EW (blocked) |
 
 ## 3. Double virtual (out of scope for now)
 
@@ -211,8 +211,8 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 
 | ID | Task | Status |
 |---|---|---|
-| C3.1 | Redo the NLO QCD comparison with `NSC-lnuQCD`: W+ and W-, channels ns, gq, qg, rate and mT. Same PDF, scales, masses, widths and alpha in both codes (write the common input down here) | ❌ |
-| C3.2 | Redo the NLO EW comparison with `NSC-lnuEW`: W+ and W-, channels ns, aq, qa. Needed again after the 2026-11-11 fixes of the photon-induced channels (I16a, N2) | ❌ |
+| C3.1 | NLO QCD vs `NSC-lnuQCD`, 13 TeV, fixed scale MZ, `W_ATLAS` cuts. W+: 1737.51(61) vs 1736.68(31) fb; W-: 1203.14(44) vs 1203.02(18) fb; LO agrees too. Setup, scripts and sector numbers in `f90/tests/powheg/README.md` | ✅ 2026-11-11 |
+| C3.2 | NLO EW vs `NSC-lnuEW`. Ours (same setup): W+ 1326.99(21) fb, W- 929.23(13) fb, photon-induced aq + qa = 2.57 / 1.47 fb. **Blocked**: `NSC-lnuEW` as pushed gives about 38 pb total against 4 pb at LO on the public POWHEG-BOX-RES; Born, limit tests and OpenLoops virtual are fine, cause not found (details in the README). Needs Christian's working copy and its analysis file | ❌ blocked |
 | C3.3 | Build the NLO QCD generator for l l' + photon (l nu gamma for W+/W-, l l gamma for Z) in the same way as `NSC-lnuQCD` (Born with a resolved photon, OpenLoops reals, same analysis plus photon cuts) | ❌ |
 | C3.4 | Build the NLO EW generator for l l' + jet (l nu j for W+/W-, l l j for Z) in the same way as `NSC-lnuEW` (OpenLoops `pplljj_ew`-type libraries, photon-induced channels, resolved jet) | ❌ |
 | C3.5 | Analyses in this code that match C3.3 and C3.4: resolved photon (cf. Z analysis `lla_nloqcd`) and resolved jet, for W+ and W- | ❌ |
