@@ -1,0 +1,141 @@
+# analysis: ANALYSIS=W_ATLAS
+lo ns na :  1535.0391373473383 fb
+nloewk aq r_is :  1.4748887886676869 fb
+nloewk aq s :  -2.1062212726526988E-002 fb
+nloewk ns r_fs_53 :  -3.1391344960128831 fb
+nloewk ns r_fs_54 :  -7.4944098046188028 fb
+nloewk ns r_is :  -4.0576464893346493 fb
+nloewk ns s :  -5.3782187995337294 fb
+nloewk ns v :  -81.014824854079095 fb
+nloewk qa r_is :  1.4192880260870440 fb
+nloewk qa s :  -2.1055403033780000E-002 fb
+nloqcd gq r_is :  38.643641556765346 fb
+nloqcd gq s :  -40.358330651931034 fb
+nloqcd ns r_is :  -31.510623479668762 fb
+nloqcd ns s :  625.48285024167865 fb
+nloqcd ns v :  -291.54102746574318 fb
+nloqcd qg r_is :  40.838331901852598 fb
+nloqcd qg s :  -39.971726632747504 fb
+nnlo ag rr_5161 : STOP xsect_nnlo_rr_5161_ag: not implemented for W
+nnlo ag rr_5162 : STOP xsect_nnlo_rr_5162_ag: not implemented for W
+nnlo ag rr_5261 : STOP xsect_nnlo_rr_5261_ag: not implemented for W
+nnlo ag rr_5262a : STOP xsect_nnlo_rr_5262a_ag: not implemented for W
+nnlo ag rr_5262b : STOP xsect_nnlo_rr_5262bd_ag: not implemented for W
+nnlo ag rr_5262c : STOP xsect_nnlo_rr_5262c_ag: not implemented for W
+nnlo ag rr_5262d : STOP xsect_nnlo_rr_5262bd_ag: not implemented for W
+nnlo ag s_12 : STOP xsect_nnlo_s_ag_s12: not implemented for W
+nnlo ag s_oewk : STOP xsect_nnlo_s_ag_oewk: not implemented for W
+nnlo ag s_oqcd : STOP xsect_nnlo_s_ag_oqcd: not implemented for W
+nnlo aq rr_5161a : STOP xsect_nnlo_rr_5161a_aq: not implemented for W
+nnlo aq rr_5161b : STOP xsect_nnlo_rr_5161bd_aq: not implemented for W
+nnlo aq rr_5161c : STOP xsect_nnlo_rr_5161c_aq: not implemented for W
+nnlo aq rr_5161d : STOP xsect_nnlo_rr_5161bd_aq: not implemented for W
+nnlo aq rr_5162 : STOP xsect_nnlo_rr_5162_aq: not implemented for W
+nnlo aq rr_5261 : STOP xsect_nnlo_rr_5261_aq: not implemented for W
+nnlo aq rr_5262a : STOP xsect_nnlo_rr_5262a_aq: not implemented for W
+nnlo aq rr_5262b : STOP xsect_nnlo_rr_5262bd_aq: not implemented for W
+nnlo aq rr_5262c : STOP xsect_nnlo_rr_5262c_aq: not implemented for W
+nnlo aq rr_5262d : STOP xsect_nnlo_rr_5262bd_aq: not implemented for W
+nnlo aq rvqcd_is : STOP xsect_nnlo_rvqcd_is_aq: not implemented for W
+nnlo aq s_12 : STOP xsect_nnlo_s_aq_s12: not implemented for W
+nnlo aq s_oewk : STOP xsect_nnlo_s_aq_oewk: not implemented for W
+nnlo aq s_oqcd :  3.8991911714742859E-003 fb
+nnlo aq s_vqcd : STOP xsect_nnlo_s_aq_vqcd: not implemented for W
+nnlo ga rr_5161a : STOP xsect_nnlo_rr_5161a_ga: not implemented for W
+nnlo ga rr_5161b : STOP xsect_nnlo_rr_5161bd_ga: not implemented for W
+nnlo ga rr_5161c : STOP xsect_nnlo_rr_5161c_ga: not implemented for W
+nnlo ga rr_5161d : STOP xsect_nnlo_rr_5161bd_ga: not implemented for W
+nnlo ga rr_5162 : STOP xsect_nnlo_rr_5162_ga: not implemented for W
+nnlo ga rr_5261 : STOP xsect_nnlo_rr_5261_ga: not implemented for W
+nnlo ga rr_5262 : STOP xsect_nnlo_rr_5262_ga: not implemented for W
+nnlo ga s_12 : STOP xsect_nnlo_s_ga_s12: not implemented for W
+nnlo ga s_oewk : STOP xsect_nnlo_s_ga_oewk: not implemented for W
+nnlo ga s_oqcd : STOP xsect_nnlo_s_ga_oqcd: not implemented for W
+nnlo gq rr_5161a :  -6.3425222554418431E-002 fb
+nnlo gq rr_5161b :  -1.7767266885650589E-003 fb
+nnlo gq rr_5161c :  -3.0651284328381983E-003 fb
+nnlo gq rr_5161d :  1.7091605957317037E-003 fb
+nnlo gq rr_5162 :  -2.0441492052506109E-002 fb
+nnlo gq rr_5163 :  -0.18007719897817445 fb
+nnlo gq rr_5164 :  -0.72399860296395280 fb
+nnlo gq rvewk_is : STOP xsect_nnlo_rvewk_is_gq: not implemented for W
+nnlo gq rvewknf_is : STOP xsect_nnlo_rvewknf_is_gq: not implemented for W
+nnlo gq s_12 : STOP xsect_nnlo_s_gq_s12: not implemented for W
+nnlo gq s_oewk_fs_53 : STOP vegas: cannot build the grid, integrand is zero at every point
+nnlo gq s_oewk_fs_54 : STOP vegas: cannot build the grid, integrand is zero at every point
+nnlo gq s_oewk_is :  -4.3183983383915110E-002 fb
+nnlo gq s_oqcd :  5.3090716247108288E-002 fb
+nnlo gq s_vewk : STOP xsect_nnlo_s_gq_vewk: not implemented for W
+nnlo gq s_vewknf : STOP xsect_nnlo_s_gq_vewknf: not implemented for W
+nnlo ns rvewk_is : STOP xsect_nnlo_rvewk_is_ns: not implemented for W
+nnlo ns rvewknf_is : STOP xsect_nnlo_rvewknf_is_ns: not implemented for W
+nnlo ns rvqcd_fs_53 :  -17.565371677770884 fb
+nnlo ns rvqcd_fs_54 :  1.5982071205557151 fb
+nnlo ns rvqcd_is :  -0.35575523042030005 fb
+nnlo ns s_12 :  -2.6006818013191122 fb
+nnlo ns s_oewk_fs_53 :  -1.1270238512100810 fb
+nnlo ns s_oewk_fs_54 :  -2.5708914127857665 fb
+nnlo ns s_oewk_is : STOP W_ATLAS: lepton ids not set
+nnlo ns s_oewk_is_ra :  -0.13235371080271047 fb
+nnlo ns s_oqcd :  0.36022250338710859 fb
+nnlo ns s_qq : STOP xsect_nnlo_s_ns_qq: not implemented for W
+nnlo ns s_qqb : STOP xsect_nnlo_s_ns_qqb: not implemented for W
+nnlo ns s_vewk :  -32.260164109710516 fb
+nnlo ns s_vewknf : STOP xsect_nnlo_s_ns_vewknf: not implemented for W
+nnlo ns s_vqcd :  1.0292130935030281 fb
+nnlo ns vvfc : STOP xsect_nnlo_vv_ns_fc: not implemented for W
+nnlo ns vvnf : STOP xsect_nnlo_vv_ns_nf: not implemented for W
+nnlo ns vvnf_full : STOP xsect_nnlo_vv_ns_nf_full: not implemented for W
+nnlo ns vvxf : STOP xsect_nnlo_vv_ns_xf: not implemented for W
+nnlo ns_ga rr_5161a :  -7.9834614448980296E-002 fb
+nnlo ns_ga rr_5161c :  2.7125839382108001 fb
+nnlo ns_ga rr_5162 :  -0.38748623686876349 fb
+nnlo ns_ga rr_5163 :  -1.8036086927826406E-002 fb
+nnlo ns_ga rr_5164 :  -0.67889292952335778 fb
+nnlo ns_ga rr_5261 :  3.6919007097102149E-002 fb
+nnlo ns_ga rr_5262a :  2.9117109733009211E-002 fb
+nnlo ns_ga rr_5262c :  -3.0931749384604398E-002 fb
+nnlo ns_ga rr_5263 :  0.13467804179972243 fb
+nnlo ns_ga rr_5264 :  -5.9323223922516100 fb
+nnlo ns_qq rr_5161a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
+nnlo ns_qq rr_5161c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
+nnlo ns_qq rr_5262a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
+nnlo ns_qq rr_5262c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
+nnlo ns_qqb rr_5161a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
+nnlo ns_qqb rr_5161c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
+nnlo ns_qqb rr_5262a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
+nnlo ns_qqb rr_5262c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
+nnlo ns_qqb_w rr :  Eur.Phys.J. C75 (2015) 3, 132 (http://arxiv.org/abs/1412.7420)
+nnlo ns_qqp_w rr :  Eur.Phys.J. C75 (2015) 3, 132 (http://arxiv.org/abs/1412.7420)
+nnlo ns_qqpb_w rr :  Eur.Phys.J. C75 (2015) 3, 132 (http://arxiv.org/abs/1412.7420)
+nnlo qa rr_5161a : STOP xsect_nnlo_rr_5161a_qa: not implemented for W
+nnlo qa rr_5161b : STOP xsect_nnlo_rr_5161bd_qa: not implemented for W
+nnlo qa rr_5161c : STOP xsect_nnlo_rr_5161c_qa: not implemented for W
+nnlo qa rr_5161d : STOP xsect_nnlo_rr_5161bd_qa: not implemented for W
+nnlo qa rr_5162 : STOP xsect_nnlo_rr_5162_qa: not implemented for W
+nnlo qa rr_5261 : STOP xsect_nnlo_rr_5261_qa: not implemented for W
+nnlo qa rr_5262a : STOP xsect_nnlo_rr_5262a_qa: not implemented for W
+nnlo qa rr_5262b : STOP xsect_nnlo_rr_5262bd_qa: not implemented for W
+nnlo qa rr_5262c : STOP xsect_nnlo_rr_5262c_qa: not implemented for W
+nnlo qa rr_5262d : STOP xsect_nnlo_rr_5262bd_qa: not implemented for W
+nnlo qa rvqcd_is : STOP xsect_nnlo_rvqcd_is_qa: not implemented for W
+nnlo qa s_12 : STOP xsect_nnlo_s_qa_s12: not implemented for W
+nnlo qa s_oewk : STOP xsect_nnlo_s_qa_oewk: not implemented for W
+nnlo qa s_oqcd : STOP xsect_nnlo_s_qa_oqcd: not implemented for W
+nnlo qa s_vqcd : STOP xsect_nnlo_s_qa_vqcd: not implemented for W
+nnlo qg rr_5261 :  -1.9281710938168935E-002 fb
+nnlo qg rr_5262a :  1.4109459615292831E-003 fb
+nnlo qg rr_5262b :  -5.5388270590195380E-003 fb
+nnlo qg rr_5262c :  0.11262796071409942 fb
+nnlo qg rr_5262d :  -0.14295046131045358 fb
+nnlo qg rr_5263 :  -7.4111399376673243E-002 fb
+nnlo qg rr_5264 :  6.7147948027419843E-002 fb
+nnlo qg rvewk_is : STOP xsect_nnlo_rvewk_is_qg: not implemented for W
+nnlo qg rvewknf_is : STOP xsect_nnlo_rvewknf_is_qg: not implemented for W
+nnlo qg s_12 : STOP xsect_nnlo_s_qg_s12: not implemented for W
+nnlo qg s_oewk_fs_53 :  0.15101962230377039 fb
+nnlo qg s_oewk_fs_54 :  0.55382376022507618 fb
+nnlo qg s_oewk_is :  -1.1226787927756096E-002 fb
+nnlo qg s_oqcd :  3.6117545478426597E-003 fb
+nnlo qg s_vewk : STOP xsect_nnlo_s_qg_vewk: not implemented for W
+nnlo qg s_vewknf : STOP xsect_nnlo_s_qg_vewknf: not implemented for W

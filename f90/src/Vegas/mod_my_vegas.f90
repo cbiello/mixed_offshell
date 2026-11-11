@@ -384,6 +384,7 @@ contains
     do i=1,nd-1
        do
           if (rc <= dr) exit
+          if (k == size(r)) stop 'vegas: cannot build the grid, integrand is zero at every point'
           k=k+1
           dr=dr+r(k)
        end do

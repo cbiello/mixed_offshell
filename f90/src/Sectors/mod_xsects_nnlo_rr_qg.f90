@@ -1191,7 +1191,7 @@ contains
           call res_tree_g_qg_gen(S6Lim%AmpMom,res_nlo)         
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[1,3,4,5],6,res_nlo_eikqed)
           call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_tmp(:,1))
-          respdf_tmp = respdf_tmp / E6sq
+          respdf_tmp(:,1) = respdf_tmp(:,1) / E6sq
 #endif
 
       call partition_nnlo_fact(S6Lim,damp,iconf_qed=[1,5,3,4,6],i_qed=1)

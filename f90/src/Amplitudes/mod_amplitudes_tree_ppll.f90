@@ -1427,6 +1427,7 @@ contains
     num4_31_c = rs4_31_c(j3,j5) + rs4_31_c(j3,j6) + rs4_31_c(j2,j5) + rs4_31_c(j2,j6)
     
     ! Eq. (4.9) and Eq. (4.10)
+    helamp_tree_jj_1 = (0._dp,0._dp)
     helamp_tree_jj_1(-1,+1,-1,+1) =   ONE / za(j1,j2) / za(j2,j3) / za(j4,j5) / za(j5,j6) * num1_13
     helamp_tree_jj_1(-1,-1,-1,-1) =   ONE / zb(j1,j2) / zb(j2,j3) / zb(j4,j5) / zb(j5,j6) * num2_13
     helamp_tree_jj_1(-1,+1,-1,-1) = - ONE / za(j1,j2) / za(j2,j3) / zb(j4,j5) / zb(j5,j6) * num3_13
@@ -1501,6 +1502,7 @@ contains
     rf1rev_c(i1,i2) = - TWO * zb(j4,i1) * (za(i2,j3) * zb(j3,j4) + za(i2,j2) * zb(j2,j4) + za(i2,j1) * zb(j1,j4))
     
     !-- Eq. (4.11) and Eq. (4.5)
+    helamp_tree_jj_2 = (0._dp,0._dp)
     helamp_tree_jj_2(-1,+1,+1,-1) = ONE / za(j1,j2) / za(j2,j3) /za(j3,j4) * rf1(j5,j6)
     helamp_tree_jj_2(-1,+1,+1,+1) = ONE / za(j1,j2) / za(j2,j3) /za(j3,j4) * rf1(j6,j5)
     

@@ -139,6 +139,7 @@ contains
     real(dp) :: Lij(4,4),Lij2(4,4)
 
     p_ol(:,3:4) = p(:,3:4)
+    res1 = 0; res0_ol = 0
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -193,6 +194,7 @@ contains
     debug = .false.
 
     p_ol(:,3:4) = p(:,3:4)
+    res1 = 0; res0_ol = 0
 
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -389,6 +391,7 @@ contains
     real(dp) :: finiteZdn, finiteZup, finiteWdu, finiteWud
 
     p_ol(:,3:5) = p(:,3:5)
+    res1 = 0; res0_ol = 0
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -493,6 +496,7 @@ contains
     real(dp) :: Lij(5,5),Lij2(5,5)
 
     p_ol(:,3:5) = p(:,3:5)
+    res1 = 0; res0_ol = 0
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -554,6 +558,7 @@ contains
     real(dp) :: finiteZdn, finiteZup, finiteWdu, finiteWud
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
 
  if (Vcharge == 0) then
     !antiquarks in is
@@ -661,6 +666,7 @@ contains
     real(dp) :: Lij(5,5),Lij2(5,5)
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     
     !quark in is
     do j = 1,3
@@ -706,6 +712,7 @@ contains
     real(dp) :: finiteZdn, finiteZup, finiteWdu, finiteWud
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
 
  if (Vcharge == 0) then
     !quarks
@@ -814,6 +821,7 @@ contains
     real(dp) :: Lij(5,5),Lij2(5,5)
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     
     do j = 1,3
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -957,6 +965,7 @@ contains
 
  if (Vcharge == 0) then
     p_ol(:,3:5) = p(:,3:5)
+    res1 = 0; res0_ol = 0
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
     do i = 1,2
@@ -967,6 +976,7 @@ contains
     enddo
  else
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     !-1 2 -> 12 -11 21 or 1 -2 -> 11 -12 21
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !2 -1 -> 12 -11 21 or -2 1 -> 11 -12 21
@@ -1015,6 +1025,7 @@ contains
     integer  :: ord(2,2),i,j
 
     p_ol(:,3:5) = p(:,3:5)
+    res1 = 0; res0_ol = 0
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -1044,6 +1055,7 @@ contains
     integer  :: j
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
 
  if (Vcharge == 0) then
     !anti-quark
@@ -1103,6 +1115,7 @@ contains
     integer  :: j
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     
     do j = 1,2
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -1129,6 +1142,7 @@ contains
     integer  :: j
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
 
  if (Vcharge == 0) then
     !quark
@@ -1188,6 +1202,7 @@ contains
     integer  :: j
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     
     do j = 1,2
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -1698,6 +1713,7 @@ end function get_fin_ewk_qqbllb_gen
  if (Vcharge == 0) then
     
     p_ol(:,3:4) = p(:,3:4)
+    res1 = 0; res0_ol = 0
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
 
@@ -1711,6 +1727,7 @@ end function get_fin_ewk_qqbllb_gen
  else
 
     p_ol(:,1:4) = p(:,1:4)
+    res1 = 0; res0_ol = 0
     !q qb: 2 -1 -> 12 -11 OR 1 -2 -> 11 -12
     call evaluate_loop(OL_id(1),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !qb q: -1 2 -> 12 -11 OR -2 1 -> 11 -12
@@ -1770,6 +1787,7 @@ end function get_fin_ewk_qqbllb_gen
     real(dp) :: Lij(4,4),Lij2(4,4),myfin(1:2)
 
     p_ol(:,3:4) = p(:,3:4)
+    res1 = 0; res0_ol = 0
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -1814,6 +1832,7 @@ end function get_fin_ewk_qqbllb_gen
  if (Vcharge == 0) then
     
     p_ol(:,3:5) = p(:,3:5)
+    res1 = 0; res0_ol = 0
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -1828,6 +1847,7 @@ end function get_fin_ewk_qqbllb_gen
  else
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     !q qb: 2 -1 -> 12 -11 22 OR 1 -2 -> 11 -12 22
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !qb q: -1 2 -> 12 -11 22 OR -2 1 -> 11 -12 22
@@ -1888,6 +1908,7 @@ end function get_fin_ewk_qqbllb_gen
     real(dp) :: Lij(5,5),Lij2(5,5),myfin(1:2)
 
     p_ol(:,3:5) = p(:,3:5)
+    res1 = 0; res0_ol = 0
     
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -1932,6 +1953,7 @@ end function get_fin_ewk_qqbllb_gen
  if (Vcharge == 0) then
     
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     ! a qbar -> underline process q qb
     do j = 1,2
        call evaluate_loop(OL_id(j+2),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -1944,6 +1966,7 @@ end function get_fin_ewk_qqbllb_gen
  else
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     !a qb: 22 -1 -> 12 -11 -2 OR 22 -2 -> 11 -12 -1
     !I fill the res1(:,1,:) since the underline process is q qb
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
@@ -2005,6 +2028,7 @@ end function get_fin_ewk_qqbllb_gen
     real(dp) :: Lij(5,5),Lij2(5,5),myfin(1:2)
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     
     do j = 1,2
        call evaluate_loop(OL_id(j+2),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -2047,6 +2071,7 @@ end function get_fin_ewk_qqbllb_gen
  if (Vcharge == 0) then
     
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     ! q a -> underline event is q qb
     do j = 1,2
        call evaluate_loop(OL_id(j+2),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -2059,6 +2084,7 @@ end function get_fin_ewk_qqbllb_gen
  else
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     ! 2 22 -> 12 -11 1 or 1 22 -> 11 -12 2
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     ! -1 22 -> 12 -11 -2 or -2 22 -> 11 -12 -1
@@ -2119,6 +2145,7 @@ end function get_fin_ewk_qqbllb_gen
     real(dp) :: Lij(5,5),Lij2(5,5),myfin(1:2)
 
     p_ol(:,1:5) = p(:,1:5)
+    res1 = 0; res0_ol = 0
     
     do j = 1,2
        call evaluate_loop(OL_id(j+2),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))

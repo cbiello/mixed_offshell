@@ -18,3 +18,5 @@ auto_generated
 src/TwoLoop/vv_nonfact.a
 src/TwoLoop/tmptwoloopdir.log
 src/TwoLoop/tmptwoloopobj.log
+tests/new_*.txt
+tests/tmp_*

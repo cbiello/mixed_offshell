@@ -143,7 +143,7 @@ contains
          real(dp), intent(in)    :: xi
          real(dp), intent(inout) :: fi(-6:7)
 
-         fi = fi/xi
+         fi(-6:6) = fi(-6:6)/xi
 
          !-- we are using the top as a placeholder for the photon
          fi(7) = fi(6)

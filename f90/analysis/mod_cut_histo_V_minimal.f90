@@ -154,10 +154,7 @@ contains
     pv(:) = rec_mom(:,1) + rec_mom(:,2)
     
     mll = sqrt(scr(pv,pv))
-    if (mll.le.qmin .or. mll.ge.qmax) then
-       print*, 'rejected event'
-       return
-    endif
+    if (mll.le.qmin .or. mll.ge.qmax) return
 
  if (Vcharge == 0) then
     ptlm  = get_pt(rec_mom(:,1))
@@ -175,8 +172,9 @@ contains
     !-- harder lepton pT cut
     if (ptl1 .le. harder_cut) return
  else
-    ptlc  = get_pt(rec_mom(:,1))
-    ptnu  = get_pt(rec_mom(:,2))
+    !-- leg 3 is the neutrino for W+ (even id)
+    ptlc  = get_pt(rec_mom(:,merge(2,1,mod(event%ids(3),2) == 0)))
+    ptnu  = get_pt(rec_mom(:,merge(1,2,mod(event%ids(3),2) == 0)))
     !-- charged lepton pT cut
     if (ptlc .le. ptlep_cut) return
     !-- neutrino pT missing cut
@@ -244,7 +242,7 @@ contains
 
     !-- compute scale
     if (dynscale) then
-       event%mu = massT/two
+       event%mu = mll/two
     else
        event%mu = mu
     endif

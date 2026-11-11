@@ -70,6 +70,14 @@ contains
     real(dp) :: ecoll
 
 
+#if defined(ANALYSIS)
+    !-- analyses for W are named W_*, w_* or V_*; all the others are for Z
+    if (Vcharge /= 0 .and. index('WwV',ANALYSIS(1:1)) == 0) then
+       print *, 'analysis ', ANALYSIS, ' is for Z: rebuild with a W analysis'
+       stop
+    endif
+#endif
+
     !-- default directory for output histograms
     histodir = trim(string_val_opt('-histodir','./histo'))
     histodir = trim(histodir)//'/'
@@ -344,7 +352,7 @@ contains
        write(outdev,*) '# Iteration, Points failing the technical cuts:  ', failed_points
        write(outdev,*) '# Iteration, Good points passing technical cuts: ', icount_good
        write(outdev,*) '# Iteration, Points passing physical cuts:       ', icount_acc
-       write(outdev,*) '# Iteration, Acceptance:                         ', real(icount_acc,kind=dp)/real(icount_good,kind=dp)
+       write(outdev,*) '# Iteration, Acceptance:                         ', real(icount_acc,kind=dp)/max(icount_good,1)
        write(outdev,*) '#'
     endif
 
@@ -353,7 +361,7 @@ contains
        write(outdev,*) '# Points failing the technical cuts:  ', acc_failed_points
        write(outdev,*) '# Good points passing technical cuts: ', acc_icount_good
        write(outdev,*) '# Points passing physical cuts:       ', acc_icount_acc
-       write(outdev,*) '# Acceptance:                         ', real(acc_icount_acc,kind=dp)/real(acc_icount_good,kind=dp)   
+       write(outdev,*) '# Acceptance:                         ', real(acc_icount_acc,kind=dp)/max(acc_icount_good,1)   
     endif
     
     write(outdev,*) '#'
@@ -419,7 +427,8 @@ contains
     write(outdev,*) '# buff_z  =      ', buff_z
     write(outdev,*) '# buff_r  =      ', buff_r
     write(outdev,*) '#'
-    write(outdev,*) '# lepton charge = ', Q_lep
+    write(outdev,*) '# boson (0 Z, -1 W-, +1 W+) = ', Vcharge
+    write(outdev,*) '# charges of legs 3,4 = ', Q3, Q4
     write(outdev,*) '# lepton cL = ', cL_lep
     write(outdev,*) '# lepton cR = ', cR_lep
     write(outdev,*) '#'
