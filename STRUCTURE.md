@@ -80,9 +80,9 @@ make remove && make -j16            # clean rebuild only when the analysis or fl
 One instance per kinematic configuration (hard process and every limit):
 `AmpMom` (momenta for amplitudes), `LimMom`, `Lim_etaij`, `Lim_Ei`, `Lim_sij`, `Lim_z`,
 `PartFrac`, `wgt`, `mu2ref`, `npart`, `flag`/`makecut`,
-`ids(6)` (what the **analysis** sees: 0 for initial state, lepton ids, `id_g`, `id_a`, quark)
-and `part(:)` (PDG ids, informational). `ids` drives cuts and photon recombination, so it must
-be right in every limit configuration.
+`ids(6)` (what the **analysis** sees: 0 for initial state, lepton ids from `lep_ids`, `id_g`, `id_a`, quark).
+`ids` drives cuts, the lepton/neutrino assignment and photon recombination, so it must
+be set in every configuration.
 
 ## 5. Sectors: naming and dispatch
 

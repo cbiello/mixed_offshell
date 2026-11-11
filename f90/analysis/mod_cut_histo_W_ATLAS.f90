@@ -122,17 +122,16 @@ contains
     !-- q qb -> l lx
     
     !-- lepton pT
-    if ( (event%part(3) .gt. 0) .and. (mod(event%part(3), 2) .eq. 0)) then
+    if ( (event%ids(3) .gt. 0) .and. (mod(event%ids(3), 2) .eq. 0)) then
           !print*, '3 is a neutrino'
           ptl  = get_pt(rec_mom(:,2))
           ptmiss = get_pT(rec_mom(:,1))
-    elseif ((event%part(3) .gt. 0) .and. (mod(event%part(3), 2) .ne. 0) ) then
+    elseif ((event%ids(3) .gt. 0) .and. (mod(event%ids(3), 2) .ne. 0) ) then
           !print*, '3 is a lepton' 
           ptl  = get_pt(rec_mom(:,1))
           ptmiss = get_pT(rec_mom(:,2))
     else
-          print*, 'where is the final state lepton?'
-    
+          stop 'W_ATLAS: lepton ids not set'
     endif
 
     !-- transverse mass

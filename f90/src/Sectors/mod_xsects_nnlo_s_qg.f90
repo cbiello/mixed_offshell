@@ -327,10 +327,6 @@ contains
     PqqNLO = Pqq_NLO(z)
 
  if (Vcharge == 0) then
-    HardProc_z%part    = [id_q, id_g,id_el,-id_el,id_q]
-    C2Lim_z%part       = [id_q,-id_q,id_el,-id_el]
-    HardProc%part      = [id_q, id_g,id_el,-id_el,id_q]
-    C2Lim%part         = [id_q,-id_q,id_el,-id_el]
 
     HardProc_z%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C2Lim_z%ids(1:4)    = [0,0,id_el,-id_el]
@@ -338,20 +334,12 @@ contains
     C2Lim%ids(1:4)      = [0,0,id_el,-id_el]
 
  elseif (Vcharge == -1) then
-    HardProc_z%part    = [id_q, id_g,id_el,-id_nue,id_q]
-    C2Lim_z%part       = [id_q,-id_q,id_el,-id_nue]
-    HardProc%part      = [id_q, id_g,id_el,-id_nue,id_q]
-    C2Lim%part         = [id_q,-id_q,id_el,-id_nue]
 
     HardProc_z%ids(1:5) = [0,0,id_el,-id_nue,id_q]
     C2Lim_z%ids(1:4)    = [0,0,id_el,-id_nue]
     HardProc%ids(1:5)   = [0,0,id_el,-id_nue,id_q]
     C2Lim%ids(1:4)      = [0,0,id_el,-id_nue]
  elseif (Vcharge == 1) then
-    HardProc_z%part    = [id_q, id_g,id_nue,-id_el,id_q]
-    C2Lim_z%part       = [id_q,-id_q,id_nue,-id_el]
-    HardProc%part      = [id_q, id_g,id_nue,-id_el,id_q]
-    C2Lim%part         = [id_q,-id_q,id_nue,-id_el]
 
     HardProc_z%ids(1:5) = [0,0,id_nue,-id_el,id_q]
     C2Lim_z%ids(1:4)    = [0,0,id_nue,-id_el]
@@ -651,10 +639,6 @@ contains
     PqgNLO = 2*((one-z)*z + Pqg0*log(one-z))
 
  if (Vcharge == 0) then
-    HardProc%part      = [id_q,-id_q,id_el,-id_el,id_a]
-    C1Lim%part         = [id_q,-id_q,id_el,-id_el]
-    C2Lim%part         = [id_q,-id_q,id_el,-id_el]
-    S5Lim%part         = [id_q,-id_q,id_el,-id_el]
     
     HardProc%ids(1:5)   = [0,0,id_el,-id_el,id_a]
     C1Lim%ids(1:4)      = [0,0,id_el,-id_el]
@@ -662,10 +646,6 @@ contains
     S5Lim%ids(1:4)      = [0,0,id_el,-id_el]
     
  elseif (Vcharge == -1) then
-    HardProc%part      = [id_q,-id_q,id_el,-id_nue,id_a]
-    C1Lim%part         = [id_q,-id_q,id_el,-id_nue]
-    C2Lim%part         = [id_q,-id_q,id_el,-id_nue]
-    S5Lim%part         = [id_q,-id_q,id_el,-id_nue]
     
     HardProc%ids(1:5)   = [0,0,id_el,-id_nue,id_a]
     C1Lim%ids(1:4)      = [0,0,id_el,-id_nue]
@@ -674,10 +654,6 @@ contains
     
  elseif (Vcharge == 1) then
 
-    HardProc%part      = [id_q,-id_q,id_nue,-id_el,id_a]
-    C1Lim%part         = [id_q,-id_q,id_nue,-id_el]
-    C2Lim%part         = [id_q,-id_q,id_nue,-id_el]
-    S5Lim%part         = [id_q,-id_q,id_nue,-id_el]
     
     HardProc%ids(1:5)   = [0,0,id_nue,-id_el,id_a]
     C1Lim%ids(1:4)      = [0,0,id_nue,-id_el]
@@ -1008,27 +984,18 @@ contains
     Qsq_FS = [Q3**2, Q4**2]
 
  if (Vcharge == 0) then
-    HardProc%part   = [id_q,-id_q, id_el,-id_el,id_a]
-    CLim%part       = [id_q,-id_q,id_el,-id_el]
-    SLim%part       = [id_q,-id_q,id_el,-id_el]
     
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
     CLim%ids(1:4)     = [0,0,id_el,-id_el]
     SLim%ids(1:4)     = [0,0,id_el,-id_el]
     
  elseif (Vcharge == -1) then
-    HardProc%part   = [id_q,-id_qp, id_el,-id_nue,id_a]
-    CLim%part       = [id_q,-id_qp, id_el,-id_nue]
-    SLim%part       = [id_q,-id_qp, id_el,-id_nue]
     
     HardProc%ids(1:5)  = [0,0,id_el,-id_nue,id_a]
     CLim%ids(1:4)      = [0,0,id_el,-id_nue]
     SLim%ids(1:4)      = [0,0,id_el,-id_nue]
     
  elseif (Vcharge == 1) then
-    HardProc%part  = [id_q,-id_qp, id_nue,-id_el,id_a]
-    CLim%part      = [id_q,-id_qp, id_nue,-id_el]
-    SLim%part      = [id_q,-id_qp, id_nue,-id_el]
 
     HardProc%ids(1:5)  = [0,0,id_nue,-id_el,id_a]
     CLim%ids(1:4)      = [0,0,id_nue,-id_el]

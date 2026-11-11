@@ -96,7 +96,6 @@ contains
 
        HardProc%mu2ref = slocal !-- for hoppet
 
-       if ( .not. allocated(HardProc%part) ) allocate(HardProc%part(5))
 
 
        if (compute_etas) then
@@ -158,7 +157,6 @@ contains
 
           C1Lim%mu2ref = slocal !-- for hoppet
 
-          if ( .not. allocated(C1Lim%part))  allocate(C1Lim%part(4))
 
        endif
 
@@ -207,7 +205,6 @@ contains
 
           C2Lim%mu2ref = slocal !-- for hoppet
 
-          if ( .not. allocated(C2Lim%part))  allocate(C2Lim%part(4))
 
        endif
           
@@ -265,7 +262,6 @@ contains
           SLim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac
           SLim%npart = 4
          
-          if ( .not. allocated(SLim%part))  allocate(SLim%part(4))
 
           !-- now prepare the soft-collinar
           if (present(SC1Lim)) then
@@ -276,7 +272,6 @@ contains
              SC1Lim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac 
              SC1Lim%npart = SLim%npart
 
-             if ( .not. allocated(SC1Lim%part))  allocate(SC1Lim%part(4))
              
           endif
 
@@ -288,7 +283,6 @@ contains
              SC2Lim%wgt = kallenF*x1/32._dp/pi * xi1xi2jac * jac
              SC2Lim%npart = SLim%npart
           
-             if ( .not. allocated(SC2Lim%part))  allocate(SC2Lim%part(4))
 
           endif
        

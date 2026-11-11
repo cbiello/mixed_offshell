@@ -56,14 +56,7 @@ contains
 
     call kinematics_lo(xx,LOProc)
 
-    ! define process specific partons
- if (Vcharge == 0) then
-    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
- elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
- elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
- endif
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
 
     call cut_histo(LOProc)
 
@@ -131,14 +124,7 @@ contains
 
     call kinematics_lo(xx,LOProc)
     
-    ! define process specific partons
- if (Vcharge == 0) then
-    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
- elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
- elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
- endif
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
 
 
     call cut_histo(LOProc)
@@ -214,13 +200,7 @@ contains
 
     call kinematics_lo(xx,LOProc)
     
- if (Vcharge == 0) then
-    LOProc%part(1:4) = [-id_q,id_q,id_el,-id_el]
- elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [-id_q,id_qp,id_el,-id_nue]
- elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [-id_q,id_qp,id_nue,-id_el]
- endif
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
 
     call cut_histo(LOProc)
 
@@ -290,13 +270,7 @@ contains
 
     call kinematics_lo(xx,LOProc)
 
- if (Vcharge == 0) then
-    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
- elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [id_qp,-id_q,id_el,-id_nue]
- elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [id_qp,-id_q,id_nue,-id_el]
- endif
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
 
 call cut_histo(LOProc)
 

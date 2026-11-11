@@ -78,26 +78,17 @@ contains
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g]
-    C1Lim%part = [id_q,-id_q,id_el,-id_el]
-    C2Lim%part = [id_q,-id_q,id_el,-id_el]
  elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
     C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C1Lim%part = [id_q,-id_qp,id_el,-id_nue]
-    C2Lim%part = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
     C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
 
-    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C1Lim%part = [id_q,-id_qp,id_nue,-id_el]
-    C2Lim%part = [id_q,-id_qp,id_nue,-id_el]
  endif
 
 
@@ -254,20 +245,14 @@ contains
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_g,id_q,id_el,-id_el,id_q]
-    C1Lim%part = [-id_q,id_q,id_el,-id_el]
  elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_g,id_qp,id_el,-id_nue,id_q]
-    C1Lim%part = [-id_q,id_qp,id_el,-id_nue]
  elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
     
-    HardProc%part = [id_g,id_qp,id_nue,-id_el,id_q]
-    C1Lim%part = [-id_q,id_qp,id_nue,-id_el]
  endif
 
 
@@ -393,20 +378,14 @@ contains
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_q,id_g,id_el,-id_el,id_q]
-    C2Lim%part = [id_q,-id_q,id_el,-id_el]
  elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_q]
     C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_qp,id_g,id_el,-id_nue,id_q]
-    C2Lim%part = [id_qp,-id_q,id_el,-id_nue]
  elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_q]
     C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
 
-    HardProc%part = [id_qp,id_g,id_nue,-id_el,id_q]
-    C2Lim%part = [id_qp,-id_q,id_nue,-id_el]
  endif
 
     !-- Hard

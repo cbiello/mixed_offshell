@@ -282,14 +282,6 @@ contains
     TCS6Lim%ids(1:4)  = [0,0,id_el,-id_el]
     TCS5Lim%ids(1:4)  = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
-    C6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
-    S5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    TCLim%part    = [id_q,-id_q,id_el,-id_el]
-    TCS6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    TCS5Lim%part  = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
@@ -301,14 +293,6 @@ contains
     TCS6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
     TCS5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    TCLim%part    = [id_q,-id_qp,id_el,-id_nue]
-    TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
@@ -320,14 +304,6 @@ contains
     TCS6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
     TCS5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
 
-    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    TCLim%part    = [id_q,-id_qp,id_nue,-id_el]
-    TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
  endif
 
@@ -864,15 +840,6 @@ contains
     TCS6Lim%ids(1:4)  = [0,0,id_el,-id_el]
     TCS5Lim%ids(1:4)  = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    C5S5Lim%part  = [id_q,-id_q,id_el,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
-    C5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    S5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    TCLim%part    = [id_q,-id_q,id_el,-id_el]
-    TCS6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    TCS5Lim%part  = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
@@ -885,15 +852,6 @@ contains
     TCS6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
     TCS5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
     
-    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C5S5Lim%part  = [id_q,-id_qp,id_el,-id_nue,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    TCLim%part    = [id_q,-id_qp,id_el,-id_nue]
-    TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
@@ -906,15 +864,6 @@ contains
     TCS6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
     TCS5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
     
-    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    C5S5Lim%part  = [id_q,-id_qp,id_nue,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    TCLim%part    = [id_q,-id_qp,id_nue,-id_el]
-    TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
  endif
 
@@ -1480,15 +1429,6 @@ contains
     C6S5Lim%ids(1:4)  = [0,0,id_el,-id_el]
     S5S6Lim%ids(1:4)  = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
-    C5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    C6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
-    C5C6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    C5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    C6S5Lim%part  = [id_q,-id_q,id_el,-id_el]
-    S5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
@@ -1501,15 +1441,6 @@ contains
     C6S5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
     S5S6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C5C6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    C5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    C6S5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
@@ -1522,15 +1453,6 @@ contains
     C6S5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
     S5S6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
 
-    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    C6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C5C6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    C5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    C6S5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
  endif
 
@@ -2096,15 +2018,6 @@ contains
     C6S5Lim%ids(1:4)  = [0,0,id_el,-id_el]
     S5S6Lim%ids(1:4)  = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
-    C5Lim%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    C6Lim%part    = [id_q,-id_q,id_el,-id_el,id_g]
-    C5C6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    C5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
-    C6S5Lim%part  = [id_q,-id_q,id_el,-id_el]
-    S5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
@@ -2117,15 +2030,6 @@ contains
     C6S5Lim%ids(1:4)  = [0,0,id_el,-id_nue]
     S5S6Lim%ids(1:4)  = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C5Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C6Lim%part    = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C5C6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    C5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    C6S5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-    S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
  elseif (Vcharge == 1) then
 
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
@@ -2138,15 +2042,6 @@ contains
     C6S5Lim%ids(1:4)  = [0,0,id_nue,-id_el]
     S5S6Lim%ids(1:4)  = [0,0,id_nue,-id_el]
 
-    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g,id_a]
-    S5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    S6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C5Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_a]
-    C6Lim%part    = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C5C6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    C5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    C6S5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
-    S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
  endif
 

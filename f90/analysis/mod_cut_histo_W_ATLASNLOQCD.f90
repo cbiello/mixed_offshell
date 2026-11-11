@@ -125,7 +125,7 @@ contains
 
     rec_mom(:,1) = event%AmpMom(:,3)
     rec_mom(:,2) = event%AmpMom(:,4)
-    !print*, 'ids= ', event%part(3), event%part(4)
+    !print*, 'ids= ', event%ids(3), event%ids(4)
 
     !invariant mass
     pv(:) = rec_mom(:,1) + rec_mom(:,2)
@@ -133,11 +133,11 @@ contains
 
     !-- q qb -> l lx    
     !-- lepton pT
-    if ( (event%part(3) .ne. 0) .and. (mod(event%part(3), 2) .eq. 0)) then
+    if ( (event%ids(3) .ne. 0) .and. (mod(event%ids(3), 2) .eq. 0)) then
        !print*, 'ptl is second'
        ptl  = get_pt(rec_mom(:,2))
        ptmiss = get_pT(rec_mom(:,1))
-    elseif ((event%part(3) .ne. 0) .and. (mod(event%part(3), 2) .ne. 0) ) then
+    elseif ((event%ids(3) .ne. 0) .and. (mod(event%ids(3), 2) .ne. 0) ) then
        !print*, 'ptl is first'
        ptl  = get_pt(rec_mom(:,1))
        ptmiss = get_pT(rec_mom(:,2))
@@ -145,8 +145,8 @@ contains
     
  if (Vcharge == 0) then
     !in case of Z
-    !print*, 'ids= ', event%part(3), event%part(4)
-    if( event%part(3) .eq. 11) then
+    !print*, 'ids= ', event%ids(3), event%ids(4)
+    if( event%ids(3) .eq. 11) then
        !print*, 'ptl is first'
        ptl = get_pt(rec_mom(:,1))
        ptmiss = get_pT(rec_mom(:,2))

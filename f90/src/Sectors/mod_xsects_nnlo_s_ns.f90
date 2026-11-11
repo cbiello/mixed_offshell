@@ -924,37 +924,22 @@ contains
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
 
-    HardProc%part = [id_q,-id_q,id_el,-id_el,id_g]
-    C1Lim%part = [id_q,-id_q,id_el,-id_el]
-    C2Lim%part = [id_q,-id_q,id_el,-id_el]
  elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
     C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
 
-    HardProc%part = [id_q,-id_qp,id_el,-id_nue,id_g]
-    C1Lim%part = [id_q,-id_qp,id_el,-id_nue]
-    C2Lim%part = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
     C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
 
-    HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g]
-    C1Lim%part = [id_q,-id_qp,id_nue,-id_el]
-    C2Lim%part = [id_q,-id_qp,id_nue,-id_el]
  endif
-    HardProc_z1%part = HardProc%part
-    HardProc_z2%part = HardProc%part
     HardProc_z1%ids  = HardProc%ids
     HardProc_z2%ids  = HardProc%ids
-    C1Lim_z1%part = C1Lim%part
-    C1Lim_z2%part = C1Lim%part
     C1Lim_z1%ids  = C1Lim%ids
     C1Lim_z2%ids  = C1Lim%ids
-    C2Lim_z1%part = C2Lim%part
-    C2Lim_z2%part = C2Lim%part
     C2Lim_z1%ids  = C2Lim%ids
     C2Lim_z2%ids  = C2Lim%ids
 
@@ -1607,12 +1592,6 @@ contains
     SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
     SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
 
-    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
-    C1Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
-    C2Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
-    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
-    SC1Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
-    SC2Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
     HardProc_z1%ids(1:5) = [0,0,id_el,-id_nue,id_a]
@@ -1622,12 +1601,6 @@ contains
     SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
     SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
 
-    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C1Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
-    C2Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
-    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
-    SC1Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
-    SC2Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
@@ -1637,12 +1610,6 @@ contains
     SC1Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
     SC2Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
 
-    HardProc_z1%part = [id_q,-id_qp,id_nue,-id_el,id_a]
-    C1Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
-    C2Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
-    SLim_z1%part     = [id_q,-id_qp,id_nue,-id_el]
-    SC1Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
-    SC2Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
  endif
 
 
@@ -2109,12 +2076,6 @@ contains
     SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
     SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_el]
 
-    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
-    C1Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
-    C2Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
-    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
-    SC1Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
-    SC2Lim_z1%part   = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
     HardProc_z1%ids(1:5) = [0,0,id_el,-id_nue,id_a]
@@ -2124,12 +2085,6 @@ contains
     SC1Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
     SC2Lim_z1%ids(1:4)   = [0,0,id_el,-id_nue]
 
-    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C1Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
-    C2Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
-    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
-    SC1Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
-    SC2Lim_z1%part   = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
@@ -2139,12 +2094,6 @@ contains
     SC1Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
     SC2Lim_z1%ids(1:4)   = [0,0,id_nue,-id_el]
 
-    HardProc_z1%part = [id_q,-id_qp,id_nue,-id_el,id_a]
-    C1Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
-    C2Lim_z1%part    = [id_q,-id_qp,id_nue,-id_el]
-    SLim_z1%part     = [id_q,-id_qp,id_nue,-id_el]
-    SC1Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
-    SC2Lim_z1%part   = [id_q,-id_qp,id_nue,-id_el]
  endif
 
     !for debug
@@ -3258,18 +3207,6 @@ contains
     C2Lim%ids(1:4)       = [0,0,id_el,-id_el]
     SLim%ids(1:4)        = [0,0,id_el,-id_el]
 
-    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
-    C1Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
-    C2Lim_z1%part    = [id_q,-id_q,id_el,-id_el]
-    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
-    HardProc_z2%part = [id_q,-id_q,id_el,-id_el,id_a]
-    C1Lim_z2%part    = [id_q,-id_q,id_el,-id_el]
-    C2Lim_z2%part    = [id_q,-id_q,id_el,-id_el]
-    SLim_z2%part     = [id_q,-id_q,id_el,-id_el]
-    HardProc%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    C1Lim%part       = [id_q,-id_q,id_el,-id_el]
-    C2Lim%part       = [id_q,-id_q,id_el,-id_el]
-    SLim%part        = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
     HardProc_z1%ids(1:5) = [0,0,id_el,-id_nue,id_a]
@@ -3285,18 +3222,6 @@ contains
     C2Lim%ids(1:4)       = [0,0,id_el,-id_nue]
     SLim%ids(1:4)        = [0,0,id_el,-id_nue]
 
-    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C1Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
-    C2Lim_z1%part    = [id_q,-id_qp,id_el,-id_nue]
-    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
-    HardProc_z2%part = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C1Lim_z2%part    = [id_q,-id_qp,id_el,-id_nue]
-    C2Lim_z2%part    = [id_q,-id_qp,id_el,-id_nue]
-    SLim_z2%part     = [id_q,-id_qp,id_el,-id_nue]
-    HardProc%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    C1Lim%part       = [id_q,-id_qp,id_el,-id_nue]
-    C2Lim%part       = [id_q,-id_qp,id_el,-id_nue]
-    SLim%part        = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
@@ -3312,18 +3237,6 @@ contains
     C2Lim%ids(1:4)       = [0,0,id_nue,-id_el]
     SLim%ids(1:4)        = [0,0,id_nue,-id_el]
 
-    HardProc_z1%part = [id_qp,-id_q,id_nue,-id_el,id_a]
-    C1Lim_z1%part    = [id_qp,-id_q,id_nue,-id_el]
-    C2Lim_z1%part    = [id_qp,-id_q,id_nue,-id_el]
-    SLim_z1%part     = [id_qp,-id_q,id_nue,-id_el]
-    HardProc_z2%part = [id_qp,-id_q,id_nue,-id_el,id_a]
-    C1Lim_z2%part    = [id_qp,-id_q,id_nue,-id_el]
-    C2Lim_z2%part    = [id_qp,-id_q,id_nue,-id_el]
-    SLim_z2%part     = [id_qp,-id_q,id_nue,-id_el]
-    HardProc%part    = [id_qp,-id_q,id_nue,-id_el,id_a]
-    C1Lim%part       = [id_qp,-id_q,id_nue,-id_el]
-    C2Lim%part       = [id_qp,-id_q,id_nue,-id_el]
-    SLim%part        = [id_qp,-id_q,id_nue,-id_el]
 
  endif
 
@@ -4291,15 +4204,6 @@ contains
     CLim%ids(1:4)        = [0,0,id_el,-id_el]
     SLim%ids(1:4)        = [0,0,id_el,-id_el]
 
-    HardProc_z1%part = [id_q,-id_q,id_el,-id_el,id_a]
-    CLim_z1%part     = [id_q,-id_q,id_el,-id_el]
-    SLim_z1%part     = [id_q,-id_q,id_el,-id_el]
-    HardProc_z2%part = [id_q,-id_q,id_el,-id_el,id_a]
-    CLim_z2%part     = [id_q,-id_q,id_el,-id_el]
-    SLim_z2%part     = [id_q,-id_q,id_el,-id_el]
-    HardProc%part    = [id_q,-id_q,id_el,-id_el,id_a]
-    CLim%part        = [id_q,-id_q,id_el,-id_el]
-    SLim%part        = [id_q,-id_q,id_el,-id_el]
 
  elseif (Vcharge == -1) then
 
@@ -4313,15 +4217,6 @@ contains
     CLim%ids(1:4)        = [0,0,id_el,-id_nue]
     SLim%ids(1:4)        = [0,0,id_el,-id_nue]
 
-    HardProc_z1%part = [id_q,-id_qp,id_el,-id_nue,id_a]
-    CLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
-    SLim_z1%part     = [id_q,-id_qp,id_el,-id_nue]
-    HardProc_z2%part = [id_q,-id_qp,id_el,-id_nue,id_a]
-    CLim_z2%part     = [id_q,-id_qp,id_el,-id_nue]
-    SLim_z2%part     = [id_q,-id_qp,id_el,-id_nue]
-    HardProc%part    = [id_q,-id_qp,id_el,-id_nue,id_a]
-    CLim%part        = [id_q,-id_qp,id_el,-id_nue]
-    SLim%part        = [id_q,-id_qp,id_el,-id_nue]
 
  elseif (Vcharge == 1) then
     HardProc_z1%ids(1:5) = [0,0,id_nue,-id_el,id_a]
@@ -4334,15 +4229,6 @@ contains
     CLim%ids(1:4)        = [0,0,id_nue,-id_el]
     SLim%ids(1:4)        = [0,0,id_nue,-id_el]
     
-    HardProc_z1%part = [id_qp,-id_q,id_nue,-id_el,id_a]
-    CLim_z1%part     = [id_qp,-id_q,id_nue,-id_el]
-    SLim_z1%part     = [id_qp,-id_q,id_nue,-id_el]
-    HardProc_z2%part = [id_qp,-id_q,id_nue,-id_el,id_a]
-    CLim_z2%part     = [id_qp,-id_q,id_nue,-id_el]
-    SLim_z2%part     = [id_qp,-id_q,id_nue,-id_el]
-    HardProc%part    = [id_qp,-id_q,id_nue,-id_el,id_a]
-    CLim%part        = [id_qp,-id_q,id_nue,-id_el]
-    SLim%part        = [id_qp,-id_q,id_nue,-id_el]
 
  endif
 

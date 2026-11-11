@@ -66,13 +66,10 @@ contains
 
     ! define process specific partons
  if (Vcharge == 0) then
-    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
  elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
  elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
  endif
 
@@ -138,7 +135,6 @@ contains
 
     call kinematics_lo(xx,LOProc)
 
-    LOProc%part(1:4) = [22,22,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
     
     call cut_histo(LOProc)
@@ -231,13 +227,10 @@ contains
     call kinematics_lo(xx,LOProc)
        ! define process specific partons
  if (Vcharge == 0) then
-    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
  elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
  elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
  endif
 
@@ -539,7 +532,6 @@ end function get_subtra_elastic_ewk_qqbllb_gen
 
     call kinematics_lo(xx,LOProc)
 
-    LOProc%part(1:4) = [22,22,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
     
     call cut_histo(LOProc)
@@ -611,13 +603,10 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     call kinematics_lo(xx,LOProc)
 
  if (Vcharge == 0) then
-    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
  elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
  elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
  endif
     
@@ -706,13 +695,10 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     call kinematics_lo(xx,LOProc)
 
  if (Vcharge == 0) then
-    LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
  elseif (Vcharge == -1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
  elseif (Vcharge == 1) then
-    LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
  endif
     
