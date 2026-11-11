@@ -1,6 +1,11 @@
 TODO Christian:
 
-1- make oldcode global
+1- make oldcode global  [done: OLDCODE=true/false in the cfg]
 3- compare PWG and NSC for NLO EW e+e-
 
 4- extend recombine_photon routine in NSC in the case of W in order to avoid the recombination of the photon with the neutrino (as in the current W analysis!)
+
+5- redo the NLO checks for W+ and W- against POWHEG (NSC-lnuQCD, NSC-lnuEW), all channels incl. photon-induced  [PLAN.md C3.1, C3.2]
+6- build POWHEG NLO QCD for lla (l nu gamma) in the same way as NSC-lnuQCD  [PLAN.md C3.3]
+7- build POWHEG NLO EWK for llj (l nu j) in the same way as NSC-lnuEW  [PLAN.md C3.4]
+8- check 6 and 7 against the corresponding sectors of our code  [PLAN.md C3.5-C3.8]

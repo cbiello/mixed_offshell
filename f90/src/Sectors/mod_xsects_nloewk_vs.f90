@@ -42,9 +42,7 @@ contains
     real(dp)    :: res_tree_old(2,3),res_loop_old(2,3)
     real(dp)    :: res_loop_old_tmp(2,3)
     integer :: i, j 
-    logical :: oldcode
 
-    oldcode = .false.
 
     xsect_nloewk_v_ns = 0
     res_loop(:,:) = 0
@@ -67,16 +65,16 @@ contains
     call kinematics_lo(xx,LOProc)
 
     ! define process specific partons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
-#endif
+ endif
 
     call cut_histo(LOProc)
 
@@ -86,13 +84,13 @@ contains
        
     else    
     
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_ewkloop_qqb(LOProc%AmpMom,res_tree_old,res_loop_old)
           call get_respdf(ns_lumi_splitb,0,1,LOProc,res_loop_old,respdf)
-       else
+#else
           call res_ewkloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
           call get_respdf_gen(0,1,LOProc,res_loop,respdf)
-       endif 
+#endif
        
        respdf = respdf*LOProc%wgt
        kin(1) = respdf(1)
@@ -200,9 +198,7 @@ contains
     real*8 :: Q2(nf)
 
     integer :: i, j
-    logical :: oldcode
 
-    oldcode = .false.
     
     Qcharge = (/ Qdn, Qup, Qdn, Qup, Qdn /)
     Q2 = Qcharge**2
@@ -233,16 +229,16 @@ contains
 
     call kinematics_lo(xx,LOProc)
        ! define process specific partons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
-#endif
+ endif
 
     call cut_histo(LOProc)
 
@@ -252,7 +248,7 @@ contains
        
     else    
         
-        if (oldcode) then 
+#if (_oldcode == 1)
 
              call res_tree_qqb(LOProc%AmpMom,res_lo_old)
              res_lo_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
@@ -278,7 +274,7 @@ contains
              
              respdf_3 = respdf_3*LOproc%wgt
        
-       else 
+#else
              call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
 
              do a = -nf, nf
@@ -311,7 +307,7 @@ contains
                 enddo
              enddo
 
-#if (_Vcharge == 0)
+          if (Vcharge == 0) then
              fin_elasticZ_ddx = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qdn,-Qdn,Q_lep,-Q_lep)
              fin_elasticZ_uux = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qup,-Qup,Q_lep,-Q_lep)
              fin_elasticZ_dxd = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qdn,Q_lep,-Q_lep)
@@ -327,7 +323,7 @@ contains
                 res_lo(-i,i) = res_lo(-i,i) * fin_elasticZ_uxu
              end do
 
-#elif (_Vcharge == +1)
+          elseif (Vcharge == 1) then
              fin_elasticW_dxu = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qdn,Qup,0d0,-Q_lep)
              fin_elasticW_udx = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qup,-Qdn,0d0,-Q_lep)
              ! u dbar  → fin_elasticW_udx
@@ -341,7 +337,7 @@ contains
                 res_lo(-j,i) = res_lo(-j,i) * fin_elasticW_dxu
              end do
 
-#elif (_Vcharge == -1)
+          elseif (Vcharge == -1) then
              fin_elasticW_dux = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,Qdn,-Qup,Q_lep,0d0)
              fin_elasticW_uxd = get_subtra_elastic_ewk_qqbllb_gen(1,2,3,4,Lij,Emax,mu,PolyLogij,-Qup,Qdn,Q_lep,0d0)
              ! d ubar → fin_elasticW_dux
@@ -355,11 +351,11 @@ contains
                 res_lo(-i,j) = res_lo(-i,j) * fin_elasticW_uxd
              end do
 
-#endif
+          endif
              call get_respdf_gen(0,1,LOProc,res_lo,respdf_3)
              respdf_3 = respdf_3*LOproc%wgt
              
-       endif 
+#endif
 
        respdf = respdf_1 + respdf_2 + respdf_3
        
@@ -590,16 +586,9 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf_vect(1:2,ipdf),respdf(ipdf)
     real(dp)    :: res_lo(2,2)
-    logical     :: oldcode
-    integer :: a, b, fa, fb
-    real*8 :: Qcharge(nf)
-    real*8 :: Q2(nf)
     real(dp)    :: res_lo_new(-5:7,-5:7)
 
-    oldcode = .false.
     
-    Qcharge = (/ Qdn, Qup, Qdn, Qup, Qdn /)
-    Q2 = Qcharge**2
     
     xsect_nloewk_s_aq = 0
 
@@ -619,16 +608,16 @@ end function get_subtra_elastic_ewk_qqbllb_gen
 
     call kinematics_lo(xx,LOProc)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
-#endif
+ endif
     
     call cut_histo(LOProc)
 
@@ -638,40 +627,31 @@ end function get_subtra_elastic_ewk_qqbllb_gen
        
     else
        
-       if(oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(LOProc%AmpMom,res_lo)
           res_lo(:,1) = Qdn2 * res_lo(:,1)
           res_lo(:,2) = Qup2 * res_lo(:,2)
           !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
           call get_respdf_hoppet(xPij,PDFs,ns_lumi,0,1,LOProc,res_lo,respdf_vect(1,:),myPDFs1_Lmu=[xPij_Lmu])
           respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
-       else
+#else
           call res_tree_qqb_gen(LOProc%AmpMom,res_lo_new)
-          do a = -nf, nf
-               if (a == 0) cycle
-               fa = abs(a)
-               do b = -nf, nf
-                 if (b == 0) cycle
-                 fb = abs(b)
-                 res_lo_new(a,b) = Q2(fa) * res_lo_new(a,b)
-                 res_lo_new(a,b) = Q2(fb) * res_lo_new(a,b)
-               end do
-            end do
+          res_lo_new = multiply_IS_charges_sq(res_lo_new,1)
           !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
           call get_respdf_hoppet_gen(xPij,PDFs,0,1,LOProc,res_lo_new,respdf_vect(1,:),myPDFs1_Lmu=[xPij_Lmu])
           respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
-       endif          
+#endif
 
        !--
 
-#if(_Vcharge == 0)
+    if (Vcharge == 0) then
        !-- Paq*sigma_aa, quark charges already in the luminosity
        call res_treeAA_aa(LOProc%AmpMom,res_lo(1,1))
        call get_respdf_hoppet(PDFs,xPij_2,aa_lumi,0,1,LOProc,res_lo,respdf_vect(2,:),myPDFs2_Lmu=[xPij_2_Lmu])
        respdf_vect(2,:) = respdf_vect(2,:)*LOProc%wgt
-#else
+    else
        respdf_vect(2,:) = 0
-#endif
+    endif
 
        respdf = sum(respdf_vect(1:2,:),1)
        
@@ -701,16 +681,9 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf_vect(2,ipdf),respdf(ipdf)
     real(dp)    :: res_lo(2,2)
-    logical     :: oldcode
-    integer :: a, b, fa, fb
-    real*8 :: Qcharge(nf)
-    real*8 :: Q2(nf)
     real(dp)    :: res_lo_new(-5:7,-5:7)
 
-    oldcode = .false.
 
-    Qcharge = (/ Qdn, Qup, Qdn, Qup, Qdn /)
-    Q2 = Qcharge**2
 
     xsect_nloewk_s_qa = 0
 
@@ -730,16 +703,16 @@ end function get_subtra_elastic_ewk_qqbllb_gen
 
     call kinematics_lo(xx,LOProc)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
     LOProc%ids(1:4) = [0,0,id_el,-id_nue] 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
     LOProc%ids(1:4) = [0,0,id_nue,-id_el] 
-#endif
+ endif
     
     call cut_histo(LOProc)
 
@@ -749,7 +722,7 @@ end function get_subtra_elastic_ewk_qqbllb_gen
        
     else    
 
-       if(oldcode) then
+#if (_oldcode == 1)
            call res_tree_qqb(LOProc%AmpMom,res_lo)
            res_lo(1,:) = [Qdn2,Qup2] * res_lo(1,:)
            res_lo(2,:) = [Qdn2,Qup2] * res_lo(2,:)
@@ -757,33 +730,24 @@ end function get_subtra_elastic_ewk_qqbllb_gen
            !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
            call get_respdf_hoppet(PDFs,xPij,ns_lumi,0,1,LOProc,res_lo,respdf_vect(1,:),myPDFs2_Lmu=[xPij_Lmu])
            respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
-       else
+#else
           call res_tree_qqb_gen(LOProc%AmpMom,res_lo_new)
-          do a = -nf, nf
-               if (a == 0) cycle
-               fa = abs(a)
-               do b = -nf, nf
-                 if (b == 0) cycle
-                 fb = abs(b)
-                 res_lo_new(a,b) = Q2(fa) * res_lo_new(a,b)
-                 res_lo_new(a,b) = Q2(fb) * res_lo_new(a,b)
-               end do
-            end do
+          res_lo_new = multiply_IS_charges_sq(res_lo_new,2)
            !-- Pqa*sigma_qq, ns_lumi because the convolution is done in xPij
            call get_respdf_hoppet_gen(PDFs,xPij,0,1,LOProc,res_lo_new,respdf_vect(1,:),myPDFs2_Lmu=[xPij_Lmu])
            respdf_vect(1,:) = xn*respdf_vect(1,:)*LOProc%wgt
-       endif    
+#endif
 
        !--
 
-#if(_Vcharge == 0)
+    if (Vcharge == 0) then
        !-- Paq*sigma_aa, quark charges already in the luminosity
        call res_treeAA_aa(LOProc%AmpMom,res_lo(1,1))
        call get_respdf_hoppet(xPij_2,PDFs,aa_lumi,0,1,LOProc,res_lo,respdf_vect(2,:),myPDFs1_Lmu=[xPij_2_Lmu])
        respdf_vect(2,:) = respdf_vect(2,:)*LOProc%wgt
-#else
+    else
        respdf_vect(2,:) = 0
-#endif
+    endif
 
        respdf = sum(respdf_vect(1:2,:),1)
 

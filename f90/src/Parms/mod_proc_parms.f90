@@ -32,13 +32,7 @@ module mod_proc_parms
   public :: print_counters,reset_counters
   public :: set_buff
 
-#if (_Vcharge == 0)
-  real(dp), public, parameter :: current_charge = zero
-#elif (_Vcharge == -1)
-  real(dp), public, parameter :: current_charge = -one
-#elif (_Vcharge == +1)
-  real(dp), public, parameter :: current_charge = +one
-#endif
+  real(dp), public, save :: current_charge
   
   real(dp), public, parameter :: Q_lep = Qel
   real(dp), public, parameter :: Q_lep2 = Q_lep**2
@@ -75,6 +69,8 @@ contains
   subroutine get_proc_parms()
     character(30) :: str_units
     real(dp) :: ecoll
+
+    current_charge = real(Vcharge,dp)
 
     !-- default directory for output histograms
     histodir = trim(string_val_opt('-histodir','./histo'))
@@ -218,6 +214,8 @@ contains
     else
        tmpfile = trim(pref)
     endif
+    if (Vcharge == -1) tmpfile = trim(tmpfile)//"_wm"
+    if (Vcharge == +1) tmpfile = trim(tmpfile)//"_wp"
     tmpfile = trim(tmpfile)//"_"//trim(corr)//'_'//trim(ch)//'_'//trim(sec)
     if (dynscale) then
        tmpfile=trim(tmpfile)//"_dynscale"

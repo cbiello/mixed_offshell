@@ -31,15 +31,15 @@ contains
        if     (ch.eq.'ns' .and. sec.eq.'na') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns,vg_result,vg_error,vg_chi2)
 !       elseif (ch.eq.'ns' .and. sec.eq.'wp') then; call vegas_integrate(LOdim_vegas,xsect_lo_ns_wp,vg_result,vg_error,vg_chi2)
        elseif (ch.eq.'aa' .and. sec.eq.'na') then
-#if _Vcharge == 0
+       if (Vcharge == 0) then
           call vegas_integrate(LOdim_vegas,xsect_lo_aa,vg_result,vg_error,vg_chi2)
-#else
+       else
           write(*,*) '------- ERROR in Chooser ------'
           write(*,*) 'The aa channel is not present  '
           write(*,*) 'in charged DY production       '
           write(*,*) '-------------------------------'
           stop
-#endif
+       endif
        else
           print *, 'wrong sector/channel for lo -> -sec na -ch ns,aa'
           stop
@@ -136,7 +136,7 @@ contains
              stop
           endif
        elseif (ch.eq.'aa') then
-#if _Vcharge == 0
+       if (Vcharge == 0) then
           if (sec.eq.'v') then
              call vegas_integrate(LOdim_vegas,xsect_nloewk_v_aa,vg_result,vg_error,vg_chi2)
           elseif (sec.eq.'r_fs_53') then
@@ -146,13 +146,13 @@ contains
           elseif (sec.eq.'s')    then
              call vegas_integrate(LOdim_vegas,xsect_nloewk_s_aa,vg_result,vg_error,vg_chi2)
           endif
-#else
+       else
           write(*,*) '------- ERROR in Chooser ------'
           write(*,*) 'The aa channel is not present  '
           write(*,*) 'in charged DY production       '
           write(*,*) '-------------------------------'
           stop
-#endif
+       endif
        else
           print *, 'wrong channel for nloqewk -> -ch ns aq qa aa'
           stop

@@ -37,20 +37,20 @@ contains
     propZ = mll/(mll-mzsq_prop)
     propW = mll/(mll-mwsq_prop)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     ! Z boson
     coupl = zero
     coupl(1:2,-1,-1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cL2(1:2)
     coupl(1:2,-1,+1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cR2(1:2)
     coupl(1:2,+1,-1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cL2(1:2)
     coupl(1:2,+1,+1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cR2(1:2)
-#else
+ else
     !W+ or W-
     coupl = zero
     coupl(3,-1,-1) = propW * cLW * cLWnue
     print *, clw,clwnue
     stop
-#endif
+ endif
 
   end subroutine get_coupl_real_gen
 
@@ -66,18 +66,18 @@ contains
     propW = mll/(mll-mwsq_prop)
 
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     ! Z boson
     coupl = zero
     coupl(1:2,-1,-1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cL2(1:2)
     coupl(1:2,-1,+1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cR2(1:2)
     coupl(1:2,+1,-1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cL2(1:2)
     coupl(1:2,+1,+1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cR2(1:2)       
-#else
+ else
     ! W+ or W-        
     coupl = czero
     coupl(3,-1,-1) = propW * cms_cLW* cms_cLWnue
-#endif
+ endif
     
   end subroutine get_coupl_cmplx_gen
   
@@ -94,18 +94,18 @@ contains
     propZ = mll/(mll-mzsq_prop)
     propW = mll/(mll-mwsq_prop)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     ! Z boson
     coupl = zero
     coupl(1:2,-1,-1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cL2(1:2)
     coupl(1:2,-1,+1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cR2(1:2)
     coupl(1:2,+1,-1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cL2(1:2)
     coupl(1:2,+1,+1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cR2(1:2)
-#else
+ else
     !W+ or W-
     coupl = zero
     coupl(:,-1,-1) = propW * cLW * cLWnue
-#endif
+ endif
 
   end subroutine get_coupl_real
 
@@ -120,18 +120,18 @@ contains
     propZ = mll/(mll-mzsq_prop)
     propW = mll/(mll-mwsq_prop)
 
-#if (_Vcharge == 0)
+     if (Vcharge == 0) then
     ! Z boson
         coupl = zero
         coupl(1:2,-1,-1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cL2(1:2)
         coupl(1:2,-1,+1) = Q1(1:2)*Q2(1:2) + propZ * cL1(1:2) * cR2(1:2)
         coupl(1:2,+1,-1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cL2(1:2)
         coupl(1:2,+1,+1) = Q1(1:2)*Q2(1:2) + propZ * cR1(1:2) * cR2(1:2)       
-#else
+     else
     ! W+ or W-        
         coupl = czero
         coupl(:,-1,-1) = propW * cms_cLW* cms_cLWnue
-#endif
+     endif
 
       end subroutine get_coupl_cmplx
 

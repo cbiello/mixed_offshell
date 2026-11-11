@@ -234,9 +234,7 @@ contains
     real(dp) :: e5,e6,eta5i,eta6i,eik_qcd,eik_qed(4),si5,si6,s56
     real(dp) :: z,z5,z6,zi
     real(dp) :: damp
-    logical  :: oldcode
 
-    oldcode = .false.
 
     xsect_nnlo_rr_5i6ia_ns_ga = 0
 
@@ -274,7 +272,7 @@ contains
          TCS5S6Lim = TCS5S6Lim, TCC6S5S6Lim = TCC6S5S6Lim, C6Lim = C6Lim, &
          opt_etas=[3,4])
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_el,id_a]
     S6Lim%ids(1:5)    = [0,0,id_el,-id_el,id_g]
@@ -293,7 +291,7 @@ contains
     TCS6Lim%part  = [id_q,-id_q,id_el,-id_el]
     TCS5Lim%part  = [id_q,-id_q,id_el,-id_el]
 
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
     S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
@@ -312,7 +310,7 @@ contains
     TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
     TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
     S6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
@@ -331,7 +329,7 @@ contains
     TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
     TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
-#endif
+ endif
 
 
 
@@ -352,13 +350,13 @@ contains
        call partition_nnlo_fact(HardProc,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=i)
    
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_ga_qqb(HardProc%AmpMom,res_nnlo_old)
           call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo_old,respdf)
-       else
+#else
           call res_tree_ga_qqb_gen(HardProc%AmpMom,res_nnlo)
           call get_respdf_gen(1,1,Hardproc,res_nnlo,respdf)
-       endif 
+#endif
 
        respdf = respdf*HardProc%wgt*damp
 
@@ -386,13 +384,13 @@ contains
        call partition_nnlo_fact(S5Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=i)
        
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(S5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,S5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(S5Lim%AmpMom,res_nlo)
           call get_respdf_gen(1,1,S5Lim,res_nlo,respdf)
-       endif
+#endif
 
        call get_qcd_eik(Cf,S5Lim%Lim_etaij,[1,2],5,eik_qcd)
        e5 = S5Lim%Lim_KinInv(1)
@@ -421,7 +419,8 @@ contains
        
     else
 
-       if ( oldcode ) then
+#if (_oldcode == 1)
+          call res_tree_g_qqb(S6Lim%AmpMom,res_nlo_old)
           !-- prepare PDFs structures, S6
           call get_qed_eik(charges,S6Lim%Lim_etaij,[1,2,3,4],6,eik_qed)
           res_tmp_vect_old(1:2,1,1) = res_nlo_old(1:2,1) * eik_qed(1:2)
@@ -430,16 +429,17 @@ contains
           res_tmp_vect_old(:,1,2) = res_nlo_old(:,1) * Qdn2
           res_tmp_vect_old(:,2,2) = res_nlo_old(:,2) * Qup2
           !-- get PDFs for all of them
-          call get_respdf_vect(ns_lumi,1,1,S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
+          call get_respdf_vect(ns_lumi,1,1,S6Lim,res_tmp_vect_old(:,:,1:2),respdf_vect(1:2,:))
+          respdf_tmp(:,1) = respdf_vect(1,:); respdf_tmp(:,2) = respdf_vect(2,:)
        
-       else
+#else
           call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo_tmp)
           call get_qed_eik_gen(res_nlo_tmp,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
           call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_tmp(:,1))
           res_nlo_ischarges = multiply_IS_charges_sq(res_nlo_tmp,i)
           call get_respdf_gen(1,1,S6Lim,res_nlo_ischarges,respdf_tmp(:,2))
                  
-       endif 
+#endif
 
        !-- S6
        call partition_nnlo_fact(S6Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -483,16 +483,16 @@ contains
        call partition_nnlo_fact(C6Lim,damp,iconf_qcd=[1,2,5],&
             i_qcd=i)
 
-       if ( oldcode ) then 
+#if (_oldcode == 1)
           call res_tree_g_qqb(C6Lim%AmpMom,res_nlo_old)
           res_nlo_old(:,1) = res_nlo_old(:,1) * Qdn2
           res_nlo_old(:,2) = res_nlo_old(:,2) * Qup2
           call get_respdf(ns_lumi,1,1,C6Lim,res_nlo_old,respdf)
-       else 
+#else
           call res_tree_g_qqb_gen(C6Lim%AmpMom,res_nlo_tmp)
           res_nlo_ischarges = multiply_IS_charges_sq(res_nlo_tmp,i)
           call get_respdf_gen(1,1,C6Lim,res_nlo_ischarges,respdf)
-       endif
+#endif
 
        z   = C6Lim%Lim_z(2)
        si6 = C6Lim%Lim_sij(i,6)
@@ -520,7 +520,7 @@ contains
        
     else
 
-       if ( oldcode ) then
+#if (_oldcode == 1)
           call res_tree_qqb(S5S6Lim%AmpMom,res_lo_old)
           !-- Prepare for PDFs, S5S6
           call get_qcd_eik(Cf,S5S6Lim%Lim_etaij,[1,2],5,eik_qcd)
@@ -530,8 +530,9 @@ contains
           !-- Prepare for PDFs, TCS5S6
           res_tmp_vect_old(:,1,2) = res_lo_old(:,1) * Qdn2
           res_tmp_vect_old(:,2,2) = res_lo_old(:,2) * Qup2
-          call get_respdf_vect(ns_lumi,1,1,S5S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
-       else 
+          call get_respdf_vect(ns_lumi,1,1,S5S6Lim,res_tmp_vect_old(:,:,1:2),respdf_vect(1:2,:))
+          respdf_tmp(:,1) = respdf_vect(1,:); respdf_tmp(:,2) = respdf_vect(2,:)
+#else
           call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo_tmp)
           !-- Prepare for PDFs, S5S6
           call get_qcd_eik(Cf,S5S6Lim%Lim_etaij,[1,2],5,eik_qcd) 
@@ -539,7 +540,7 @@ contains
           res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
           call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_tmp(:,1))
           call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_tmp(:,2))
-       endif 
+#endif
        
        !-- S5S6
        call partition_nnlo_fact(S5S6Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -599,16 +600,17 @@ contains
        
     else
 
-       if ( oldcode ) then 
+#if (_oldcode == 1)
           call res_tree_qqb(TCLim%AmpMom,res_lo_old)
           res_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
           res_tmp_old(:,2) = res_lo_old(:,2) * Qup2
           call get_respdf(ns_lumi,1,1,TCLim,res_tmp_old,respdf)    
-       else 
+          respdf_tmp(:,1) = respdf
+#else
           call res_tree_qqb_gen(TCLim%AmpMom,res_lo_tmp)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
           call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf_tmp(:,1))
-       endif 
+#endif
 
 
        !-- TC
@@ -652,16 +654,17 @@ contains
        
     else
 
-       if ( oldcode ) then
+#if (_oldcode == 1)
           call res_tree_qqb(TCS6Lim%AmpMom,res_lo_old)
           res_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
           res_tmp_old(:,2) = res_lo_old(:,2) * Qup2
           call get_respdf(ns_lumi,1,1,TCS6Lim,res_tmp_old,respdf)
-       else
+          respdf_tmp(:,1) = respdf
+#else
           call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo_tmp)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
           call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_tmp(:,1))
-       endif
+#endif
 
        !-- TCS6
        z5  = TCS6Lim%Lim_z(1)
@@ -701,16 +704,17 @@ contains
        
     else
 
-       if ( oldcode ) then
+#if (_oldcode == 1)
           call res_tree_qqb(TCS5Lim%AmpMom,res_lo_old)
           res_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
           res_tmp_old(:,2) = res_lo_old(:,2) * Qup2
           call get_respdf(ns_lumi,1,1,TCS5Lim,res_tmp_old,respdf)
-       else 
+          respdf_tmp(:,1) = respdf
+#else
           call res_tree_qqb_gen(TCS5Lim%AmpMom,res_lo_tmp)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo_tmp,i)
           call get_respdf_gen(1,1,TCS5Lim,res_lo_ischarges,respdf_tmp(:,1))
-       endif 
+#endif
 
        !-- TCS5
        z5  = TCS5Lim%Lim_z(1)
@@ -813,13 +817,11 @@ contains
     real(dp) :: e5,e6,eta5i,eta6i,eik_qcd,eik_qed(4),si5,si6,s56
     real(dp) :: z,z5,z6,zi
     real(dp) :: damp
-    logical  :: oldcode
 
     xsect_nnlo_rr_5i6ic_ns_ga = 0
 
     ff(1) = zero
 
-    oldcode = .false.
 
     xx(1:kNNLO_max)=buff+onet*real(yRnd(1:kNNLO_max),dp)
     call random_number(xx(kNNLO_max_full-1))
@@ -851,7 +853,7 @@ contains
          TCS5S6Lim = TCS5S6Lim, TCC5S5S6Lim = TCC5S5S6Lim, C5Lim = C5Lim, &
          opt_etas=[3,4])
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_el,id_a]
     C5S5Lim%ids(1:5)  = [0,0,id_el,-id_el,id_a]
@@ -872,7 +874,7 @@ contains
     TCS6Lim%part  = [id_q,-id_q,id_el,-id_el]
     TCS5Lim%part  = [id_q,-id_q,id_el,-id_el]
 
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
     C5S5Lim%ids(1:5)  = [0,0,id_el,-id_nue,id_a]
@@ -893,7 +895,7 @@ contains
     TCS6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
     TCS5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
     C5S5Lim%ids(1:5)  = [0,0,id_nue,-id_el,id_a]
@@ -914,7 +916,7 @@ contains
     TCS6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
     TCS5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
-#endif
+ endif
 
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
@@ -933,13 +935,13 @@ contains
        call partition_nnlo_fact(HardProc,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=i)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_ga_qqb(HardProc%AmpMom,res_nnlo_old)
           call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo_old,respdf)
-       else
+#else
           call res_tree_ga_qqb_gen(HardProc%AmpMom,res_nnlo)
           call get_respdf_gen(1,1,Hardproc,res_nnlo,respdf)
-       endif
+#endif
 
        respdf = respdf*HardProc%wgt*damp
 
@@ -967,13 +969,13 @@ contains
        call partition_nnlo_fact(S5Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=i)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(S5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,S5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(S5Lim%AmpMom,res_nlo)
           call get_respdf_gen(1,1,S5Lim,res_nlo,respdf)
-       endif
+#endif
 
        call get_qcd_eik(Cf,S5Lim%Lim_etaij,[1,2],5,eik_qcd)
        e5 = S5Lim%Lim_KinInv(1)
@@ -1005,13 +1007,13 @@ contains
        call partition_nnlo_fact(C5S5Lim,damp,iconf_qed=[1,2,3,4,6],&
             i_qed=i)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(C5S5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,C5S5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(C5S5Lim%AmpMom,res_nlo)
           call get_respdf_gen(1,1,C5S5Lim,res_nlo,respdf)
-       endif
+#endif
 
        e5    = C5S5Lim%Lim_KinInv(1)
        eta5i = C5S5Lim%Lim_etaij(i,5)
@@ -1038,7 +1040,7 @@ contains
        FintNNLO_ns(4) = zero
        
     else
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_qqb(S6Lim%AmpMom,res_nlo_old)
        
           !-- prepare PDFs structures, S6
@@ -1046,11 +1048,11 @@ contains
           res_tmp_old(1:2,1) = res_nlo_old(1:2,1) * eik_qed(1:2)
           res_tmp_old(1:2,2) = res_nlo_old(1:2,2) * eik_qed(3:4)
           call get_respdf(ns_lumi,1,1,S6Lim,res_tmp_old,respdf)
-       else
+#else
           call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo)
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
           call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf)
-       endif
+#endif
 
        !-- S6
        call partition_nnlo_fact(S6Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -1083,13 +1085,13 @@ contains
        call partition_nnlo_fact(C5Lim,damp,iconf_qed=[1,2,3,4,6],&
             i_qed=i)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(C5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,C5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(C5Lim%AmpMom,res_lo)
           call get_respdf_gen(1,1,C5Lim,res_lo,respdf)
-       endif
+#endif
 
        z   = C5Lim%Lim_z(1)
        si5 = C5Lim%Lim_sij(i,5)
@@ -1117,7 +1119,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(S5S6Lim%AmpMom,res_lo_old)
 
           !-- Prepare for PDFs, S5S6
@@ -1137,7 +1139,7 @@ contains
           res_tmp_vect_old(1:2,2,3) = res_lo_old(1:2,2) * eik_qed(3:4) 
               
           call get_respdf_vect(ns_lumi,1,1,S5S6Lim,res_tmp_vect_old(:,:,1:3),respdf_vect(1:3,:))
-       else
+#else
           
           call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo)
 
@@ -1157,7 +1159,7 @@ contains
           respdf_vect(2,:) = respdf_vect2(:)
           respdf_vect(3,:) = respdf_vect3(:)
 
-       endif
+#endif
        
        !-- S5S6
        call partition_nnlo_fact(S5S6Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -1218,18 +1220,18 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(TCLim%AmpMom,res_lo_old)
 
           res_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
           res_tmp_old(:,2) = res_lo_old(:,2) * Qup2
           call get_respdf(ns_lumi,1,1,TCLim,res_tmp_old,respdf)
-       else
+#else
           
           call res_tree_qqb_gen(TCLim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           call get_respdf_gen(1,1,TCLim,res_lo_ischarges,respdf)
-       endif
+#endif
 
 
        !-- TC
@@ -1273,7 +1275,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(TCS6Lim%AmpMom,res_lo_old)
 
           !-- prepare PDFs structures, TCS6 + tCC5S6
@@ -1286,7 +1288,7 @@ contains
           res_tmp_vect_old(1:2,2,2) = res_lo_old(1:2,2) * eik_qed(3:4) 
 
           call get_respdf_vect(ns_lumi,1,1,TCS6Lim,res_tmp_vect_old(:,:,1:2),respdf_vect(1:2,:))
-       else
+#else
           call res_tree_qqb_gen(TCS6Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           call get_respdf_gen(1,1,TCS6Lim,res_lo_ischarges,respdf_vect1(:))
@@ -1294,7 +1296,7 @@ contains
           call get_respdf_gen(1,1,TCS6Lim,res_lo_eikqed,respdf_vect2(:))
           respdf_vect(1,:) = respdf_vect1(:)
           respdf_vect(2,:) = respdf_vect2(:)
-       endif
+#endif
 
        !-- TCS6
        z5  = TCS6Lim%Lim_z(1)
@@ -1341,17 +1343,17 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(TCS5Lim%AmpMom,res_lo_old)
 
           res_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
           res_tmp_old(:,2) = res_lo_old(:,2) * Qup2
           call get_respdf(ns_lumi,1,1,TCS5Lim,res_tmp_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(TCS5Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,i)
           call get_respdf_gen(1,1,TCS5Lim,res_lo_ischarges,respdf)
-       endif
+#endif
        
           
           
@@ -1429,14 +1431,12 @@ contains
     real(dp) :: e5,e6,eik_qcd,eik_qed(4),si5,sj6
     real(dp) :: z5,z6
     real(dp) :: damp
-    logical  :: oldcode
 
 
     xsect_nnlo_rr_ii_5i6j_ns_ga = 0
 
     ff(1) = zero
 
-    oldcode = .false.
 
     xx(1:kNNLO_max)=buff+onet*real(yRnd(1:kNNLO_max),dp)
     call random_number(xx(kNNLO_max_full-1))
@@ -1469,7 +1469,7 @@ contains
          C6S5S6Lim = C6S5S6Lim, C5C6S5S6Lim = C5C6S5S6Lim, &
          opt_etas=[3,4])
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_el,id_a]
     S6Lim%ids(1:5)    = [0,0,id_el,-id_el,id_g]
@@ -1490,7 +1490,7 @@ contains
     C6S5Lim%part  = [id_q,-id_q,id_el,-id_el]
     S5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
 
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
     S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
@@ -1511,7 +1511,7 @@ contains
     C6S5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
     S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
     S6Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_g]
@@ -1532,7 +1532,7 @@ contains
     C6S5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
     S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
-#endif
+ endif
 
 
     !!-----------------------------------------------------------------------!!
@@ -1551,13 +1551,13 @@ contains
        call partition_nnlo_fact(HardProc,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=j)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_ga_qqb(HardProc%AmpMom,res_nnlo_old)
           call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo_old,respdf)
-       else
+#else
           call res_tree_ga_qqb_gen(HardProc%AmpMom,res_nnlo)
           call get_respdf_gen(1,1,Hardproc,res_nnlo,respdf)
-       endif
+#endif
        
        respdf = respdf*HardProc%wgt*damp
 
@@ -1582,13 +1582,13 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(S5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,S5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(S5Lim%AmpMom,res_nlo)
           call get_respdf_gen(1,1,S5Lim,res_nlo,respdf)
-       endif
+#endif
 
        !-- S5
        call partition_nnlo_fact(S5Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -1631,7 +1631,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_qqb(S6Lim%AmpMom,res_nlo_old)
 
           !-- prepare PDFs structures, S6
@@ -1645,7 +1645,7 @@ contains
 
           !-- get PDFs for all of them
           call get_respdf_vect(ns_lumi,1,1,S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
-       else
+#else
           call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo)
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
           call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect_rev(:,1))
@@ -1654,7 +1654,7 @@ contains
           call get_respdf_gen(1,1,S6Lim,res_nlo_ischarges,respdf_vect_rev(:,2))
           respdf_vect(1,:) = respdf_vect_rev(:,1)
           respdf_vect(2,:) = respdf_vect_rev(:,2)
-       endif
+#endif
           
 
        !-- S6
@@ -1699,13 +1699,13 @@ contains
        call partition_nnlo_fact(C5Lim,damp,iconf_qed=[1,2,3,4,6],&
             i_qed=j)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(C5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,C5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(C5Lim%AmpMom,res_nlo)
           call get_respdf_gen(1,1,C5Lim,res_nlo,respdf)
-       endif
+#endif
        
        z5  = one - C5Lim%Lim_z(1) !!TODO: change this in kinematics
        si5 = C5Lim%Lim_sij(i,5)
@@ -1736,16 +1736,16 @@ contains
        call partition_nnlo_fact(C6Lim,damp,iconf_qcd=[1,2,5],&
             i_qcd=i)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_qqb(C6Lim%AmpMom,res_nlo_old)
           res_nlo_old(:,1) = res_nlo_old(:,1) * Qdn2
           res_nlo_old(:,2) = res_nlo_old(:,2) * Qup2
           call get_respdf(ns_lumi,1,1,C6Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_g_qqb_gen(C6Lim%AmpMom,res_nlo)
           res_nlo_ischarges = multiply_IS_charges_sq(res_nlo,j)
           call get_respdf_gen(1,1,C6Lim,res_nlo_ischarges,respdf)
-       endif
+#endif
 
        z6  = one - C6Lim%Lim_z(2) !!TODO: change this in kinematics
        sj6 = C6Lim%Lim_sij(j,6)
@@ -1773,16 +1773,16 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C5C6Lim%AmpMom,res_lo_old)
           res_lo_old(:,1) = res_lo_old(:,1) * Qdn2
           res_lo_old(:,2) = res_lo_old(:,2) * Qup2          
           call get_respdf(ns_lumi,1,1,C5C6Lim,res_lo_old,respdf) 
-       else
+#else
           call res_tree_qqb_gen(C5C6Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
           call get_respdf_gen(1,1,C5C6Lim,res_lo_ischarges,respdf)
-       endif
+#endif
        
        z5  = one - C5C6Lim%Lim_z(1) !!TODO: change this in kinematics
        si5 = C5C6Lim%Lim_sij(i,5)
@@ -1816,7 +1816,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C5S6Lim%AmpMom,res_lo_old)
 
        !-- prepare PDFs structures, S6
@@ -1830,7 +1830,7 @@ contains
 
        !-- get PDFs for all of them
        call get_respdf_vect(ns_lumi,1,1,C5S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
-    else
+#else
        call res_tree_qqb_gen(C5S6Lim%AmpMom,res_lo)
        call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)       
        res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
@@ -1838,7 +1838,7 @@ contains
        call get_respdf_gen(1,1,C5S6Lim,res_lo_ischarges,respdf_vect_rev(:,2))
        respdf_vect(1,:) = respdf_vect_rev(:,1)
        respdf_vect(2,:) = respdf_vect_rev(:,2)
-    endif
+#endif
     
        !-- C5S6
        call partition_nnlo_fact(C5S6Lim,damp,iconf_qed=[1,2,3,4,6],&
@@ -1879,17 +1879,17 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C6S5Lim%AmpMom,res_lo_old)
           res_lo_old(:,1) = res_lo_old(:,1) * Qdn2
           res_lo_old(:,2) = res_lo_old(:,2) * Qup2
 
           call get_respdf(ns_lumi,1,1,C6S5Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C6S5Lim%AmpMom,res_lo)
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
           call get_respdf_gen(1,1,C6S5Lim,res_lo_ischarges,respdf)
-       endif
+#endif
 
 
        !-- C6S5
@@ -1933,7 +1933,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(S5S6Lim%AmpMom,res_lo_old)
 
        !-- prepare PDFs structures, S6
@@ -1948,7 +1948,7 @@ contains
           !-- get PDFs for all of them
           call get_respdf_vect(ns_lumi,1,1,S5S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
 
-       else
+#else
           call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)       
           res_lo_ischarges = multiply_IS_charges_sq(res_lo,j)
@@ -1956,7 +1956,7 @@ contains
           call get_respdf_gen(1,1,S5S6Lim,res_lo_ischarges,respdf_vect_rev(:,2))
           respdf_vect(1,:) = respdf_vect_rev(:,1)
           respdf_vect(2,:) = respdf_vect_rev(:,2)
-       endif
+#endif
        
        !-- S5S6
        call partition_nnlo_fact(S5S6Lim,damp,iconf_qed=[1,2,3,4,6],iconf_qcd=[1,2,5],&
@@ -2046,13 +2046,11 @@ contains
     real(dp) :: e5,e6,eik_qcd,eik_qed(4),si5,sk6,Qsq_FS(2)
     real(dp) :: z5,z6
     real(dp) :: damp
-    logical  :: oldcode
     
     xsect_nnlo_rr_if_5i6k_ns_ga = 0
 
     ff(1) = zero
 
-    oldcode = .false.
 
     xx(1:kNNLO_max)=buff+onet*real(yRnd(1:kNNLO_max),dp)
     call random_number(xx(kNNLO_max_full-1))
@@ -2087,7 +2085,7 @@ contains
 
     Qsq_FS = [Q3**2, Q4**2]
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:6) = [0,0,id_el,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_el,id_a]
     S6Lim%ids(1:5)    = [0,0,id_el,-id_el,id_g]
@@ -2108,7 +2106,7 @@ contains
     C6S5Lim%part  = [id_q,-id_q,id_el,-id_el]
     S5S6Lim%part  = [id_q,-id_q,id_el,-id_el]
 
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:6) = [0,0,id_el,-id_nue,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_a]
     S6Lim%ids(1:5)    = [0,0,id_el,-id_nue,id_g]
@@ -2128,7 +2126,7 @@ contains
     C5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
     C6S5Lim%part  = [id_q,-id_qp,id_el,-id_nue]
     S5S6Lim%part  = [id_q,-id_qp,id_el,-id_nue]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
 
     HardProc%ids(1:6) = [0,0,id_nue,-id_el,id_g,id_a]
     S5Lim%ids(1:5)    = [0,0,id_nue,-id_el,id_a]
@@ -2150,7 +2148,7 @@ contains
     C6S5Lim%part  = [id_q,-id_qp,id_nue,-id_el]
     S5S6Lim%part  = [id_q,-id_qp,id_nue,-id_el]
 
-#endif
+ endif
 
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
@@ -2169,13 +2167,13 @@ contains
        call partition_nnlo_fact(HardProc,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
             i_qcd=i,i_qed=k)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_ga_qqb(HardProc%AmpMom,res_nnlo_old)
           call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo_old,respdf)
-       else
+#else
           call res_tree_ga_qqb_gen(HardProc%AmpMom,res_nnlo)
           call get_respdf_gen(1,1,Hardproc,res_nnlo,respdf)
-       endif
+#endif
 
        respdf = respdf*HardProc%wgt*damp
 
@@ -2200,13 +2198,13 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(S5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,S5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(S5Lim%AmpMom,res_nlo)
           call get_respdf_gen(1,1,S5Lim,res_nlo,respdf)
-       endif
+#endif
 
        !-- S5
        call partition_nnlo_fact(S5Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -2249,7 +2247,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_qqb(S6Lim%AmpMom,res_nlo_old)
 
           !-- prepare PDFs structures, S6
@@ -2262,7 +2260,7 @@ contains
 
           !-- get PDFs for all of them
           call get_respdf_vect(ns_lumi,1,1,S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
-       else
+#else
           call res_tree_g_qqb_gen(S6Lim%AmpMom,res_nlo)
           call get_qed_eik_gen(res_nlo,S6Lim%Lim_etaij,[1,2,3,4],6,res_nlo_eikqed)
           call get_respdf_gen(1,1,S6Lim,res_nlo_eikqed,respdf_vect_rev(:,1))
@@ -2271,7 +2269,7 @@ contains
           respdf_vect(1,:) = respdf_vect_rev(:,1)
           respdf_vect(2,:) = respdf_vect_rev(:,2)
           
-       endif
+#endif
           
        !-- S6
        call partition_nnlo_fact(S6Lim,damp,iconf_qcd=[1,2,5],iconf_qed=[1,2,3,4,6],&
@@ -2314,13 +2312,13 @@ contains
 
        call partition_nnlo_fact(C5Lim,damp,iconf_qed=[1,2,3,4,6],&
             i_qed=k)
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(C5Lim%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,1,C5Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(C5Lim%AmpMom,res_nlo)
           call get_respdf_gen(1,1,C5Lim,res_nlo,respdf)
-       endif
+#endif
 
        z5  = C5Lim%Lim_z(1)
        si5 = C5Lim%Lim_sij(i,5)
@@ -2351,15 +2349,15 @@ contains
        call partition_nnlo_fact(C6Lim,damp,iconf_qcd=[1,2,5],&
             i_qcd=i)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_qqb(C6Lim%AmpMom,res_nlo_old)
           res_nlo_old = res_nlo_old * Q_lep2
           call get_respdf(ns_lumi,1,1,C6Lim,res_nlo_old,respdf)
-       else
+#else
           call res_tree_g_qqb_gen(C6Lim%AmpMom,res_nlo)
           res_nlo_fscharges = Qsq_Fs(k-2)**2 * res_nlo
           call get_respdf_gen(1,1,C6Lim,res_nlo_fscharges,respdf)
-       endif
+#endif
 
           
 
@@ -2388,16 +2386,16 @@ contains
        FintNNLO_ns(8) = zero
        
     else
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C5C6Lim%AmpMom,res_lo_old)
           res_lo_old = res_lo_old * Q_lep2
 
           call get_respdf(ns_lumi,1,1,C5C6Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C5C6Lim%AmpMom,res_lo)
           res_lo_fscharges = Qsq_Fs(k-2)**2 * res_lo
           call get_respdf_gen(1,1,C5C6Lim,res_lo_fscharges,respdf)
-       endif
+#endif
        
        z5  = C5C6Lim%Lim_z(1)
        si5 = C5C6Lim%Lim_sij(i,5)
@@ -2428,7 +2426,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C5S6Lim%AmpMom,res_lo_old)
 
        !-- prepare PDFs structures, S6
@@ -2441,7 +2439,7 @@ contains
 
           !-- get PDFs for all of them
           call get_respdf_vect(ns_lumi,1,1,C5S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
-       else
+#else
           call res_tree_qqb_gen(C5S6Lim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,C5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
           res_lo_fscharges = Qsq_Fs(k-2)**2 * res_lo
@@ -2449,7 +2447,7 @@ contains
           call get_respdf_gen(1,1,C5S6Lim,res_lo_fscharges,respdf_vect_rev(:,2))
           respdf_vect(1,:) = respdf_vect_rev(:,1)
           respdf_vect(2,:) = respdf_vect_rev(:,2)
-       endif
+#endif
        
        !-- C5S6
        call partition_nnlo_fact(C5S6Lim,damp,iconf_qed=[1,2,3,4,6],&
@@ -2490,15 +2488,15 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C6S5Lim%AmpMom,res_lo_old)
           res_lo_old = res_lo_old * Q_lep2
           call get_respdf(ns_lumi,1,1,C6S5Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C6S5Lim%AmpMom,res_lo)
           res_lo_fscharges = Qsq_Fs(k-2)**2 * res_lo
           call get_respdf_gen(1,1,C6S5Lim,res_lo_fscharges,respdf)
-       endif
+#endif
        
 
 
@@ -2543,7 +2541,7 @@ contains
        
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(S5S6Lim%AmpMom,res_lo_old)
 
           !-- prepare PDFs structures, S5S6
@@ -2557,7 +2555,7 @@ contains
           !-- get PDFs for all of them
           call get_respdf_vect(ns_lumi,1,1,S5S6Lim,res_tmp_vect(:,:,1:2),respdf_vect(1:2,:))
 
-       else
+#else
           call res_tree_qqb_gen(S5S6Lim%AmpMom,res_lo)
           call get_qed_eik_gen(res_lo,S5S6Lim%Lim_etaij,[1,2,3,4],6,res_lo_eikqed)
           call get_respdf_gen(1,1,S5S6Lim,res_lo_eikqed,respdf_vect_rev(:,1))
@@ -2565,7 +2563,7 @@ contains
           call get_respdf_gen(1,1,S5S6Lim,res_lo_fscharges,respdf_vect_rev(:,2))
           respdf_vect(1,:) = respdf_vect_rev(:,1)
           respdf_vect(2,:) = respdf_vect_rev(:,2)
-       endif
+#endif
        
        !-- S5S6
        call partition_nnlo_fact(S5S6Lim,damp,iconf_qed=[1,2,3,4,6],iconf_qcd=[1,2,5],&

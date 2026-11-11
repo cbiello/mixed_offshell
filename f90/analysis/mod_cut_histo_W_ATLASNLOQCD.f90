@@ -95,13 +95,13 @@ contains
     !-- consistency test
     !----------------------------------------------------------
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     !print*, '******************************************************'
     !print*, '******* This is NOT the correct analys to run! *******'
     !print*, '******************************************************'
     !print*, ''
     !stop
-#endif
+ endif
 
     !----------------------------------------------------------
     !-- do not touch this part
@@ -143,7 +143,7 @@ contains
        ptmiss = get_pT(rec_mom(:,2))
     endif
     
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     !in case of Z
     !print*, 'ids= ', event%part(3), event%part(4)
     if( event%part(3) .eq. 11) then
@@ -155,7 +155,7 @@ contains
        ptl = get_pT(rec_mom(:,2))
        ptmiss = get_pT(rec_mom(:,1))
     endif
-#endif
+ endif
     
     !-- transverse mass
     dphiln = get_dphi(rec_mom(:,1),rec_mom(:,2))
@@ -212,11 +212,11 @@ contains
     obs(3) = ptl
     obs(4) = ptmiss
     obs(5) = invmass
-#if (_Vcharge == 1)
+ if (Vcharge == 1) then
     obs(6) = ylp
-#else
+ else
     obs(6) = ylm
-#endif
+ endif
     
     !-- need boosted momenta
     call boostz(event%PartFrac(1),event%PartFrac(2),2,rec_mom(:,1:2),rec_mom_lab(:,1:2))

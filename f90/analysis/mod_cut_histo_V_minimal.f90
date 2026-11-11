@@ -159,7 +159,7 @@ contains
        return
     endif
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     ptlm  = get_pt(rec_mom(:,1))
     ptlp  = get_pt(rec_mom(:,2))
     !-- Harder and softer leptons
@@ -174,14 +174,14 @@ contains
     if (ptl2 .le. ptlep_cut) return
     !-- harder lepton pT cut
     if (ptl1 .le. harder_cut) return
-#else
+ else
     ptlc  = get_pt(rec_mom(:,1))
     ptnu  = get_pt(rec_mom(:,2))
     !-- charged lepton pT cut
     if (ptlc .le. ptlep_cut) return
     !-- neutrino pT missing cut
     if (ptnu .le. ptmiss_cut) return
-#endif
+ endif
 
     !------------------------------------------------------
     !-- OBSERVABLES

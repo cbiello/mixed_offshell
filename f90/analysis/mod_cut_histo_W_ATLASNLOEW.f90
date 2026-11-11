@@ -71,7 +71,7 @@ contains
     il = 0
     inu = 0
     iphot = 0
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     do ihep=3,n
        if(event%ids(ihep).eq.11) then
           il=ihep
@@ -83,7 +83,7 @@ contains
           iphot=ihep
        endif
     enddo
-#else
+ else
     do ihep=3,n
        if(abs(event%ids(ihep)).eq.11) then
           il=ihep
@@ -95,7 +95,7 @@ contains
           iphot=ihep
        endif
     enddo
-#endif
+ endif
 
     !define the bare leptons
     rec_mom(:,1) = event%AmpMom(:,il)
@@ -170,11 +170,11 @@ contains
     obs(4) = ptmiss
     obs(5) = invmass
     obs(6) = invmassbare
-#if (_Vcharge == 1)
+ if (Vcharge == 1) then
     obs(7) = ylp
-#else
+ else
     obs(7) = ylm
-#endif
+ endif
     
     !-- need boosted momenta
     call boostz(event%PartFrac(1),event%PartFrac(2),2,rec_mom(:,1:2),rec_mom_lab(:,1:2))

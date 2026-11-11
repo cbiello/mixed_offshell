@@ -89,20 +89,20 @@ contains
     do i = -5,5
        do j = -5,5
 
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           if ( i .eq. -j) then
              if (mod(abs(i),2) .eq. 0) ii=2
              if (mod(abs(i),2) .eq. 1) ii=1
           else
              cycle
           endif
-#else
+       else
           if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
           endif
-!#elif (_Vcharge == 1)
+!#elif (Vcharge == 1)
 !!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
 !          !             ii = 3
 !          if 
@@ -110,14 +110,14 @@ contains
 !          else
 !             cycle
 !          endif
-!#elif (_Vcharge == -1)
+!#elif (Vcharge == -1)
 !          !          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
 !
 !             ii = 3
 !          else
 !             cycle
 !          endif
-#endif       
+       endif
           if ( i .gt. 0 .and. j .lt. 0) then ! qqb
              res(i,j) =  aa * ( abs(coupl(ii,-1,-1))**2 + abs(coupl(ii,+1,+1))**2 ) + &
                   bb * ( abs(coupl(ii,-1,+1))**2 + abs(coupl(ii,+1,-1))**2 )
@@ -205,7 +205,7 @@ contains
 
     do i = 1,size(iconf,2)
 
-#if (_Vcharge == 0)       
+    if (Vcharge == 0) then
        !-- initial-state emission
        amp_is = master_amp_qgqb_llb(iconf(1,i),iconf(2,i),iconf(3,i),iconf(4,i),iconf(5,i),za,zb)
        call need_coupl_gen(iconf(4,i),iconf(5,i),ismin,ismax,need)
@@ -228,14 +228,14 @@ contains
              enddo
           enddo
        enddo
-#elif (_Vcharge == -1)
+    elseif (Vcharge == -1) then
        amp_w(-1,-1,-1) = agamtree(iconf(1,i),iconf(3,i),iconf(4,i),iconf(5,i),iconf(2,i),za,zb,sprod,-1)
        amp_w(-1,-1,+1) = agamtree(iconf(1,i),iconf(3,i),iconf(4,i),iconf(5,i),iconf(2,i),za,zb,sprod,+1)
        amp_w = amp_w * cms_cLW * cms_cLWnue
        
        res(i,3) = abs(amp_w(-1,-1,-1))**2 + abs(amp_w(-1,-1,+1))**2  
 
-#elif (_Vcharge == +1)
+    elseif (Vcharge == 1) then
        amp_w(-1,-1,-1) = agamtree(iconf(3,i),iconf(1,i),iconf(5,i),iconf(4,i),iconf(2,i),zb,za,sprod,-1)
        amp_w(-1,-1,+1) = agamtree(iconf(3,i),iconf(1,i),iconf(5,i),iconf(4,i),iconf(2,i),zb,za,sprod,+1)
 
@@ -243,7 +243,7 @@ contains
        amp_w = amp_w * cms_cLW * cms_cLWnue
        res(i,3) = abs(amp_w(-1,-1,-1))**2 + abs(amp_w(-1,-1,+1))**2 
 
-#endif
+    endif
 
        
     enddo
@@ -288,32 +288,32 @@ contains
     res = zero
     do i = -5,5
        do j = -5,5
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           if ( i .eq. -j) then
              if (mod(abs(i),2) .eq. 0) ii=2
              if (mod(abs(i),2) .eq. 1) ii=1
           else
              cycle
           endif
-#else
+       else
           if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
           endif
-!#elif (_Vcharge == 1)
+!#elif (Vcharge == 1)
 !          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
 !             ii = 3
 !          else
 !             cycle
 !          endif
-!#elif (_Vcharge == -1)
+!#elif (Vcharge == -1)
 !          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
 !             ii = 3
 !          else
 !             cycle
 !          endif
-#endif       
+       endif
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
 !             if (mod(abs(i),2) .eq. 1) jj=1
@@ -351,32 +351,32 @@ contains
     res = zero
     do i = -5,5
        do j = -5,5
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           if ( i .eq. -j) then
              if (mod(abs(i),2) .eq. 0) ii=2
              if (mod(abs(i),2) .eq. 1) ii=1
           else
              cycle
           endif
-#else
+       else
           if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
           endif          
-!#elif (_Vcharge == 1)
+!#elif (Vcharge == 1)
 !          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
 !             ii = 3
 !          else
 !             cycle
 !          endif
-!#elif (_Vcharge == -1)
+!#elif (Vcharge == -1)
 !          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
 !             ii = 3
 !          else
 !             cycle
 !          endif
-#endif       
+       endif
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
 !             if (mod(abs(i),2) .eq. 1) jj=1
@@ -415,19 +415,19 @@ contains
     res = zero
     do i = -5,5
        do j = -5,5
-#if (_Vcharge == 0)                   
+       if (Vcharge == 0) then
           jj = quark_type(j)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           jj = 3
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
           if ( abs(j).eq.5 ) cycle 
-#elif (_Vcharge == +1)
+       elseif (Vcharge == 1) then
           jj = 3
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
           if ( abs(j).eq.5) cycle
-#endif          
+       endif
           if (i .eq. 0 .and. j .gt. 0) then   ! gq
              res(i,j) = res1(2,jj)
           elseif (i .eq. 0 .and. j .lt. 0) then ! gqb
@@ -454,19 +454,19 @@ contains
     res = zero
     do i = -5,5
        do j = -5,5
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           ii = quark_type(i)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           ii = 3
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
           if ( abs(i).eq.5 ) cycle
-#elif (_Vcharge == 1)
+       elseif (Vcharge == 1) then
           ii = 3
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
           if ( abs(i).eq.5 ) cycle
-#endif
+       endif
           
           if (i .gt. 0 .and. j .eq. 0) then   ! qg
              res(i,j) = res1(1,ii)
@@ -494,17 +494,19 @@ contains
     res = zero
     do i = -5,7
        do j = -5,7
-#if (_Vcharge == 0)                   
+       if (Vcharge == 0) then
           jj = quark_type(j)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           jj = 3
+          if (abs(j) .eq. 5) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-#elif (_Vcharge == +1)
+       elseif (Vcharge == 1) then
           jj = 3
+          if (abs(j) .eq. 5) cycle
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-#endif          
+       endif
           if (i .eq. 7 .and. j .gt. 0 .and. j .ne. 7) then   ! aq
              res(i,j) = res1(2,jj)
           elseif (i .eq. 7 .and. j .lt. 0 .and. j .ne. 7) then ! aqb
@@ -527,17 +529,19 @@ contains
     res = zero
     do i = -5,7
        do j = -5,7
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           ii = quark_type(i)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           ii = 3
+          if (abs(i) .eq. 5) cycle
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-#elif (_Vcharge == 1)
+       elseif (Vcharge == 1) then
           ii = 3
+          if (abs(i) .eq. 5) cycle
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-#endif
+       endif
           
           if (i .gt. 0 .and. j .eq. 7 .and. i .ne. 7) then   ! qa
              res(i,j) = res1(1,ii)
@@ -571,32 +575,32 @@ contains
     res = zero
     do i = -5,5
        do j = -5,5
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           if ( i .eq. -j) then
              if (mod(abs(i),2) .eq. 0) ii=2
              if (mod(abs(i),2) .eq. 1) ii=1
           else
              cycle
           endif
-#else
+       else
           if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
              ii = 3
           else
              cycle
           endif                    
-!#elif (_Vcharge == 1)
+!#elif (Vcharge == 1)
 !          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
 !             ii = 3
 !          else
 !             cycle
 !          endif
-!#elif (_Vcharge == -1)
+!#elif (Vcharge == -1)
 !          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
 !             ii = 3
 !          else
 !             cycle
 !          endif
-#endif       
+       endif
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
 !             if (mod(abs(i),2) .eq. 1) jj=1
@@ -634,19 +638,19 @@ contains
     res = zero
     do i = -5,5
        do j = -5,5
-#if (_Vcharge == 0)                   
+       if (Vcharge == 0) then
           jj = quark_type(j)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           jj = 3
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
           if ( abs(j).eq.5 ) cycle
-#elif (_Vcharge == +1)
+       elseif (Vcharge == 1) then
           jj = 3
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
           if ( abs(j).eq.5 ) cycle
-#endif          
+       endif
           if (i .eq. 0 .and. j .gt. 0) then   ! gq
              res(i,j) = res1(2,jj)
           elseif (i .eq. 0 .and. j .lt. 0) then ! gqb
@@ -674,17 +678,17 @@ contains
     res = zero
     do i = -5,5
        do j = -5,5
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           ii = quark_type(i)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           ii = 3
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-#elif (_Vcharge == 1)
+       elseif (Vcharge == 1) then
           ii = 3
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-#endif
+       endif
           
           if (i .gt. 0 .and. j .eq. 0) then   ! qg
              res(i,j) = res1(1,ii)
@@ -713,17 +717,17 @@ contains
     res = zero
     do i = -5,7
        do j = -5,7
-#if (_Vcharge == 0)                   
+       if (Vcharge == 0) then
           jj = quark_type(j)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           jj = 3
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-#elif (_Vcharge == +1)
+       elseif (Vcharge == 1) then
           jj = 3
           if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
           if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-#endif          
+       endif
           if (i .eq. 7 .and. j .gt. 0) then   ! aq
              res(i,j) = res1(2,jj)
           elseif (i .eq. 7 .and. j .lt. 0) then ! aqb
@@ -752,17 +756,17 @@ contains
     res = zero
     do i = -5,7
        do j = -5,7
-#if (_Vcharge == 0)          
+       if (Vcharge == 0) then
           ii = quark_type(i)
-#elif (_Vcharge == -1)
+       elseif (Vcharge == -1) then
           ii = 3
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-#elif (_Vcharge == 1)
+       elseif (Vcharge == 1) then
           ii = 3
           if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
           if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-#endif
+       endif
           
           if (i .gt. 0 .and. j .eq. 7) then   ! qa
              res(i,j) = res1(1,ii)
@@ -788,13 +792,13 @@ contains
     call res_tree_jj_ag_gen(p,iconf1,iconf2,avega,res_tmp)
 
     res = zero
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     res(7,0) = res_tmp(1,1) * ndn + res_tmp(1,2) * nup
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res(7,0) = res_tmp(1,3)*nup
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res(7,0) = res_tmp(1,3)*nup
-#endif
+ endif
   end subroutine res_tree_ga_ag_gen
 
   !-- ga channel
@@ -811,13 +815,13 @@ contains
     call res_tree_jj_ag_gen(p,iconf1,iconf2,avega,res_tmp)
 
     res = zero
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     res(0,7) = res_tmp(1,1) * ndn + res_tmp(1,2) * nup
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res(0,7) = res_tmp(1,3)*nup
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res(0,7) = res_tmp(1,3)*nup
-#endif
+ endif
 
   end subroutine res_tree_ga_ga_gen
 
@@ -855,7 +859,7 @@ contains
     
     do j = 1,size(iconf1,2)
 
-#if (_Vcharge == 0)
+    if (Vcharge == 0) then
        
        !contribution of the factorised diagrams
        !-- notation for the factorised: 0 -> j1(q,h1) j2(g,h2) j3(qb,-h1) + j4(q',h3) j5(g,h4) j6(qb',-h3)
@@ -891,12 +895,12 @@ contains
           enddo
        enddo
 
-#elif (_Vcharge == -1)
+    elseif (Vcharge == -1) then
        res(j,3) = ubdgmsq(iconf1(1,j),iconf1(3,j),iconf1(4,j),iconf1(6,j),iconf1(5,j),iconf1(2,j),za,zb,sprod)
-#elif (_Vcharge == +1)
+    elseif (Vcharge == 1) then
        res(j,3) = ubdgmsq(iconf1(3,j),iconf1(1,j),iconf1(6,j),iconf1(4,j),iconf1(5,j),iconf1(2,j),zb,za,sprod)
 
-#endif
+    endif
  enddo
 
  res = eesq2 * ave * four * xn * Cf * res
@@ -970,9 +974,9 @@ contains
     real(dp), intent(out) :: res(-5:7,-5:7)
 
     res = zero
-#if (_Vcharge == 0)          
+ if (Vcharge == 0) then
     call res_treeAA_aa(p,res(7,7))
-#endif
+ endif
 
   end subroutine res_treeAA_aa_gen
 

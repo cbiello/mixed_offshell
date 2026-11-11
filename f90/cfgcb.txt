@@ -1,0 +1,14 @@
+#---------------------------------
+# Configuration for cbiello's machine (deps in ~/Packages)
+#---------------------------------
+FC=gfortran
+FCmpi=mpif90
+FFLAGS='-O3 -g -Wall -fcheck=all -fbacktrace -fbounds-check -ffree-line-length-1000'
+CHECKS=true
+MPI=false
+With2L=false
+analysis=W_ATLAS
+LHAPDF=/home/cbiello/Packages/lhapdf-install/lib
+OPENLOOPS=/home/cbiello/Packages/openloops-src
+HOPPET=/home/cbiello/Packages/hoppet-install
+HANDYG=/home/cbiello/Packages/handyG-install

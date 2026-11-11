@@ -132,6 +132,8 @@ module mod_parms
   !-- charges for final state leptons
   real(dp), public, save  :: Q3
   real(dp), public, save  :: Q4
+  !-- boson: 0 = Z, -1 = W-, +1 = W+ (set by -boson z/wm/wp)
+  integer, public, save   :: Vcharge = 0
   !-- generation labels for quarks
   real(dp), public, parameter  :: Qgeneration(-5:5)=[3,2,2,1,1,0,1,1,2,2,3]
   real(dp), public, parameter  :: Q_IS(-5:7) = [-Qdn,-Qup,-Qdn,-Qup,-Qdn,zero,Qdn,Qup,Qdn,Qup,Qdn,Qup,zero]
@@ -144,7 +146,21 @@ module mod_parms
 contains
 
   subroutine get_parms()
-    
+    character(2) :: boson
+
+    boson = trim(string_val_opt('-boson','z'))
+    select case (boson)
+    case ('z');  Vcharge = 0
+    case ('wm'); Vcharge = -1
+    case ('wp'); Vcharge = +1
+    case default
+       print *, 'wrong boson -> -boson z/wm/wp'
+       stop
+    end select
+#if (_oldcode == 1)
+    if (Vcharge /= 0) stop 'old code (OLDCODE=true) is Z only'
+#endif
+
     !-- QCD
     nup = int_val_opt('-nup',2)
     ndn = int_val_opt('-ndn',3)
@@ -188,16 +204,16 @@ contains
     alpha_mz = real_val_opt('-alpha_mz',1/128._dp) !-- for alpha(0) scheme
 
     ! couplings of final state leptons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     Q3 = -one
     Q4 = +one
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     Q3 = -one
     Q4 = zero
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     Q3 = zero
     Q4 = +one
-#endif
+ endif
     
     
   end subroutine get_parms
@@ -206,6 +222,7 @@ contains
     integer, intent(in) :: idev
 
     write(idev,*) ''
+    write(idev,*) ' -boson z/wm/wp'
     write(idev,*) ' -nup 2'
     write(idev,*) ' -ndn 3'
     write(idev,*) ''
@@ -398,13 +415,13 @@ contains
     character(*), intent(in) :: my_ew_scheme
     integer, intent(in) :: outdev
 
-#if (_Vcharge==0)     
+ if (Vcharge == 0) then
     write(outdev,*) '# PROCESS  = NEUTRAL CURRENT'
-#elif (_Vcharge==-1)     
+ elseif (Vcharge == -1) then
     write(outdev,*) '# PROCESS  = -ve CHARGE'
-#elif (_Vcharge==+1)     
+ elseif (Vcharge == 1) then
     write(outdev,*) '# PROCESS  = +ve CHARGE'
-#endif
+ endif
     
     write(outdev,*) '#'
 

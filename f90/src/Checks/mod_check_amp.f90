@@ -87,7 +87,7 @@ contains
      real(dp)           :: udx_veep(20), dxu_veep(20)
 
      
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
 #include "./MG_output/MG_qqb_emep.out"
 #include "./MG_output/MG_qbq_emep.out"
     mgamps(:,+2,-2) = uux_emep(:)
@@ -96,18 +96,18 @@ contains
     mgamps(:,-1,+1) = dxd_emep(:)
 
 !
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
 #include "./MG_output/MG_qbq_veep.out"
 #include "./MG_output/MG_qqb_veep.out"
     mgamps(:,-1,+2) = dxu_veep(:)
     mgamps(:,+2,-1) = udx_veep(:)
      !
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
 #include "./MG_output/MG_qqb_emvx.out"
 #include "./MG_output/MG_qbq_emvx.out"
     mgamps(:,+1,-2) = dux_emvex(:)
     mgamps(:,-2,+1) = uxd_emvex(:)
-#endif
+ endif
 
   end subroutine import_MGresults_lo
 
@@ -124,7 +124,7 @@ contains
      real(dp)           :: ug_veepd(20), gu_veepd(20), gdx_veepux(20), dxg_veepux(20)
 
      
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
 #include "./MG_output/MG_qqb_emep_g.out"
 #include "./MG_output/MG_qbq_emep_g.out"
 #include "./MG_output/MG_qg_emep_q.out"
@@ -145,7 +145,7 @@ contains
     mgamps(:,0,+1) = gd_emepd(:)
 
 
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
 #include "./MG_output/MG_qqb_veep_g.out"
 #include "./MG_output/MG_qbq_veep_g.out"
 #include "./MG_output/MG_qg_veep_q.out"
@@ -161,7 +161,7 @@ contains
     mgamps(:,+2,0) = ug_veepd(:)
 
 
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
 #include "./MG_output/MG_qqb_emvx_g.out"
 #include "./MG_output/MG_qbq_emvx_g.out"
 #include "./MG_output/MG_qg_emvx_q.out"
@@ -177,7 +177,7 @@ contains
     mgamps(:,+1,0) = dg_emvexu(:)
   
     
-#endif
+ endif
 
   end subroutine import_MGresults_nloqcd
 
@@ -194,7 +194,7 @@ contains
      real(dp)           :: ua_veepd(20), au_veepd(20), adx_veepux(20), dxa_veepux(20)
 
      
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
 #include "./MG_output/MG_qqb_emep_a.out"
 #include "./MG_output/MG_qbq_emep_a.out"
 #include "./MG_output/MG_qa_emep_q.out"
@@ -217,7 +217,7 @@ contains
     mgamps(:,3,-1) = adx_emepdx(:)
 
 
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
 #include "./MG_output/MG_qqb_veep_a.out"
 #include "./MG_output/MG_qbq_veep_a.out"
 #include "./MG_output/MG_qa_veep_q.out"
@@ -233,7 +233,7 @@ contains
     mgamps(:,+2,3) = ua_veepd(:)
 
 
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
 #include "./MG_output/MG_qqb_emvx_a.out"
 #include "./MG_output/MG_qbq_emvx_a.out"
 #include "./MG_output/MG_qa_emvx_q.out"
@@ -249,7 +249,7 @@ contains
     mgamps(:,+1,3) = da_emvexu(:)
   
     
-#endif
+ endif
 
   end subroutine import_MGresults_nloew
 
@@ -275,7 +275,7 @@ contains
      
 
      
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
 #include "./MG_output/MG_qqb_emep_ga.out"
 #include "./MG_output/MG_qbq_emep_ga.out"
 
@@ -320,7 +320,7 @@ contains
 
     !
 !
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
 #include "./MG_output/MG_qqb_veep_ga.out"
 #include "./MG_output/MG_qbq_veep_ga.out"
 
@@ -354,7 +354,7 @@ contains
     mgamps(:,3,0) = ag_veepdux(:)*nup
 !
 !
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
 
 #include "./MG_output/MG_qqb_emvx_ga.out"
 #include "./MG_output/MG_qbq_emvx_ga.out"
@@ -388,7 +388,7 @@ contains
     mgamps(:,3,0) = ag_emvexudx(:)*nup
 !  
 !    
-#endif
+ endif
 
   end subroutine import_MGresults_qcdew
   

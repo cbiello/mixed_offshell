@@ -5,14 +5,15 @@
 
 
 Here some instructions and tricks
-1) to run CCDY be sure you set    oldcode = .false. 
+1) old vs new code is a compile-time choice: OLDCODE=true/false in the cfg file
+   (default false = general code). The old code is Z only.
    [useful for debugging]
 
-2) the process can be set via the configure file
+2) the boson is set on the command line
    0 : Z boson
   -1 : W- exchange
   +1 : W+ exchange
-  -----> this is set via the Vcharge flag
+  -----> chosen at run time: -boson z / wm / wp (default z)
   -----> the analysis has to be set accordingly
 
   (?) whay to set automatically the correct analysis?  

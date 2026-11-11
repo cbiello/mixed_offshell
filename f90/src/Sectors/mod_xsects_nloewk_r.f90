@@ -57,11 +57,9 @@ contains
     real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7),res_lo_tmp(-5:7,-5:7)
     real(dp)    :: z,s5i,eik(4),e5,eta5i,eik_gen(4,4)
     real(dp)    :: damp
-    logical     :: oldcode
 
     xsect_nloewk_r_is_ns = 0
 
-    oldcode = .false.
 
     ff(1) = zero
     limval_nlo_is = zero
@@ -87,7 +85,7 @@ contains
          C1Lim=C1Lim,C2Lim=C2Lim,SLim=SLim,SC1Lim=SC1Lim,SC2Lim=SC2Lim,compute_etas=.true.)
     
     ! define process specific partons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
     C1Lim%ids(1:4)    = [0,0,id_el,-id_el]
     C2Lim%ids(1:4)    = [0,0,id_el,-id_el]
@@ -102,7 +100,7 @@ contains
     SC1Lim%part   = [id_q,-id_q,id_el,-id_el]
     SC2Lim%part   = [id_q,-id_q,id_el,-id_el]
 
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_a]
     C1Lim%ids(1:4)    = [0,0,id_el,-id_nue]
     C2Lim%ids(1:4)    = [0,0,id_el,-id_nue]
@@ -117,7 +115,7 @@ contains
     SC1Lim%part   = [id_q,-id_qp,id_el,-id_nue]
     SC2Lim%part   = [id_q,-id_qp,id_el,-id_nue]
 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_a]
     C1Lim%ids(1:4)    = [0,0,id_nue,-id_el]
     C2Lim%ids(1:4)    = [0,0,id_nue,-id_el]
@@ -131,7 +129,7 @@ contains
     SLim%part     = [id_q,-id_qp,id_nue,-id_el]
     SC1Lim%part   = [id_q,-id_qp,id_nue,-id_el]
     SC2Lim%part   = [id_q,-id_qp,id_nue,-id_el]
-#endif
+ endif
 
     !-- Hard
     call cut_histo(HardProc)
@@ -143,13 +141,13 @@ contains
 
     else    
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(HardProc%AmpMom,res_nlo_old)       
           call get_respdf(ns_lumi,0,1,HardProc,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
-       endif
+#endif
 
        call partition_nlo_qed(HardProc,damp,12)
        respdf = respdf*HardProc%wgt*damp
@@ -173,16 +171,16 @@ contains
 
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
           res_lo_old(1,:) = [Qdn2,Qup2] * res_lo_old(1,:)
           res_lo_old(2,:) = [Qdn2,Qup2] * res_lo_old(2,:)
           call get_respdf(ns_lumi,0,1,C1Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
           res_lo = multiply_IS_charges_sq(res_lo,1)
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
-       endif
+#endif
 
 
        z   = C1Lim%Lim_KinInv(1)
@@ -210,16 +208,16 @@ contains
 
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
           res_lo_old(1,:) = [Qdn2,Qup2] * res_lo_old(1,:)
           res_lo_old(2,:) = [Qdn2,Qup2] * res_lo_old(2,:)
           call get_respdf(ns_lumi,0,1,C2Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
           res_lo = multiply_IS_charges_sq(res_lo,2)
           call get_respdf_gen(0,1,C2Lim,res_lo,respdf)
-       endif
+#endif
        
        z   = C2Lim%Lim_KinInv(1)
        s5i = C2Lim%Lim_KinInv(2)
@@ -248,17 +246,17 @@ contains
 
     else
        e5 = SLim%Lim_KinInv(1)
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(SLim%AmpMom,res_lo_old)
           call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
           res_lo_tmp_old(:,1) = res_lo_old(:,1) * eik(1:2) !-- dn
           res_lo_tmp_old(:,2) = res_lo_old(:,2) * eik(3:4) !-- up
           call get_respdf(ns_lumi,0,1,SLim,res_lo_tmp_old,respdf_tmp(:,1))
-       else
+#else
           call res_tree_qqb_gen(SLim%AmpMom,res_lo_tmp)
           call get_qed_eik_gen(res_lo_tmp,SLim%Lim_etaij,[1,2,3,4],5,res_lo)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,1))
-       endif
+#endif
        
        call partition_nlo_qed(SLim,damp,12)
        
@@ -267,17 +265,17 @@ contains
        FintNLO_ns(4) = respdf_tmp(1,1)
 
        !-- SC1
-       if (oldcode) then
+#if (_oldcode == 1)
           res_lo_tmp_old(:,1) = res_lo_old(:,1) * Qdn2
           res_lo_tmp_old(:,2) = res_lo_old(:,2) * Qup2
           call get_respdf(ns_lumi,0,1,SLim,res_lo_tmp_old,respdf_tmp(:,2))
           respdf_tmp(:,3) = respdf_tmp(:,2)
-       else
+#else
           res_lo = multiply_IS_charges_sq(res_lo_tmp,1)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,2))
           res_lo = multiply_IS_charges_sq(res_lo_tmp,2)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,3))
-       endif
+#endif
        
        
        e5    = SC1Lim%Lim_KinInv(1)
@@ -370,9 +368,7 @@ contains
     real(dp)    :: damp,Qsq_FS(2)
     !--
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_lo_tmp_old(2,2)
-    logical     :: oldcode
 
-    oldcode = .false.
 
     xsect_nlo_5i_a_ns = 0
 
@@ -399,7 +395,7 @@ contains
 
     call kinematics_nlo_fs(xx,icoll,jother,HardProc,CLim,CSLim,SLim)
     
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
     CLim%ids(1:4)     = [0,0,id_el,-id_el]
     SLim%ids(1:4)     = [0,0,id_el,-id_el]
@@ -408,7 +404,7 @@ contains
     CLim%part     = [id_q,-id_q,id_el,-id_el]
     SLim%part     = [id_q,-id_q,id_el,-id_el]
 
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_a]
     CLim%ids(1:4)     = [0,0,id_el,-id_nue]
     SLim%ids(1:4)     = [0,0,id_el,-id_nue]
@@ -417,7 +413,7 @@ contains
     CLim%part     = [id_q,-id_qp,id_el,-id_nue]
     SLim%part     = [id_q,-id_qp,id_el,-id_nue]
 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_a]
     CLim%ids(1:4)     = [0,0,id_nue,-id_el]
     SLim%ids(1:4)     = [0,0,id_nue,-id_el]
@@ -425,7 +421,7 @@ contains
     HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_a]
     CLim%part     = [id_q,-id_qp,id_nue,-id_el]
     SLim%part     = [id_q,-id_qp,id_nue,-id_el]
-#endif
+ endif
 
     Qsq_FS = [Q3**2, Q4**2]
     
@@ -439,13 +435,13 @@ contains
 
     else    
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qqb(HardProc%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,0,1,HardProc,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qqb_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
-       endif
+#endif
 
        call partition_nlo_qed(HardProc,damp,icoll)
        
@@ -468,18 +464,18 @@ contains
 
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
 
           call res_tree_qqb(CLim%AmpMom,res_lo_old)
           res_lo_old = Q_lep2*res_lo_old
           call get_respdf(ns_lumi,0,1,CLim,res_lo_old,respdf)
-       else
+#else
           
           call res_tree_qqb_gen(CLim%AmpMom,res_lo)
           res_lo = Qsq_Fs(icoll-2)**2 * res_lo
           call get_respdf_gen(0,1,CLim,res_lo,respdf)
 
-       endif
+#endif
 
        z   = CLim%Lim_KinInv(1)
        s5i = CLim%Lim_KinInv(2)
@@ -505,7 +501,7 @@ contains
        FintNLO_ns(3:4) = zero
 
     else
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(SLim%AmpMom,res_lo_old)
           call get_qed_eik(charges_ns,SLim%Lim_etaij,[1,2,3,4],5,eik)
           res_tmp_vect(:,1,1) = res_lo_old(:,1) * eik(1:2) !-- dn
@@ -514,23 +510,23 @@ contains
           call get_respdf_vect(ns_lumi,0,1,SLim,res_tmp_vect(:,:,1:2), &
                   respdf_vect(1:2,:))
 
-       else
+#else
           call res_tree_qqb_gen(SLim%AmpMom,res_lo_tmp)
           call get_qed_eik_gen(res_lo_tmp,SLim%Lim_etaij,[1,2,3,4],5,res_lo)
           call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,1))
 
-       endif 
+#endif
        
        !-- S
        call partition_nlo_qed(SLim,damp,icoll)
        
        e5 = SLim%Lim_KinInv(1)
 
-       if (oldcode) then
+#if (_oldcode == 1)
            respdf_tmp(:,1) = -respdf_vect(1,:)/e5**2 * SLim%wgt * damp
-       else        
+#else
            respdf_tmp(:,1) = -respdf_tmp(:,1)/e5**2 * SLim%wgt * damp
-       endif
+#endif
 
        FintNLO_ns(3) = respdf_tmp(1,1)
 
@@ -538,12 +534,12 @@ contains
        e5    = CSLim%Lim_KinInv(1)
        eta5i = CSLim%Lim_KinInv(2)
 
-       if (oldcode) then
+#if (_oldcode == 1)
                respdf_tmp(:,2) = respdf_vect(2,:)/e5**2/eta5i * CSLim%wgt
-       else
+#else
                res_lo = res_lo_tmp * Qsq_Fs(icoll-2)**2 /e5**2/eta5i * CSLim%wgt
                call get_respdf_gen(0,1,SLim,res_lo,respdf_tmp(:,2))
-       endif
+#endif
        
        FintNLO_ns(4) = respdf_tmp(1,2)
 
@@ -726,15 +722,15 @@ contains
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_tmp_old(2,2),res_loAA_old
     real(dp)    :: res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7),res_tmp(-5:7,-5:7),res_loAA(-5:7,-5:7)
     real(dp)    :: z,s5i
-    logical     :: oldcode
 
     xsect_nloewk_r_is_aq = 0
 
     limval_nlo_is = zero
 
-    oldcode = .false.
 
     ff(1) = zero
+    kin = zero
+    FintNLO_ns = zero
 
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
@@ -756,7 +752,7 @@ contains
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,&
          C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
@@ -764,19 +760,19 @@ contains
     HardProc%part = [id_a,-id_q,id_el,-id_el,id_q]
     C1Lim%part     = [id_q,-id_q,id_el,-id_el]
     C2Lim%part     = [id_q,-id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,-id_q]
     C1Lim%ids(1:4)     = [0,0,id_el,-id_nue]
 
     HardProc%part = [id_a,-id_qp,id_el,-id_el,-id_q]
     C1Lim%part     = [id_q,-id_qp,id_el,-id_el]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,-id_q]
     C1Lim%ids(1:4)     = [0,0,id_nue,-id_el]
 
     HardProc%part = [id_a,-id_qp,id_el,-id_el,-id_q]
     C1Lim%part     = [id_q,-id_qp,id_el,-id_el]
-#endif
+ endif
     
     !-- Hard
     call cut_histo(HardProc)
@@ -787,13 +783,13 @@ contains
 
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_aq(HardProc%AmpMom,res_nlo_old)
           call get_respdf(aq_lumi,0,1,HardProc,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_aq_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
-       endif
+#endif
        respdf = respdf*HardProc%wgt
 
        kin(1) = respdf(1)
@@ -812,18 +808,18 @@ contains
        FintNLO_ns(2) = zero
 
     else
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
           res_lo_old(1,:) = [Qdn2,Qup2] * res_lo_old(1,:)
           res_lo_old(2,:) = [Qdn2,Qup2] * res_lo_old(2,:)
           
           call get_respdf(aq_lumi,0,1,C1Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
           res_lo = multiply_IS_charges_sq(res_lo,1)
           res_lo = transition('ga -> q', 'none', res_lo)
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
-       endif
+#endif
           
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
@@ -842,7 +838,7 @@ contains
     endif
 
     !-- C2 -> only present in the neutral-change case
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     call cut_histo(C2Lim)
     
     if (C2Lim%makecut.or.C2Lim%flag) then
@@ -856,7 +852,7 @@ contains
        s5i = C2Lim%Lim_KinInv(2)
 
        !-- here we use spin-averages since there are no spin correlations for the aa -> e-e+ amplitude
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_treeAA_aa(C2Lim%AmpMom,res_loAA_old)
           !-- 1=xn*aveqa/aveaa
           res_loAA_old = res_loAA_old * Pqq(z)/(one-z) !-- use Pqq/(1-z) because of definition of z
@@ -865,14 +861,14 @@ contains
           res_tmp_old(:,2) = Qup2 * res_loAA_old
        
           call get_respdf(aq_lumi,0,1,C2Lim,res_tmp_old,respdf)
-       else
+#else
           call res_treeAA_aa_gen(C2Lim%AmpMom,res_lo)
           res_lo = transition('none','q -> ga',  res_lo)
           res_lo = multiply_IS_charges_sq(res_lo,2)
 
           call get_respdf_gen(0,1,C2Lim,res_lo,respdf)
           respdf = respdf * Pqq(z) / (one-z)
-       endif
+#endif
        
        respdf = (-one)*respdf*(two/s5i)&
             * C2Lim%wgt
@@ -883,7 +879,7 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
-#endif
+ endif
     
     ff(1) = sum(kin)
     call close_histo()
@@ -912,14 +908,14 @@ contains
     real(dp)    :: respdf(ipdf)
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_tmp(2,2),res_loAA,res_nlo(-5:7,-5:7), res_lo(-5:7,-5:7)
     real(dp)    :: z,s5i
-    logical     :: oldcode
 
 
-    oldcode = .false.
 
     xsect_nloewk_r_is_qa = 0
 
     ff(1) = zero
+    kin = zero
+    FintNLO_ns = zero
 
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
@@ -941,7 +937,7 @@ contains
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,&
          C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
@@ -949,19 +945,19 @@ contains
     HardProc%part = [id_a,-id_q,id_el,-id_el,id_q]
     C1Lim%part     = [id_q,-id_q,id_el,-id_el]
     C2Lim%part     = [id_q,-id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_qp]
     C2Lim%ids(1:4)     = [0,0,id_el,-id_nue]
 
     HardProc%part = [id_q,id_a,id_el,-id_el,id_qp]
     C2Lim%part     = [id_q,-id_qp,id_el,-id_el]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_qp]
     C2Lim%ids(1:4)     = [0,0,id_nue,-id_el]
 
     HardProc%part = [id_q,id_a,id_el,-id_el,id_qp]
     C2Lim%part     = [id_q,-id_qp,id_el,-id_el]
-#endif
+ endif
     
     !-- Hard
     call cut_histo(HardProc)
@@ -972,13 +968,13 @@ contains
 
     else    
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_a_qa(HardProc%AmpMom,res_nlo_old)
           call get_respdf(qa_lumi,0,1,HardProc,res_nlo_old,respdf)
-       else
+#else
           call res_tree_a_qa_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(0,1,HardProc,res_nlo,respdf)
-       endif
+#endif
        
        respdf = respdf*HardProc%wgt
 
@@ -990,7 +986,7 @@ contains
     endif
 
     !-- C1 -> only present in the neutral-change case
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     call cut_histo(C1Lim)
     
     if (C1Lim%makecut.or.C1Lim%flag) then
@@ -1003,23 +999,22 @@ contains
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           !-- here we use spin-averages since there are no spin correlations for the aa -> e-e+ amplitude
           call res_treeAA_aa(C1Lim%AmpMom,res_loAA)
           !-- 1=xn*aveqa/aveaa
-          res_loAA = res_loAA * Pqq(z)/(one-z) !-- use Pqq/(1-z) because of definition of z
           
           res_tmp(1,:) = [Qdn2,Qup2] * res_loAA
           res_tmp(2,:) = [Qdn2,Qup2] * res_loAA
        
           call get_respdf(qa_lumi,0,1,C1Lim,res_tmp,respdf)
-       else
+#else
           call res_treeAA_aa_gen(C1Lim%AmpMom,res_lo)
           res_lo = transition('q -> ga','none', res_lo)
           res_lo = multiply_IS_charges_sq(res_lo,1)
 
           call get_respdf_gen(0,1,C1Lim,res_lo,respdf)
-       endif
+#endif
        
        respdf = respdf * Pqq(z) / (one-z)
           
@@ -1032,7 +1027,7 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
-#endif
+ endif
 
     !-- C2
     call cut_histo(C2Lim)
@@ -1047,18 +1042,18 @@ contains
        z   = C2Lim%Lim_KinInv(1)
        s5i = C2Lim%Lim_KinInv(2)
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
           res_lo_old(1,:) = [Qdn2,Qup2] * res_lo_old(1,:)
           res_lo_old(2,:) = [Qdn2,Qup2] * res_lo_old(2,:)
 
           call get_respdf(qa_lumi,0,1,C2Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
-          res_lo = multiply_IS_charges_sq(res_lo,1)
+          res_lo = multiply_IS_charges_sq(res_lo,2)
           res_lo = transition('none','ga -> q', res_lo)
           call get_respdf_gen(0,1,C2Lim,res_lo,respdf)
-       endif
+#endif
 
 
        !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]

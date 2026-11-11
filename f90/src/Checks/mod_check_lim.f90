@@ -910,21 +910,21 @@ contains
       endif
    elseif (corr .eq. 'nloewk') then
       if (ch .eq. 'ns') then
-#if (_Vcharge == -1)
+      if (Vcharge == -1) then
          if (sec .eq. 'r_fs_54') then
             sing_terms_nlo(2,:) = .false.    ! no coll limit in FS
             sing_terms_nlo(3,:) = .false.    ! no softcoll limit in FS
             sing_terms_nlo(1,2) = .false.  ! no coll/softcoll limit inside soft limit
             non_sing_terms_nlo(2,1) = .true.
          endif
-#elif (_Vcharge == +1)
+      elseif (Vcharge == 1) then
          if (sec .eq. 'r_fs_53') then
             sing_terms_nlo(2,:) = .false.    ! no coll limit in FS
             sing_terms_nlo(3,:) = .false.    ! no softcoll limit in FS
             sing_terms_nlo(1,2) = .false.  ! no coll/softcoll limit inside soft limit
             non_sing_terms_nlo(2,1) = .true.
          endif
-#endif
+      endif
          
       endif
    endif

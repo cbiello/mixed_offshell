@@ -35,9 +35,7 @@ contains
     real(dp)    :: res_tree(-5:7,-5:7),res_loop(-5:7,-5:7)
     !--
     real(dp)    :: res_tree_old(2,2),res_loop_old(2,2)
-    logical :: oldcode
 
-    oldcode = .false.
     res_loop = 0
 
     xsect_nloqcd_v_ns = 0
@@ -59,13 +57,13 @@ contains
     call kinematics_lo(xx,LOProc)
 
     ! define process specific partons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
-#endif
+ endif
 
     call cut_histo(LOProc)
 
@@ -75,13 +73,13 @@ contains
        
     else    
        
-       if(oldcode) then
+#if (_oldcode == 1)
           call res_qcdloop_qqb(LOProc%AmpMom,res_tree_old,res_loop_old)
           call get_respdf(ns_lumi,1,0,LOProc,res_loop_old,respdf)
-       else 
+#else
           call res_qcdloop_qqb_gen(LOProc%AmpMom,res_tree,res_loop)
           call get_respdf_gen(1,0,LOProc,res_loop,respdf)
-       endif
+#endif
 
        respdf = respdf*LOProc%wgt
        
@@ -113,9 +111,7 @@ contains
     real(dp)    :: res_lo(-5:7,-5:7)
     !--
     real(dp)    :: res_lo_old(2,2)
-    logical :: oldcode
 
-    oldcode = .false.
 
     xsect_nloqcd_s_ns = 0
 
@@ -136,13 +132,13 @@ contains
     call kinematics_lo(xx,LOProc)
     
     ! define process specific partons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_el,-id_nue]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [id_q,-id_qp,id_nue,-id_el]
-#endif
+ endif
 
 
     call cut_histo(LOProc)
@@ -153,15 +149,15 @@ contains
        
     else    
 
-       if (oldcode) then
+#if (_oldcode == 1)
            call res_tree_qqb(LOProc%AmpMom,res_lo_old)
            call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,0,LOProc,res_lo_old,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
            call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,0,LOProc,res_lo_old,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-       else
+#else
            call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
            call get_respdf_hoppet_gen(xPij,PDFs,1,0,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
            call get_respdf_hoppet_gen(PDFs,xPij,1,0,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-       endif
+#endif
 
 
        respdf_1 = Cf*respdf_1*LOProc%wgt
@@ -198,9 +194,7 @@ contains
     real(dp)    :: res_lo(-5:7,-5:7)
     !--
     real(dp)    :: res_lo_old(2,2)
-    logical :: oldcode
 
-    oldcode = .false.
 
     xsect_nloqcd_s_gq = 0
 
@@ -220,13 +214,13 @@ contains
 
     call kinematics_lo(xx,LOProc)
     
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [-id_q,id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [-id_q,id_qp,id_el,-id_nue]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [-id_q,id_qp,id_nue,-id_el]
-#endif
+ endif
 
     call cut_histo(LOProc)
 
@@ -237,15 +231,15 @@ contains
     else    
 
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(LOProc%AmpMom,res_lo_old)
           !-- ns_lumi because the convolution is done in xPij
           call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,0,LOProc,res_lo_old,respdf,myPDFs1_Lmu=[xPij_Lmu])
-       else
+#else
           call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
           !why don't we have to rotate?
           call get_respdf_hoppet_gen(xPij,PDFs,1,0,LOProc,res_lo,respdf,myPDFs1_Lmu=[xPij_Lmu])
-       endif
+#endif
           
        respdf = tr*respdf*LOProc%wgt
 
@@ -276,9 +270,7 @@ contains
     real(dp)    :: res_lo(-5:7,-5:7)
     !--
     real(dp)    :: res_lo_old(2,2)
-    logical :: oldcode
 
-    oldcode = .false.
     
     xsect_nloqcd_s_qg = 0
 
@@ -298,13 +290,13 @@ contains
 
     call kinematics_lo(xx,LOProc)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     LOProc%part(1:4) = [id_q,-id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     LOProc%part(1:4) = [id_qp,-id_q,id_el,-id_nue]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     LOProc%part(1:4) = [id_qp,-id_q,id_nue,-id_el]
-#endif
+ endif
 
 call cut_histo(LOProc)
 
@@ -314,14 +306,14 @@ call cut_histo(LOProc)
        
     else  
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(LOProc%AmpMom,res_lo_old)
           !-- ns_lumi because the convolution is done in xPij
           call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,0,LOProc,res_lo_old,respdf,myPDFs2_Lmu=[xPij_Lmu])
-       else
+#else
           call res_tree_qqb_gen(LOProc%AmpMom,res_lo)
           call get_respdf_hoppet_gen(PDFs,xPij,1,0,LOProc,res_lo,respdf,myPDFs2_Lmu=[xPij_Lmu])
-       endif
+#endif
        
        respdf = tr*respdf*LOProc%wgt
 

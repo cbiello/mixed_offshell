@@ -22,7 +22,6 @@ GIT_VERSION := $(shell git describe --abbrev=50 --dirty --always --tags)
 
 -include config.cfg
 -include makefile.inc
-F95 += -D_Vcharge=$(Vcharge)
 
 #####################################################################
 
@@ -32,6 +31,9 @@ Here = $(PWD)
 
 LIBS=
 ifeq ($(WithLHAPDF),Yes) 
+ ifeq ($(myOS),Linux)
+  LIBS += "-Wl,-rpath=$(LHAPDF)"
+ endif
  LIBS +=-L$(LHAPDF) -lLHAPDF
 endif
 

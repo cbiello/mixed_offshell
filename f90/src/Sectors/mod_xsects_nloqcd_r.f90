@@ -44,9 +44,7 @@ contains
     real(dp)    :: z,s5i
     integer     :: i, j
     !--
-    logical :: oldcode
 
-    oldcode = .false.
 
     !----- initialisation
     xsect_nloqcd_r_is_ns = 0
@@ -78,7 +76,7 @@ contains
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
 
     ! define process specific partons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
@@ -86,7 +84,7 @@ contains
     HardProc%part = [id_q,-id_q,id_el,-id_el,id_g]
     C1Lim%part = [id_q,-id_q,id_el,-id_el]
     C2Lim%part = [id_q,-id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_g]
     C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
     C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
@@ -95,7 +93,7 @@ contains
     C1Lim%part = [id_q,-id_qp,id_el,-id_nue]
     C2Lim%part = [id_q,-id_qp,id_el,-id_nue]
 
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_g]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
     C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
@@ -103,7 +101,7 @@ contains
     HardProc%part = [id_q,-id_qp,id_nue,-id_el,id_g]
     C1Lim%part = [id_q,-id_qp,id_nue,-id_el]
     C2Lim%part = [id_q,-id_qp,id_nue,-id_el]
-#endif
+ endif
 
 
     !-- Hard
@@ -115,14 +113,14 @@ contains
 
     else    
 
-       if(oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_qqb(HardProc%AmpMom,res_nlo_old)
           call get_respdf(ns_lumi,1,0,HardProc,res_nlo_old,respdf)
-       else 
+#else
           call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
        
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
-       endif
+#endif
 
        respdf = respdf*HardProc%wgt
 
@@ -142,13 +140,13 @@ contains
        FintNLO_ns(2) = zero
 
     else
-       if(oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
           call get_respdf(ns_lumi,1,0,C1Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
           call get_respdf_gen(1,0,C1Lim,res_lo,respdf)
-       endif 
+#endif
 
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
@@ -174,13 +172,13 @@ contains
        FintNLO_ns(3) = zero
 
     else
-       if(oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
           call get_respdf(ns_lumi,1,0,C2Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
           call get_respdf_gen(1,0,C2Lim,res_lo,respdf)
-       endif
+#endif
 
        z   = C2Lim%Lim_KinInv(1)
        s5i = C2Lim%Lim_KinInv(2)
@@ -221,10 +219,8 @@ contains
     real(dp)    :: respdf(ipdf)
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2),res_nlo(-5:7,-5:7),res_lo(-5:7,-5:7)
     real(dp)    :: z,s5i
-    logical     :: oldcode
     integer :: i, j
 
-    oldcode = .false.
 
     !----- initialisation
     xsect_nloqcd_r_is_gq = 0
@@ -257,25 +253,25 @@ contains
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,compute_etas=.false.)
 
     ! define process specific partons
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_el]
 
     HardProc%part = [id_g,id_q,id_el,-id_el,id_q]
     C1Lim%part = [-id_q,id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_q]
     C1Lim%ids(1:4) = [0,0,id_el,-id_nue]
 
     HardProc%part = [id_g,id_qp,id_el,-id_nue,id_q]
     C1Lim%part = [-id_q,id_qp,id_el,-id_nue]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_q]
     C1Lim%ids(1:4) = [0,0,id_nue,-id_el]
     
     HardProc%part = [id_g,id_qp,id_nue,-id_el,id_q]
     C1Lim%part = [-id_q,id_qp,id_nue,-id_el]
-#endif
+ endif
 
 
     !-- Hard
@@ -287,13 +283,13 @@ contains
        
 
     else    
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_gq(HardProc%AmpMom,res_nlo_old)
           call get_respdf(gq_lumi,1,0,HardProc,res_nlo_old,respdf)
-       else
+#else
           call res_tree_g_gq_gen(HardProc%AmpMom,res_nlo)          
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
-       endif
+#endif
       
        respdf = respdf*HardProc%wgt
 
@@ -314,14 +310,14 @@ contains
 
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C1Lim%AmpMom,res_lo_old)
           call get_respdf(gq_lumi,1,0,C1Lim,res_lo_old,respdf)
-       else
+#else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
           res_lo = transition('g -> q', 'none', res_lo)
           call get_respdf_gen(1,0,C1Lim,res_lo,respdf)
-       endif 
+#endif
 
        z   = C1Lim%Lim_KinInv(1)
        s5i = C1Lim%Lim_KinInv(2)
@@ -363,10 +359,8 @@ contains
     !--
     real(dp)    :: res_nlo_old(2,2),res_lo_old(2,2)
     real(dp)    :: z,s5i
-    logical     :: oldcode
 
     
-    oldcode = .false.
 
     !----- initialisation
     xsect_nloqcd_r_is_qg = 0
@@ -398,25 +392,25 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C2Lim=C2Lim,compute_etas=.false.)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
     C2Lim%ids(1:4) = [0,0,id_el,-id_el]
 
     HardProc%part = [id_q,id_g,id_el,-id_el,id_q]
     C2Lim%part = [id_q,-id_q,id_el,-id_el]
-#elif  (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     HardProc%ids(1:5) = [0,0,id_el,-id_nue,id_q]
     C2Lim%ids(1:4) = [0,0,id_el,-id_nue]
 
     HardProc%part = [id_qp,id_g,id_el,-id_nue,id_q]
     C2Lim%part = [id_qp,-id_q,id_el,-id_nue]
-#elif  (_Vcharge == +1)
+ elseif (Vcharge == 1) then
     HardProc%ids(1:5) = [0,0,id_nue,-id_el,id_q]
     C2Lim%ids(1:4) = [0,0,id_nue,-id_el]
 
     HardProc%part = [id_qp,id_g,id_nue,-id_el,id_q]
     C2Lim%part = [id_qp,-id_q,id_nue,-id_el]
-#endif
+ endif
 
     !-- Hard
     call cut_histo(HardProc)
@@ -427,13 +421,13 @@ contains
 
     else    
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_g_qg(HardProc%AmpMom,res_nlo_old)
           call get_respdf(qg_lumi,1,0,HardProc,res_nlo_old,respdf)
-       else
+#else
           call res_tree_g_qg_gen(HardProc%AmpMom,res_nlo)
           call get_respdf_gen(1,0,HardProc,res_nlo,respdf)
-       endif
+#endif
 
        respdf = respdf*HardProc%wgt
 
@@ -454,14 +448,14 @@ contains
 
     else
 
-       if (oldcode) then
+#if (_oldcode == 1)
           call res_tree_qqb(C2Lim%AmpMom,res_lo_old)
           call get_respdf(qg_lumi,1,0,C2Lim,res_lo_old,respdf)
-       else   
+#else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
           res_lo = transition('none', 'g -> q', res_lo)
           call get_respdf_gen(1,0,C2Lim,res_lo,respdf)
-       endif
+#endif
 
        z   = C2Lim%Lim_KinInv(1)
        s5i = C2Lim%Lim_KinInv(2)

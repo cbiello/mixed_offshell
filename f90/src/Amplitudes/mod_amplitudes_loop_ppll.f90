@@ -197,7 +197,7 @@ contains
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
 
-#if (_Vcharge==0)
+ if (Vcharge == 0) then
     do i = 1,2
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
        do j = 1,3
@@ -209,7 +209,7 @@ contains
           endif
        enddo
     enddo
-#else
+ else
     do i = 1,1 ! no additional ord since we have defined all the process
                ! therefore we don't need to obtain the results via crossing
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
@@ -222,7 +222,7 @@ contains
           endif
        enddo
     enddo
-#endif
+ endif
 
     res0 = res0_ol
 
@@ -232,7 +232,7 @@ contains
     !-- now go to finite part
     call get_Lij(p,mu_ol,[1,2,3,4],Lij,Lij2)
     
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     
     finiteZdn = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
     finiteZup = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
@@ -247,7 +247,7 @@ contains
     res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
     res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
 
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
 
     !-1 2  -> 12 -11
     finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
@@ -256,7 +256,7 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     
     !1 -2  -> 11 -12
     finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
@@ -265,11 +265,11 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
-#endif
+ endif
     
     !--reshape the resfin matrix element to have the new shape
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(-1,1) = res1fin(2,1)
     res1loopfin(-2,2) = res1fin(2,2)
     res1loopfin(-3,3) = res1fin(2,1)
@@ -296,7 +296,7 @@ contains
     res0loop(5,-5) = res0(1,3)
 
 
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(-1,2) = res1fin(1,1)
     res1loopfin(2,-1) = res1fin(1,2)
     res1loopfin(4,-3) = res1loopfin(2,-1)
@@ -307,7 +307,7 @@ contains
     res0loop(4,-3) = res0(1,2)
     res0loop(-3,4) = res0(1,1)
 
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(1,-2) = res1fin(1,1)
     res1loopfin(-2,1) = res1fin(1,2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
@@ -318,7 +318,7 @@ contains
     res0loop(-2,1) = res0(1,2)
     res0loop(-4,3) = res0(1,2)
     res0loop(3,-4) = res0(1,1)
-#endif
+ endif
   
   end subroutine res_ewkloop_qqb_gen
 
@@ -336,7 +336,7 @@ contains
     !debug true set H1=0 finite reminder in SCET scheme
     debug=.false.
 
-#if(_Vcharge==0)
+ if (Vcharge == 0) then
     
     p_ol = p
 
@@ -357,12 +357,12 @@ contains
     call get_Lij(p,mu_ol,[1,2],Lij,Lij2)
     res1fin = res1(0) - get_fin_ewk_aallb(1,2,Lij,Lij2)*res0
 
-#else
+ else
 
     write(*,*), 'no aa process for CC DY'
     stop
 
-#endif
+ endif
 
 #if(_withchecks == 1)
     if (checkpoles) then
@@ -393,21 +393,21 @@ contains
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
 
-#if (_Vcharge==0)
+ if (Vcharge == 0) then
     do i = 1,2 !for crossing symmetry
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
        do j = 1,3
           call evaluate_loop(OL_id(j+3),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
        enddo
     enddo
-#else
+ else
     do i = 1,1 !no needed crossing-symmetry
        p_ol(:,1) = p(:,ord(1,i)); p_ol(:,2) = p(:,ord(2,i))
        do j = 1,2
           call evaluate_loop(OL_id(j+2),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
        enddo
     enddo
-#endif
+ endif
     res0 = res0_ol
 
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
@@ -417,7 +417,7 @@ contains
     !-- now go to finite part
     call get_Lij(p,mu_ol,[1,2,3,4],Lij,Lij2)
 
-#if (_Vcharge==0)
+ if (Vcharge == 0) then
 
     finiteZdn = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)
     finiteZup = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
@@ -433,7 +433,7 @@ contains
     res1fin(2,2) = res1(0,2,2) - finiteZup * res0(2,2)
     res1fin(2,3) = res1(0,2,3) - finiteZdn * res0(2,3)
     
-#elif (_Vcharge==1)
+ elseif (Vcharge == 1) then
 
     !-1 2 -> 12 -11 21
     finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
@@ -442,7 +442,7 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
     
-#elif (_Vcharge==-1)
+ elseif (Vcharge == -1) then
 
     !1 -2 -> 11 -12 21
     finiteWdu = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
@@ -451,11 +451,11 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(1,2,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
-#endif
+ endif
 
     !--reshape the resfin matrix element to have the new shape
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(-1,1) = res1fin(2,1)
     res1loopfin(-2,2) = res1fin(2,2)
     res1loopfin(-3,3) = res1fin(2,1)
@@ -467,17 +467,17 @@ contains
     res1loopfin(3,-3) = res1fin(1,1)
     res1loopfin(4,-4) = res1fin(1,2)
     res1loopfin(5,-5) = res1fin(1,3)
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(-1,2) = res1fin(1,1)
     res1loopfin(2,-1) = res1fin(1,2)
     res1loopfin(4,-3) = res1loopfin(2,-1)
     res1loopfin(-3,4) = res1loopfin(-1,2)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(1,-2) = res1fin(1,1)
     res1loopfin(-2,1) = res1fin(1,2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
     res1loopfin(3,-4) = res1loopfin(1,-2)
-#endif
+ endif
     
   end subroutine res_ewkloop_g_qqb_gen
   
@@ -555,7 +555,7 @@ contains
 
     p_ol(:,1:5) = p(:,1:5)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     !antiquarks in is
     do j = 1,3
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -564,12 +564,12 @@ contains
     do j = 1,3
        call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
     enddo
-#else
+ else
     !up (or anti-up) in is
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !anti-down (or down) in is
     call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
-#endif
+ endif
     
     res0 = res0_ol
     
@@ -580,7 +580,7 @@ contains
     !-- now go to finite part
     call get_Lij(p,mu_ol,[2,3,4,5],Lij,Lij2)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
 
     !21 -1 -> 11 -11 -1  |---> 1 -1 -> 11 -11
     finiteZdn = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)    
@@ -602,7 +602,7 @@ contains
     ! print*, 'finiteZup= ', finiteZup
     ! print*, 'old= ', get_fin_ewk_qqbllb(5,2,3,4,Lij,Lij2)
     
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
 
     !21 2 -> 12 -11 1
     finiteWdu = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
@@ -611,7 +611,7 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
 
     !21 -2 -> 11 -12 -1
     finiteWdu = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
@@ -620,11 +620,11 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(5,2,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
     
-#endif
+ endif
 
     !--reshape the resfin matrix element to have the new shape
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(0,-1) = res1fin(1,1)
     res1loopfin(0,-2) = res1fin(1,2)
     res1loopfin(0,-3) = res1fin(1,1)
@@ -636,17 +636,17 @@ contains
     res1loopfin(0,3) = res1fin(2,1)
     res1loopfin(0,4) = res1fin(2,2)
     res1loopfin(0,5) = res1fin(2,3)
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(0,2) = res1fin(1,1)
     res1loopfin(0,-1) = res1fin(1,2)
     res1loopfin(0,-3) = res1loopfin(0,-1)
     res1loopfin(0,4) = res1loopfin(0,2)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(0,-2) = res1fin(1,1)
     res1loopfin(0,1) = res1fin(1,2)
     res1loopfin(0,3) = res1loopfin(0,1)
     res1loopfin(0,-4) = res1loopfin(0,-2)
-#endif
+ endif
     
   end subroutine res_ewkloop_g_gq_gen
 
@@ -707,7 +707,7 @@ contains
 
     p_ol(:,1:5) = p(:,1:5)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     !quarks
     do j = 1,3
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -716,14 +716,14 @@ contains
     do j = 1,3
        call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
     enddo
-#else
+ else
     !ol_id(3)= 2 21 -> 12 -11 1  OR  -1 21 -> 12 -11 -2
     !up (or anti-up) in is
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !anti-down (or down) in is
     !ol_id(4)= -1 21 -> 12 -11 -2  OR  1 21 -> 11 -12 2
     call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
-#endif
+ endif
     
     res0 = res0_ol
        
@@ -734,7 +734,7 @@ contains
     !-- now go to finite part
     call get_Lij(p,mu_ol,[1,3,4,5],Lij,Lij2)
 
-#if (_Vcharge == 0)    
+ if (Vcharge == 0) then
     !1 21 -> 11 -11 -1  |---> 1 -1 -> 11 -11
     finiteZdn = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qdn,-Qdn,Q_lep,-Q_lep)    
     finiteZup = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qup,-Qup,Q_lep,-Q_lep)
@@ -755,7 +755,7 @@ contains
     !print*, 'finiteZup= ', finiteZup
     !print*, 'old= ', get_fin_ewk_qqbllb(1,5,3,4,Lij,Lij2)
     
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
 
     !2 21 -> 12 -11 1
     finiteWdu = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qup,-Qdn,0d0,-Q_lep)
@@ -764,7 +764,7 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,-Qdn,Qup,0d0,-Q_lep)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
 
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
 
     !-2 21 -> 11 -12 -1
     finiteWdu = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,-Qup,Qdn,Q_lep,0d0)
@@ -773,11 +773,11 @@ contains
     finiteWud = get_fin_ewk_qqbllb_gen(1,5,3,4,Lij,Lij2,Qdn,-Qup,Q_lep,0d0)
     res1fin(1,2) = res1(0,1,2) - finiteWud * res0(1,2)
     
-#endif
+ endif
 
     ! FIlling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(1,0) = res1fin(1,1)
     res1loopfin(2,0) = res1fin(1,2)
     res1loopfin(3,0) = res1fin(1,1)
@@ -789,17 +789,17 @@ contains
     res1loopfin(-3,0) = res1fin(2,1)
     res1loopfin(-4,0) = res1fin(2,2)
     res1loopfin(-5,0) = res1fin(2,3)
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(2,0) = res1fin(1,1)
     res1loopfin(-1,0) = res1fin(1,2)
     res1loopfin(-3,0) = res1loopfin(-1,0)
     res1loopfin(4,0) = res1loopfin(2,0)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(-2,0) = res1fin(1,1)
     res1loopfin(1,0) = res1fin(1,2)
     res1loopfin(3,0) = res1loopfin(1,0)
     res1loopfin(-4,0) = res1loopfin(-2,0)
-#endif
+ endif
     
   end subroutine res_ewkloop_g_qg_gen
 
@@ -955,7 +955,7 @@ contains
     real(dp15) :: res1(0:2,2,2),acc(2,2),res0_ol(2,2)
     integer  :: ord(2,2),i,j
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     p_ol(:,3:5) = p(:,3:5)
     ord(:,1) = [1,2] !-- q qb
     ord(:,2) = [2,1] !-- qb q
@@ -965,13 +965,13 @@ contains
           call evaluate_loop(OL_id(j+3),p_ol,res0_ol(i,j),res1(:,i,j),acc(i,j))
        enddo
     enddo
-#else
+ else
     p_ol(:,1:5) = p(:,1:5)
     !-1 2 -> 12 -11 21 or 1 -2 -> 11 -12 21
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !2 -1 -> 12 -11 21 or -2 1 -> 11 -12 21
     call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))    
-#endif
+ endif
 
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
     res1 = res1/(aem_ol/twopi)/(4*pi*as_ol)
@@ -980,7 +980,7 @@ contains
 
     !-- filling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(1,-1) = res1fin(1,1)
     res1loopfin(2,-2) = res1fin(1,2)
     res1loopfin(3,-3) = res1fin(1,1)
@@ -992,17 +992,17 @@ contains
     res1loopfin(-3,3) = res1fin(2,1)
     res1loopfin(-4,4) = res1fin(2,2)
     res1loopfin(-5,5) = res1fin(2,1) !no diff in the nf part
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(-1,2) = res1fin(1,1)
     res1loopfin(2,-1) = res1fin(1,2)
     res1loopfin(-3,4) = res1loopfin(-1,2)
     res1loopfin(4,-3) = res1loopfin(2,-1)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(1,-2) = res1fin(1,1)
     res1loopfin(-2,1) = res1fin(1,2)
     res1loopfin(3,-4) = res1loopfin(1,-2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
-#endif
+ endif
 
   end subroutine res_ewkloop_g_qqb_nf_gen
   
@@ -1045,7 +1045,7 @@ contains
 
     p_ol(:,1:5) = p(:,1:5)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     !anti-quark
     do j = 1,2
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -1054,12 +1054,12 @@ contains
     do j = 1,2
        call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
     enddo
-#else
+ else
     !21 2 -> 12 -11 1 or 21 -2 -> 11 -12 -1
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !21 -1 -> 12 -11 -2 or 21 1 -> 11 -12 2
     call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
-#endif
+ endif
 
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
     res1 = res1/(aem_ol/twopi)/(4*pi*as_ol)
@@ -1068,7 +1068,7 @@ contains
 
     !-- filling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(0,-1) = res1fin(1,1)
     res1loopfin(0,-2) = res1fin(1,2)
     res1loopfin(0,-3) = res1fin(1,1)
@@ -1080,17 +1080,17 @@ contains
     res1loopfin(0,3) = res1fin(2,1)
     res1loopfin(0,4) = res1fin(2,2)
     res1loopfin(0,5) = res1fin(2,1) !no diff in the nf part
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(0,2) = res1fin(1,1)
     res1loopfin(0,-1) = res1fin(1,2)
     res1loopfin(0,4) = res1loopfin(0,2)
     res1loopfin(0,-3) = res1loopfin(0,-1)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(0,-2) = res1fin(1,1)
     res1loopfin(0,1) = res1fin(1,2)
     res1loopfin(0,-4) = res1loopfin(0,-2)
     res1loopfin(0,3) = res1loopfin(0,1)
-#endif    
+ endif
     
   end subroutine res_ewkloop_g_gq_nf_gen
 
@@ -1130,7 +1130,7 @@ contains
 
     p_ol(:,1:5) = p(:,1:5)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     !quark
     do j = 1,2
        call evaluate_loop(OL_id(j+3),p_ol,res0_ol(1,j),res1(:,1,j),acc(1,j))
@@ -1139,12 +1139,12 @@ contains
     do j = 1,2
        call evaluate_loop(OL_id(j+6),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
     enddo
-#else
+ else
     !2 21 -> 12 -11 1 or -2 21 -> 11 -12 -1
     call evaluate_loop(OL_id(3),p_ol,res0_ol(1,1),res1(:,1,1),acc(1,1))
     !-1 21 -> 12 -11 -2 or 1 21 -> 11 -12 2
     call evaluate_loop(OL_id(4),p_ol,res0_ol(1,2),res1(:,1,2),acc(1,2))
-#endif
+ endif
        
     !-- remove our couplings: aem/twopi * (as*four*pi) = aem*as*two
     res1 = res1/(aem_ol/twopi)/(4*pi*as_ol)
@@ -1153,7 +1153,7 @@ contains
     
     !-- filling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(1,0) = res1fin(1,1)
     res1loopfin(2,0) = res1fin(1,2)
     res1loopfin(3,0) = res1fin(1,1)
@@ -1165,17 +1165,17 @@ contains
     res1loopfin(-3,0) = res1fin(2,1)
     res1loopfin(-4,0) = res1fin(2,2)
     res1loopfin(-5,0) = res1fin(2,1) !no diff in the nf part
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(2,0) = res1fin(1,1)
     res1loopfin(-1,0) = res1fin(1,2)
     res1loopfin(4,0) = res1loopfin(2,0)
     res1loopfin(-3,0) = res1loopfin(-1,0)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(-2,0) = res1fin(1,1)
     res1loopfin(1,0) = res1fin(1,2)
     res1loopfin(-4,0) = res1loopfin(-2,0)
     res1loopfin(3,0) = res1loopfin(1,0)
-#endif    
+ endif
     
   end subroutine res_ewkloop_g_qg_nf_gen
 
@@ -1695,7 +1695,7 @@ end function get_fin_ewk_qqbllb_gen
     integer  :: ord(2,2),i,j
     real(dp) :: Lij(4,4),Lij2(4,4),myfin(1:2)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     
     p_ol(:,3:4) = p(:,3:4)
     ord(:,1) = [1,2] !-- q qb
@@ -1708,7 +1708,7 @@ end function get_fin_ewk_qqbllb_gen
        enddo
     enddo
 
-#else
+ else
 
     p_ol(:,1:4) = p(:,1:4)
     !q qb: 2 -1 -> 12 -11 OR 1 -2 -> 11 -12
@@ -1716,7 +1716,7 @@ end function get_fin_ewk_qqbllb_gen
     !qb q: -1 2 -> 12 -11 OR -2 1 -> 11 -12
     call evaluate_loop(OL_id(2),p_ol,res0_ol(2,1),res1(:,2,1),acc(2,1))
 
-#endif
+ endif
     
     res0 = res0_ol
     !-- remove our couplings: aem/twopi
@@ -1731,7 +1731,7 @@ end function get_fin_ewk_qqbllb_gen
 
     !-- filling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(1,-1) = res1fin(1,1)
     res1loopfin(2,-2) = res1fin(1,2)
     res1loopfin(3,-3) = res1fin(1,1)
@@ -1743,17 +1743,17 @@ end function get_fin_ewk_qqbllb_gen
     res1loopfin(-3,3) = res1fin(2,1)
     res1loopfin(-4,4) = res1fin(2,2)
     res1loopfin(-5,5) = res1fin(2,1) !no diff in the nf part
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(2,-1) = res1fin(1,1)
     res1loopfin(-1,2) = res1fin(2,1)
     res1loopfin(4,-3) = res1loopfin(2,-1)
     res1loopfin(-3,4) = res1loopfin(-1,2)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(1,-2) = res1fin(1,1)
     res1loopfin(-2,1) = res1fin(2,1)
     res1loopfin(3,-4) = res1loopfin(1,-2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
-#endif    
+ endif
 
 
   end subroutine ol_res_qcdloop_qqb_gen
@@ -1811,7 +1811,7 @@ end function get_fin_ewk_qqbllb_gen
     integer  :: ord(2,2),i,j
     real(dp) :: Lij(5,5),Lij2(5,5),myfin(1:2)
 
-#if (_Vcharge ==0 )
+ if (Vcharge == 0) then
     
     p_ol(:,3:5) = p(:,3:5)
     
@@ -1825,7 +1825,7 @@ end function get_fin_ewk_qqbllb_gen
        enddo
     enddo
 
-#else
+ else
 
     p_ol(:,1:5) = p(:,1:5)
     !q qb: 2 -1 -> 12 -11 22 OR 1 -2 -> 11 -12 22
@@ -1833,7 +1833,7 @@ end function get_fin_ewk_qqbllb_gen
     !qb q: -1 2 -> 12 -11 22 OR -2 1 -> 11 -12 22
     call evaluate_loop(OL_id(4),p_ol,res0_ol(2,1),res1(:,2,1),acc(2,1))
 
-#endif
+ endif
 
 
     res0 = res0_ol
@@ -1850,7 +1850,7 @@ end function get_fin_ewk_qqbllb_gen
 
     !-- filling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(1,-1) = res1fin(1,1)
     res1loopfin(2,-2) = res1fin(1,2)
     res1loopfin(3,-3) = res1fin(1,1)
@@ -1862,17 +1862,17 @@ end function get_fin_ewk_qqbllb_gen
     res1loopfin(-3,3) = res1fin(2,1)
     res1loopfin(-4,4) = res1fin(2,2)
     res1loopfin(-5,5) = res1fin(2,1)
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(2,-1) = res1fin(1,1)
     res1loopfin(-1,2) = res1fin(2,1)
     res1loopfin(4,-3) = res1loopfin(2,-1)
     res1loopfin(-3,4) = res1loopfin(-1,2)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(1,-2) = res1fin(1,1)
     res1loopfin(-2,1) = res1fin(2,1)
     res1loopfin(3,-4) = res1loopfin(1,-2)
     res1loopfin(-4,3) = res1loopfin(-2,1)
-#endif    
+ endif
 
 
   end subroutine ol_res_qcdloop_a_qqb_gen
@@ -1929,7 +1929,7 @@ end function get_fin_ewk_qqbllb_gen
     integer  :: j
     real(dp) :: Lij(5,5),Lij2(5,5),myfin(1:2)
 
-#if (_Vcharge == 0 )
+ if (Vcharge == 0) then
     
     p_ol(:,1:5) = p(:,1:5)
     ! a qbar -> underline process q qb
@@ -1941,7 +1941,7 @@ end function get_fin_ewk_qqbllb_gen
        call evaluate_loop(OL_id(j+4),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
     enddo
 
-#else
+ else
 
     p_ol(:,1:5) = p(:,1:5)
     !a qb: 22 -1 -> 12 -11 -2 OR 22 -2 -> 11 -12 -1
@@ -1951,7 +1951,7 @@ end function get_fin_ewk_qqbllb_gen
     !I fill the res1(:,2,:) since the underline process is qb q
     call evaluate_loop(OL_id(4),p_ol,res0_ol(2,1),res1(:,2,1),acc(2,1))    
 
-#endif
+ endif
     
     res0 = res0_ol
 
@@ -1967,7 +1967,7 @@ end function get_fin_ewk_qqbllb_gen
 
     !-- filling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(7,-1) = res1fin(1,1)
     res1loopfin(7,-2) = res1fin(1,2)
     res1loopfin(7,-3) = res1fin(1,1)
@@ -1979,17 +1979,17 @@ end function get_fin_ewk_qqbllb_gen
     res1loopfin(7,3) = res1fin(2,1)
     res1loopfin(7,4) = res1fin(2,2)
     res1loopfin(7,5) = res1fin(2,1)
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(7,-1) = res1fin(1,1)
     res1loopfin(7,2) = res1fin(2,1)
     res1loopfin(7,-3) = res1loopfin(7,-1)
     res1loopfin(7,4) = res1loopfin(7,2)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(7,-2) = res1fin(1,1)
     res1loopfin(7,1) = res1fin(2,1)
     res1loopfin(7,-4) = res1loopfin(7,-2)
     res1loopfin(7,3) = res1loopfin(7,1)
-#endif    
+ endif
     
   end subroutine ol_res_qcdloop_a_aq_gen
 
@@ -2044,7 +2044,7 @@ end function get_fin_ewk_qqbllb_gen
     integer  :: j
     real(dp) :: Lij(5,5),Lij2(5,5),myfin(1:2)
 
-#if (_Vcharge == 0)
+ if (Vcharge == 0) then
     
     p_ol(:,1:5) = p(:,1:5)
     ! q a -> underline event is q qb
@@ -2056,7 +2056,7 @@ end function get_fin_ewk_qqbllb_gen
        call evaluate_loop(OL_id(j+4),p_ol,res0_ol(2,j),res1(:,2,j),acc(2,j))
     enddo
 
-#else
+ else
 
     p_ol(:,1:5) = p(:,1:5)
     ! 2 22 -> 12 -11 1 or 1 22 -> 11 -12 2
@@ -2064,7 +2064,7 @@ end function get_fin_ewk_qqbllb_gen
     ! -1 22 -> 12 -11 -2 or -2 22 -> 11 -12 -1
     call evaluate_loop(OL_id(4),p_ol,res0_ol(2,1),res1(:,2,1),acc(2,1))    
 
-#endif
+ endif
 
     
     res0 = res0_ol
@@ -2081,7 +2081,7 @@ end function get_fin_ewk_qqbllb_gen
 
     !-- filling the res1loopfin in flavour space
     res1loopfin=0
-#if (_Vcharge == 0) 
+ if (Vcharge == 0) then
     res1loopfin(1,7) = res1fin(1,1)
     res1loopfin(2,7) = res1fin(1,2)
     res1loopfin(3,7) = res1fin(1,1)
@@ -2093,17 +2093,17 @@ end function get_fin_ewk_qqbllb_gen
     res1loopfin(-3,7) = res1fin(2,1)
     res1loopfin(-4,7) = res1fin(2,2)
     res1loopfin(-5,7) = res1fin(2,1)
-#elif (_Vcharge == 1)
+ elseif (Vcharge == 1) then
     res1loopfin(2,7) = res1fin(1,1)
     res1loopfin(-1,7) = res1fin(2,1)
     res1loopfin(4,7) = res1loopfin(2,7)
     res1loopfin(-3,7) = res1loopfin(-1,7)
-#elif (_Vcharge == -1)
+ elseif (Vcharge == -1) then
     res1loopfin(1,7) = res1fin(1,1)
     res1loopfin(-2,7) = res1fin(2,1)
     res1loopfin(-4,7) = res1loopfin(-2,7)
     res1loopfin(3,7) = res1loopfin(1,7)
-#endif    
+ endif
     
 
   end subroutine ol_res_qcdloop_a_qa_gen
