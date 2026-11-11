@@ -39,6 +39,7 @@ contains
     real(dp) :: res_tree(2,2),res_nlo(2,2),kin(1)
 
     xsect_nnlo_s_qa_vqcd = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_qa_vqcd: not implemented for W'
 
     ff(1) = zero
 
@@ -105,6 +106,7 @@ contains
     real(dp) :: res_lo_1(1,1),res_lo_2(2,2)
 
     xsect_nnlo_s_qa_s12 = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_qa_s12: not implemented for W'
 
     ff(1) = zero
 
@@ -202,6 +204,7 @@ contains
     real(dp) :: Pqg0,res_nlo(2,2),res_lo(2,2)
 
     xsect_nnlo_s_qa_oqcd = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_qa_oqcd: not implemented for W'
 
     ff(1) = zero
     kin = 0
@@ -464,6 +467,7 @@ contains
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1),res_nlo(2,2),res_lo(2,2),res_aa
 
     xsect_nnlo_s_qa_oewk = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_qa_oewk: not implemented for W'
 
     ff(1) = zero
     kin = 0

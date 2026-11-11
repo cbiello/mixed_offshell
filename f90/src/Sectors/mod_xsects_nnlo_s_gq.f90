@@ -78,6 +78,7 @@ contains
     real(dp) :: res_lo(2,2),Pqg0,gq_int_sub(2,2)
 
     xsect_nnlo_s_gq_s12 = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_gq_s12: not implemented for W'
 
     ff(1) = zero
 
@@ -203,6 +204,7 @@ contains
     real(dp) :: res_tree(2,3),res_nlo(2,3),kin(1)
 
     xsect_nnlo_s_gq_vewk = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_gq_vewk: not implemented for W'
 
     ff(1) = zero
 
@@ -1210,16 +1212,6 @@ contains
 !    endif
     ff(1) = sum(kin)
 
-    if (product(kin) .ne. zero) then
-       print *, "boosted1 kin", kin(1:3), sum(kin(1:3))/kin(1)
-       print *, "hard",FintNNLO_s_gq_oewk_fs(1)
-       print *, "coll1", FintNNLO_s_gq_oewk_fs(2)/FintNNLO_s_gq_oewk_fs(1)
-       print *, "soft", FintNNLO_s_gq_oewk_fs(3)/FintNNLO_s_gq_oewk_fs(1)
-       print *, "softcoll", FintNNLO_s_gq_oewk_fs(4)/FintNNLO_s_gq_oewk_fs(1)
-!       print *, "softcoll1", FintNNLO_s_gq_oewk_is(6)!/FintNNLO_s_gq_oewk_is(1)
-       print *, "ff",ff(1)
-       pause
-    endif
 
     call close_histo()
 
@@ -1242,6 +1234,7 @@ contains
     real(dp) :: res_nlo(2,2),kin(1)
 
     xsect_nnlo_s_gq_vewknf = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_gq_vewknf: not implemented for W'
 
     ff(1) = zero
 

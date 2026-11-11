@@ -994,7 +994,7 @@ contains
     !!                             C5S5                                      !!
     !!-----------------------------------------------------------------------!!
 
-    C5S5Lim%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    C5S5Lim%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_a]
     call cut_histo(C5S5Lim)
 
     if (C5S5Lim%makecut.or.C5S5Lim%flag) then
@@ -2649,6 +2649,7 @@ contains
     real(dp) :: damp
     
     xsect_nnlo_rr_5i6iac_ns_4q_qqb = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W'
 
     ff(1) = zero
 
@@ -2768,6 +2769,7 @@ contains
     real(dp) :: damp
     
     xsect_nnlo_rr_5i6iac_ns_4q_qq = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W'
 
     ff(1) = zero
 
@@ -2891,6 +2893,7 @@ contains
     real(dp) :: respdf(ipdf)
 
     xsect_nnlo_rr_ns_qqb_w = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_ns_qqb_w: not implemented for W'
 
     ff(1) = zero
 
@@ -2973,6 +2976,7 @@ contains
     real(dp) :: respdf(ipdf)
 
     xsect_nnlo_rr_ns_qqp_w = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_ns_qqp_w: not implemented for W'
 
     ff(1) = zero
 
@@ -3054,6 +3058,7 @@ contains
     real(dp) :: respdf(ipdf)
 
     xsect_nnlo_rr_ns_qqpb_w = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_ns_qqpb_w: not implemented for W'
 
     ff(1) = zero
 

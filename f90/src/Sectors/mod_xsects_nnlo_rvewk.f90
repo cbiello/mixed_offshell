@@ -41,9 +41,9 @@ contains
     real(dp)    :: res0red(2,3),res1red(2,3),restmp(2,3)
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(3)
-    real(dp)    :: res1loop(-5:7,-5:7)
 
     xsect_nnlo_rvewk_is_ns = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvewk_is_ns: not implemented for W'
 
     ff(1) = zero
 
@@ -79,10 +79,6 @@ contains
 
     else    
 
-       print*, 'calling gen routine...'
-       call res_ewkloop_g_qqb_gen(HardProc%AmpMom,res0,res1loop)
-       print*, 'res1loop= ', res1loop
-       pause
        
        call res_ewkloop_g_qqb(HardProc%AmpMom,res0,res1)
        call get_respdf(ns_lumi_splitb,1,1,HardProc,res1,respdf)
@@ -180,9 +176,9 @@ contains
     real(dp)    :: res0red(2,3),res1red(2,3),restmp(2,3)
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(3)
-    real(dp)    :: res1loop(-5:7,-5:7)
 
     xsect_nnlo_rvewk_is_gq = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvewk_is_gq: not implemented for W'
 
     ff(1) = zero
 
@@ -217,9 +213,6 @@ contains
 
     else    
 
-       call res_ewkloop_g_gq_gen(HardProc%AmpMom(:,1:5),res0,res1loop)
-       print*, 'res1loop= ', res1loop
-       pause
        
        call res_ewkloop_g_gq(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(gq_lumi_splitb,1,1,HardProc,res1,respdf)
@@ -285,9 +278,9 @@ contains
     real(dp)    :: res0red(2,3),res1red(2,3),restmp(2,3)
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(3)
-    real(dp)    :: res1gen(-5:7,-5:7)
 
     xsect_nnlo_rvewk_is_qg = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvewk_is_qg: not implemented for W'
 
     ff(1) = zero
 
@@ -322,9 +315,6 @@ contains
 
     else    
 
-       call res_ewkloop_g_qg_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
-       print*, 'res1gen= ', res1gen
-       pause
        
        call res_ewkloop_g_qg(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(qg_lumi_splitb,1,1,HardProc,res1,respdf)
@@ -396,6 +386,7 @@ contains
     real(dp)    :: z,s5i
 
     xsect_nnlo_rvewknf_is_ns = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvewknf_is_ns: not implemented for W'
 
     ff(1) = zero
 
@@ -519,6 +510,7 @@ contains
     real(dp)    :: res_lo(2,2),res_nlo(2,2),respdf(ipdf)
 
     xsect_nnlo_rvewknf_is_gq = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvewknf_is_gq: not implemented for W'
 
     ff(1) = zero
 
@@ -616,6 +608,7 @@ contains
     real(dp)    :: res_lo(2,2),res_nlo(2,2),respdf(ipdf)
 
     xsect_nnlo_rvewknf_is_qg = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvewknf_is_qg: not implemented for W'
 
     ff(1) = zero
 

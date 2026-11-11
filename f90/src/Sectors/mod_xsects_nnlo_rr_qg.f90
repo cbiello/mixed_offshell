@@ -1038,10 +1038,6 @@ contains
     !!-----------------------------------------------------------------------!!
  !   if (any(FintNNLO_qg .ne. zero)) then
     !    if (FintNNLO_qg(1) .ne. zero) then
-    if (product(FintNNLO_qg) .ne. zero) then
-       print *, "FintNNLO_qg",FintNNLO_qg
-       pause
-    endif
 
     ff(1) = sum(kin)
     call close_histo()
@@ -1498,7 +1494,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids = [0,0,id_el,-id_el,id_q,id_a]
+    HardProc%ids = [0,0,lep_ids(1),lep_ids(2),id_q,id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -1530,7 +1526,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                                 Soft 6                                !!
     !!-----------------------------------------------------------------------!!
-    S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(S6Lim)
 
     if (S6Lim%makecut) then
@@ -1596,7 +1592,7 @@ contains
     !                              Collinear 6                              !!
     !-----------------------------------------------------------------------!!
 
-    C6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(C6Lim)
 
     if (C6Lim%makecut) then
@@ -1634,7 +1630,7 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids = [0,0,id_el,-id_el,id_a,0]
+    C5Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_a,0]
     call cut_histo(C5Lim)
 
     if (C5Lim%makecut) then
@@ -1672,7 +1668,7 @@ contains
     !!                         Collinear 5 + Soft 6                          !!
     !!-----------------------------------------------------------------------!!
 
-    C5S6Lim%ids = [0,0,id_el,-id_el,0,0]
+    C5S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     call cut_histo(C5S6Lim)
 
     if (C5S6Lim%makecut) then
@@ -1757,7 +1753,7 @@ contains
     !!                       Collinear 5 + Collinear 6                       !!
     !!-----------------------------------------------------------------------!!
 
-    C5C6Lim%ids = [0,0,id_el,-id_el,0,0]
+    C5C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     call cut_histo(C5C6Lim)
 
     if (C5C6Lim%makecut) then
@@ -1806,11 +1802,6 @@ contains
 
     !!-----------------------------------------------------------------------!!
 
-    if (product(FintNNLO_qg) .ne. zero) then
-!    if (any(FintNNLO_qg .ne. zero)) then
-       print *, "FintNNLO_qg",FintNNLO_qg
-       pause
-    endif
 
 
     ff(1) = sum(kin)

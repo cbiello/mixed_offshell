@@ -97,26 +97,11 @@ contains
              cycle
           endif
        else
-          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
+          if (is_W_pair(i,j)) then
              ii = 3
           else
              cycle
           endif
-!#elif (Vcharge == 1)
-!!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
-!          !             ii = 3
-!          if 
-!             ii=3
-!          else
-!             cycle
-!          endif
-!#elif (Vcharge == -1)
-!          !          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-!
-!             ii = 3
-!          else
-!             cycle
-!          endif
        endif
           if ( i .gt. 0 .and. j .lt. 0) then ! qqb
              res(i,j) =  aa * ( abs(coupl(ii,-1,-1))**2 + abs(coupl(ii,+1,+1))**2 ) + &
@@ -296,23 +281,11 @@ contains
              cycle
           endif
        else
-          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
+          if (is_W_pair(i,j)) then
              ii = 3
           else
              cycle
           endif
-!#elif (Vcharge == 1)
-!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
-!             ii = 3
-!          else
-!             cycle
-!          endif
-!#elif (Vcharge == -1)
-!          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-!             ii = 3
-!          else
-!             cycle
-!          endif
        endif
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
@@ -359,23 +332,11 @@ contains
              cycle
           endif
        else
-          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
+          if (is_W_pair(i,j)) then
              ii = 3
           else
              cycle
           endif          
-!#elif (Vcharge == 1)
-!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
-!             ii = 3
-!          else
-!             cycle
-!          endif
-!#elif (Vcharge == -1)
-!          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-!             ii = 3
-!          else
-!             cycle
-!          endif
        endif
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
@@ -417,16 +378,9 @@ contains
        do j = -5,5
        if (Vcharge == 0) then
           jj = quark_type(j)
-       elseif (Vcharge == -1) then
+       else
           jj = 3
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-          if ( abs(j).eq.5 ) cycle 
-       elseif (Vcharge == 1) then
-          jj = 3
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-          if ( abs(j).eq.5) cycle
+          if (.not. is_W_quark(j)) cycle
        endif
           if (i .eq. 0 .and. j .gt. 0) then   ! gq
              res(i,j) = res1(2,jj)
@@ -456,16 +410,9 @@ contains
        do j = -5,5
        if (Vcharge == 0) then
           ii = quark_type(i)
-       elseif (Vcharge == -1) then
+       else
           ii = 3
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-          if ( abs(i).eq.5 ) cycle
-       elseif (Vcharge == 1) then
-          ii = 3
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-          if ( abs(i).eq.5 ) cycle
+          if (.not. is_W_quark(i)) cycle
        endif
           
           if (i .gt. 0 .and. j .eq. 0) then   ! qg
@@ -496,16 +443,9 @@ contains
        do j = -5,7
        if (Vcharge == 0) then
           jj = quark_type(j)
-       elseif (Vcharge == -1) then
+       else
           jj = 3
-          if (abs(j) .eq. 5) cycle
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-       elseif (Vcharge == 1) then
-          jj = 3
-          if (abs(j) .eq. 5) cycle
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+          if (.not. is_W_quark(j)) cycle
        endif
           if (i .eq. 7 .and. j .gt. 0 .and. j .ne. 7) then   ! aq
              res(i,j) = res1(2,jj)
@@ -531,16 +471,9 @@ contains
        do j = -5,7
        if (Vcharge == 0) then
           ii = quark_type(i)
-       elseif (Vcharge == -1) then
+       else
           ii = 3
-          if (abs(i) .eq. 5) cycle
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-       elseif (Vcharge == 1) then
-          ii = 3
-          if (abs(i) .eq. 5) cycle
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+          if (.not. is_W_quark(i)) cycle
        endif
           
           if (i .gt. 0 .and. j .eq. 7 .and. i .ne. 7) then   ! qa
@@ -583,23 +516,11 @@ contains
              cycle
           endif
        else
-          if ( (Q_IS(i) + Q_IS(j) .eq. current_charge) .and. (Qgeneration(i) .eq. Qgeneration(j)) ) then
+          if (is_W_pair(i,j)) then
              ii = 3
           else
              cycle
           endif                    
-!#elif (Vcharge == 1)
-!          if (i+j .eq. 1) then                                   ! this supposes a unit CKM matrix
-!             ii = 3
-!          else
-!             cycle
-!          endif
-!#elif (Vcharge == -1)
-!          if (i+j .eq. -1) then                                   ! this supposes a unit CKM matrix
-!             ii = 3
-!          else
-!             cycle
-!          endif
        endif
 !          if ( i .eq. -j) then
 !             if (mod(abs(i),2) .eq. 0) jj=2
@@ -640,16 +561,9 @@ contains
        do j = -5,5
        if (Vcharge == 0) then
           jj = quark_type(j)
-       elseif (Vcharge == -1) then
+       else
           jj = 3
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-          if ( abs(j).eq.5 ) cycle
-       elseif (Vcharge == 1) then
-          jj = 3
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-          if ( abs(j).eq.5 ) cycle
+          if (.not. is_W_quark(j)) cycle
        endif
           if (i .eq. 0 .and. j .gt. 0) then   ! gq
              res(i,j) = res1(2,jj)
@@ -680,14 +594,9 @@ contains
        do j = -5,5
        if (Vcharge == 0) then
           ii = quark_type(i)
-       elseif (Vcharge == -1) then
+       else
           ii = 3
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-       elseif (Vcharge == 1) then
-          ii = 3
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+          if (.not. is_W_quark(i)) cycle
        endif
           
           if (i .gt. 0 .and. j .eq. 0) then   ! qg
@@ -719,14 +628,9 @@ contains
        do j = -5,7
        if (Vcharge == 0) then
           jj = quark_type(j)
-       elseif (Vcharge == -1) then
+       else
           jj = 3
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 1) cycle
-       elseif (Vcharge == 1) then
-          jj = 3
-          if (j .lt. 0 .and. mod(abs(j),2) .eq. 0) cycle
-          if (j .gt. 0 .and. mod(abs(j),2) .eq. 1) cycle
+          if (.not. is_W_quark(j)) cycle
        endif
           if (i .eq. 7 .and. j .gt. 0) then   ! aq
              res(i,j) = res1(2,jj)
@@ -758,14 +662,9 @@ contains
        do j = -5,7
        if (Vcharge == 0) then
           ii = quark_type(i)
-       elseif (Vcharge == -1) then
+       else
           ii = 3
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 1) cycle
-       elseif (Vcharge == 1) then
-          ii = 3
-          if (i .lt. 0 .and. mod(abs(i),2) .eq. 0) cycle
-          if (i .gt. 0 .and. mod(abs(i),2) .eq. 1) cycle
+          if (.not. is_W_quark(i)) cycle
        endif
           
           if (i .gt. 0 .and. j .eq. 7) then   ! qa

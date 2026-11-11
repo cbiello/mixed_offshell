@@ -590,6 +590,7 @@ contains
     real(dp)    :: limcol(2),z,s5i
 
     xsect_nnlo_rvqcd_is_aq = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvqcd_is_aq: not implemented for W'
 
     ff(1) = zero
 
@@ -726,6 +727,7 @@ contains
     real(dp)    :: limcol(2),z,s5i
 
     xsect_nnlo_rvqcd_is_qa = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rvqcd_is_qa: not implemented for W'
 
     ff(1) = zero
 

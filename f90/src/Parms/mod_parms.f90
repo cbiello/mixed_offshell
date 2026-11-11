@@ -134,25 +134,46 @@ module mod_parms
   real(dp), public, save  :: Q4
   !-- boson: 0 = Z, -1 = W-, +1 = W+ (set by -boson z/wm/wp)
   integer, public, save   :: Vcharge = 0
-  !-- generation labels for quarks
-  real(dp), public, parameter  :: Qgeneration(-5:5)=[3,2,2,1,1,0,1,1,2,2,3]
+  !-- ids of the two leptons (legs 3,4) for the chosen boson
+  integer, public, save   :: lep_ids(2) = [id_el,-id_el]
   real(dp), public, parameter  :: Q_IS(-5:7) = [-Qdn,-Qup,-Qdn,-Qup,-Qdn,zero,Qdn,Qup,Qdn,Qup,Qdn,Qup,zero]
   real(dp), public, parameter  :: Qsq_IS(-5:7) = [Qdn2,Qup2,Qdn2,Qup2,Qdn2,zero,Qdn2,Qup2,Qdn2,Qup2,Qdn2,Qup2,zero]
   ! ----- 
   public :: get_parms,help_parms
+  public :: is_W_pair,is_W_quark
   public :: set_qcd_parms,set_ew_parms_cms
   public :: print_qcd_parms,print_ew_parms
   
 contains
+
+  !-- 3 x electric charge of parton i (0 for gluon, photon)
+  integer function charge3(i)
+    integer, intent(in) :: i
+    charge3 = 0
+    if (i == 0 .or. abs(i) > 5) return
+    charge3 = sign(1,i)*merge(2,-1,mod(abs(i),2) == 0)
+  end function charge3
+
+  !-- partons i,j annihilate into the chosen W (unit CKM, so no b)
+  logical function is_W_pair(i,j)
+    integer, intent(in) :: i,j
+    is_W_pair = charge3(i) + charge3(j) == 3*Vcharge .and. (abs(i)+1)/2 == (abs(j)+1)/2
+  end function is_W_pair
+
+  !-- quark i can radiate the chosen W (unit CKM, so no b)
+  logical function is_W_quark(i)
+    integer, intent(in) :: i
+    is_W_quark = charge3(i)*Vcharge > 0 .and. abs(i) /= 5
+  end function is_W_quark
 
   subroutine get_parms()
     character(2) :: boson
 
     boson = trim(string_val_opt('-boson','z'))
     select case (boson)
-    case ('z');  Vcharge = 0
-    case ('wm'); Vcharge = -1
-    case ('wp'); Vcharge = +1
+    case ('z');  Vcharge = 0;  lep_ids = [id_el,-id_el]
+    case ('wm'); Vcharge = -1; lep_ids = [id_el,-id_nue]
+    case ('wp'); Vcharge = +1; lep_ids = [id_nue,-id_el]
     case default
        print *, 'wrong boson -> -boson z/wm/wp'
        stop

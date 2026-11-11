@@ -131,7 +131,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids = [0,0,id_el,-id_el,id_q,id_a]
+    HardProc%ids = [0,0,lep_ids(1),lep_ids(2),id_q,id_a]
     HardProc%npart = 6
 
     call cut_histo(HardProc)
@@ -166,7 +166,7 @@ contains
     !!                                 Soft 6                                !!
     !!-----------------------------------------------------------------------!!
 
-    S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     S6Lim%npart = 5
 
     call cut_histo(S6Lim)
@@ -214,7 +214,7 @@ contains
     !!                          Triple Collinear 5                           !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids = [0,0,id_el,-id_el,0,0]
+    TCLim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCLim%npart = 4
 
     call cut_histo(TCLim)
@@ -260,7 +260,7 @@ contains
     !!                      Triple Collinear 5 + Soft 6                      !!
     !!-----------------------------------------------------------------------!!
 
-    TCS6Lim%ids = [0,0,id_el,-id_el,0,0]
+    TCS6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCS6Lim%npart = 4
 
     call cut_histo(TCS6Lim)
@@ -372,7 +372,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids = [0,0,id_el,-id_el,id_q,id_a]
+    HardProc%ids = [0,0,lep_ids(1),lep_ids(2),id_q,id_a]
     HardProc%npart = 6
 
     call cut_histo(HardProc)
@@ -405,7 +405,7 @@ contains
     !!                                 Soft 6                                !!
     !!-----------------------------------------------------------------------!!
 
-    S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     S6Lim%npart = 5
 
     call cut_histo(S6Lim)
@@ -449,7 +449,7 @@ contains
     !!                          Triple Collinear 5                           !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids = [0,0,id_el,-id_el,0,0]
+    TCLim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCLim%npart = 4
 
     call cut_histo(TCLim)
@@ -512,7 +512,7 @@ contains
     !!                      Triple Collinear 5 + Soft 6                      !!
     !!-----------------------------------------------------------------------!!
 
-    TCS6Lim%ids = [0,0,id_el,-id_el,0,0]
+    TCS6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCS6Lim%npart = 4
 
     call cut_histo(TCS6Lim)
@@ -573,7 +573,7 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids = [0,0,id_el,-id_el,id_a,0]
+    C5Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_a,0]
     C5Lim%npart = 5
 
     call cut_histo(C5Lim)
@@ -611,7 +611,7 @@ contains
     !!                         Collinear 5 + Soft 6                          !!
     !!-----------------------------------------------------------------------!!
 
-    C5S6Lim%ids = [0,0,id_el,-id_el,0,0]
+    C5S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     C5S6Lim%npart = 4
 
     call cut_histo(C5S6Lim)
@@ -732,7 +732,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids = [0,0,id_el,-id_el,id_q,id_a]
+    HardProc%ids = [0,0,lep_ids(1),lep_ids(2),id_q,id_a]
     HardProc%npart = 6
 
     call cut_histo(HardProc)
@@ -765,7 +765,7 @@ contains
     !!                                 Soft 6                                !!
     !!-----------------------------------------------------------------------!!
 
-    S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     S6Lim%npart = 5
 
     call cut_histo(S6Lim)
@@ -811,7 +811,7 @@ contains
     !!                          Triple Collinear                             !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids = [0,0,id_el,-id_el,0,0]
+    TCLim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCLim%npart = 4
 
     call cut_histo(TCLim)
@@ -876,7 +876,7 @@ contains
     !!                              Collinear 6                              !!
     !!-----------------------------------------------------------------------!!
 
-    C6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     C6Lim%npart = 5
 
     call cut_histo(C6Lim)
@@ -918,7 +918,7 @@ contains
     !!                         Collinear 6 + Soft 6                          !!
     !!-----------------------------------------------------------------------!!
 
-    C6S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    C6S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     C6S6Lim%npart = 5
 
     call cut_histo(C6S6Lim)
@@ -958,7 +958,7 @@ contains
     !!                       Triple Collinear + Soft 6                       !!
     !!-----------------------------------------------------------------------!!
 
-    TCS6Lim%ids = [0,0,id_el,-id_el,0,0]
+    TCS6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCS6Lim%npart = 4
 
     call cut_histo(TCS6Lim)
@@ -1094,7 +1094,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids = [0,0,id_el,-id_el,id_q,id_a]
+    HardProc%ids = [0,0,lep_ids(1),lep_ids(2),id_q,id_a]
     HardProc%npart = 6
 
     call cut_histo(HardProc)
@@ -1129,7 +1129,7 @@ contains
     !!                                 Soft 6                                !!
     !!-----------------------------------------------------------------------!!
 
-    S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     S6Lim%npart = 5
 
     call cut_histo(S6Lim)
@@ -1200,7 +1200,7 @@ contains
     !!                              Collinear 6                              !!
     !!-----------------------------------------------------------------------!!
 
-    C6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     C6Lim%npart = 5
 
     call cut_histo(C6Lim)
@@ -1243,7 +1243,7 @@ contains
     !!                         Collinear 5 + Soft 6                          !!
     !!-----------------------------------------------------------------------!!
 
-    C5S6Lim%ids = [0,0,id_el,-id_el,0,0]
+    C5S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     C5S6Lim%npart = 4
 
     call cut_histo(C5S6Lim)
@@ -1330,7 +1330,7 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids = [0,0,id_el,-id_el,id_a,0]
+    C5Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_a,0]
     C5Lim%npart = 5
 
     call cut_histo(C5Lim)
@@ -1370,7 +1370,7 @@ contains
     !!                       Collinear 5 + Collinear 6                       !!
     !!-----------------------------------------------------------------------!!
 
-    C5C6Lim%ids = [0,0,id_el,-id_el,0,0]
+    C5C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     C5C6Lim%npart = 4
 
     call cut_histo(C5C6Lim)
@@ -1493,7 +1493,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids = [0,0,id_el,-id_el,id_q,id_a]
+    HardProc%ids = [0,0,lep_ids(1),lep_ids(2),id_q,id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -1524,7 +1524,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                                 Soft 6                                !!
     !!-----------------------------------------------------------------------!!
-    S6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(S6Lim)
 
     if (S6Lim%makecut) then
@@ -1593,7 +1593,7 @@ contains
     !                              Collinear 6                              !!
     !-----------------------------------------------------------------------!!
 
-    C6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(C6Lim)
 
     if (C6Lim%makecut) then
@@ -1635,7 +1635,7 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids = [0,0,id_el,-id_el,id_a,0]
+    C5Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_a,0]
     C5Lim%npart = 5
     
     call cut_histo(C5Lim)
@@ -1675,7 +1675,7 @@ contains
     !!                         Collinear 5 + Soft 6                          !!
     !!-----------------------------------------------------------------------!!
 
-    C5S6Lim%ids = [0,0,id_el,-id_el,0,0]
+    C5S6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     call cut_histo(C5S6Lim)
 
     if (C5S6Lim%makecut) then
@@ -1758,7 +1758,7 @@ contains
     !!                       Collinear 5 + Collinear 6                       !!
     !!-----------------------------------------------------------------------!!
 
-    C5C6Lim%ids = [0,0,id_el,-id_el,0,0]
+    C5C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),0,0]
     call cut_histo(C5C6Lim)
 
     if (C5C6Lim%makecut) then

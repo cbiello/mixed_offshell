@@ -58,6 +58,7 @@ contains
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5262a_ag = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5262a_ag: not implemented for W'
 
     ff(1) = zero
 
@@ -235,6 +236,7 @@ contains
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5262c_ag = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5262c_ag: not implemented for W'
 
     ff(1) = zero
 
@@ -412,6 +414,7 @@ contains
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5262bd_ag = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5262bd_ag: not implemented for W'
 
     ff(1) = zero
 
@@ -535,6 +538,7 @@ contains
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5161_ag = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5161_ag: not implemented for W'
 
     ff(1) = zero
 
@@ -687,6 +691,7 @@ contains
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5261_ag = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5261_ag: not implemented for W'
 
     ff(1) = zero
 
@@ -877,6 +882,7 @@ contains
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5162_ag = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5162_ag: not implemented for W'
 
     ff(1) = zero
 

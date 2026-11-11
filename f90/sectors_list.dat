@@ -23,20 +23,25 @@
  -corr nnlo -ch ns -sec vvnf                
  -corr nnlo -ch ns -sec vvfc                
  -corr nnlo -ch ns -sec vvxf                
+ -corr nnlo -ch ns -sec vvnf_full           
  -corr nnlo -ch ns -sec rvewk_is            
+ -corr nnlo -ch ns -sec rvewknf_is          
  -corr nnlo -ch ns -sec rvqcd_is            
  -corr nnlo -ch ns -sec rvqcd_fs_53         
  -corr nnlo -ch ns -sec rvqcd_fs_54         
  -corr nnlo -ch ns -sec s_vewk              
+ -corr nnlo -ch ns -sec s_vewknf            
  -corr nnlo -ch ns -sec s_vqcd              
  -corr nnlo -ch ns -sec s_oqcd              
  -corr nnlo -ch ns -sec s_oewk_is           
+ -corr nnlo -ch ns -sec s_oewk_is_ra        
  -corr nnlo -ch ns -sec s_oewk_fs_53        
  -corr nnlo -ch ns -sec s_oewk_fs_54        
  -corr nnlo -ch ns -sec s_12                
  -corr nnlo -ch ns -sec s_qqb               
  -corr nnlo -ch ns -sec s_qq                
  -corr nnlo -ch qg -sec rvewk_is            
+ -corr nnlo -ch qg -sec rvewknf_is          
  -corr nnlo -ch qg -sec rr_5262a            
  -corr nnlo -ch qg -sec rr_5262b            
  -corr nnlo -ch qg -sec rr_5262c            
@@ -45,12 +50,14 @@
  -corr nnlo -ch qg -sec rr_5263             
  -corr nnlo -ch qg -sec rr_5264             
  -corr nnlo -ch qg -sec s_vewk              
+ -corr nnlo -ch qg -sec s_vewknf            
  -corr nnlo -ch qg -sec s_oqcd              
  -corr nnlo -ch qg -sec s_oewk_is           
  -corr nnlo -ch qg -sec s_oewk_fs_53        
  -corr nnlo -ch qg -sec s_oewk_fs_54        
  -corr nnlo -ch qg -sec s_12                
  -corr nnlo -ch gq -sec rvewk_is            
+ -corr nnlo -ch gq -sec rvewknf_is          
  -corr nnlo -ch gq -sec rr_5161a            
  -corr nnlo -ch gq -sec rr_5161b            
  -corr nnlo -ch gq -sec rr_5161c            
@@ -59,6 +66,7 @@
  -corr nnlo -ch gq -sec rr_5163             
  -corr nnlo -ch gq -sec rr_5164             
  -corr nnlo -ch gq -sec s_vewk              
+ -corr nnlo -ch gq -sec s_vewknf            
  -corr nnlo -ch gq -sec s_oqcd              
  -corr nnlo -ch gq -sec s_oewk_is           
  -corr nnlo -ch gq -sec s_oewk_fs_53        
@@ -94,8 +102,7 @@
  -corr nnlo -ch aq -sec s_oqcd              
  -corr nnlo -ch aq -sec s_oewk              
  -corr nnlo -ch aq -sec s_12                
- -corr nnlo -ch ag -sec rr_5161a            
- -corr nnlo -ch ag -sec rr_5161c            
+ -corr nnlo -ch ag -sec rr_5161             
  -corr nnlo -ch ag -sec rr_5262a            
  -corr nnlo -ch ag -sec rr_5262b            
  -corr nnlo -ch ag -sec rr_5262c            
@@ -109,8 +116,7 @@
  -corr nnlo -ch ga -sec rr_5161b            
  -corr nnlo -ch ga -sec rr_5161c            
  -corr nnlo -ch ga -sec rr_5161d            
- -corr nnlo -ch ga -sec rr_5262a            
- -corr nnlo -ch ga -sec rr_5262c            
+ -corr nnlo -ch ga -sec rr_5262             
  -corr nnlo -ch ga -sec rr_5162             
  -corr nnlo -ch ga -sec rr_5261             
  -corr nnlo -ch ga -sec s_oqcd              

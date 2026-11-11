@@ -32,7 +32,6 @@ module mod_proc_parms
   public :: print_counters,reset_counters
   public :: set_buff
 
-  real(dp), public, save :: current_charge
   
   real(dp), public, parameter :: Q_lep = Qel
   real(dp), public, parameter :: Q_lep2 = Q_lep**2
@@ -70,7 +69,6 @@ contains
     character(30) :: str_units
     real(dp) :: ecoll
 
-    current_charge = real(Vcharge,dp)
 
     !-- default directory for output histograms
     histodir = trim(string_val_opt('-histodir','./histo'))

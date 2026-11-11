@@ -78,6 +78,7 @@ contains
     real(dp) :: res_lo(2,2),Pqg0,qg_int_sub(2,2)
 
     xsect_nnlo_s_qg_s12 = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_qg_s12: not implemented for W'
 
     ff(1) = zero
 
@@ -203,6 +204,7 @@ contains
     real(dp) :: res_tree(2,3),res_nlo(2,3),kin(1)
 
     xsect_nnlo_s_qg_vewk = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_qg_vewk: not implemented for W'
 
     ff(1) = zero
 
@@ -401,7 +403,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim_z%ids(1:4) = [0,0,id_el,-id_el]
+    C2Lim_z%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C2Lim_z)
 
     if (C2Lim_z%makecut) then
@@ -449,7 +451,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -507,7 +509,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C2Lim)
 
     if (C2Lim%makecut) then
@@ -686,7 +688,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -727,7 +729,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C1Lim)
 
     if (C1Lim%makecut) then
@@ -774,7 +776,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C2Lim)
 
     if (C2Lim%makecut) then
@@ -824,7 +826,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Soft Limit 5                              !!
     !!-----------------------------------------------------------------------!!
-    S5Lim%ids(1:4) = [0,0,id_el,-id_el]
+    S5Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(S5Lim)
 
     if (S5Lim%makecut) then
@@ -1036,7 +1038,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_a]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_a]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -1079,7 +1081,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                            Collinear Limit                            !!
     !!-----------------------------------------------------------------------!!
-    CLim%ids(1:4) = [0,0,id_el,-id_el]
+    CLim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(CLim)
 
     if (CLim%makecut) then
@@ -1123,7 +1125,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                              Soft Limit                               !!
     !!-----------------------------------------------------------------------!!
-    SLim%ids(1:4) = [0,0,id_el,-id_el]
+    SLim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(SLim)
 
     if (SLim%makecut) then
@@ -1239,6 +1241,7 @@ contains
     real(dp) :: res_nlo(2,2),kin(1)
 
     xsect_nnlo_s_qg_vewknf = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_qg_vewknf: not implemented for W'
 
     ff(1) = zero
 

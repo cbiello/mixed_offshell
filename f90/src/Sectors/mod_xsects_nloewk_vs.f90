@@ -120,6 +120,7 @@ contains
     real(dp)    :: res_tree,res_loop(1,1)
 
     xsect_nloewk_v_aa = 0
+    if (Vcharge /= 0) stop 'xsect_nloewk_v_aa: not implemented for W'
 
     ff(1) = zero
 
@@ -520,6 +521,7 @@ end function get_subtra_elastic_ewk_qqbllb_gen
     real(dp)    :: res_lo(1,1),eta13,eta14,EC
 
     xsect_nloewk_s_aa = 0
+    if (Vcharge /= 0) stop 'xsect_nloewk_s_aa: not implemented for W'
 
     ff(1) = zero
 

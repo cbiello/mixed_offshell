@@ -37,6 +37,7 @@ contains
     real(dp) :: res_lo_1(1,1),res_lo_2(2,2)
 
     xsect_nnlo_s_ag_s12 = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_ag_s12: not implemented for W'
 
     ff(1) = zero
 
@@ -123,6 +124,7 @@ contains
     real(dp) :: Pqg0,res_nlo(2,2),res_lo(2,2),res_aa,res_ag(1,1)
 
     xsect_nnlo_s_ag_oewk = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_ag_oewk: not implemented for W'
 
     ff(1) = zero
     kin = 0
@@ -301,6 +303,7 @@ contains
     real(dp)    :: z,zz,s25,Pqg0,EC
 
     xsect_nnlo_s_ag_oqcd = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_ag_oqcd: not implemented for W'
 
     ff(1) = zero
 
@@ -430,6 +433,7 @@ contains
     real(dp)    :: z,s5i
 
     xsect_nnlo_s_ag_oqcd_hppt = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_ag_oqcd_hppt: not implemented for W'
 
     ff(1) = zero
 

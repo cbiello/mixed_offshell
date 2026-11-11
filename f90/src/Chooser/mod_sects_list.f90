@@ -1,5 +1,6 @@
 module mod_sects_list
   use mod_types
+  use mod_parser
   implicit none
   private
 
@@ -22,6 +23,9 @@ module mod_sects_list
 
   character(len=20), allocatable :: ns_ga_nnlo(:),ns_qqb_nnlo(:),ns_qq_nnlo(:)
   character(len=20), allocatable :: ns_qqb_w_nnlo(:),ns_qqp_w_nnlo(:),ns_qqpb_w_nnlo(:)
+
+  !-- boson of the list: '' for Z, '_wm', '_wp' (no aa channel for W)
+  character(len=3) :: tag = ''
 
 contains
 
@@ -53,6 +57,10 @@ contains
     integer :: i, outid, sel_lst, sel_ch, sel_corr
     character(len=32) :: iString
 
+    tag = string_val_opt('-boson','z')
+    if (.not. any(tag == ['z  ','wm ','wp '])) stop 'unknown -boson, use z, wm or wp'
+    if (tag == 'z') then; tag = ''; else; tag = '_'//tag; endif
+
     write(6,*) 'List sectors by [1/2]: '
     write(6,*) '1: corrections'
     write(6,*) '2: channels   '
@@ -81,28 +89,28 @@ contains
       call initialise_ch_corr_sec_list(3)
 
       if(sel_corr .eq. 1) then
-        open(outid, file = "lo_sectors_list.dat", status = 'replace')
+        open(outid, file = "lo_sectors_list"//trim(tag)//".dat", status = 'replace')
         call write_sects_lo(outid)
-        write(6,*) 'List of sectors written to file: lo_sectors_list.dat'
+        write(6,*) 'List of sectors written to file: lo_sectors_list'//trim(tag)//'.dat'
       elseif(sel_corr.eq. 2) then
-        open(outid, file = "nloqcd_sectors_list.dat", status = 'replace')
+        open(outid, file = "nloqcd_sectors_list"//trim(tag)//".dat", status = 'replace')
         call write_sects_nloqcd(outid)
-        write(6,*) 'List of sectors written to file: nloqcd_sectors_list.dat'
+        write(6,*) 'List of sectors written to file: nloqcd_sectors_list'//trim(tag)//'.dat'
       elseif(sel_corr.eq. 3) then
-        open(outid, file = "nloewk_sectors_list.dat", status = 'replace')
+        open(outid, file = "nloewk_sectors_list"//trim(tag)//".dat", status = 'replace')
         call write_sects_nloewk(outid)
-        write(6,*) 'List of sectors written to file: nloewk_sectors_list.dat'
+        write(6,*) 'List of sectors written to file: nloewk_sectors_list'//trim(tag)//'.dat'
       elseif(sel_corr.eq. 4) then
-        open(outid, file = "nnlo_sectors_list.dat", status = 'replace')
+        open(outid, file = "nnlo_sectors_list"//trim(tag)//".dat", status = 'replace')
         call write_sects_nnlo(outid)
-        write(6,*) 'List of sectors written to file: nnlo_sectors_list.dat'
+        write(6,*) 'List of sectors written to file: nnlo_sectors_list'//trim(tag)//'.dat'
       elseif(sel_corr.eq. 0) then
-        open(outid, file = "sectors_list.dat", status = 'replace')
+        open(outid, file = "sectors_list"//trim(tag)//".dat", status = 'replace')
         call write_sects_lo(outid)
         call write_sects_nloqcd(outid)
         call write_sects_nloewk(outid)
         call write_sects_nnlo(outid)
-        write(6,*) 'List of sectors written to file: sectors_list.dat'
+        write(6,*) 'List of sectors written to file: sectors_list'//trim(tag)//'.dat'
       endif
 
     else if(sel_lst==2) then
@@ -122,7 +130,7 @@ contains
       read *, sel_ch
 
       outid = 7
-      open(outid, file = "sectors_list.dat", status = 'replace')
+      open(outid, file = "sectors_list"//trim(tag)//".dat", status = 'replace')
       call initialise_ch_corr_sec_list(3)
 
       if(sel_ch .eq. 1) then
@@ -169,7 +177,7 @@ contains
         call write_sects_ns_qqp_w(outid)  ! 13
         call write_sects_ns_qqpb_w(outid) ! 14
       endif
-      write(6,*) 'List of sectors written to file: sectors_list.dat'
+      write(6,*) 'List of sectors written to file: sectors_list'//trim(tag)//'.dat'
     else
       write(6,*) 'Invalid selection. Aborting'
     endif
@@ -200,31 +208,34 @@ contains
       allocate (ns_lo(1))
       allocate (ns_nloqcd(3))
       allocate (ns_nloewk(5))
-      allocate (ns_nnlo(16))
+      allocate (ns_nnlo(20))
       ns_lo     = [character(len=20) :: 'na']
       ns_nloqcd = [character(len=20) :: 'r_is','s','v']
       ns_nloewk = [character(len=20) :: 'r_is','s','v','r_fs_53','r_fs_54']
-      ns_nnlo   = [character(len=20) :: 'vvnf','vvfc','vvxf','rvewk_is','rvqcd_is','rvqcd_fs_53','rvqcd_fs_54',&
-        's_vewk','s_vqcd','s_oqcd','s_oewk_is','s_oewk_fs_53','s_oewk_fs_54','s_12','s_qqb','s_qq']
+      ns_nnlo   = [character(len=20) :: 'vvnf','vvfc','vvxf','vvnf_full', &
+        'rvewk_is','rvewknf_is','rvqcd_is','rvqcd_fs_53','rvqcd_fs_54', &
+        's_vewk','s_vewknf','s_vqcd','s_oqcd','s_oewk_is','s_oewk_is_ra','s_oewk_fs_53','s_oewk_fs_54','s_12','s_qqb','s_qq']
 
-      allocate (aa_lo(1))
-      allocate (aa_nloewk(4))
-      aa_lo     = [character(len=20) :: 'na']
-      aa_nloewk = [character(len=20) :: 's','v','r_fs_53','r_fs_54']
+      if (tag == '') then
+         aa_lo     = [character(len=20) :: 'na']
+         aa_nloewk = [character(len=20) :: 's','v','r_fs_53','r_fs_54']
+      else
+         allocate (aa_lo(0), aa_nloewk(0))
+      endif
 
       allocate (qg_nloqcd(2))
-      allocate (qg_nnlo(14))
+      allocate (qg_nnlo(16))
       qg_nloqcd  = [character(len=20) :: 'r_is','s']
-      qg_nnlo    = [character(len=20) :: 'rvewk_is', &
+      qg_nnlo    = [character(len=20) :: 'rvewk_is','rvewknf_is', &
         'rr_5262a','rr_5262b','rr_5262c','rr_5262d','rr_5261','rr_5263','rr_5264', &
-        's_vewk','s_oqcd','s_oewk_is','s_oewk_fs_53','s_oewk_fs_54','s_12']
+        's_vewk','s_vewknf','s_oqcd','s_oewk_is','s_oewk_fs_53','s_oewk_fs_54','s_12']
 
       allocate (gq_nloqcd(2))
-      allocate (gq_nnlo(14))
+      allocate (gq_nnlo(16))
       gq_nloqcd  = [character(len=20) :: 'r_is','s']
-      gq_nnlo    = [character(len=20) :: 'rvewk_is', &
+      gq_nnlo    = [character(len=20) :: 'rvewk_is','rvewknf_is', &
         'rr_5161a','rr_5161b','rr_5161c','rr_5161d','rr_5162','rr_5163','rr_5164', &
-        's_vewk','s_oqcd','s_oewk_is','s_oewk_fs_53','s_oewk_fs_54','s_12']
+        's_vewk','s_vewknf','s_oqcd','s_oewk_is','s_oewk_fs_53','s_oewk_fs_54','s_12']
 
       allocate (qa_nloewk(2))
       allocate (qa_nnlo(15))
@@ -240,12 +251,12 @@ contains
         'rr_5161a','rr_5161b','rr_5161c','rr_5161d','rr_5262a','rr_5262b','rr_5262c','rr_5262d','rr_5162','rr_5261', &
         's_vqcd','s_oqcd','s_oewk','s_12']
 
-      allocate (ag_nnlo(11))
+      allocate (ag_nnlo(10))
       ag_nnlo = [character(len=20) :: & 
         'rr_5161','rr_5262a','rr_5262b','rr_5262c','rr_5262d','rr_5162','rr_5261', &
         's_oqcd','s_oewk','s_12']
 
-      allocate (ga_nnlo(11))
+      allocate (ga_nnlo(10))
       ga_nnlo = [character(len=20) :: &
         'rr_5161a','rr_5161b','rr_5161c','rr_5161d','rr_5262','rr_5162','rr_5261', &
         's_oqcd','s_oewk','s_12']

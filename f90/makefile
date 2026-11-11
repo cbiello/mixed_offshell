@@ -116,7 +116,6 @@ OBJS_openloops = \
 
 OBJS_amp = \
 	mod_coupl.o \
-	mod_amplitudes_tree_ppnul.o \
 	mod_amplitudes_tree_ppll.o \
 	mod_amplitudes_loop_ppll.o \
 	mod_amplitudes_twol_nf_ppll.o \

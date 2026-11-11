@@ -6,7 +6,7 @@ module mod_coupl
   implicit none
   private
 
-  public :: get_coupl, get_coupl_w, quark_type, get_coupl_gen
+  public :: get_coupl, quark_type, get_coupl_gen
 
   interface get_coupl
      module procedure get_coupl_real, get_coupl_cmplx
@@ -17,9 +17,6 @@ module mod_coupl
   end interface get_coupl_gen
 
 
-  !interface get_coupl_w
-  !   module procedure get_coupl_w_real, get_coupl_w_cmplx
-  !end interface get_coupl_w
 
 contains
 
@@ -136,31 +133,6 @@ contains
       end subroutine get_coupl_cmplx
 
       
-  !-- coupling of w to quark and lepton line
-  !-- index: down/up, L/R_quark, L/R_lepton
-  subroutine get_coupl_w(mll,coupl)
-    real(dp), intent(in) :: mll
-    complex(dp), intent(out) :: coupl(1:2,-1:1,-1:1)
-    complex(dp) :: propW
-
-    !chiara 
-    !real(dp) :: mwMG, gawMG
-    !mwMG = 80.419002445756163_dp
-    !gawMG = 2.0476000000000001_dp
-    !propW = mll/(mll -  mwMG**2 + ci * mwMG * gawMG )
-
-    propW = mll/(mll-mwsq_prop)
-
-    !u + dbar > W+
-    !d + ubar > W-
-    coupl(:,-1,-1) = propW * cms_cLWud * cms_cLWnue
-    coupl(:,-1,+1) = czero
-    coupl(:,+1,-1) = czero
-    coupl(:,+1,+1) = czero
-
-    return
-
-  end subroutine get_coupl_w
 
   
   ! !-- coupling of a/z to quark and lepton line

@@ -39,6 +39,7 @@ contains
     real(dp) :: res_tree(2,2),res_nlo(2,2),kin(1)
 
     xsect_nnlo_s_aq_vqcd = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_aq_vqcd: not implemented for W'
 
     ff(1) = zero
 
@@ -105,6 +106,7 @@ contains
     real(dp) :: res_lo_1(1,1),res_lo_2(2,2)
 
     xsect_nnlo_s_aq_s12 = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_aq_s12: not implemented for W'
 
     ff(1) = zero
 
@@ -235,7 +237,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_g]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -280,7 +282,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C1Lim)
 
     if (C1Lim%makecut) then
@@ -329,7 +331,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C2Lim)
 
     if (C2Lim%makecut) then
@@ -376,7 +378,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Soft Limit 5                              !!
     !!-----------------------------------------------------------------------!!
-    S5Lim%ids(1:4) = [0,0,id_el,-id_el]
+    S5Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(S5Lim)
 
     if (S5Lim%makecut) then
@@ -460,10 +462,6 @@ contains
 
     endif
 
-    if (product(FintNNLO_s_aq_oqcd) .ne. zero) then
-       print *, "FintNNLO_s_aq_oqcd",FintNNLO_s_aq_oqcd
-       stop
-    endif
     
 
     !!-----------------------------------------------------------------------!!
@@ -494,6 +492,7 @@ contains
     real(dp) :: Pqq0_R(-1:1),PqqNLO(-1:1),res_nlo(2,2),res_lo(2,2),res_aa
 
     xsect_nnlo_s_aq_oewk = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_s_aq_oewk: not implemented for W'
 
     ff(1) = zero
     kin = 0

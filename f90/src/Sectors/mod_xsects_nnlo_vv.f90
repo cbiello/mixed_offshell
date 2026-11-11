@@ -42,6 +42,7 @@ contains
     real(dp)    :: res0(2,2),res2(2,2)
 
     xsect_nnlo_vv_ns_nf = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_vv_ns_nf: not implemented for W'
 
     ff(1) = zero
 
@@ -99,6 +100,7 @@ contains
     real(dp)    :: res_tree(2,3),res_loop(2,3)
 
     xsect_nnlo_vv_ns_fc = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_vv_ns_fc: not implemented for W'
 
     ff(1) = zero
 
@@ -160,6 +162,7 @@ contains
 #endif
 
     xsect_nnlo_vv_ns_xf = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_vv_ns_xf: not implemented for W'
 
     ff(1) = zero
 
@@ -253,6 +256,7 @@ contains
     real(dp)    :: res0(2,2),res1(2,2),res2(2,2)
 
     xsect_nnlo_vv_ns_nf_full = 0
+    if (Vcharge /= 0) stop 'xsect_nnlo_vv_ns_nf_full: not implemented for W'
 
     ff(1) = zero
 

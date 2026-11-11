@@ -16,7 +16,7 @@ O(alpha_s alpha) with the nested soft-collinear subtraction scheme:
 | `wp` (+1) | pp -> W+ -> nu e+       | `[id_nue,-id_el]` | 0, +1 |
 
 The boson is chosen **at run time** with `-boson z|wm|wp` (default `z`). It sets the integer
-`Vcharge` in `Parms/mod_parms.f90` (and `current_charge`, `Q3`, `Q4`); the code branches on
+`Vcharge` in `Parms/mod_parms.f90` (and `lep_ids`, `Q3`, `Q4`); the code branches on
 `if (Vcharge == ...)`. One binary serves all three bosons. Only the analysis is still fixed
 at compile time. Output files of W runs carry a `_wm`/`_wp` tag after the analysis name.
 Momentum convention everywhere: `q(1) q'(2) -> l(3) l'(4) [+ parton 5] [+ parton 6]`.
@@ -60,12 +60,12 @@ make remove && make -j16            # clean rebuild only when the analysis or fl
 |---|---|---|
 | `BasicDef` | `mod_types`, `mod_consts_dp`, `mod_mpi_common`, `mod_limvals` | kinds, constants, MPI state, storage for limit checks |
 | `Parser` | `mod_parser` | command line / input file |
-| `Parms` | `mod_parms`, `mod_proc_parms`, `mod_vegas_parms` | EW/QCD parameters, charges (`Q_IS(-5:7)`, `Qgeneration`, `Q3`, `Q4`, `current_charge`), CKM (unit), cuts, buffers |
+| `Parms` | `mod_parms`, `mod_proc_parms`, `mod_vegas_parms` | EW/QCD parameters, charges (`Q_IS(-5:7)`, `Q3`, `Q4`), flavour tests `is_W_pair`, `is_W_quark`, lepton ids `lep_ids`, CKM (unit), cuts, buffers |
 | `GenProc` | `mod_process` | `type KinConfig` (below) |
 | `AuxFunctions` | `mod_auxfunctions`, `mod_kinfunctions`, `mod_lumi`, `cpolylog_main` | spinors, polylogs, PDF calls |
 | `HoppetTools` | `mod_hoppet_tools` | PDF tables (photon = flavour 7 internally) |
 | `OpenLoops` | `mod_ol_interface` | registers the OpenLoops processes needed by the selected `(corr,ch,sec)` |
-| `Amplitudes` | `mod_coupl`, `mod_amplitudes_tree_ppll`, `mod_amplitudes_tree_ppnul`, `mod_amplitudes_loop_ppll`, `mod_amplitudes_twol_nf_ppll` | matrix elements (section 6) |
+| `Amplitudes` | `mod_coupl`, `mod_amplitudes_tree_ppll`, `mod_amplitudes_loop_ppll`, `mod_amplitudes_twol_nf_ppll` | matrix elements (section 6) |
 | `Kinematics` | `mod_kinematics_lo(_z)`, `_nlo(_z)`, `_lept`, `_gen`, `_nnlo_tc_is_eu_ac/abcd`, `_nnlo_dc_ii`, `_nnlo_dc_if`, `mod_aux_kinematics` | phase space + momenta in every singular limit. No `_Vcharge` dependence |
 | `SingLimits` | `mod_splittings_bare`, `mod_eikonals`, `mod_limits_rv` | splitting functions, QED/QCD eikonals (`get_qed_eik_gen` is charge-general), one-loop collinear limits (Z-specific charges) |
 | `IntSub` | `mod_hoppet_nlo`, `mod_hoppet_nnlo`, `mod_int_sub_nnlo` | integrated subtraction: convolution tables `xPij*` and soft/elastic functions `calG*`, `fin_*` |
@@ -131,7 +131,7 @@ Two generations coexist.
 
 **General (`*_gen`, "New from Raoul", used for NC, CC+, CC-)**: return a full flavour matrix
 `res(-5:7,-5:7)` (index 0 = gluon, 7 = photon). For W the entries with
-`Q_IS(i)+Q_IS(j) == current_charge` and equal generation are filled (unit CKM).
+`is_W_pair(i,j)` (charges sum to the W charge, same generation) are filled (unit CKM, no b).
 
 | Process | Tree (`mod_amplitudes_tree_ppll`) | One-loop (`mod_amplitudes_loop_ppll`) |
 |---|---|---|
@@ -143,8 +143,6 @@ Two generations coexist.
 | gamma gamma -> l l | `res_treeAA_aa(_gen)` (zero for W) | `res_ewkloopAA_aa` |
 | two-loop | – | `mod_amplitudes_twol_nf_ppll`, `TwoLoop/` (Z only) |
 
-`mod_amplitudes_tree_ppnul.f90` holds the first, now superseded, W amplitudes
-(`res_tree_*_wp/_wm`).
 
 Loop amplitudes come from OpenLoops. `mod_ol_interface.f90` registers per `(corr,ch,sec)`
 and per `Vcharge`; process ids are stored in `OL_id(:)` with positions that differ between
