@@ -22,6 +22,7 @@ GIT_VERSION := $(shell git describe --abbrev=50 --dirty --always --tags)
 
 -include config.cfg
 -include makefile.inc
+F95 += -D_Vcharge=$(Vcharge)
 
 #####################################################################
 
@@ -116,7 +117,6 @@ OBJS_amp = \
 	mod_amplitudes_tree_ppnul.o \
 	mod_amplitudes_tree_ppll.o \
 	mod_amplitudes_loop_ppll.o \
-	mod_amplitudes_loop_pplnu.o \
 	mod_amplitudes_twol_nf_ppll.o \
 
 ifeq ($(-D_with2L),1)

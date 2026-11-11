@@ -46,7 +46,7 @@ contains
 
     LOConfig%npart  = 4 
     
-    allocate(LOConfig%part(LOConfig%npart))
+    if (.not. allocated(LOConfig%part)) allocate(LOConfig%part(LOConfig%npart))
 
     LOConfig%mu2ref = mv2 !-- for hoppet
 
