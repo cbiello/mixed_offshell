@@ -39,6 +39,7 @@ contains
     real(dp)    :: FintRV_ns(3),kin(3)
     real(dp)    :: res0(2,3),res1(2,3) !-- dn,qup and b
     real(dp)    :: res0red(2,3),res1red(2,3),restmp(2,3)
+    real(dp)    :: res1g(-5:7,-5:7)
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(3)
 
@@ -66,9 +67,9 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
     !-- these must go before the cut_histo routine
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_g]
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_g]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
 
     !-- Hard
     call cut_histo(HardProc)
@@ -79,9 +80,13 @@ contains
 
     else    
 
-       
+#if (_oldcode == 1)
        call res_ewkloop_g_qqb(HardProc%AmpMom,res0,res1)
        call get_respdf(ns_lumi_splitb,1,1,HardProc,res1,respdf)
+#else
+       call res_ewkloop_g_qqb_gen(HardProc%AmpMom,res0,res1g)
+       call get_respdf_gen(1,1,HardProc,res1g,respdf)
+#endif
        
        respdf = respdf*HardProc%wgt
        

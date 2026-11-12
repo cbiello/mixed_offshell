@@ -86,7 +86,7 @@ silently returns neutral-current numbers.
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| RV1 | `rvewk_is` ns: the **amplitudes are ready for W±** (`res_ewkloop_g_qqb_gen`: OpenLoops ids, W-charge finite part, flavour matrix; reduced `res_ewkloop_qqb_gen`; commit `b28b7a7`). The **integrand is still Z**: it calls the `_gen` routine only as a test (`print` + `pause`), then uses the legacy amplitude, `ns_lumi_splitb`, `[Qdn2,Qup2]`, Z ids. To do: hard, C1, C2 with `_gen` amplitudes, `get_respdf_gen`, per-leg charges, W ids | `mod_xsects_nnlo_rvewk.f90` :33-168 | 🔧 |
+| RV1 | `rvewk_is` ns: amplitudes ready for W± (`res_ewkloop_g_qqb_gen`, `res_ewkloop_qqb_gen`). **Hard done** (2026-11-12): `_gen` amplitude, `get_respdf_gen`, `lep_ids`; legacy under `_oldcode`. Z, `PC_ATLAS`, same seed: new -0.71454867697 vs old -0.71454867562 fb (2e-9). **Still Z**: C1, C2 (charges `[Qdn2,Qup2]`, `Q_lep`, needs RV3); W guard kept | `mod_xsects_nnlo_rvewk.f90` :33-168 | 🔧 |
 | RV2 | `rvewk_is` gq, qg: same situation (`res_ewkloop_g_gq_gen`, `_g_qg_gen` ready and called as a test; integrand Z) | :172-380 | 🔧 |
 | RV3 | One-loop collinear limits with W charges. `col_rvewk_is_ns/_qg` use `-2 log(s_i3/s_i4)` times `Q_lep*[Qdn,Qup]`, which assumes `Q3=-Q4` and one quark charge. Re-derive for general `(Q_q, Q_q', Q_3, Q_4)` | `SingLimits/mod_limits_rv.f90` | ❌ |
 | RV4 | OpenLoops ids: W registers ids 3-4 only; the Z code reads `OL_id(j+3)`. Check the W+ ordering (`register_red_qcd` vs `register_red_ew` differ) | `OpenLoops/mod_ol_interface.f90` | 🟡 |
