@@ -1,0 +1,20 @@
+(* ::Package:: *)
+
+(* Soft functions for Nested soft collinear subtraction *)
+
+softfunctions = {
+
+KK[a_, b_] :>
+ 1 + (-(\[Pi]^2/6) + PolyLog[2, 1 - eta[a, b]]) ep^2 + (-(1/6) Log[eta[a, b]] (\[Pi]^2 - 3 Log[1 - eta[a, b]] Log[eta[a, b]]) + Log[eta[a, b]] PolyLog[2, 1 - eta[a, b]] + PolyLog[3, 1 - eta[a, b]] + PolyLog[3, eta[a, b]] - 3 Zeta[3]) ep^3 +(-(\[Pi]^4/40)-1/24 Log[eta[a,b]]^2 (4 \[Pi]^2-12 Log[1-eta[a,b]] Log[eta[a,b]]+Log[eta[a,b]]^2)-1/6 (\[Pi]^2-3 Log[eta[a,b]]^2) PolyLog[2,1-eta[a,b]]-PolyLog[4,1-1/eta[a,b]]+Log[eta[a,b]] (PolyLog[3,1-eta[a,b]]+PolyLog[3,eta[a,b]]-Zeta[3])) ep^4 +ep^5 ORD[KK,5],
+
+SS[a_, b_, c_, d_] :> ((2 Emax)^2/mu2)^(-2 ep)/(2 ep^4) (eta[a, b])^-ep (eta[c, d])^-ep KK[a, b] KK[c, d],
+
+SSgg[a_, b_] :> ((2 Emax)^2/mu2)^(-2 ep) (1/(2 ep^4) + 1/ep^3 (11/12 - Log[eta[a, b]]) + 1/ep^2 (2 PolyLog[2, 1 - eta[a, b]] + Log[eta[a, b]]^2 - 11/6 Log[eta[a, b]] + 11/3 Log[2] - \[Pi]^2/4 - 16/9) + 1/ep (6 PolyLog[3,eta[a,b]] + 2 PolyLog[3,1-eta[a,b]] + PolyLog[2,1-eta[a,b]](2 Log[eta[a,b]]+11/3)-2/3 Log[eta[a,b]]^3 + Log[eta[a,b]]^2(3 Log[1-eta[a,b]] + 11/6) - Log[eta[a,b]](22/3 Log[2] + \[Pi]^2 /2 - 32/9) - 45/4 Zeta[3] - 11/3 Log[2]^2 - 11/36 \[Pi]^2 - 137/18 Log[2] + 217/54) + 4 G[-1,0,0,1,eta[a,b]] - 7 G[0,1,0,1,eta[a,b]] + 22/3 Ci3[twodelta[a,b]] + 1/(3 Tandelta[a,b]) Si2[twodelta[a,b]] + 2 PolyLog[4,1-eta[a,b]] - 14 PolyLog[4,eta[a,b]] + 4 PolyLog[4,1/(1+eta[a,b])] - 2 PolyLog[4,(1-eta[a,b])/(1+eta[a,b])] + 2 PolyLog[4,(-1+eta[a,b])/(1+eta[a,b])] + PolyLog[4,1-eta[a,b]^2] + PolyLog[3,1-eta[a,b]](10 Log[eta[a,b]] - 4 Log[1+eta[a,b]] + 11/3) + PolyLog[3,eta[a,b]](14 Log[1-eta[a,b]] + 2 Log[eta[a,b]] + 4 Log[1+eta[a,b]] + 22/3) + 4 Log[1-eta[a,b]] PolyLog[3,-eta[a,b]] + 9/2 PolyLog[2,1-eta[a,b]]^2 - 4 PolyLog[2,1-eta[a,b]] PolyLog[2,-eta[a,b]] + PolyLog[2,1-eta[a,b]](7 Log[1-eta[a,b]]Log[eta[a,b]] - Log[eta[a,b]]^2 - 5/2 \[Pi]^2 + 22/3 Log[2] - 131/18) + PolyLog[2,-eta[a,b]](2/3 \[Pi]^2 - 4 Log[1-eta[a,b]]Log[eta[a,b]]) + Log[eta[a,b]]^4/3 + Log[1+eta[a,b]]^4/6 - Log[eta[a,b]]^3(4/3 Log[1-eta[a,b]] + 11/9) + Log[eta[a,b]]^2(7 Log[1-eta[a,b]]^2 + 11/3 Log[1-eta[a,b]] + \[Pi]^2 /3 + 22/3 Log[2] - 32/9) - \[Pi]^2 /6 Log[1+eta[a,b]]^2 + Zeta[3](17/2 Log[eta[a,b]] - 11 Log[1-eta[a,b]] + 7/2 Log[1+eta[a,b]] - 21/2 Log[2] - 99/4) + Log[eta[a,b]](-7/2 \[Pi]^2 Log[1-eta[a,b]] + 22/3 Log[2]^2 - 11/18 \[Pi]^2 + 137/9 Log[2] - 208/27) - 12 PolyLog[4,1/2] + 143/720 \[Pi]^4 - Log[2]^4/2 + \[Pi]^2 /2 Log[2]^2 - 11/6 \[Pi]^2 Log[2] + 125/216 \[Pi]^2 + 22/9 Log[2]^3 + 137/18 Log[2]^2 + 434/27 Log[2] - 649/81)+ ep ORD[SSgg,1],
+                
+SSqq[a_, b_] :> ((2 Emax)^2/mu2)^(-2 ep) (-1/(3 ep^3) + 1/ep^2 (2/3 Log[eta[a,b]] - 4/3 Log[2] + 13/18) + 1/ep (-4/3 PolyLog[2, 1-eta[a,b]] - 2/3 Log[eta[a,b]]^2 + Log[eta[a,b]] (8/3 Log[2] - 13/9) + \[Pi]^2/9 + 4/3 Log[2]^2 +35/9 Log[2] - 125/54) -8/3 Ci3[twodelta[a,b]] - 2/(3 Tandelta[a,b]) Si2[twodelta[a,b]] -4/3 PolyLog[3, 1-eta[a,b]] - 8/3 PolyLog[3, eta[a,b]] + PolyLog[2, 1-eta[a,b]] (29/9 - 8/3 Log[2]) + 4/9 Log[eta[a,b]]^3 + Log[eta[a,b]]^2 (-4/3 Log[1-eta[a,b]] - 8/3 Log[2] + 13/9) + Log[eta[a,b]] (-8/3 Log[2]^2 - 70/9 Log[2] + 2/9 \[Pi]^2 + 107/27) + 9 Zeta[3] + 2\[Pi]^2/3 Log[2] -8/9 Log[2]^3 - 23/108 \[Pi]^2 -35/9 Log[2]^2 -223/27 Log[2] + 601/162 + ep ORD[SSqq,1]),
+
+Ktilde[a_, b_] :> 1 + (-((2 \[Pi]^2)/3) + 4 PolyLog[2, 1 - eta[a, b]])  ep^2 + (-2 \[Pi]^2 Log[eta[a, b]] + 6 Log[1 - eta[a, b]] Log[eta[a, b]]^2 + 12 Log[eta[a, b]] PolyLog[2, 1 - eta[a, b]] + 4 PolyLog[3, 1 - eta[a, b]] + 12 PolyLog[3, eta[a, b]] - 
+     28 Zeta[3]) ep^3 + (-((2 \[Pi]^4)/9) - 1/6 Log[eta[a, b]]^2 (28 \[Pi]^2 - 92 Log[1 - eta[a, b]] Log[eta[a, b]] + 5 Log[eta[a, b]]^2) + (-((8 \[Pi]^2)/3) + 18 Log[eta[a, b]]^2) PolyLog[2, 1 - eta[a, b]] + 2 PolyLog[2, 1 - eta[a, b]]^2 - 20 PolyLog[4, 1 - 1/eta[a, b]] - 
+     16 PolyLog[4, 1 - eta[a, b]] - 16 PolyLog[4, eta[a, b]] + 4 Log[eta[a, b]] (5 PolyLog[3, 1 - eta[a, b]] + 9 PolyLog[3, eta[a, b]] - 5 Zeta[3])) ep^4+ ep^5 ORD[Ktilde,4]
+                
+} /. ep -> \[Epsilon];
