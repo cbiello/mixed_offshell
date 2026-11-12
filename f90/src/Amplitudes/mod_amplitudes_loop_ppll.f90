@@ -270,7 +270,7 @@ contains
  endif
     
     !--reshape the resfin matrix element to have the new shape
-    res1loopfin=0
+    res1loopfin=0; res0loop=0
  if (Vcharge == 0) then
     res1loopfin(-1,1) = res1fin(2,1)
     res1loopfin(-2,2) = res1fin(2,2)

@@ -37,14 +37,15 @@ contains
     !--
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintRV_ns(3),kin(3)
-    real(dp)    :: res0(2,3),res1(2,3) !-- dn,qup and b
-    real(dp)    :: res0red(2,3),res1red(2,3),restmp(2,3)
-    real(dp)    :: res1g(-5:7,-5:7)
+    real(dp)    :: res0_old(2,3),res1_old(2,3) !-- dn,qup and b
+    real(dp)    :: res0red_old(2,3),res1red_old(2,3),restmp_old(2,3)
+    real(dp)    :: res0(2,3),res1(-5:7,-5:7)
+    real(dp)    :: res0red(-5:7,-5:7),res1red(-5:7,-5:7),res_tmp(-5:7,-5:7)
+    real(dp)    :: Qi(-5:7,-5:7) !-- charge of the emitting leg
     real(dp)    :: respdf(ipdf)
-    real(dp)    :: limcol(3)
+    real(dp)    :: limcol_old(3),limcol(4)
 
     xsect_nnlo_rvewk_is_ns = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rvewk_is_ns: not implemented for W'
 
     ff(1) = zero
 
@@ -81,11 +82,11 @@ contains
     else    
 
 #if (_oldcode == 1)
-       call res_ewkloop_g_qqb(HardProc%AmpMom,res0,res1)
-       call get_respdf(ns_lumi_splitb,1,1,HardProc,res1,respdf)
+       call res_ewkloop_g_qqb(HardProc%AmpMom,res0_old,res1_old)
+       call get_respdf(ns_lumi_splitb,1,1,HardProc,res1_old,respdf)
 #else
-       call res_ewkloop_g_qqb_gen(HardProc%AmpMom,res0,res1g)
-       call get_respdf_gen(1,1,HardProc,res1g,respdf)
+       call res_ewkloop_g_qqb_gen(HardProc%AmpMom,res0,res1)
+       call get_respdf_gen(1,1,HardProc,res1,respdf)
 #endif
        
        respdf = respdf*HardProc%wgt
@@ -107,17 +108,29 @@ contains
 
     else
 
-       call res_ewkloop_qqb(C1Lim%AmpMom,res0red,res1red)
+#if (_oldcode == 1)
+       call res_ewkloop_qqb(C1Lim%AmpMom,res0red_old,res1red_old)
 
-       limcol = Cf*col_rvewk_is_ns(1,C1Lim)
+       limcol_old = Cf*col_rvewk_is_ns(1,C1Lim)
 
-       restmp(1,:) = res0red(1,:) * (limcol(1)*[Qdn2,Qup2,Qdn2] + limcol(2)*Q_lep*[Qdn,Qup,Qdn]) + &
-            res1red(1,:) * limcol(3)
+       restmp_old(1,:) = res0red_old(1,:) * (limcol_old(1)*[Qdn2,Qup2,Qdn2] + limcol_old(2)*Q_lep*[Qdn,Qup,Qdn]) + &
+            res1red_old(1,:) * limcol_old(3)
        !
-       restmp(2,:) = res0red(2,:) * (limcol(1)*[Qdn2,Qup2,Qdn2] - limcol(2)*Q_lep*[Qdn,Qup,Qdn]) + &
-            res1red(2,:) * limcol(3)
+       restmp_old(2,:) = res0red_old(2,:) * (limcol_old(1)*[Qdn2,Qup2,Qdn2] - limcol_old(2)*Q_lep*[Qdn,Qup,Qdn]) + &
+            res1red_old(2,:) * limcol_old(3)
 
-       call get_respdf(ns_lumi_splitb,1,1,C1Lim,restmp,respdf)
+       call get_respdf(ns_lumi_splitb,1,1,C1Lim,restmp_old,respdf)
+#else
+       call res_ewkloop_qqb_gen(C1Lim%AmpMom,res0red,res1red)
+
+       limcol = Cf*col_rvewk_is_ns_gen(1,C1Lim)
+
+       Qi = spread(Q_IS,2,13) !-- Q_IS of leg 1
+       res_tmp = res0red * (limcol(1)*Qi**2 + (limcol(2)*Q3 + limcol(3)*Q4)*Qi) + &
+            res1red * limcol(4)
+
+       call get_respdf_gen(1,1,C1Lim,res_tmp,respdf)
+#endif
        respdf = -respdf*C1Lim%wgt
 
        FintRV_ns(2) = respdf(1)
@@ -137,17 +150,29 @@ contains
 
     else
 
-       call res_ewkloop_qqb(C2Lim%AmpMom,res0red,res1red)
+#if (_oldcode == 1)
+       call res_ewkloop_qqb(C2Lim%AmpMom,res0red_old,res1red_old)
 
-       limcol = Cf*col_rvewk_is_ns(2,C2Lim)
+       limcol_old = Cf*col_rvewk_is_ns(2,C2Lim)
 
-       restmp(1,:) = res0red(1,:) * (limcol(1)*[Qdn2,Qup2,Qdn2] - limcol(2)*Q_lep*[Qdn,Qup,Qdn]) + &
-            res1red(1,:) * limcol(3)
+       restmp_old(1,:) = res0red_old(1,:) * (limcol_old(1)*[Qdn2,Qup2,Qdn2] - limcol_old(2)*Q_lep*[Qdn,Qup,Qdn]) + &
+            res1red_old(1,:) * limcol_old(3)
        !
-       restmp(2,:) = res0red(2,:) * (limcol(1)*[Qdn2,Qup2,Qdn2] + limcol(2)*Q_lep*[Qdn,Qup,Qdn]) + &
-            res1red(2,:) * limcol(3)
-       
-       call get_respdf(ns_lumi_splitb,1,1,C2Lim,restmp,respdf)
+       restmp_old(2,:) = res0red_old(2,:) * (limcol_old(1)*[Qdn2,Qup2,Qdn2] + limcol_old(2)*Q_lep*[Qdn,Qup,Qdn]) + &
+            res1red_old(2,:) * limcol_old(3)
+
+       call get_respdf(ns_lumi_splitb,1,1,C2Lim,restmp_old,respdf)
+#else
+       call res_ewkloop_qqb_gen(C2Lim%AmpMom,res0red,res1red)
+
+       limcol = Cf*col_rvewk_is_ns_gen(2,C2Lim)
+
+       Qi = spread(Q_IS,1,13) !-- Q_IS of leg 2
+       res_tmp = res0red * (limcol(1)*Qi**2 + (limcol(2)*Q3 + limcol(3)*Q4)*Qi) + &
+            res1red * limcol(4)
+
+       call get_respdf_gen(1,1,C2Lim,res_tmp,respdf)
+#endif
        respdf = -respdf*C2Lim%wgt
 
        FintRV_ns(3) = respdf(1)

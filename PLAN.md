@@ -86,9 +86,9 @@ silently returns neutral-current numbers.
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| RV1 | `rvewk_is` ns: amplitudes ready for W± (`res_ewkloop_g_qqb_gen`, `res_ewkloop_qqb_gen`). **Hard done** (2026-11-12): `_gen` amplitude, `get_respdf_gen`, `lep_ids`; legacy under `_oldcode`. Z, `PC_ATLAS`, same seed: new -0.71454867697 vs old -0.71454867562 fb (2e-9). **Still Z**: C1, C2 (charges `[Qdn2,Qup2]`, `Q_lep`, needs RV3); W guard kept | `mod_xsects_nnlo_rvewk.f90` :33-168 | 🔧 |
+| RV1 | `rvewk_is` ns generalised for W± (2026-11-12): Hard, C1, C2 with `_gen` amplitudes, `get_respdf_gen`, `lep_ids`, per-leg charges (RV3); legacy under `_oldcode`; W guard removed. Z: new -0.71454867610 vs old -0.71454867562 fb (7e-10). W limits (`-checklim`, ~300 W_ATLAS points per leg): median \|H+CT\|/H 2e-3, 2e-4, 2e-5 at depth 1e-4, 1e-6, 1e-8 (W- and W+, C1 and C2), ~sqrt(depth); with the new charge logs switched off it stays at 9e-3. **Finite parts not validated**: matching with the integrated counterterm (W+ `s_12` term B has `-2 Qlept Q_IS log(s14/s12)`, same structure) still to check; W- integrated sectors missing (S2) | `mod_xsects_nnlo_rvewk.f90`, `mod_limits_rv.f90` | 🟡 limits ✅, finite ❌ |
 | RV2 | `rvewk_is` gq, qg: same situation (`res_ewkloop_g_gq_gen`, `_g_qg_gen` ready and called as a test; integrand Z) | :172-380 | 🔧 |
-| RV3 | One-loop collinear limits with W charges. `col_rvewk_is_ns/_qg` use `-2 log(s_i3/s_i4)` times `Q_lep*[Qdn,Qup]`, which assumes `Q3=-Q4` and one quark charge. Re-derive for general `(Q_q, Q_q', Q_3, Q_4)` | `SingLimits/mod_limits_rv.f90` | ❌ |
+| RV3 | One-loop collinear limits with general charges, ns: `col_rvewk_is_ns_gen`. The C1 (C2) counterterm is c_i^2 (splitting part) + 2 log(1-z) c_i [c3 log(s_i3/s12) + c4 log(s_i4/s12)], c = incoming charges (c3=-Q3, c4=-Q4), from the mismatch of the I operator between 5-point and reduced kinematics; reduces to the Z form for Q2=-Q1, Q4=-Q3. C2 uses the leg-2 charge (cf. RV6a). gq/qg (`col_rvewk_is_qg`) still to do | `SingLimits/mod_limits_rv.f90` | ✅ ns (2026-11-12) |
 | RV4 | OpenLoops ids: W registers ids 3-4 only; the Z code reads `OL_id(j+3)`. Check the W+ ordering (`register_red_qcd` vs `register_red_ew` differ) | `OpenLoops/mod_ol_interface.f90` | 🟡 |
 | RV5 | `rvewknf_is` for W (see V2) | – | ⏸ |
 

@@ -67,7 +67,7 @@ nnlo gq s_oewk_is :  -4.3183983383915110E-002 fb
 nnlo gq s_oqcd :  5.3090716247108288E-002 fb
 nnlo gq s_vewk : STOP xsect_nnlo_s_gq_vewk: not implemented for W
 nnlo gq s_vewknf : STOP xsect_nnlo_s_gq_vewknf: not implemented for W
-nnlo ns rvewk_is : STOP xsect_nnlo_rvewk_is_ns: not implemented for W
+nnlo ns rvewk_is :  -9.5558044438770071E-002 fb
 nnlo ns rvewknf_is : STOP xsect_nnlo_rvewknf_is_ns: not implemented for W
 nnlo ns rvqcd_fs_53 :  -17.565371677770884 fb
 nnlo ns rvqcd_fs_54 :  1.5982071205557151 fb
