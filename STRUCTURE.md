@@ -184,6 +184,7 @@ Files with no `_oldcode` and no `Vcharge` branch are untouched Z code.
 |---|---|---|
 | `-MGcheck` | `Checks/mod_check_amp.f90`: `*_gen` tree amplitudes vs stored MadGraph points (`MG_output/`, Z, W-, W+) | works, tree level only, no four-quark |
 | `-checklim -lim <x>` | `mod_xsects_checklim_*`: one phase-space point pushed to depth `x`, prints Hard, CT and ratio, then pauses. Needs `_withchecks=1` | NLO sectors, RV sectors, RR only `ns_qqb/ns_qq`; not W-aware |
+| `-checkint` | `Checks/mod_check_int.f90`, called from `vegas_integrate`: integrability scan of the chosen sector. Test points from a Vegas warm-up (`-vegasNc0`, `-vegasIt0`); each variable and each combination of the unresolved-parton variables is sent to the edge; prints the median of \|f\| d^k at three depths and `ok`/`FAIL`/`few` |
 | scaling checker | `Checks/mod_check_lim.f90`: scans depths 1e-4..1e-15, fits the slope, grades each limit | NLO (3 sectors) and RR `ns_ga`; **unreachable**: `lim_proc` has no caller |
 | `-check` | `mod_checks.f90`, `icheck=6` hard-coded -> only the nf amplitude check | Z |
 | `-checkpoles` | pole cancellation in legacy loop routines | Z only |

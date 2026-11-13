@@ -1,6 +1,7 @@
 # PLAN — mixed QCD x EW NNLO for off-shell W+ and W-
 
 Shared status board. Read [STRUCTURE.md](STRUCTURE.md) first for names and conventions.
+Checks that passed, with numbers: [CHECKS.md](CHECKS.md).
 Based on a read-through of branch `AI-era` (snapshot 2026-11-11). Nothing below was
 established by running the NNLO sectors; items marked *suspected* come from reading the
 code and must be confirmed before fixing.
@@ -15,14 +16,14 @@ Legend: ✅ done and checked · 🟡 code exists, not validated · 🔧 partial 
 
 | Block | Z | W+ | W- |
 |---|---|---|---|
-| LO, NLO QCD, NLO EW (ns, gq, qg, aq, qa) | ✅ | ✅ (aq/qa 🟡) | ✅ (aq/qa 🟡) |
+| LO, NLO QCD, NLO EW (ns, gq, qg, aq, qa) | ✅ | ✅ POWHEG | ✅ POWHEG |
 | VV (two-loop) | ✅ | ⏸ | ⏸ |
-| RV, EW loop + gluon (`rvewk_is`: ns, gq, qg) | ✅ | 🔧 amplitudes ready, integrand Z | 🔧 same |
-| RV, QCD loop + photon (`rvqcd_*` ns) | ✅ | 🟡 | 🟡 |
-| RV, QCD loop + photon (aq, qa) | ✅ | ❌ | ❌ |
-| RR `ns_ga` | ✅ | 🟡 | 🟡 |
-| RR `gq`, `qg` | ✅ | 🟡 | 🟡 |
-| RR `aq`, `qa`, `ag`, `ga` | ✅ | ❌ | ❌ |
+| RV, EW loop + gluon (`rvewk_is`: ns, gq, qg) | ✅ | ns 🟡 (limits ✅); gq, qg 🔧 integrand Z | same |
+| RV, QCD loop + photon (`rvqcd_*` ns) | ✅ | ✅ limits | ✅ limits |
+| RV, QCD loop + photon (aq, qa) | ✅ | ✅ limits | ✅ limits |
+| RR `ns_ga` | ✅ | ✅ limits | ✅ limits |
+| RR `gq`, `qg` | ✅ | ✅ limits | ✅ limits |
+| RR `aq`, `qa`, `ag`, `ga` | ✅ | ✅ limits | ✅ limits |
 | RR four-quark | ✅ | ❌ | ❌ |
 | S ns: `s_12`, `s_vqcd`, `s_vewk` | ✅ | 🟡 | ❌ (`stop`) |
 | S ns: `s_oqcd`, `s_oewk_*` | ✅ | 🟡 | 🟡 |
@@ -62,6 +63,7 @@ silently returns neutral-current numbers.
 | I16b | `nloewk qa r_is` (old = -19221 fb): **bug in the old branch**. In C1, `Pqq(z)/(1-z)` is applied inside the old branch and again after `#endif` (in `aq` the second one sits inside the new branch). With it once, old = new to 12 digits. New code is right | `mod_xsects_nloewk_r.f90` (`xsect_nloewk_r_is_qa`) | ✅ fixed (old = new, -9.06994348143 fb) |
 | I16c | `ns_ga rr_5161a/5262a` (old = -58 fb): **old branch incomplete**, five defects: S6 never calls `res_tree_g_qqb`; S6 and S5S6 pass the unset `res_tmp_vect` instead of `res_tmp_vect_old` and leave the result in `respdf_vect` while the code reads `respdf_tmp`; TC, TCS6, TCS5 fill `respdf` instead of `respdf_tmp(:,1)`. With these repaired, old = new to 11 digits, so the **new code is validated for Z in sector a** | `mod_xsects_nnlo_rr_ns.f90` (`xsect_nnlo_rr_5i6ia_ns_ga`) | ✅ fixed (old = new to 11 digits) |
 | I16d | `rvqcd_fs_53/54`, `rvqcd_is` (agree to 1e-7..1e-9): not a bug. Old code uses the analytic one-loop amplitude (`res_qcdloop_j`), new code uses OpenLoops; the difference is numerical precision | – | ✅ understood |
+| I17 | Vegas reliability with a resolved photon: (a) the technical mass rescaling `-qmin_rsc 20` (default) biases the initial-state photon sectors low for hard-photon cuts (`nloewk ns r_is` W+: 1.495-1.517 fb over seeds); (b) with 300k/1M points many RR/S sectors are 1-3% low with underestimated errors. For now: `-qmin_rsc 1` and 1.5M/5M points. To do: check the production NNLO setup of the same sectors (`rr_5161/5262/5162/5261`, `rvqcd_is`, `s_oewk_is`) with several seeds, and decide the default | `Parms/mod_proc_parms.f90`, `Vegas/` | 🔧 found 2026-11-13 |
 
 ## 2. NLO (done; remaining loose ends)
 
@@ -69,9 +71,9 @@ silently returns neutral-current numbers.
 |---|---|---|---|
 | N1 | NLO QCD ns/gq/qg and NLO EW ns: implemented for W±, benchmarked against POWHEG (commit `346fdea`) | – | ✅ |
 | N2 | NLO EW `aq`/`qa` `r_is` for W: limits checked with `-checklim` (2026-11-11). Z closes (ratio ~ sqrt(depth)); W does not, two bugs: (a) `qa` C2 uses the charge of leg 1, must be leg 2 (:1053); (b) `res_tree_a_aq_gen` / `res_tree_a_qa_gen` keep the b quark for W while the Born does not (missing `abs(.)==5` skip, see I8). Both fixed: all four W limits close, Z unchanged digit for digit. W+ aq/qa = 1.508(7)/1.494(6) fb, W- = 0.856(4)/0.847(3) fb (`W_ATLAS`) | `mod_xsects_nloewk_r.f90`, `mod_amplitudes_tree_ppll.f90` :484-550 | ✅ 2026-11-11 |
-| N3 | NLO EW `s_aq`/`s_qa`: double charge factor, fixed, see I16a. Redo the POWHEG comparison for the photon-induced channels (N5) | `mod_xsects_nloewk_vs.f90` | ✅ fixed, to re-benchmark |
+| N3 | NLO EW `s_aq`/`s_qa`: double charge factor, fixed, see I16a. Included in the POWHEG NLO EW comparison (C3.2) | `mod_xsects_nloewk_vs.f90` | ✅ |
 | N4 | NLO QCD `gq`/`qg` integrated collinear: closed. The full NLO QCD (ns + gq + qg) agrees with POWHEG for W+ and W- at the 0.05% level (C3.1); gq + qg contribute 72 fb (W+), so they are tested to about 1% of their size | `mod_xsects_nloqcd_vs.f90` | ✅ 2026-11-11 |
-| N5 | POWHEG comparison for W+ and W-: LO and NLO QCD agree (C3.1). NLO EW: our numbers are ready, the POWHEG side is not usable as pushed (C3.2) | `f90/tests/powheg/` | ✅ QCD / ❌ EW (blocked) |
+| N5 | POWHEG comparison for W+ and W-: LO, NLO QCD (C3.1) and NLO EW (C3.2) agree | `f90/tests/powheg/` | ✅ 2026-11-12 |
 
 ## 3. Double virtual (out of scope for now)
 
@@ -96,15 +98,15 @@ silently returns neutral-current numbers.
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| RV6 | `rvqcd_is` ns: **integrand generalised** (ids/part for Z, W-, W+; `ol_res_qcdloop_a_qqb_gen`, `res_qcdloop_qqb_gen`, `get_qed_eik_gen`, `get_respdf_gen`). To verify for W: see RV6a, RV6b | `mod_xsects_nnlo_rvqcd.f90` :45-321 | 🟡 |
-| RV7 | `rvqcd_fs_53/54` ns: **integrand generalised**, commit note "limits checked but NOT deeply". To verify for W: see RV7a, RV7b | idem :346-577 | 🟡 |
-| RV6a | **Verify for W**: C2 uses the leg-1 charge, `multiply_IS_charges_sq(res_tmp,1)` (:223). Photon collinear to leg 2 should carry `Q_IS` of leg 2, as in NLO EW (`mod_xsects_nloewk_r.f90` :220). Invisible for Z (equal charges), so the old-vs-new comparison cannot detect it. Test: C1.6 scaling in the 5\|\|2 limit for W+ and W- | :223 | ❌ to verify |
-| RV6b | **Verify for W**: SC2 is a copy of SC1, `respdf_tmp(:,3) = respdf_tmp(:,2)` with leg-1 charge (:277-279). NLO EW computes it separately with leg 2 (:276-278 there). Test: soft-collinear 5\|\|2 scaling for W± | :277-279 | ❌ to verify |
-| RV7a | **Verify for W**: C uses `Q_lep2` for both sectors (:492). In the neutrino sector (`fs_54` for W-, `fs_53` for W+) the hard term has no collinear pole, so the CT should vanish; NLO EW uses `Qsq_FS(icoll-2)` (`mod_xsects_nloewk_r.f90` :479). Test: run the neutrino sector, check finiteness and collinear scaling | :492 | ❌ to verify |
-| RV7b | **Verify for W**: CS uses `res1red*Q_lep2` (:530), same issue as RV7a. Test: soft-collinear scaling in the neutrino sector for W± | :530 | ❌ to verify |
-| RV7c | **Verify for W**: charged-lepton sector (`fs_53` for W-, `fs_54` for W+): repeat the limit check with the scaling tool (C, S, CS), both signs | :346-577 | ❌ to verify |
+| RV6 | `rvqcd_is` ns generalised and checked for W±: all limits close in the `-checkint` scan (Z, W+, W-) after RV6a, RV6b | `mod_xsects_nnlo_rvqcd.f90` | ✅ limits (2026-11-12) |
+| RV7 | `rvqcd_fs_53/54` ns generalised and checked for W±: all limits close in the scan after RV7a, RV7b, both the charged-lepton and the neutrino sector | idem | ✅ limits (2026-11-12) |
+| RV6a | C2 used the leg-1 charge: **confirmed by the scan** (5\|\|2 limit did not close for W+ and W-), fixed with `multiply_IS_charges_sq(res_tmp,2)` | idem | ✅ fixed |
+| RV6b | SC2 was a copy of SC1 (leg-1 charge): fixed, computed with the leg-2 charge as at NLO EW | idem | ✅ fixed |
+| RV7a | C used `Q_lep2` in both sectors: **confirmed** (the neutrino sector, `fs_53` for W+ and `fs_54` for W-, had a counterterm without a pole). Fixed with the charge of the emitting lepton, `Qfs2 = Q3^2` or `Q4^2`. W result of the neutrino sector: -17.6 -> 0.63 fb (W+), -14.0 -> 0.45 fb (W-) at test statistics | idem | ✅ fixed |
+| RV7b | CS used `Q_lep2`: same fix as RV7a | idem | ✅ fixed |
+| RV7c | Charged-lepton sector for W±: C, S, CS close in the scan | idem | ✅ |
 | RV7d | **Verify for W**: sum of the three partitions (`rvqcd_is` + `fs_53` + `fs_54`) is independent of the damping/partition choice | `mod_partitions.f90` | ❌ to verify |
-| RV8 | `rvqcd_is` aq, qa: **integrand is Z only** (no `oldcode`, no `Vcharge` branch, Z ids, `aq_lumi`). The general amplitudes `ol_res_qcdloop_a_aq_gen`/`_qa_gen` are ready and called, but the result is discarded (:633, :769). Generalise, then verify for W: collinear gamma -> q qb limit with the charge of the produced quark, both signs | idem :583-853 | ❌ |
+| RV8 | `rvqcd_is` aq, qa generalised for W±: `_gen` amplitudes, charge of the quark from the photon splitting, `transition`, `lep_ids`; the gamma gamma limit (C2 for aq, C1 for qa) only for Z; legacy under `_oldcode`. Z identical to the old code; W limits close (`-checklim`: 1e-2, 1e-3, 1e-4 at depth 1e-4, 1e-6, 1e-8; scan ok) | idem | ✅ limits (2026-11-12) |
 | RV9 | Confirm that no additional RV sector is needed for W (e.g. photon-induced with EW loop, final-state EW-loop sectors): none exists for Z either | – | question |
 
 ## 5. Double real
@@ -117,12 +119,12 @@ General amplitudes exist for every channel with g + gamma or q + gamma in the fi
 | RR1 | `ns_ga`, all 10 sectors: general code for W±. Fix ids (:995). Legacy branch of 5161a/5262a is broken (:433, :533 use an uninitialised array), so `oldcode=T` is not a valid reference there | `mod_xsects_nnlo_rr_ns.f90` :217-2637 | 🟡 |
 | RR2 | `gq`, 7 sectors: general matrix elements and charges, but no `Vcharge` branch; ids are Z; `%part` unset. "agrees with oldcode=T", limits unchecked for W | `mod_xsects_nnlo_rr_gq.f90` | 🟡 |
 | RR3 | `qg`, 7 sectors: as RR2; `pause` in 5262b/d and 5263/5264; ids Z in 526k | `mod_xsects_nnlo_rr_qg.f90` | 🟡 |
-| RR4 | Scale-variation weights: `respdf = respdf_tmp(1,1)+respdf_tmp(1,2)` assigns the central value to all weights (`gq` :1200, :1330; `qg` :1236, :1353) | idem | 🔧 |
-| RR5 | Neutrino partition (5164/5264 for W-, 5163/5263 for W+): confirm hard minus soft is integrable and collinear CTs vanish | `ns_ga`, `gq`, `qg` | 🟡 |
-| RR6 | `aq`, `qa` (10 sectors each): pure Z code. Generalise: `_gen` amplitudes, `gen_lumi`, gamma -> q qb with the charge of the **produced** quark (isospin partner for W), ids | `mod_xsects_nnlo_rr_aq.f90`, `_qa.f90` | ❌ |
-| RR7 | `ag`, `ga`: pure Z code. Generalise; the flavour sum `ndn*Qdn2+nup*Qup2` becomes per-leg (q and qb' carry different charges) | `mod_xsects_nnlo_rr_ag.f90`, `_ga.f90` | ❌ |
-| RR8 | Limits built on gamma gamma -> l l (`res_treeAA_aa`: TC in `aq` 5262, `qa` 5161, `ag` 5262, `ga` 5161) do not exist for W. Decide per sector: drop, or keep the sector with soft/C5/C56 only | RR6, RR7 | ❌ |
-| RR9 | Check `res_tree_ga_ag_gen`/`_ga_gen`: W+ and W- use the identical expression `res_tmp(1,3)*nup`, and the W branch of `res_tree_jj_ag_gen` uses `iconf1` only. Extend `-MGcheck` to cover it | `Amplitudes/` | 🟡 |
+| RR4 | Scale-variation weights: `respdf = respdf_tmp(1,1)+respdf_tmp(1,2)` gave the central value to all weights in `gq`, `qg`, `aq`, `qa` (two sectors each); now `respdf_tmp(:,1)+respdf_tmp(:,2)`. Central values unchanged | idem | ✅ 2026-11-12 |
+| RR5 | Neutrino partition (5164/5264 for W-, 5163/5263 for W+) in `ns_ga`, `gq`, `qg`: all limits close in the scan for W+ and W- | `ns_ga`, `gq`, `qg` | ✅ limits |
+| RR6 | `aq`, `qa` (10 sectors each) generalised for W± by a scripted conversion: `_gen` amplitudes, `get_respdf_gen`, charge of the quark from the photon splitting, `lep_ids`, W guards removed; legacy under `_oldcode`. Z: all sectors reproduce the old numbers; W+ and W-: all limits close in the scan | `mod_xsects_nnlo_rr_aq.f90`, `_qa.f90` | ✅ limits (2026-11-12) |
+| RR7 | `ag`, `ga` (7 sectors each) generalised for W±: flavour sums per leg with the new `collapse_leg` (quarks or antiquarks of one leg, optionally with their charge). Z reproduces the old numbers (`ag rr_5262a` to 6e-11 without grid adaptation, 2.5e-6 with it: rounding in a strongly cancelling sector); W limits close | `mod_xsects_nnlo_rr_ag.f90`, `_ga.f90`, `mod_aux_sectors.f90` | ✅ limits (2026-11-12) |
+| RR8 | Limits built on gamma gamma -> l l: kept in the code, `res_treeAA_aa_gen` is zero for W, and the scan shows that the W integrand is integrable there without them | RR6, RR7 | ✅ |
+| RR9 | `res_tree_ga_ag_gen`/`_ga_gen` for W: not compared with MadGraph yet, but all their collinear limits (onto validated lower-multiplicity amplitudes) close for W+ and W-. Fixed on the way: `res_tree_ga_aq_gen`/`_qa_gen` filled a spurious photon-photon entry | `Amplitudes/` | 🟡 limits ✅, MG check open |
 | RR10 | Four-quark singular channels (`ns_qqb`, `ns_qq`, TC limit only): Z legacy amplitudes. Need q qb' -> l nu q'' qb'' amplitudes at O(alpha_s alpha) interference and the TC counterterm with W flavours | `mod_xsects_nnlo_rr_ns.f90` :2641-2883 | ❌ |
 | RR11 | Four-quark finite channels (`ns_qqb_w`, `ns_qqp_w`, `ns_qqpb_w`): OpenLoops registration stops for W ("TO IMPLEMENT OL rr for W in the 4q case"). Enumerate W flavour channels, register, add luminosities (`qQpb_lumi_wp/_wm` exist, unused) | `mod_ol_interface.f90` :248-284, `rr_ns` :2885-3126 | ❌ |
 | RR12 | List, on paper, all partonic channels at O(alpha_s alpha) for W+ and W- with their singular limits, and map each to a sector. Use it to confirm nothing is missing (notes exist for Z in `notes/chiara_federica`) | new note | ❌ |
@@ -136,8 +138,8 @@ channels are to be provided by Christian.
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| S1 | `s_12`, `s_vqcd`, `s_vewk` for W+: implemented (`FINITEDYp[1..7,60]`); only term [7] and the soft functions are validated symbolically | `mod_xsects_nnlo_s_ns.f90` :83-696, `IntSub/mod_int_sub_nnlo.f90` | 🟡 |
-| S2 | Same three for **W-**: `stop` at :141, :520, :642. Helpers already take `(Qlept, ilept)`; add branches with `Qlept=-1`, `ilept=3`, `s13/s23`, ids `[id_el,-id_nue]`. Needs the W- Mathematica reference | idem | ❌ |
+| S1 | `s_12`, `s_vqcd`, `s_vewk` for W+: **validated against `math/subtraction-notebooks/W.nb`** (2026-11-12). The notebook derivation was re-run (all poles vanish) and the Fortran W+ branches, the elastic functions (`fin_ns_vqcd_cc`, `genGnloQCD_cc`, `legfinalcalG_cc`, `fin_ns_v7_cc`) and the HOPPET kernels, transcribed to Mathematica, reproduce the full finite remainder in every structure (FLVqcd, FLVew, FLM double boost, two single boosts, elastic). Script: `math/subtraction-notebooks/checks/` | `mod_xsects_nnlo_s_ns.f90`, `IntSub/` | ✅ symbolic |
+| S2 | `s_12`, `s_vqcd`, `s_vewk` for **W-**: done with one W branch for both signs (`ilept_chg`, `Qlept_chg`); CP test against W+ with antiproton PDFs passes (CHECKS.md) | idem | ✅ 2026-11-13 |
 | S3 | `s_oqcd` W±: general, limits checked. Open: `calG_ONLOQCD_ns` and `genGnloQCD_cc` differ in the sign of the `Qlept*Q_IS` cross terms once the scale logs are aligned; the note in `math/tex` already flags they are not equal. Establish which is right in which context | :837-1528; `mod_int_sub_nnlo.f90` :263, :428 | 🟡 |
 | S4 | `s_oewk_is`: the routine wired to `-sec s_oewk_is` is an unfinished draft (broken for Z too); the working one is `_raoul` under `s_oewk_is_ra`. Rewire, delete the draft | :1531-2491, :3181-4216; `Chooser/mod_run_proc_s_ns.f90` | 🔧 |
 | S5 | `s_oewk_fs_53/54` (`_raoul`): general; "limits checked for W- only". Check W+; remove legacy `oewk_fs_5i`; `Q_lep2` left at :4861 | :4220-5019 | 🟡 |
@@ -151,7 +153,7 @@ channels are to be provided by Christian.
 | S8 | `s_oqcd`, `s_oewk_is`, `s_oewk_fs_53/54`: general; "agreement oldcode T/F for NC, limits work for + and - CC". The W elastic function `calG_ONLOQCD_gq` is never exercised by the NC comparison | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90` | 🟡 |
 | S9 | *Suspected*: `gq` passes `Lim_Ei(2)` (energy of the radiated parton) in the scale log of `calG_ONLOQCD_gq` (:499, :562), `qg` passes `Lim_Ei(1)` | idem | 🟡 |
 | S10 | `s_12`, `s_vewk` (and `s_vewknf`): Z only | :66-255 in both | ❌ |
-| S10b | `gq s_oewk_fs_53/54` returns zero at every point for Z (seen once the debug pause was removed, I4), while the `qg` twin gives 1.05 fb; find why | `mod_xsects_nnlo_s_gq.f90` (`xsect_nnlo_s_gq_oewk_fs_5i`) | ❌ |
+| S10b | `gq s_oewk_fs_53/54` zero at every point: two debug lines set `xx(xE)`, `xx(xRHO)` to fixed values. Removed; Z gq = qg mirror | `mod_xsects_nnlo_s_gq.f90` | ✅ 2026-11-13 |
 
 ### 6c. aq, qa, ag, ga
 
@@ -177,12 +179,12 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 
 | ID | Task | Status |
 |---|---|---|
-| C1.1 | Make the scaling checker reachable: `lim_proc` (`Chooser/mod_lim_proc.f90`) has no caller; add `-checkscaling` | ❌ |
+| C1.1 | New `-checkint`: integrability scan of any sector (takes points from a Vegas warm-up, sends subsets of the variables to the edge, prints the median of \|f\| d^k at three depths). Works for every integrand without wiring. Tested with planted bugs: detects a wrong charge and 1% errors, also in nested counterterms. `lim_proc` (pairwise scaling) still has no caller | ✅ scan (2026-11-12) |
 | C1.2 | Fix wiring: `xsect_nloewk_r_is_ns` fills `limval_nlo_is` but the checker reads `FintNLO_ew`; `nloqcd r_is` routed to the wrong reader; `rr_qg` fills no `limval_nnlo` | 🔧 |
 | C1.3 | Extend `xsect_selector` beyond RR `ns_ga`: RR gq/qg/aq/qa/ag/ga/4q, all RV, all ONLO | ❌ |
 | C1.4 | Make it W-aware (which limits are singular per sector: no lepton-collinear pole on the neutrino; no gamma gamma TC) | 🔧 |
 | C1.5 | Output one table per sector (limit, slope, grade); store reference tables for Z, W+, W- | ❌ |
-| C1.6 | Run for every sector, Z/W+/W-; record in section 9 | ❌ |
+| C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Still to run: `rvewk`, four-quark, S sectors | 🟡 |
 | C1.7 | Priority targets for W (cannot be seen in Z): RV6a, RV6b, RV7a, RV7b, RV3, N2, RR5, RR8. Each needs a recorded scaling table for W+ and W- before it is ticked | ❌ |
 
 ### C2. Integrated counterterm left-over, Fortran vs Mathematica
@@ -212,11 +214,11 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 | ID | Task | Status |
 |---|---|---|
 | C3.1 | NLO QCD vs `NSC-lnuQCD`, 13 TeV, fixed scale MZ, `W_ATLAS` cuts. W+: 1737.51(61) vs 1736.68(31) fb; W-: 1203.14(44) vs 1203.02(18) fb; LO agrees too. Setup, scripts and sector numbers in `f90/tests/powheg/README.md` | ✅ 2026-11-11 |
-| C3.2 | NLO EW vs `NSC-lnuEW`. Ours (same setup): W+ 1326.99(21) fb, W- 929.23(13) fb, photon-induced aq + qa = 2.57 / 1.47 fb. **Blocked**: `NSC-lnuEW` as pushed gives about 38 pb total against 4 pb at LO on the public POWHEG-BOX-RES; Born, limit tests and OpenLoops virtual are fine, cause not found (details in the README). Needs Christian's working copy and its analysis file | ❌ blocked |
-| C3.3 | Build the NLO QCD generator for l l' + photon (l nu gamma for W+/W-, l l gamma for Z) in the same way as `NSC-lnuQCD` (Born with a resolved photon, OpenLoops reals, same analysis plus photon cuts) | ❌ |
-| C3.4 | Build the NLO EW generator for l l' + jet (l nu j for W+/W-, l l j for Z) in the same way as `NSC-lnuEW` (OpenLoops `pplljj_ew`-type libraries, photon-induced channels, resolved jet) | ❌ |
+| C3.2 | NLO EW vs `NSC-lnuEW`, same setup, lepton dressed with ΔR 0.1. W+: 1327.29(25) vs 1326.99(21) fb; W-: 929.24(25) vs 929.23(13) fb. Needed three fixes in `NSC-lnuEW/openloops2.f` (real and virtual normalised by alpha_s/2pi as the public POWHEG-BOX-RES expects, scale passed to OpenLoops) and `detailedNLO 1`; see the README | ✅ 2026-11-12 |
+| C3.3 | NLO QCD generator for l l' + photon: `NSC-lnuaEW` (POWHEG-BOX-RES, OpenLoops `pplla`, `ppllaj`), Z, W+, W- | ✅ 2026-11-13 |
+| C3.4 | NLO EW generator for l l' + jet: `NSC-lnujQCD` (POWHEG-BOX-RES; l nu j for W+/W-, l l j for Z; photon-induced channels, resolved jet), built like `NSC-lnuaEW` | 🔧 next |
 | C3.5 | Analyses in this code that match C3.3 and C3.4: resolved photon (cf. Z analysis `lla_nloqcd`) and resolved jet, for W+ and W- | ❌ |
-| C3.6 | Compare C3.3 with the sum of the O(alpha_s alpha) sectors here with one resolved photon (`rvqcd` + RR + ONLO), channel by channel | ❌ |
+| C3.6 | NLO QCD l l' gamma: sum of the 39 sectors with a resolved photon against `NSC-lnuaEW` (no damping): W+ 6.1928(21) vs 6.1937(75) fb; W-, Z being rerun. Needs `-qmin_rsc 1` and 1.5M/5M points (`f90/tests/powheg/lla/`) | ✅ 2026-11-13 |
 | C3.7 | Compare C3.4 with the sum of the sectors here with one resolved jet (`rvewk` + RR + ONLO), channel by channel | ❌ |
 | C3.8 | Script that runs and sums the right sectors for C3.1, C3.2, C3.6, C3.7 and prints the ratio to POWHEG | ❌ |
 
@@ -248,7 +250,7 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 
 | corr ch sec | W+ code | W+ C1 | W+ C2 | W- code | W- C1 | W- C2 |
 |---|---|---|---|---|---|---|
-| nnlo ns rvewk_is | 🔧 | | – | 🔧 | | – |
+| nnlo ns rvewk_is | 🟡 | ✅ | – | 🟡 | ✅ | – |
 | nnlo ns rvqcd_is | 🟡 | | – | 🟡 | | – |
 | nnlo ns rvqcd_fs_53/54 | 🟡 | | – | 🟡 | | – |
 | nnlo gq/qg rvewk_is | 🔧 | | – | 🔧 | | – |
