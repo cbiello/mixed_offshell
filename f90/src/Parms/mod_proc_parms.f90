@@ -45,6 +45,7 @@ module mod_proc_parms
 
   !-- for checking limits
   logical, public, save  :: checklim = .false.
+  logical, public, save  :: checkint = .false.
   real(dp), public, save :: lim
 
   !-- cuts, etc
@@ -156,6 +157,10 @@ contains
     !-- checklimits
     checklim = log_val_opt('-checklim',.false.)
     lim = real_val_opt('-lim',1E-8_dp)
+    checkint = log_val_opt('-checkint',.false.)
+    if (checkint) then !-- the scan goes below the default technical cuts
+       buff_rr = 1E-14_dp; buff_r = 1E-14_dp
+    endif
 
   end subroutine get_proc_parms
 
@@ -197,6 +202,7 @@ contains
     write(idev,*) ' -checkpoles --> check 1L poles, if config debug is active'
     write(idev,*) ''
     write(idev,*) ' -checklim --> check limits'
+    write(idev,*) ' -checkint --> integrability scan of the chosen sector'
     write(idev,*) ' -lim      --> how deep we want to go with the limit'
     
   end subroutine help_proc_parms

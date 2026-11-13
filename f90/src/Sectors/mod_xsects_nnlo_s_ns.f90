@@ -135,10 +135,8 @@ contains
     !!-----------------------------------------------------------------------!!
  if (Vcharge == 0) then
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
- elseif (Vcharge == 1) then
-    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
- elseif (Vcharge == -1) then
-    stop 'xsect_nnlo_s_ns_s12: W- (-boson wm) not yet implemented'
+ else
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
  endif
     LOProc%npart = 4
 
@@ -219,7 +217,7 @@ contains
        call get_respdf_hoppet(PDFs,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_bak)
        respdf_4 = respdf_4 + respdf_bak*sv_logs
 
-    elseif (Vcharge == 1) then
+    else
        !!-- Charged current W+: FINITEDYp[5] double-boosted piece only.
        !!   FINITEDYp[5] = CF (Qq^2 + Qqp^2) FLM[z1.p1,z2.p2] (AA+BB+CC+DD).
        !!   The (Qq^2+Qqp^2) prefactor = the two QCD<->QED leg assignments:
@@ -243,10 +241,10 @@ contains
        !!     leg1:  -2 Qlp Q_IS(al) Log(s14/s12) * [xPij_B_1 kernel = (z-bracket_B) Logz]
        !!     leg2:  -2 Qlp Q_IS(be) Log(s24/s12) * [xPij_C_2 kernel]
        !!   Q_IS is a first-power (signed) leg charge, so weight FLM per leg by Q_IS directly.
-       Qlept = +one
+       Qlept = Qlept_chg
        s12 = 2*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,2))
-       s14 = 2*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,4))
-       s24 = 2*scr(LOProc%AmpMom(:,2),LOProc%AmpMom(:,4))
+       s14 = 2*scr(LOProc%AmpMom(:,1),LOProc%AmpMom(:,ilept_chg))   !-- charged lepton
+       s24 = 2*scr(LOProc%AmpMom(:,2),LOProc%AmpMom(:,ilept_chg))
 
        !-- leg 1: Q_IS(al) weighting
        do ia = -5,7
@@ -286,7 +284,7 @@ contains
        !!-- FINITEDYp[7] elastic soft: (4 zeta2 - 3 Log(mu^2/4EC^2))*genGnloQCD + explicit bracket.
        !!   fin_ns_v7_cc computes genGnloQCD directly (validated vs DY+_qq.wl) plus the explicit
        !!   charge bracket, minus the pure Q_IS^2 elastic already delivered by term C's xPij delta.
-       ilept = 4
+       ilept = ilept_chg
        EC = LOProc%Lim_Ei(1)
        call fill_sv_logs(LOProc%muf(1)**2,4*EC**2,sv_logs)     !-- L = Log(mu^2/4EC^2)
        res_calG = fin_ns_v7_cc(LOProc,res_lo_gen,sv_logs,Qlept,ilept)
@@ -353,13 +351,13 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
- elseif (Vcharge == 1) then
+ else
     !!-- FINITEDYp[6] term A (leg-1 boosted): CF * (z-bracket_A) * leg1finalcalG * FLM[z1.p1,p2]
     !!   z-bracket_A = SplitF_1 = PqqNLO(0) + Pqq0_R(0)*Log(mu^2/4EC^2).
     !!   leg1finalcalG = genGnloQCD - 3 Qq^2 Log(4EC^2/mu^2)  (legfinalcalG_cc, ileg=1),
     !!   with genGnloQCD computed directly (validated vs DY+_qq.wl, != calG_ONLOQCD_ns).
     !!   Terms B (QlpQq) and C (Qq^2 z-space) are separate (kin(1) xPij) -- not here.
-    LOProc_z1%ids(1:4) = [0,0,id_nue,-id_el]
+    LOProc_z1%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     LOProc_z1%npart = 4
 
     call cut_histo(LOProc_z1)
@@ -370,8 +368,8 @@ contains
 
     else
 
-       Qlept = +one
-       ilept = 4
+       Qlept = Qlept_chg
+       ilept = ilept_chg
 
        call res_tree_qqb_gen(LOProc_z1%AmpMom,res_lo_gen)         !-- FLM
 
@@ -427,11 +425,11 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
- elseif (Vcharge == 1) then
+ else
     !!-- FINITEDYp[60] term A (leg-2 boosted): CF * (z-bracket_A) * leg2finalcalG * FLM[p1,z2.p2]
     !!   Leg-2 mirror of FINITEDYp[6] term A. leg2finalcalG = genGnloQCD - 3 Qqp^2 Log(4EC^2/mu^2)
     !!   (legfinalcalG_cc, ileg=2), genGnloQCD computed directly.  z-bracket_A = SplitF_2.
-    LOProc_z2%ids(1:4) = [0,0,id_nue,-id_el]
+    LOProc_z2%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     LOProc_z2%npart = 4
 
     call cut_histo(LOProc_z2)
@@ -442,8 +440,8 @@ contains
 
     else
 
-       Qlept = +one
-       ilept = 4
+       Qlept = Qlept_chg
+       ilept = ilept_chg
 
        call res_tree_qqb_gen(LOProc_z2%AmpMom,res_lo_gen)         !-- FLM
 
@@ -514,10 +512,8 @@ contains
     !!-----------------------------------------------------------------------!!
  if (Vcharge == 0) then
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
- elseif (Vcharge == 1) then
-    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
- elseif (Vcharge == -1) then
-    stop 'xsect_nnlo_s_ns_vqcd: W- (-boson wm) not yet implemented'
+ else
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
  endif
     LOProc%npart = 4
 
@@ -553,7 +549,7 @@ contains
        !-- F[1,z2]
        call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_nlo,respdf_3,myPDFs2_Lmu=[xPij_Lmu])
 
-    elseif (Vcharge == 1) then
+    else
        !!-- Charged current W+: FINITEDYp[1] (boosted QCD-virtual piece).
        !!   The z-bracket is charge/current independent and lives in the xPij table
        !!   (reused verbatim from NC). The only CC difference is the per-leg charge:
@@ -564,8 +560,8 @@ contains
 
        !-- FINITEDYp[2] : elastic QCD-virtual I-operator (FLVqcdfin * Gp).
        !!   Charged lepton (W+ -> nu e+): leg 4 = e+, Qlept = +1.
-       Qlept = +one
-       ilept = 4
+       Qlept = Qlept_chg
+       ilept = ilept_chg
        !-- back-to-back initial partons: eta(2,l) = 1 - eta(1,l) (not set by kinematics_lo)
        LOProc%Lim_etaij(2,ilept) = one - LOProc%Lim_etaij(1,ilept)
        EC = LOProc%Lim_Ei(1)
@@ -636,10 +632,8 @@ contains
     !!-----------------------------------------------------------------------!!
  if (Vcharge == 0) then
     LOProc%ids(1:4) = [0,0,id_el,-id_el]
- elseif (Vcharge == 1) then
-    LOProc%ids(1:4) = [0,0,id_nue,-id_el]
- elseif (Vcharge == -1) then
-    stop 'xsect_nnlo_s_ns_vewk: W- (-boson wm) not yet implemented'
+ else
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
  endif
     LOProc%npart = 4
 
@@ -660,7 +654,7 @@ contains
 
        !-- F[1,z2]
        call get_respdf_hoppet(PDFs,xPij,ns_lumi_splitb,1,1,LOProc,res_nlo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-    elseif (Vcharge == 1) then
+    else
        !!-- Charged current W+: FINITEDYp[3] (boosted EW-virtual) + FINITEDYp[4] (elastic).
        !!   FLVewfin already carries the electric charges, so there is NO per-leg charge
        !!   weighting (unlike vqcd): just CF*(FLVewfin[q z,qp] + FLVewfin[q,qp z])*zbracket.

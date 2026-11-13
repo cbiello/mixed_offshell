@@ -199,6 +199,7 @@ OBJS_check = \
 	mod_checks.o \
 	mod_check_amp.o \
 	mod_check_lim.o \
+	mod_check_int.o \
 
 OBJS_chooser = \
 	mod_run_proc_lonlo.o \

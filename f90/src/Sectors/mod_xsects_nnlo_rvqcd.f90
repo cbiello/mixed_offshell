@@ -200,7 +200,7 @@ contains
           call res_qcdloop_qqb_gen(C2Lim%AmpMom,res0red,res1red)
           limcol = col_rvqcd_is_ns(C2Lim)
           res_tmp = res0red(:,:)*limcol(1) * Cf + res1red(:,:)*limcol(2)
-          res_tmp = multiply_IS_charges_sq(res_tmp,1)
+          res_tmp = multiply_IS_charges_sq(res_tmp,2)
           call get_respdf_gen(1,1,C2Lim,res_tmp,respdf)
 
 !          print*, 'res1red= ', res1red
@@ -254,9 +254,10 @@ contains
           call get_respdf(ns_lumi,1,1,SLim,res_tmp_old,respdf_tmp(:,2))
           respdf_tmp(:,3) = respdf_tmp(:,2)
 #else
-          res_tmp = multiply_IS_charges_sq(res_tmp,1)
-          call get_respdf_gen(1,1,SLim,res_tmp,respdf_tmp(:,2))
-          respdf_tmp(:,3) = respdf_tmp(:,2)
+          res1red = multiply_IS_charges_sq(res_tmp,1)
+          call get_respdf_gen(1,1,SLim,res1red,respdf_tmp(:,2))
+          res1red = multiply_IS_charges_sq(res_tmp,2)
+          call get_respdf_gen(1,1,SLim,res1red,respdf_tmp(:,3))
 #endif
 
        e5    = SC1Lim%Lim_KinInv(1)
@@ -340,13 +341,14 @@ contains
     real(dp) :: respdf_vect(imax_ipdf,ipdf),res_tmp_vect(2,2,imax_ipdf),respdf_vect_rev(ipdf,imax_ipdf)
     !--
     real(dp)    :: z,s5i,eik(4),e5,eta5i
-    real(dp)    :: damp
+    real(dp)    :: damp,Qfs2
     integer :: i
 
 
     xsect_nnlo_rvqcd_fs_5i_ns = 0
 
     ff(1) = zero
+    Qfs2 = merge(Q3,Q4,icoll == 3)**2 !-- charge of the emitting lepton
 
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
@@ -458,7 +460,7 @@ contains
 
        !-- use Pqg so that in the soft limit we do not have 1/[1-(1-x)]
        !-- which loses precision
-       respdf = (-one)*respdf*(two/s5i)*(Q_lep2*Pqg(z))&
+       respdf = (-one)*respdf*(two/s5i)*(Qfs2*Pqg(z))&
             * CLim%wgt
 
        FintRV_ns(2) = respdf(1)
@@ -496,7 +498,7 @@ contains
           call get_qed_eik_gen(res1red,SLim%Lim_etaij,[1,2,3,4],5,res_eikqed)
           call get_respdf_gen(1,1,SLim,res_eikqed,respdf_vect_rev(:,1))
          
-          res1red_fs_charge(:,:) = res1red(:,:) * Q_lep2
+          res1red_fs_charge(:,:) = res1red(:,:) * Qfs2
           call get_respdf_gen(1,1,SLim,res1red_fs_charge,respdf_vect_rev(:,2))
           
           respdf_vect(1,:) = respdf_vect_rev(:,1)
@@ -557,15 +559,16 @@ contains
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintRV_aq(3),kin(3)
     real(dp)    :: res0(2,2),res1(2,2)
-    real(dp)    :: res1gen(-5:7,-5:7)
+    real(dp)    :: res0gen(-5:7,-5:7),res1gen(-5:7,-5:7)
     real(dp)    :: res0red(2,2),res1red(2,2),restmp(2,2),res0red_AA
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(2),z,s5i
 
     xsect_nnlo_rvqcd_is_aq = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rvqcd_is_aq: not implemented for W'
 
     ff(1) = zero
+    kin = zero
+    FintRV_aq = zero
 
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
@@ -586,9 +589,9 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
     !-- these must go before the cut_histo routine
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),merge(id_q,-id_q,Vcharge == 0)]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
 
     !-- Hard
     call cut_histo(HardProc)
@@ -600,9 +603,13 @@ contains
     else    
 
 
-       call ol_res_qcdloop_a_aq_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+#if (_oldcode == 1)
        call res_qcdloop_a_aq(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(aq_lumi,1,1,HardProc,res1,respdf)
+#else
+       call ol_res_qcdloop_a_aq_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+       call get_respdf_gen(1,1,HardProc,res1gen,respdf)
+#endif
 
        respdf = respdf*HardProc%wgt
        
@@ -623,14 +630,20 @@ contains
 
     else
 
-       call res_qcdloop_qqb(C1Lim%AmpMom(:,1:4),res0red,res1red)
-
        limcol = xn*col_rvqcd_is_qa(C1Lim)
 
+#if (_oldcode == 1)
+       call res_qcdloop_qqb(C1Lim%AmpMom(:,1:4),res0red,res1red)
        restmp(:,1) = (res0red(:,1) * limcol(1) * Cf + res1red(:,1) * limcol(2)) * Qdn2
        restmp(:,2) = (res0red(:,2) * limcol(1) * Cf + res1red(:,2) * limcol(2)) * Qup2
-       
        call get_respdf(aq_lumi,1,1,C1Lim,restmp,respdf)
+#else
+       !-- charge of the quark from the photon splitting
+       call res_qcdloop_qqb_gen(C1Lim%AmpMom(:,1:4),res0gen,res1gen)
+       res1gen = multiply_IS_charges_sq(res0gen*limcol(1)*Cf + res1gen*limcol(2),1)
+       res1gen = transition('ga -> q','none',res1gen)
+       call get_respdf_gen(1,1,C1Lim,res1gen,respdf)
+#endif
        respdf = -respdf*C1Lim%wgt
 
        FintRV_aq(2) = respdf(1)
@@ -640,7 +653,8 @@ contains
        
     endif
 
-    !-- C2
+    !-- C2: gamma gamma -> l l, only for Z
+ if (Vcharge == 0) then
     call cut_histo(C2Lim)
     
     if (C2Lim%makecut.or.C2Lim%flag) then
@@ -654,16 +668,21 @@ contains
        s5i = C2Lim%Lim_KinInv(2)
 
        !-- here we use spin-averages since there are no spin correlations for the aa -> e-e+ amplitude
-       call res_treeAA_aa(C2Lim%AmpMom,res0red_AA)
        !-- 1=xn*aveqa/aveaa
        !-- use Pqq/(1-z) because of definition of z
        !-- to get 1L splitting function: recall that finite part of FF is -8*Cf
+#if (_oldcode == 1)
+       call res_treeAA_aa(C2Lim%AmpMom,res0red_AA)
        res0red_AA = res0red_AA * Q_lep2 * Pqq(z)/(one-z) * (-8._dp*Cf) 
-
        res0red(:,1) = Qdn2 * res0red_AA
        res0red(:,2) = Qup2 * res0red_AA
-       
        call get_respdf(aq_lumi,1,1,C2Lim,res0red,respdf)
+#else
+       call res_treeAA_aa_gen(C2Lim%AmpMom,res1gen)
+       res1gen = transition('none','q -> ga',res1gen)
+       res1gen = multiply_IS_charges_sq(res1gen,2) * Pqq(z)/(one-z) * (-8._dp*Cf)
+       call get_respdf_gen(1,1,C2Lim,res1gen,respdf)
+#endif
        
        respdf = (-one)*respdf*(two/s5i)&
             * C2Lim%wgt
@@ -674,6 +693,7 @@ contains
        call fill_histo(respdf,vegasweight)
 
     endif
+ endif
     
     ff(1) = sum(kin)
     call close_histo()
@@ -694,15 +714,16 @@ contains
     real(dp)    :: xx(kNLO_max_full)
     real(dp)    :: FintRV_qa(3),kin(3)
     real(dp)    :: res0(2,2),res1(2,2)
-    real(dp)    :: res1gen(-5:7,-5:7)
+    real(dp)    :: res0gen(-5:7,-5:7),res1gen(-5:7,-5:7)
     real(dp)    :: res0red(2,2),res1red(2,2),restmp(2,2),res0red_AA
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(2),z,s5i
 
     xsect_nnlo_rvqcd_is_qa = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rvqcd_is_qa: not implemented for W'
 
     ff(1) = zero
+    kin = zero
+    FintRV_qa = zero
 
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
@@ -723,9 +744,9 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,C2Lim=C2Lim,compute_etas=.false.)
     !-- these must go before the cut_histo routine
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),merge(id_q,-id_q,Vcharge == 0)]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
 
     !-- Hard
     call cut_histo(HardProc)
@@ -737,9 +758,13 @@ contains
     else    
 
 
-       call ol_res_qcdloop_a_qa_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+#if (_oldcode == 1)
        call res_qcdloop_a_qa(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(qa_lumi,1,1,HardProc,res1,respdf)
+#else
+       call ol_res_qcdloop_a_qa_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+       call get_respdf_gen(1,1,HardProc,res1gen,respdf)
+#endif
 
        respdf = respdf*HardProc%wgt
        
@@ -750,7 +775,8 @@ contains
 
     endif
 
-    !-- C1
+    !-- C1: gamma gamma -> l l, only for Z
+ if (Vcharge == 0) then
     call cut_histo(C1Lim)
     
     if (C1Lim%makecut.or.C1Lim%flag) then
@@ -764,16 +790,21 @@ contains
        s5i = C1Lim%Lim_KinInv(2)
 
        !-- here we use spin-averages since there are no spin correlations for the aa -> e-e+ amplitude
-       call res_treeAA_aa(C1Lim%AmpMom,res0red_AA)
        !-- 1=xn*aveqa/aveaa
        !-- use Pqq/(1-z) because of definition of z
        !-- to get 1L splitting function: recall that finite part of FF is -8*Cf
+#if (_oldcode == 1)
+       call res_treeAA_aa(C1Lim%AmpMom,res0red_AA)
        res0red_AA = res0red_AA * Q_lep2 * Pqq(z)/(one-z) * (-8._dp*Cf) 
-
        res0red(:,1) = Qdn2 * res0red_AA
        res0red(:,2) = Qup2 * res0red_AA
-       
        call get_respdf(qa_lumi,1,1,C1Lim,res0red,respdf)
+#else
+       call res_treeAA_aa_gen(C1Lim%AmpMom,res1gen)
+       res1gen = transition('q -> ga','none',res1gen)
+       res1gen = multiply_IS_charges_sq(res1gen,1) * Pqq(z)/(one-z) * (-8._dp*Cf)
+       call get_respdf_gen(1,1,C1Lim,res1gen,respdf)
+#endif
        
        respdf = (-one)*respdf*(two/s5i)&
             * C1Lim%wgt
@@ -784,6 +815,7 @@ contains
        call fill_histo(respdf,vegasweight)
        
     endif
+ endif
 
     !-- C2
     call cut_histo(C2Lim)
@@ -795,14 +827,20 @@ contains
 
     else
 
-       call res_qcdloop_qqb(C2Lim%AmpMom(:,1:4),res0red,res1red)
-
        limcol = xn*col_rvqcd_is_qa(C2Lim)
 
+#if (_oldcode == 1)
+       call res_qcdloop_qqb(C2Lim%AmpMom(:,1:4),res0red,res1red)
        restmp(:,1) = (res0red(:,1) * limcol(1) * Cf + res1red(:,1) * limcol(2)) * Qdn2
        restmp(:,2) = (res0red(:,2) * limcol(1) * Cf + res1red(:,2) * limcol(2)) * Qup2
-       
        call get_respdf(qa_lumi,1,1,C2Lim,restmp,respdf)
+#else
+       !-- charge of the quark from the photon splitting
+       call res_qcdloop_qqb_gen(C2Lim%AmpMom(:,1:4),res0gen,res1gen)
+       res1gen = multiply_IS_charges_sq(res0gen*limcol(1)*Cf + res1gen*limcol(2),2)
+       res1gen = transition('none','ga -> q',res1gen)
+       call get_respdf_gen(1,1,C2Lim,res1gen,respdf)
+#endif
        respdf = -respdf*C2Lim%wgt
 
        FintRV_qa(3) = respdf(1)

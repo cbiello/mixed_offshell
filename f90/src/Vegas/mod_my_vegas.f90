@@ -2,6 +2,8 @@ module mod_my_vegas
   use mod_types
   use mod_vegas_parms
   use mod_histo
+  use mod_proc_parms, only: checkint
+  use mod_check_int
   implicit none
   private
 
@@ -20,6 +22,13 @@ contains
          real(dp15) :: xx(30),ff(1),weight
        end function integrand
     end interface
+
+    if (checkint) then
+       call start_recording(integrand,ndim_in)
+       call go_vegas_warmup(ndim_in,rec_integrand)
+       call check_integrability(ndim_in,integrand)
+       stop
+    endif
 
     if (writegrid) then
        write (6,*) '# writing out vegas grid'
@@ -89,6 +98,25 @@ contains
     return
     
   end subroutine go_vegas_gen
+
+  subroutine go_vegas_warmup(ndim,integrand)
+    integer, intent(in) :: ndim
+    real(vp) :: res,err,chi2
+    integer  :: idum
+    interface
+       function integrand(xx,ff,weight)
+         use mod_types
+         integer    :: integrand
+         real(dp15) :: xx(30),ff(1),weight
+       end function integrand
+    end interface
+
+    call init_idum(seed,idum)
+    nohistos = .true.
+    call clear_histo()
+    call my_vegas_lepage(integrand,idum,0,ndim,VegasNc0,VegasIt0,0,res,err,chi2)
+
+  end subroutine go_vegas_warmup
 
   subroutine init_idum(seed,idum)
     integer, intent(in)  :: seed

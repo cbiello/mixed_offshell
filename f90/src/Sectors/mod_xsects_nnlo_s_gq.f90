@@ -969,8 +969,6 @@ contains
     xx(1:kNLO_max)=buff+onet*real(yRnd(1:kNLO_max),dp)
     call random_number(xx(kNLO_max_full))
     z = buff+onet*real(yRnd(kNLO_max_full),dp)
-    xx(xE) = 1E-7_dp
-    xx(xRHO)=1E-10_dp
 
 #if (_withchecks == 1)
     if (override) then

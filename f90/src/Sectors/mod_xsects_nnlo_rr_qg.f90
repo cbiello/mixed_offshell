@@ -1221,7 +1221,7 @@ contains
       respdf_tmp(:,2) = respdf_tmp(:,2) * (4/z6/s16) * C6S6Lim%wgt * damp
       FintNNLO_qg(3)  = respdf_tmp(1,2)
 
-      respdf = respdf_tmp(1,1) + respdf_tmp(1,2)
+      respdf = respdf_tmp(:,1) + respdf_tmp(:,2)
       kin(2) = respdf(1)
 
       call fill_histo(respdf,vegasweight)
@@ -1338,7 +1338,7 @@ contains
 
       FintNNLO_qg(6) = respdf_tmp(1,2)
 
-      respdf = respdf_tmp(1,1) + respdf_tmp(1,2)
+      respdf = respdf_tmp(:,1) + respdf_tmp(:,2)
       kin(4) = respdf(1)
 
       call fill_histo(respdf,vegasweight)

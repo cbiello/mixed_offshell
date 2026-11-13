@@ -632,7 +632,7 @@ contains
           jj = 3
           if (.not. is_W_quark(j)) cycle
        endif
-          if (i .eq. 7 .and. j .gt. 0) then   ! aq
+          if (i .eq. 7 .and. j .gt. 0 .and. j .ne. 7) then   ! aq
              res(i,j) = res1(2,jj)
           elseif (i .eq. 7 .and. j .lt. 0) then ! aqb
              res(i,j) = res1(1,jj)
@@ -667,7 +667,7 @@ contains
           if (.not. is_W_quark(i)) cycle
        endif
           
-          if (i .gt. 0 .and. j .eq. 7) then   ! qa
+          if (i .gt. 0 .and. j .eq. 7 .and. i .ne. 7) then   ! qa
              res(i,j) = res1(1,ii)
           elseif (i .lt. 0 .and. j .eq. 7) then ! qba
              res(i,j) = res1(2,ii)

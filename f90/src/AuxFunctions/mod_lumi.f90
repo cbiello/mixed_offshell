@@ -1,6 +1,7 @@
 module mod_lumi
   use mod_types
   use mod_consts_dp
+  use mod_parms, only: cptest
   implicit none
   private
 
@@ -22,9 +23,11 @@ contains
     muf_dp15 = real(muf,kind=dp15)
 
     call evolvePDFphoton(x1,muf_dp15,f1_dp15,f1_dp15(7))
+    if (cptest) f1_dp15(-6:6) = f1_dp15(6:-6:-1)
     f1 = f1_dp15/x1
 
     call evolvePDFphoton(x2,muf_dp15,f2_dp15,f2_dp15(7))
+    if (cptest) f2_dp15(-6:6) = f2_dp15(6:-6:-1)
     f2 = f2_dp15/x2
 
     return

@@ -54,11 +54,11 @@ contains
     real(dp)  :: FintNNLO_ga(4),kin(3)
     real(dp)  :: respdf(ipdf),respdf_bak(ipdf),respdf_tmp(ipdf,2)
     real(dp)  :: ampres(1,1),res_tmp(2,2)
+    real(dp)  :: res_gen(-5:7,-5:7),res_x(-5:7,-5:7)
     real(dp)  :: z1,z5,z6,s15,s16,s56,s156,damp
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5161a_ga = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5161a_ga: not implemented for W'
 
     ff(1) = zero
 
@@ -91,7 +91,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     HardProc%npart = 6
     call cut_histo(HardProc)
 
@@ -102,8 +102,13 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_tree_ga_ga(HardProc%AmpMom,ampres(1,1))
       call get_respdf(ga_lumi,1,1,HardProc,ampres,respdf)
+#else
+      call res_tree_ga_ga_gen(HardProc%AmpMom,res_gen)
+      call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(HardProc, damp, iconf, 1,1)
 
@@ -119,7 +124,7 @@ contains
     !!                          Triple Collinear                             !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids(1:6) = [0,0,id_el,-id_el,0,0]
+    TCLim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCLim%npart = 4
     call cut_histo(TCLim)
 
@@ -130,10 +135,18 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_treeAA_aa(TCLim%AmpMom,ampres(1,1))
       ampres(1,1) = ampres(1,1) * (ndn*Qdn2 + nup*Qup2)
 
       call get_respdf(ga_lumi,1,1,TCLim,ampres,respdf_bak)
+#else
+      call res_treeAA_aa_gen(TCLim%AmpMom,res_x)
+      res_gen = zero
+      res_gen(0,7) = res_x(7,7) * (ndn*Qdn2 + nup*Qup2)
+
+      call get_respdf_gen(1,1,TCLim,res_gen,respdf_bak)
+#endif
 
     !! --------------------------------- TC -------------------------------- !!
 
@@ -177,7 +190,7 @@ contains
     !!                              Collinear 6                              !!
     !!-----------------------------------------------------------------------!!
 
-    C6Lim%ids(1:6) = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     C6Lim%npart = 5
     call cut_histo(C6Lim)
 
@@ -191,11 +204,19 @@ contains
       z6  = C6Lim%Lim_z(2)
       s16 = C6Lim%Lim_sij(1,6)
 
+#if (_oldcode == 1)
       call res_tree_a_qa(C6Lim%AmpMom,res_tmp)
 
       !! take only quarks, i.e. res_tmp(1,:)
       ampres(1,1) = res_tmp(1,1)*ndn + res_tmp(1,2)*nup
       call get_respdf(ga_lumi,1,1,C6Lim,ampres,respdf)
+#else
+      call res_tree_a_qa_gen(C6Lim%AmpMom,res_x)
+
+      !! take only quarks, i.e. res_tmp(1,:)
+      res_gen = collapse_leg(res_x,1,+1,0,.false.)
+      call get_respdf_gen(1,1,C6Lim,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(C6Lim, damp, iconf, 1,1)
 
@@ -232,11 +253,11 @@ contains
     real(dp)  :: FintNNLO_ga(4),kin(3)
     real(dp)  :: respdf(ipdf),respdf_bak(ipdf),respdf_tmp(ipdf,2)
     real(dp)  :: ampres(1,1),res_tmp(2,2)
+    real(dp)  :: res_gen(-5:7,-5:7),res_x(-5:7,-5:7)
     real(dp)  :: z1,z5,z6,s15,s16,s56,s156,damp
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5161c_ga = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5161c_ga: not implemented for W'
 
     ff(1) = zero
 
@@ -269,7 +290,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     HardProc%npart = 6
     call cut_histo(HardProc)
 
@@ -280,8 +301,13 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_tree_ga_ga(HardProc%AmpMom,ampres(1,1))
       call get_respdf(ga_lumi,1,1,HardProc,ampres,respdf)
+#else
+      call res_tree_ga_ga_gen(HardProc%AmpMom,res_gen)
+      call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(HardProc, damp, iconf, 1,1)
 
@@ -297,7 +323,7 @@ contains
     !!                          Triple Collinear                             !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids(1:6) = [0,0,id_el,-id_el,0,0]
+    TCLim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCLim%npart = 4
     call cut_histo(TCLim)
 
@@ -308,10 +334,18 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_treeAA_aa(TCLim%AmpMom,ampres(1,1))
       ampres(1,1) = ampres(1,1) * (ndn*Qdn2 + nup*Qup2)
 
       call get_respdf(ga_lumi,1,1,TCLim,ampres,respdf_bak)
+#else
+      call res_treeAA_aa_gen(TCLim%AmpMom,res_x)
+      res_gen = zero
+      res_gen(0,7) = res_x(7,7) * (ndn*Qdn2 + nup*Qup2)
+
+      call get_respdf_gen(1,1,TCLim,res_gen,respdf_bak)
+#endif
 
     !! --------------------------------- TC -------------------------------- !!
 
@@ -355,7 +389,7 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids(1:6) = [0,0,id_el,-id_el,id_q,0]
+    C5Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     C5Lim%npart = 5
     call cut_histo(C5Lim)
 
@@ -369,11 +403,19 @@ contains
       z5  = C5Lim%Lim_z(1)
       s15 = C5Lim%Lim_sij(1,5)
 
+#if (_oldcode == 1)
       call res_tree_a_qa(C5Lim%AmpMom,res_tmp)
 
       !-- take only anti-quarks, i.e. res_tmp(2,:)
       ampres(1,1) = res_tmp(2,1)*ndn + res_tmp(2,2)*nup
       call get_respdf(ga_lumi,1,1,C5Lim,ampres,respdf)
+#else
+      call res_tree_a_qa_gen(C5Lim%AmpMom,res_x)
+
+      !-- take only anti-quarks, i.e. res_tmp(2,:)
+      res_gen = collapse_leg(res_x,1,-1,0,.false.)
+      call get_respdf_gen(1,1,C5Lim,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(C5Lim, damp, iconf, 1,1)
 
@@ -411,11 +453,11 @@ contains
     real(dp)  :: xx(kNNLO_max_full)
     real(dp)  :: FintNNLO_ga(2),kin(2)
     real(dp)  :: ampres(1,1), respdf(ipdf)
+    real(dp)  :: res_gen(-5:7,-5:7),res_x(-5:7,-5:7)
     real(dp)  :: z1,z5,z6,s15,s16,s56,damp
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5161bd_ga = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5161bd_ga: not implemented for W'
 
     ff(1) = zero
 
@@ -447,7 +489,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     HardProc%npart = 6
     call cut_histo(HardProc)
 
@@ -458,8 +500,13 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_tree_ga_ga(HardProc%AmpMom,ampres(1,1))
       call get_respdf(ga_lumi,1,1,HardProc,ampres,respdf)
+#else
+      call res_tree_ga_ga_gen(HardProc%AmpMom,res_gen)
+      call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(HardProc, damp, iconf, 1,1)
 
@@ -475,7 +522,7 @@ contains
     !!                          Triple Collinear                             !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids(1:6) = [0,0,id_el,-id_el,0,0]
+    TCLim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),0,0]
     TCLim%npart = 4
     call cut_histo(TCLim)
 
@@ -486,10 +533,18 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_treeAA_aa(TCLim%AmpMom,ampres(1,1))
       ampres(1,1) = ampres(1,1) * (ndn*Qdn2 + nup*Qup2)
 
       call get_respdf(ga_lumi,1,1,TCLim,ampres,respdf)
+#else
+      call res_treeAA_aa_gen(TCLim%AmpMom,res_x)
+      res_gen = zero
+      res_gen(0,7) = res_x(7,7) * (ndn*Qdn2 + nup*Qup2)
+
+      call get_respdf_gen(1,1,TCLim,res_gen,respdf)
+#endif
 
       z5 = TCLim%Lim_z(1)
       z6 = TCLim%Lim_z(2)
@@ -534,12 +589,12 @@ contains
     real(dp) :: FintNNLO_ga(3),kin(3)
     real(dp) :: respdf(ipdf)
     real(dp) :: res_tmp1(1,1),res_tmp2(2,2)
+    real(dp)  :: res_gen(-5:7,-5:7),res_x(-5:7,-5:7)
     real(dp) :: z5,z6,s25,s26
     real(dp) :: damp
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5262_ga = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5262_ga: not implemented for W'
 
     ff(1) = zero
 
@@ -572,7 +627,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids = [0,0,id_el,-id_el,id_q,-id_q]
+    HardProc%ids = [0,0,lep_ids(1),lep_ids(2),id_q,-id_q]
     HardProc%npart = 6
 
     call cut_histo(HardProc)
@@ -584,8 +639,13 @@ contains
        
     else
        
+#if (_oldcode == 1)
        call res_tree_ga_ga(HardProc%AmpMom,res_tmp1(1,1))
        call get_respdf(ga_lumi,1,1,HardProc,res_tmp1,respdf)
+#else
+       call res_tree_ga_ga_gen(HardProc%AmpMom,res_gen)
+       call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+#endif
        
        call partition_nnlo_qcd(HardProc,damp,iconf,2,2)
        
@@ -601,7 +661,7 @@ contains
     !!                               C5                                      !!
     !!-----------------------------------------------------------------------!!
     
-    C5Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    C5Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     C5Lim%npart = 5
     
     call cut_histo(C5Lim)
@@ -613,9 +673,15 @@ contains
     
     else
        
+#if (_oldcode == 1)
        call res_tree_g_gq(C5Lim%AmpMom,res_tmp2)
        res_tmp1(1,1) = res_tmp2(1,1)*ndn*Qdn2 + res_tmp2(1,2)*nup*Qup2
        call get_respdf(ga_lumi,1,1,C5Lim,res_tmp1,respdf)
+#else
+       call res_tree_g_gq_gen(C5Lim%AmpMom,res_x)
+       res_gen = collapse_leg(res_x,2,-1,7,.true.)
+       call get_respdf_gen(1,1,C5Lim,res_gen,respdf)
+#endif
        
        call partition_nnlo_qcd(C5Lim,damp,iconf,2,2)
        
@@ -636,7 +702,7 @@ contains
     !!                               C6                                      !!
     !!-----------------------------------------------------------------------!!
     
-    C6Lim%ids = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     C6Lim%npart = 5
     
     call cut_histo(C6Lim)
@@ -648,9 +714,15 @@ contains
        
     else
 
+#if (_oldcode == 1)
        call res_tree_g_gq(C6Lim%AmpMom,res_tmp2)
        res_tmp1(1,1) = res_tmp2(2,1)*ndn*Qdn2 + res_tmp2(2,2)*nup*Qup2
        call get_respdf(ga_lumi,1,1,C6Lim,res_tmp1,respdf)
+#else
+       call res_tree_g_gq_gen(C6Lim%AmpMom,res_x)
+       res_gen = collapse_leg(res_x,2,+1,7,.true.)
+       call get_respdf_gen(1,1,C6Lim,res_gen,respdf)
+#endif
        
        call partition_nnlo_qcd(C6Lim,damp,iconf,2,2)
        
@@ -688,11 +760,11 @@ contains
     real(dp)  :: FintNNLO_ga(4),kin(4)
     real(dp)  :: respdf(ipdf)
     real(dp)  :: ampres(1,1),res_tmp(2,2)
+    real(dp)  :: res_gen(-5:7,-5:7),res_x(-5:7,-5:7)
     real(dp)  :: z5,z6,s15,s26,damp
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5162_ga = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5162_ga: not implemented for W'
 
     ff(1) = zero
 
@@ -725,7 +797,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -735,8 +807,13 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_tree_ga_ga(HardProc%AmpMom,ampres(1,1))
       call get_respdf(ga_lumi,1,1,HardProc,ampres,respdf)
+#else
+      call res_tree_ga_ga_gen(HardProc%AmpMom,res_gen)
+      call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(HardProc, damp, iconf, 1,2)
 
@@ -754,7 +831,7 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids(1:6) = [0,0,id_el,-id_el,id_q,0]
+    C5Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(C5Lim)
 
     if (C5Lim%makecut) then
@@ -767,11 +844,19 @@ contains
       z5  = C5Lim%Lim_z(1)
       s15 = C5Lim%Lim_sij(1,5)
 
+#if (_oldcode == 1)
       call res_tree_a_qa(C5Lim%AmpMom,res_tmp)
 
       !-- take only quarks, i.e. res_tmp(1,:)
       ampres(1,1) = res_tmp(2,1)*ndn + res_tmp(2,2)*nup
       call get_respdf(ga_lumi,1,1,C5Lim,ampres,respdf)
+#else
+      call res_tree_a_qa_gen(C5Lim%AmpMom,res_x)
+
+      !-- take only quarks, i.e. res_tmp(1,:)
+      res_gen = collapse_leg(res_x,1,-1,0,.false.)
+      call get_respdf_gen(1,1,C5Lim,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(C5Lim, damp, iconf, 1,2)
 
@@ -789,7 +874,7 @@ contains
     !!                              Collinear 6                              !!
     !!-----------------------------------------------------------------------!!
 
-    C6Lim%ids(1:6) = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(C6Lim)
 
     if (C6Lim%makecut) then
@@ -802,11 +887,19 @@ contains
       z6  = C6Lim%Lim_z(2)
       s26 = C6Lim%Lim_sij(2,6)
 
+#if (_oldcode == 1)
       call res_tree_g_gq(C6Lim%AmpMom,res_tmp)
 
       !-- take only quarks, i.e. res_tmp(1,:)
       ampres(1,1) = res_tmp(2,1)*ndn*Qdn2 + res_tmp(2,2)*nup*Qup2
       call get_respdf(ga_lumi,1,1,C6Lim,ampres,respdf)
+#else
+      call res_tree_g_gq_gen(C6Lim%AmpMom,res_x)
+
+      !-- take only quarks, i.e. res_tmp(1,:)
+      res_gen = collapse_leg(res_x,2,+1,7,.true.)
+      call get_respdf_gen(1,1,C6Lim,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(C6Lim, damp, iconf, 1,2)
 
@@ -824,7 +917,7 @@ contains
     !!                       Collinear 5 + Collinear 6                       !!
     !!-----------------------------------------------------------------------!!
 
-    C5C6Lim%ids(1:6) = [0,0,id_el,-id_el,0,0]
+    C5C6Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),0,0]
     call cut_histo(C5C6Lim)
 
     if (C5C6Lim%makecut) then
@@ -839,9 +932,15 @@ contains
       s15 = C5C6Lim%Lim_sij(1,5)
       s26 = C5C6Lim%Lim_sij(2,6)
 
+#if (_oldcode == 1)
       call res_tree_qqb(C5C6Lim%AmpMom,res_tmp)
       ampres = (res_tmp(2,1)*ndn*Qdn2 + res_tmp(2,2)*nup*Qup2)
       call get_respdf(ga_lumi,1,1,C5C6Lim,ampres,respdf)
+#else
+      call res_tree_qqb_gen(C5C6Lim%AmpMom,res_x)
+      res_gen = collapse_leg(collapse_leg(res_x,2,+1,7,.true.),1,-1,0,.false.)
+      call get_respdf_gen(1,1,C5C6Lim,res_gen,respdf)
+#endif
 
       !-- damp = one
       respdf = (two/s15) * Tr * Pqg(z5) &
@@ -879,11 +978,11 @@ contains
     real(dp)  :: FintNNLO_ga(4),kin(4)
     real(dp)  :: respdf(ipdf)
     real(dp)  :: ampres(1,1),res_tmp(2,2)
+    real(dp)  :: res_gen(-5:7,-5:7),res_x(-5:7,-5:7)
     real(dp)  :: z5,z6,s25,s16,damp
     integer, parameter :: iconf(2,2) = reshape([1,2, 5,6],[2,2])
 
     xsect_nnlo_rr_5261_ga = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5261_ga: not implemented for W'
 
     ff(1) = zero
 
@@ -916,7 +1015,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -926,8 +1025,13 @@ contains
 
     else
 
+#if (_oldcode == 1)
       call res_tree_ga_ga(HardProc%AmpMom,ampres(1,1))
       call get_respdf(ga_lumi,1,1,HardProc,ampres,respdf)
+#else
+      call res_tree_ga_ga_gen(HardProc%AmpMom,res_gen)
+      call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(HardProc, damp, iconf, 2,1)
 
@@ -945,7 +1049,7 @@ contains
     !!                              Collinear 5                              !!
     !!-----------------------------------------------------------------------!!
 
-    C5Lim%ids(1:6) = [0,0,id_el,-id_el,id_q,0]
+    C5Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(C5Lim)
 
     if (C5Lim%makecut) then
@@ -958,11 +1062,19 @@ contains
       z5  = C5Lim%Lim_z(1)
       s25 = C5Lim%Lim_sij(2,5)
 
+#if (_oldcode == 1)
       call res_tree_g_gq(C5Lim%AmpMom,res_tmp)
 
       !-- take only quarks, i.e. res_tmp(1,:)
       ampres(1,1) = res_tmp(1,1)*ndn*Qdn2 + res_tmp(1,2)*nup*Qup2
       call get_respdf(ga_lumi,1,1,C5Lim,ampres,respdf)
+#else
+      call res_tree_g_gq_gen(C5Lim%AmpMom,res_x)
+
+      !-- take only quarks, i.e. res_tmp(1,:)
+      res_gen = collapse_leg(res_x,2,-1,7,.true.)
+      call get_respdf_gen(1,1,C5Lim,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(C5Lim, damp, iconf, 2,1)
 
@@ -980,7 +1092,7 @@ contains
     !!                              Collinear 6                              !!
     !!-----------------------------------------------------------------------!!
 
-    C6Lim%ids(1:6) = [0,0,id_el,-id_el,id_q,0]
+    C6Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,0]
     call cut_histo(C6Lim)
 
     if (C6Lim%makecut) then
@@ -993,11 +1105,19 @@ contains
       z6  = C6Lim%Lim_z(2)
       s16 = C6Lim%Lim_sij(1,6)
 
+#if (_oldcode == 1)
       call res_tree_a_qa(C6Lim%AmpMom,res_tmp)
 
       !-- take only anti-quarks, i.e. res_tmp(1,:)
       ampres(1,1) = res_tmp(1,1)*ndn + res_tmp(1,2)*nup
       call get_respdf(ga_lumi,1,1,C6Lim,ampres,respdf)
+#else
+      call res_tree_a_qa_gen(C6Lim%AmpMom,res_x)
+
+      !-- take only anti-quarks, i.e. res_tmp(1,:)
+      res_gen = collapse_leg(res_x,1,+1,0,.false.)
+      call get_respdf_gen(1,1,C6Lim,res_gen,respdf)
+#endif
 
       call partition_nnlo_qcd(C6Lim, damp, iconf, 2,1)
 
@@ -1015,7 +1135,7 @@ contains
     !!                       Collinear 5 + Collinear 6                       !!
     !!-----------------------------------------------------------------------!!
 
-    C5C6Lim%ids(1:6) = [0,0,id_el,-id_el,0,0]
+    C5C6Lim%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),0,0]
     call cut_histo(C5C6Lim)
 
     if (C5C6Lim%makecut) then
@@ -1030,9 +1150,15 @@ contains
       s25 = C5C6Lim%Lim_sij(2,5)
       s16 = C5C6Lim%Lim_sij(1,6)
 
+#if (_oldcode == 1)
       call res_tree_qqb(C5C6Lim%AmpMom,res_tmp)
       ampres = (res_tmp(1,1)*ndn*Qdn2 + res_tmp(1,2)*nup*Qup2)
       call get_respdf(ga_lumi,1,1,C5C6Lim,ampres,respdf)
+#else
+      call res_tree_qqb_gen(C5C6Lim%AmpMom,res_x)
+      res_gen = collapse_leg(collapse_leg(res_x,2,-1,7,.true.),1,+1,0,.false.)
+      call get_respdf_gen(1,1,C5C6Lim,res_gen,respdf)
+#endif
 
       !-- damp = one
       respdf = (two/s25) * xn * Pqg(z5) &

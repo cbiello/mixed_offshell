@@ -49,7 +49,7 @@ contains
 
   !-- put the photon in position 6
   subroutine evolvePDF_photon_is_six(x,Q,res)
-    use types; implicit none
+    use types; use mod_parms, only: cptest; implicit none
     real(dp), intent(in)  :: x,Q
     real(dp), intent(out) :: res(*)
     real(dp) :: resA
@@ -59,6 +59,7 @@ contains
     !res(13) = res(14)
 
     call evolvePDFphoton(x,Q,res(1:13),resA)
+    if (cptest) res(1:13) = res(13:1:-1)
     res(13) = resA
 
   end subroutine evolvePDF_photon_is_six

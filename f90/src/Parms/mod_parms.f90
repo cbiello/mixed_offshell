@@ -132,6 +132,10 @@ module mod_parms
   !-- charges for final state leptons
   real(dp), public, save  :: Q3
   real(dp), public, save  :: Q4
+  !-- W: index and outgoing charge of the charged lepton (W+: 4, +1; W-: 3, -1)
+  logical,  public, save  :: cptest = .false. !-- -cptest: antiproton beams (q <-> qbar in the PDFs)
+  integer,  public, save  :: ilept_chg = 4
+  real(dp), public, save  :: Qlept_chg = one
   !-- boson: 0 = Z, -1 = W-, +1 = W+ (set by -boson z/wm/wp)
   integer, public, save   :: Vcharge = 0
   !-- ids of the two leptons (legs 3,4) for the chosen boson
@@ -213,6 +217,7 @@ contains
 
     !-- select only up-quarks
     only_up = log_val_opt_witharg('-only_up',.false.)
+    cptest = log_val_opt('-cptest',.false.)
     if(only_up) then
       flag_down = 0
     else
@@ -235,6 +240,10 @@ contains
     Q3 = zero
     Q4 = +one
  endif
+    if (Vcharge == -1) then
+       ilept_chg = 3
+       Qlept_chg = Q3
+    endif
     
     
   end subroutine get_parms

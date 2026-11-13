@@ -34,7 +34,7 @@ module mod_aux_sectors
 
   public :: gen_lumi
 
-  public :: multiply_IS_charges_sq, multiply_FSQ_charges_sq
+  public :: multiply_IS_charges_sq, multiply_FSQ_charges_sq, collapse_leg
 
   public :: transition
   
@@ -1153,6 +1153,24 @@ end function gen_lumi
 
   end function multiply_IS_charges_sq
 
+
+  !-- sum the quark (sgn = +1) or antiquark (sgn = -1) entries of leg `leg` into the entry `to`
+  !-- (0 gluon, 7 photon) of that leg; charged: each term times the squared charge of the quark
+  function collapse_leg(res,leg,sgn,to,charged) result(out)
+    real(dp), intent(in) :: res(-5:7,-5:7)
+    integer, intent(in)  :: leg,sgn,to
+    logical, intent(in)  :: charged
+    real(dp) :: out(-5:7,-5:7),w
+    integer  :: i
+
+    out = zero
+    do i = 1,5
+       w = merge(Qsq_IS(sgn*i),one,charged)
+       if (leg == 1) out(to,:) = out(to,:) + w*res(sgn*i,:)
+       if (leg == 2) out(:,to) = out(:,to) + w*res(:,sgn*i)
+    enddo
+
+  end function collapse_leg
 
   function multiply_FSQ_charges_sq(res_in) result(res_out)
     real(dp), intent(in)  :: res_in(-5:7,-5:7)
