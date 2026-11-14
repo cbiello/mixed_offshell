@@ -483,7 +483,7 @@ contains
        call fill_sv_logs(HardProc%muf(1)**2,EC**2,sv_logs)
        respdf_2 = respdf_2 - 1.5_dp * respdf_tmp * sv_logs
     else
-       call fill_sv_logs(HardProc%muf(1)**2,four*HardProc%Lim_Ei(2)**2,sv_logs)                   ! hard-coded that we use the quark energy, should be changed for qg channel
+       call fill_sv_logs(HardProc%muf(1)**2,four*HardProc%Lim_Ei(1)**2,sv_logs)
        res_nlo_calG =  calG_ONLOQCD_gq(HardProc,res_nlo,sv_logs,Qlept,ilept,1,2)
        call get_respdf_gen_mu(1,1,HardProc,res_nlo_calG,respdf_2)
     endif
@@ -546,7 +546,7 @@ contains
        respdf_2 = respdf_2 - 1.5_dp * respdf_tmp * sv_logs
 
     else
-       call fill_sv_logs(C1Lim%muf(1)**2,four*C1Lim%Lim_Ei(2)**2,sv_logs)                   ! hard-coded that we use the quark energy, should be changed for qg channel
+       call fill_sv_logs(C1Lim%muf(1)**2,four*C1Lim%Lim_Ei(1)**2,sv_logs)
        res_lo = transition('g -> q', 'none', res_lo)
        res_lo_calG =  calG_ONLOQCD_gq(C1Lim,res_lo,sv_logs,Qlept,ilept,1,2)
        call get_respdf_gen_mu(1,1,C1Lim,res_lo_calG,respdf_2)

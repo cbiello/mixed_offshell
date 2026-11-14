@@ -1025,29 +1025,11 @@ end function gen_lumi
   function qg_lumi_splitb(res,f1,f2) result(respdf)
     real(dp), intent(in) :: res(:,:),f1(-6:),f2(-6:)
     real(dp) :: respdf
-
-    respdf = zero
-
-    ! g(1) ux(2) + g(1) cx(2)
-    respdf = respdf + res(1,2)*(f1(-2) + f1(-4))
-
-    ! g(1) dx(2) + g(1) sx(2) 
-    respdf = respdf + flag_down*res(1,1)*(f1(-1) + f1(-3)) 
-
-    ! g(1) bx(2)
-    respdf = respdf + flag_down*res(1,3)*(f1(-5)) 
-    
-    ! g(1) u(2) + g(1) + c(2)
-    respdf = respdf + res(2,2)*(f1(2) + f1(4))
-
-    ! g(1) d(2) + g(1) s(2) 
-    respdf = respdf + flag_down*res(2,1)*(f1(1) + f1(3))
-
-    ! g(1) b(2)
-    respdf = respdf + flag_down*res(2,3)*(f1(5))
-
+    !-- res(1,:) = q g, res(2,:) = qb g  [dn,up,bot], as in res_ewkloop_g_qg and qg_lumi
+    respdf = res(1,2)*(f1(2) + f1(4)) + res(2,2)*(f1(-2) + f1(-4)) &
+         + flag_down*(res(1,1)*(f1(1) + f1(3)) + res(1,3)*f1(5) &
+         + res(2,1)*(f1(-1) + f1(-3)) + res(2,3)*f1(-5))
     respdf = respdf * f2(0)
-    
   end function qg_lumi_splitb
 
   function aq_lumi(res,f1,f2) result(respdf)

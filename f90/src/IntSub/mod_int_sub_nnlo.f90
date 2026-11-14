@@ -13,7 +13,7 @@ module mod_int_sub_nnlo
   public :: genGnloQCD_cc, legfinalcalG_cc
   public :: Pqqbqqb, Pqqbqqb_Lmu
   public :: calG_QqQl,calG_QqQl_L,calG_CF,calG_Q2
-  public :: calG_ONLOQCD_ns,calG_ONLOQCD_gq
+  public :: calG_ONLOQCD_gq
 
   interface calG_CF
     module procedure calG_CF_hard, calG_CF_coll
@@ -273,60 +273,6 @@ contains
   end function calG_Q2
 
 
-  function calG_ONLOQCD_ns(proc,ampl,lmu,Qlept,ilept)
-    use mod_process, only: KinConfig
-    ! lmu  = log(mu^2/4/EC^2)
-    implicit none
-    type(KinConfig),   intent(in) :: proc
-    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:)
-    integer, intent(in)           :: ilept    ! this is the label of the charged lepton
-!    integer, optional, intent(in) :: icoll
-    real(dp) :: calG_ONLOQCD_ns(-5:7,-5:7,size(lmu))
-    real(dp) :: EC,El
-    real(dp) :: eta1l,eta2l,lECoEl,li2_ometa1l, li2_ometa2l
-    real(dp) :: leta1l,leta2l,li2_1l,li2_2l
-    real(dp) :: coeff_Qlsq(size(lmu)), coeff_QqQl(size(lmu)), coeff_QqbQl(size(lmu)),coeff_QqQqb(size(lmu))
-    integer  :: al,be
-
-    calG_ONLOQCD_ns = zero
-    
-    EC = proc%Lim_Ei(1)
-    El = proc%Lim_Ei(ilept)   ! for CC, specify the final state lepton
-
-    eta1l  = proc%Lim_etaij(1,ilept)
-    eta2l  = proc%Lim_etaij(2,ilept)
-
-
-    lECoEl = log(EC/El)
-
-    leta1l = log(eta1l)
-    leta2l = log(eta2l)
-    li2_ometa1l = real(dilog2(one-eta1l),kind=dp)
-    li2_ometa2l = real(dilog2(one-eta2l),kind=dp)
-
-    ! mu-independent part
-    coeff_QqQqb = -6.0_dp*LECoEl - two*pisq/three
-    coeff_Qlsq = 13.0_dp/two - two*LECoEl**2 - two*pisq/three
-    coeff_QqQl  = -three*LECoEl*(one + LECoEl) - leta1l*(three + two*LECoEl) - two*li2_ometa1l + pisq/three
-    coeff_QqbQl = -three*LECoEl*(one + LECoEl) - leta2l*(three + two*LECoEl) - two*li2_ometa2l + pisq/three
-
-    ! mu-dependent part
-    coeff_QqQqb = coeff_QqQqb + three*lmu
-    coeff_QqQl  = coeff_QqQl  + lmu*(three + two*lECoEl)
-    coeff_QqbQl = coeff_QqbQl + lmu*(three + two*lECoEl)
-    coeff_Qlsq  = coeff_Qlsq  + lmu*(three/two + two*lECoEl)
-
-
-    do al = -5,5
-       do be = -5,5
-          calG_ONLOQCD_ns(al,be, :) = ampl(al,be)* ( Qlept**2 * coeff_Qlsq(:) + &
-               Qlept*Q_IS(al)*coeff_QqQl(:) + Qlept*Q_IS(be)*coeff_QqbQl(:) + Q_IS(al)*Q_IS(be)*coeff_QqQqb(:) )
-       enddo
-    enddo
-
-
-  end function calG_ONLOQCD_ns
-
   function calG_ONLOQCD_gq(proc,ampl,lmu,Qlept,ilept,ig,iq)
     use mod_process, only: KinConfig
     ! set ig,iq=1,2 for gq channel; ig,iq=2,1 for qg channel
@@ -340,7 +286,7 @@ contains
     real(dp) :: calG_ONLOQCD_gq(-5:7,-5:7,size(lmu))
     real(dp)    :: Emax,Eq,Eg,El,E5,LE5oEmax,LE5oEl,LEloEq,LEmaxsqoEqEl,LEmaxsqoElE5,LEmaxsqoEqE5!,Llmusqo4E2sq(size(lmu))
     real(dp)    :: etal5,etaql,etaq5,etag5,li2ometal5,li2ometaql,li2ometaq5,Qqp
-    real(dp)    :: coeff_Qqsq(size(lmu)),coeff_Qqpsq(size(lmu)),coeff_QqQqp(size(lmu))
+    real(dp)    :: coeff_Qqsq(size(lmu)),coeff_Qqpsq(size(lmu)),coeff_QqQqp(size(lmu)),coeff(size(lmu))
     integer  :: al,be
 
     calG_ONLOQCD_gq = zero
@@ -379,7 +325,12 @@ contains
 
     do al = -5,5
        Qqp = Q_IS(al) - Qlept
-       calG_ONLOQCD_gq(0,al,:) = ampl(0,al)* ( Q_IS(al)**2 * coeff_Qqsq(:)  + Qqp*Q_IS(al) * coeff_QqQqp(:) + Qqp**2 * coeff_Qqpsq(:))
+       coeff = Q_IS(al)**2 * coeff_Qqsq  + Qqp*Q_IS(al) * coeff_QqQqp + Qqp**2 * coeff_Qqpsq
+       if (ig == 1) then
+          calG_ONLOQCD_gq(0,al,:) = ampl(0,al) * coeff
+       else
+          calG_ONLOQCD_gq(al,0,:) = ampl(al,0) * coeff
+       endif
     enddo
 
 
@@ -464,7 +415,7 @@ contains
   !!=========================================================================!!
   !!  FINITEDYp[7] : charged-current (W) elastic soft I-operator.             !!
   !!  Returns  (4 zeta2 - 3 L) * genGnloQCD  +  ( EB - dC ) * FLM ,           !!
-  !!  with L = Log(mu^2/4EC^2), genGnloQCD = calG_ONLOQCD_ns (mu-dependent).  !!
+  !!  with L = Log(mu^2/4EC^2), genGnloQCD = genGnloQCD_cc (mu-dependent).   !!
   !!  EB = the explicit charge bracket of DY+_qq.wl FINITEDYp[7] (2nd term).  !!
   !!  dC = the pure Q_IS^2 elastic already shipped by term C's xPij delta     !!
   !!       (mySub_TCqq/_Lmu/_Lmu2 delta pieces), subtracted here to avoid     !!

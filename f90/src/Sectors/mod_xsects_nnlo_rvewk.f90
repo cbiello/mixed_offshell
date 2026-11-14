@@ -206,9 +206,9 @@ contains
     real(dp)    :: res0red(2,3),res1red(2,3),restmp(2,3)
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(3)
+    real(dp)    :: res1gen(-5:7,-5:7),res0gen(-5:7,-5:7),res_tmp(-5:7,-5:7),Qi(-5:7,-5:7),limgen(4)
 
     xsect_nnlo_rvewk_is_gq = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rvewk_is_gq: not implemented for W'
 
     ff(1) = zero
 
@@ -231,8 +231,8 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C1Lim=C1Lim,compute_etas=.false.)
     !-- these must go before the cut_histo routine
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_q]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     
     !-- Hard
     call cut_histo(HardProc)
@@ -244,8 +244,13 @@ contains
     else    
 
        
+#if (_oldcode == 1)
        call res_ewkloop_g_gq(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(gq_lumi_splitb,1,1,HardProc,res1,respdf)
+#else
+       call res_ewkloop_g_gq_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+       call get_respdf_gen(1,1,HardProc,res1gen,respdf)
+#endif
        
        respdf = respdf*HardProc%wgt
        
@@ -266,6 +271,7 @@ contains
 
     else
 
+#if (_oldcode == 1)
        call res_ewkloop_qqb(C1Lim%AmpMom(:,1:4),res0red,res1red)
 
        limcol = tr*col_rvewk_is_qg(1,C1Lim)
@@ -277,6 +283,15 @@ contains
             res1red(2,:) * limcol(3)
        
        call get_respdf(gq_lumi_splitb,1,1,C1Lim,restmp,respdf)
+#else
+       call res_ewkloop_qqb_gen(C1Lim%AmpMom(:,1:4),res0gen,res1gen)
+       limgen = tr*col_rvewk_is_qg_gen(1,C1Lim)
+       Qi = spread(Q_IS,2,13) !-- Q_IS of leg 1
+       res_tmp = res0gen * (limgen(1)*Qi**2 + (limgen(2)*Q3 + limgen(3)*Q4)*Qi) + &
+            res1gen * limgen(4)
+       res_tmp = transition('g -> q','none',res_tmp)
+       call get_respdf_gen(1,1,C1Lim,res_tmp,respdf)
+#endif
        respdf = -respdf*C1Lim%wgt
 
        FintRV_gq(2) = respdf(1)
@@ -308,9 +323,9 @@ contains
     real(dp)    :: res0red(2,3),res1red(2,3),restmp(2,3)
     real(dp)    :: respdf(ipdf)
     real(dp)    :: limcol(3)
+    real(dp)    :: res1gen(-5:7,-5:7),res0gen(-5:7,-5:7),res_tmp(-5:7,-5:7),Qi(-5:7,-5:7),limgen(4)
 
     xsect_nnlo_rvewk_is_qg = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rvewk_is_qg: not implemented for W'
 
     ff(1) = zero
 
@@ -333,8 +348,8 @@ contains
 
     call kinematics_nlo_is(yr=xx,HardProc=HardProc,C2Lim=C2Lim,compute_etas=.false.)
     !-- these must go before the cut_histo routine
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_q]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     
     !-- Hard
     call cut_histo(HardProc)
@@ -346,8 +361,13 @@ contains
     else    
 
        
+#if (_oldcode == 1)
        call res_ewkloop_g_qg(HardProc%AmpMom(:,1:5),res0,res1)
        call get_respdf(qg_lumi_splitb,1,1,HardProc,res1,respdf)
+#else
+       call res_ewkloop_g_qg_gen(HardProc%AmpMom(:,1:5),res0,res1gen)
+       call get_respdf_gen(1,1,HardProc,res1gen,respdf)
+#endif
        
        respdf = respdf*HardProc%wgt
        
@@ -368,6 +388,7 @@ contains
 
     else
 
+#if (_oldcode == 1)
        call res_ewkloop_qqb(C2Lim%AmpMom(:,1:4),res0red,res1red)
 
        limcol = tr*col_rvewk_is_qg(2,C2Lim)
@@ -379,6 +400,15 @@ contains
             res1red(2,:) * limcol(3)
        
        call get_respdf(qg_lumi_splitb,1,1,C2Lim,restmp,respdf)
+#else
+       call res_ewkloop_qqb_gen(C2Lim%AmpMom(:,1:4),res0gen,res1gen)
+       limgen = tr*col_rvewk_is_qg_gen(2,C2Lim)
+       Qi = spread(Q_IS,1,13) !-- Q_IS of leg 2
+       res_tmp = res0gen * (limgen(1)*Qi**2 + (limgen(2)*Q3 + limgen(3)*Q4)*Qi) + &
+            res1gen * limgen(4)
+       res_tmp = transition('none','g -> q',res_tmp)
+       call get_respdf_gen(1,1,C2Lim,res_tmp,respdf)
+#endif
        respdf = -respdf*C2Lim%wgt
 
        FintRV_qg(2) = respdf(1)

@@ -9,7 +9,7 @@ module mod_limits_rv
   private
 
   public :: col_rvewk_is_ns, col_rvewk_is_ns_gen, col_rvqcd_is_ns
-  public :: col_rvewk_is_qg
+  public :: col_rvewk_is_qg, col_rvewk_is_qg_gen
   public :: col_rvqcd_is_qa
 
   !-- be careful to the z definition
@@ -174,6 +174,46 @@ contains
     res = res * two/s5i ! * Tr
     
   end function col_rvewk_is_qg
+
+  !-- general charges: 1 -> Qi^2, 2 -> Qi Q3, 3 -> Qi Q4, 4 -> PTREE (Qi: quark entering the reduced process)
+  function col_rvewk_is_qg_gen(i,proc) result(res)
+    integer, intent(in) :: i
+    type(KinConfig), intent(in)  :: proc
+    real(dp) :: res(4)
+    real(dp) :: z,s5i,etaij,s12,si3,si4
+    real(dp) :: omz,lomzOz,lz,leta,Li2z
+    real(dp) :: pnew,ptree
+
+    z     = proc%Lim_KinInv(1)
+    s5i   = proc%Lim_KinInv(2)
+    etaij = proc%Lim_KinInv(3)
+
+    s12 = two*scr(proc%AmpMom(:,1),proc%AmpMom(:,2))
+    si3 = two*scr(proc%AmpMom(:,i),proc%AmpMom(:,3))
+    si4 = two*scr(proc%AmpMom(:,i),proc%AmpMom(:,4))
+    
+    omz = one-z
+    lz = log(z)
+    lomzOz = log(omz/z)
+    leta = log(etaij)
+    Li2z = real(dilog2(z),kind=dp)
+
+    ptree = z**2+omz**2
+    ptree = ptree/omz
+
+    pnew  = one
+
+    res(1) = -pnew + &
+         (5._dp/three*pisq + two*lomzOz*leta - lz**2 - lomzOz**2 + three*lomzOz-two*Li2z)*ptree
+
+    !-- 2 pi^2: the collinear quark is outgoing in the 5-point amplitude and incoming in the reduced one
+    res(2) = (-two*pisq - two*log(si3/s12)*lomzOz) * ptree
+    res(3) = (-two*pisq - two*log(si4/s12)*lomzOz) * ptree
+    res(4) = ptree
+
+    res = res * two/s5i ! * Tr
+    
+  end function col_rvewk_is_qg_gen
 
   !-- 1 -> PLOOP, 2 --> PTREE
   !-- z = eg/ei so that the soft singularity is for z->0 [precision]

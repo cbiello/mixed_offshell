@@ -63,7 +63,7 @@ nnlo gq rr_5161d :  -2.4269717668193438E-002 fb
 nnlo gq rr_5162 :  1.3998887650704089E-002 fb
 nnlo gq rr_5163 :  -0.51807263531332559 fb
 nnlo gq rr_5164 :  -0.48258743423997208 fb
-nnlo gq rvewk_is :  -0.91400629524863075 fb
+nnlo gq rvewk_is :  -0.91400616667313117 fb
 nnlo gq rvewknf_is : [OpenLoops] STOP.
 nnlo gq s_12 :  -0.81583678560854722 fb
 nnlo gq s_oewk_fs_53 :  1.0649670335526848 fb
@@ -135,7 +135,7 @@ nnlo qg rr_5262c :  -6.3500562166447672E-002 fb
 nnlo qg rr_5262d :  -8.0809405125604472E-002 fb
 nnlo qg rr_5263 :  -0.64172164990949854 fb
 nnlo qg rr_5264 :  -0.49842866949832648 fb
-nnlo qg rvewk_is :  -0.65266098192232769 fb
+nnlo qg rvewk_is :  -0.73950006653205502 fb
 nnlo qg rvewknf_is : [OpenLoops] STOP.
 nnlo qg s_12 :  -0.81705043495368479 fb
 nnlo qg s_oewk_fs_53 :  1.0501527114653120 fb

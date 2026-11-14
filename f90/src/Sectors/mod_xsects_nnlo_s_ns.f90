@@ -355,7 +355,7 @@ contains
     !!-- FINITEDYp[6] term A (leg-1 boosted): CF * (z-bracket_A) * leg1finalcalG * FLM[z1.p1,p2]
     !!   z-bracket_A = SplitF_1 = PqqNLO(0) + Pqq0_R(0)*Log(mu^2/4EC^2).
     !!   leg1finalcalG = genGnloQCD - 3 Qq^2 Log(4EC^2/mu^2)  (legfinalcalG_cc, ileg=1),
-    !!   with genGnloQCD computed directly (validated vs DY+_qq.wl, != calG_ONLOQCD_ns).
+    !!   with genGnloQCD computed directly (validated vs DY+_qq.wl).
     !!   Terms B (QlpQq) and C (Qq^2 z-space) are separate (kin(1) xPij) -- not here.
     LOProc_z1%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     LOProc_z1%npart = 4
@@ -1249,9 +1249,7 @@ contains
        else
           call res_tree_g_qqb_gen(HardProc%AmpMom,res_nlo)
 
-          El = HardProc%Lim_Ei(ilept)
-          call fill_sv_logs(HardProc%muf(1)**2,4*El**2,sv_logs)
-          res_nlo_calG =  calG_ONLOQCD_ns(HardProc,res_nlo,sv_logs,Qlept,ilept)
+          res_nlo_calG =  genGnloQCD_cc(HardProc,res_nlo,sv_logs,Qlept,ilept)
 
           res_nlo_ischarges_1 = multiply_IS_charges_sq(res_nlo,1)
           res_nlo_ischarges_2 = multiply_IS_charges_sq(res_nlo,2)
@@ -1339,10 +1337,7 @@ contains
           call get_respdf(ns_lumi,1,1,C1Lim,res_nlo_old,respdf_bak)
        else
           call res_tree_qqb_gen(C1Lim%AmpMom,res_lo)
-          El = C1Lim%Lim_Ei(ilept)
-          call fill_sv_logs(C1Lim%muf(1)**2,4*El**2,sv_logs)
-          
-          res_lo_calG =  calG_ONLOQCD_ns(C1Lim,res_lo,sv_logs,Qlept,ilept)
+          res_lo_calG =  genGnloQCD_cc(C1Lim,res_lo,sv_logs,Qlept,ilept)
           res_lo_ischarges_1 = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges_2 = multiply_IS_charges_sq(res_lo,2)
           call get_respdf_gen(1,1,C1Lim,res_lo_ischarges_1,respdf_bak_1)
@@ -1419,10 +1414,7 @@ contains
           call get_respdf(ns_lumi,1,1,C2Lim,res_nlo_old,respdf_bak)
        else
           call res_tree_qqb_gen(C2Lim%AmpMom,res_lo)
-          El = C2Lim%Lim_Ei(ilept)
-          call fill_sv_logs(C2Lim%muf(1)**2,4*El**2,sv_logs)
-          
-          res_lo_calG =  calG_ONLOQCD_ns(C2Lim,res_lo,sv_logs,Qlept,ilept)
+          res_lo_calG =  genGnloQCD_cc(C2Lim,res_lo,sv_logs,Qlept,ilept)
           res_lo_ischarges_1 = multiply_IS_charges_sq(res_lo,1)
           res_lo_ischarges_2 = multiply_IS_charges_sq(res_lo,2)
           

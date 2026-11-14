@@ -58,13 +58,13 @@ nnlo gq rr_5161d :  1.7091605957317037E-003 fb
 nnlo gq rr_5162 :  -2.0441492052506109E-002 fb
 nnlo gq rr_5163 :  -0.18007719897817445 fb
 nnlo gq rr_5164 :  -0.72399860296395280 fb
-nnlo gq rvewk_is : STOP xsect_nnlo_rvewk_is_gq: not implemented for W
+nnlo gq rvewk_is :  -1.8597035163588231 fb
 nnlo gq rvewknf_is : STOP xsect_nnlo_rvewknf_is_gq: not implemented for W
 nnlo gq s_12 : STOP xsect_nnlo_s_gq_s12: not implemented for W
 nnlo gq s_oewk_fs_53 :  0.13123410068174432 fb
 nnlo gq s_oewk_fs_54 :  0.11189998634135116 fb
 nnlo gq s_oewk_is :  -4.3183983383915110E-002 fb
-nnlo gq s_oqcd :  5.3090716247108288E-002 fb
+nnlo gq s_oqcd :  0.16210550466490453 fb
 nnlo gq s_vewk : STOP xsect_nnlo_s_gq_vewk: not implemented for W
 nnlo gq s_vewknf : STOP xsect_nnlo_s_gq_vewknf: not implemented for W
 nnlo ns rvewk_is :  -9.5558046272833916E-002 fb
@@ -77,7 +77,7 @@ nnlo ns s_oewk_fs_53 :  -1.1270238512100810 fb
 nnlo ns s_oewk_fs_54 :  -2.5708914127857665 fb
 nnlo ns s_oewk_is : STOP W_ATLAS: lepton ids not set
 nnlo ns s_oewk_is_ra :  -0.13235371080271047 fb
-nnlo ns s_oqcd :  0.36022250338710859 fb
+nnlo ns s_oqcd :  -1.3288379764027705E-002 fb
 nnlo ns s_qq : STOP xsect_nnlo_s_ns_qq: not implemented for W
 nnlo ns s_qqb : STOP xsect_nnlo_s_ns_qqb: not implemented for W
 nnlo ns s_vewk :  -32.260164109710516 fb
@@ -130,12 +130,12 @@ nnlo qg rr_5262c :  0.11262796071409942 fb
 nnlo qg rr_5262d :  -0.14295046131045358 fb
 nnlo qg rr_5263 :  -7.4111399376673243E-002 fb
 nnlo qg rr_5264 :  6.7147948027419843E-002 fb
-nnlo qg rvewk_is : STOP xsect_nnlo_rvewk_is_qg: not implemented for W
+nnlo qg rvewk_is :  -1.9112257948664642 fb
 nnlo qg rvewknf_is : STOP xsect_nnlo_rvewknf_is_qg: not implemented for W
 nnlo qg s_12 : STOP xsect_nnlo_s_qg_s12: not implemented for W
 nnlo qg s_oewk_fs_53 :  0.15101962230377039 fb
 nnlo qg s_oewk_fs_54 :  0.55382376022507618 fb
 nnlo qg s_oewk_is :  -1.1226787927756096E-002 fb
-nnlo qg s_oqcd :  3.6117545478426597E-003 fb
+nnlo qg s_oqcd :  0.16472291797347524 fb
 nnlo qg s_vewk : STOP xsect_nnlo_s_qg_vewk: not implemented for W
 nnlo qg s_vewknf : STOP xsect_nnlo_s_qg_vewknf: not implemented for W
