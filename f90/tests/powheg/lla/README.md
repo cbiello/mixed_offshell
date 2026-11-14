@@ -19,14 +19,16 @@ The sectors are listed in `sectors.txt`: the hard events of `nloewk ns r_*` are 
 
 | | POWHEG [fb] | mixed_ll [fb] | difference [fb] |
 |---|---|---|---|
-| NLO QCD W+ | 6.1937 +- 0.0075 | 6.1928 +- 0.0021 | -0.0009 +- 0.0078 |
-| NLO QCD W- | running | 3.7968 +- 0.0012 | |
-| NLO QCD Z | running | 13.1031 +- 0.0031 | |
+| NLO QCD W+ | 6.1896 +- 0.0049 | 6.1928 +- 0.0021 | 0.0032 +- 0.0053 |
+| NLO QCD W- | 3.8011 +- 0.0038 | 3.7968 +- 0.0012 | -0.0043 +- 0.0040 |
+| NLO QCD Z | 13.1107 +- 0.0112 | 13.1031 +- 0.0031 | -0.0076 +- 0.0116 |
 | LO W+ | 5.0308 +- 0.0015 | 5.0291 +- 0.0009 | -0.0017 +- 0.0018 |
 | LO W- | 3.0387 +- 0.0011 | 3.0376 +- 0.0005 | -0.0011 +- 0.0012 |
 | LO Z | 10.5800 +- 0.0026 | 10.5766 +- 0.0014 | -0.0034 +- 0.0029 |
 
-W- and Z with the damping off are being rerun; with the gluon PDF switched off W- already agrees (3.4048 +- 0.0011 against 3.4066 +- 0.0039).
+POWHEG NLO: mean over 50 (W+) and 30 (W-, Z) seeds without damping; seeds more than 0.2 fb from the median are dropped (1 for W+, 2 for W-, none for Z: single large-weight points).
+
+With the gluon PDF switched off W- also agrees (3.4048 +- 0.0011 against 3.4066 +- 0.0039).
 
 Three things were needed to get here (all in the recipe now):
 
