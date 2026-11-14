@@ -85,14 +85,16 @@ table: [f90/tests/powheg/lla/README.md](f90/tests/powheg/lla/README.md).
 
 | | POWHEG [fb] | mixed_ll [fb] | difference [fb] |
 |---|---|---|---|
-| NLO QCD W+ | 6.1937 +- 0.0075 | 6.1928 +- 0.0021 | -0.0009 +- 0.0078 |
-| NLO QCD W- | running | 3.7968 +- 0.0012 | |
-| NLO QCD Z | running | 13.1031 +- 0.0031 | |
+| NLO QCD W+ | 6.1896 +- 0.0049 | 6.1928 +- 0.0021 | 0.0032 +- 0.0053 |
+| NLO QCD W- | 3.8011 +- 0.0038 | 3.7968 +- 0.0012 | -0.0043 +- 0.0040 |
+| NLO QCD Z | 13.1107 +- 0.0112 | 13.1031 +- 0.0031 | -0.0076 +- 0.0116 |
 | LO W+ | 5.0308 +- 0.0015 | 5.0291 +- 0.0009 | -0.0017 +- 0.0018 |
 | LO W- | 3.0387 +- 0.0011 | 3.0376 +- 0.0005 | -0.0011 +- 0.0012 |
 | LO Z | 10.5800 +- 0.0026 | 10.5766 +- 0.0014 | -0.0034 +- 0.0029 |
 
-W- and Z with the damping off are being rerun; with the gluon PDF switched off W- already agrees (3.4048 +- 0.0011 against 3.4066 +- 0.0039).
+POWHEG NLO: mean over 50 (W+) and 30 (W-, Z) seeds without damping; seeds more than 0.2 fb from the median are dropped (1 for W+, 2 for W-, none for Z: single large-weight points).
+
+With the gluon PDF switched off W- also agrees (3.4048 +- 0.0011 against 3.4066 +- 0.0039).
 The check covers the W fixes of `rvqcd` (RV6a-RV7b), the RR sectors and the resolved-photon S sectors for q qb, gq
 and qg. The `_gen` trees with g + gamma agree with the stored MadGraph points for W+ and W- up to one constant factor
 per coupling order (1.00069 at alpha^2, 1.00115 at alpha^3: inputs of the stored points; not followed up).
@@ -116,6 +118,41 @@ How the last point was found (W+, fb; useful as partial checks):
 | real, final gluon pT > 20 | 2.4284 +- 0.0009 | 2.4286 +- 0.0046 |
 | real, final quark pT > 20 | 1.1865 +- 0.0005 | 1.1870 +- 0.0017 (with damping: 1.160 +- 0.008) |
 | real, final quark pT > 50 | 0.7363 +- 0.0003 | 0.7365 +- 0.0012 (with damping: 0.710 +- 0.007) |
+
+## NLO EW corrections to l l' + jet against POWHEG (2026-11-14)
+
+Sum of the 33 sectors with one resolved jet (`nloqcd r_is` as LO, `rvewk_is`, RR `ns_ga`/`gq`/`qg`, `s_oqcd`)
+against the new POWHEG generator `NSC-lnujQCD`, channels q qb', gq, qg; photon recombined with leptons and quarks
+(Delta R 0.1), jet pT > 30. Setup, recipe and sector table: [f90/tests/powheg/llj/README.md](f90/tests/powheg/llj/README.md).
+
+| | channel | POWHEG [fb] | mixed_ll [fb] | difference [fb] |
+|---|---|---|---|---|
+| LO W+ | all | 555.51 +- 0.20 | 555.24 +- 0.09 | -0.27 +- 0.22 |
+| LO W+ | q qb' | 307.54 +- 0.12 | 307.36 +- 0.08 | -0.18 +- 0.14 |
+| LO W+ | gluon | 247.97 +- 0.12 | 247.88 +- 0.04 | -0.08 +- 0.13 |
+| LO W- | all | 365.99 +- 0.10 | 365.75 +- 0.05 | -0.24 +- 0.11 |
+| LO W- | q qb' | 187.10 +- 0.06 | 186.95 +- 0.05 | -0.15 +- 0.07 |
+| LO W- | gluon | 178.89 +- 0.07 | 178.80 +- 0.03 | -0.09 +- 0.07 |
+| LO Z | all | 585.61 +- 0.18 | 585.25 +- 0.09 | -0.36 +- 0.21 |
+| LO Z | q qb' | 291.37 +- 0.07 | 291.13 +- 0.08 | -0.24 +- 0.11 |
+| LO Z | gluon | 294.24 +- 0.14 | 294.11 +- 0.05 | -0.12 +- 0.15 |
+| correction W+ | all | -38.86 +- 0.08 | -38.82 +- 0.02 | 0.04 +- 0.09 |
+| correction W+ | q qb' | -22.36 +- 0.04 | -22.36 +- 0.02 | 0.00 +- 0.05 |
+| correction W+ | gluon | -16.50 +- 0.05 | -16.46 +- 0.01 | 0.04 +- 0.05 |
+| correction W- | all | -25.01 +- 0.05 | -24.93 +- 0.01 | 0.08 +- 0.05 |
+| correction W- | q qb' | -13.15 +- 0.03 | -13.13 +- 0.01 | 0.02 +- 0.03 |
+| correction W- | gluon | -11.86 +- 0.03 | -11.79 +- 0.01 | 0.06 +- 0.03 |
+| correction Z | all | -18.63 +- 0.07 | -18.64 +- 0.01 | -0.00 +- 0.07 |
+| correction Z | q qb' | -8.76 +- 0.03 | -8.81 +- 0.01 | -0.05 +- 0.03 |
+| correction Z | gluon | -9.86 +- 0.05 | -9.83 +- 0.01 | 0.03 +- 0.05 |
+
+The corrections agree within 2 sigma (0.02% of the LO); the LO of mixed_ll is 0.05% low (2 sigma), still to be understood.
+Before the fixes the q qb' correction was W+ -26.86, W- -15.71 fb. Found with this check:
+
+- `ns s_oqcd` (W): wrong sign of the lepton-quark charge terms in `calG_ONLOQCD_ns`; now `genGnloQCD_cc`.
+- `qg s_oqcd` (W): `calG_ONLOQCD_gq` filled only the (g,q) element. Mirror after the fix: gq 0.3584(9), qg 0.3592(8) fb (W+).
+- `gq`/`qg rvewk_is` for W: new, collinear limit with the extra -2 pi^2 Q_i (Q3+Q4); integrability scan passes.
+- `qg rvewk_is` (Z, old code): quark and antiquark rows of `qg_lumi_splitb` swapped; mirror after the fix gq -1.8129(26), qg -1.8085(25) fb.
 
 ## W- q qbar' integrated subtraction (2026-11-13)
 

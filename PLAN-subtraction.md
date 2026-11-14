@@ -55,7 +55,7 @@ elastic functions: `IntSub/mod_int_sub_nnlo.f90`.
 |---|---|---|---|
 | A1 | `s_12`, `s_vqcd`, `s_vewk` against `W.nb` | M1 | ✅ 2026-11-12 |
 | A2 | `s_oewk_is_ra`, `s_oewk_fs_53/54`: QCD kernels on the resolved-photon process against the ONLO-EWK terms of `W.nb` | M1 (kernels), M2, M4 | ✅ kernels, scan, POWHEG (2026-11-13) |
-| A3 | `s_oqcd` against the ONLO-QCD terms of `W.nb` (`calG_ONLOQCD_ns` vs `genGnloQCD`, PLAN S3) | M1, M2 | 🟡 later, not needed for 5 |
+| A3 | `s_oqcd` against the ONLO-QCD terms of `W.nb` (`calG_ONLOQCD_ns` vs `genGnloQCD`, PLAN S3) | M1, M2 | ✅ settled numerically by POWHEG l l' + jet (PLAN S3): `genGnloQCD_cc` is right; symbolic check still open |
 | A4 | `s_oewk_is`: draft routine, use `_ra`; rewire and delete the draft (PLAN S4) | – | 🔧 |
 
 ### 4b. q qb' (ns), W-
@@ -92,7 +92,7 @@ Sectors that contribute with a resolved photon (analysis `V_lla_nloqcd`):
 |---|---|---|
 | T1 | Matching analyses in both codes (photon cuts, pT(l l') cut) | ✅ `V_lla_nloqcd`, `pwhg_analysis-NSCa.f` |
 | T2 | LO l l' gamma: mixed_ll against POWHEG, Z, W+, W- | ✅ agree at 0.03% (needs `-qmin_rsc 1`) |
-| T3 | NLO QCD l l' gamma: mixed_ll against POWHEG, Z, W+, W- | ✅ W+ agrees at 0.1% (6.1928(21) vs 6.1937(75)); W-, Z: POWHEG rerun without damping in progress |
+| T3 | NLO QCD l l' gamma: mixed_ll against POWHEG, Z, W+, W- | ✅ agree at 0.1%: W+ 6.1928(21) vs 6.1896(49), W- 3.7968(12) vs 3.8011(38), Z 13.1031(31) vs 13.1107(112) |
 
 ## 6. Order
 

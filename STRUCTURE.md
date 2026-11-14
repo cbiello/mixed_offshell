@@ -194,6 +194,7 @@ Files with no `_oldcode` and no `Vcharge` branch are untouched Z code.
 ## 10. Analyses
 
 `analysis/mod_cut_histo_<name>.f90` provides `init_user_histo` and `cut_histo(event)`.
+Benchmark analyses for all three bosons: `V_lla_nloqcd` (resolved photon) and `V_llj_nloew` (resolved jet, photon recombination).
 W analyses: `W_ATLAS` (high-mT ATLAS-like cuts), `W_ATLASNLOEW`, `W_ATLASNLOQCD`
 (POWHEG benchmark setups), `w_dflt`. `mod_cut_histo_aux` has photon recombination
 (`recombine_photons`), driven by `event%ids`.
