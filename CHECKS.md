@@ -255,3 +255,34 @@ ag `s_12` 3.278(1)e-3, ga 3.277(1)e-3.
 Seeds: before I18 (PLAN) runs with different `-seed` shared the generator of the lepton rapidity sign. With 8 seeds gq `s_12`
 came out 0.13595(30) and qg 0.13404(30) (4.5 sigma apart); each charge structure of the boosted term taken alone was symmetric.
 After the fix the two agree (numbers above). The four-quark CP result for `ns_qqb` (only a + c symmetric) is unchanged with independent seeds.
+
+## Scale dependence of the integrated sectors (RGE test, 2026-11-15)
+
+With PDFs and alpha_s frozen at mu0 (`-pdfscale`), the slope c1 in log mu^2 of the mixed sectors of a channel must equal -r0,
+r0 = lower-order results with one PDF replaced by a splitting function convolved with it (`-rge`): P_qg, P_qq, P_q gamma at
+one loop times the NLO QCD / NLO EW sectors, and the mixed kernels P^(1,1) times LO. The finite remainders (`v`, `rvewk`,
+`rvqcd`, the hard events) do not depend on mu, so the test covers every S sector of the channel at once.
+Both sides come from the scale-variation weights of single runs, at the same points. Recipe: `f90/tests/rge/rgetest.sh`, `rge.py`.
+The two-loop sector cannot run here (library not linked): its slope is taken as minus the delta(1-x) part of P_qq^(1,1) (row V).
+
+Calibration at NLO: gq -104.89 vs -104.884; Z ns QCD 65.330 vs 65.324, QED 0.9643 vs 0.9642.
+
+Mixed sectors, fb per unit of log mu^2 (`W_ATLAS`, 14 TeV, mu0 = MZ, one seed):
+
+| Channel | W+ c1 | W+ -r0 | W- c1 | W- -r0 | Z c1 | Z -r0 |
+|---|---|---|---|---|---|---|
+| gq + qg | 6.6211 | 6.6122 | 5.2229 | 5.2117 | 4.163 | 4.182 |
+| aq + qa | 0.0653 | 0.0668 | 0.03676 | 0.03682 | | |
+| ag + ga | -0.04335 | -0.04323 | -0.04318 | -0.04330 | | |
+| q qb (ns) | -3.778 | -3.838 | -3.188 | -3.192 | -1.927 | -1.923 |
+
+- W+ ns: the gap is noise of `s_oewk_fs_54` (slope -0.412 here; -0.465, -0.499, -0.496, -0.506 with four other seeds).
+  With the mean of the five seeds c1 = -3.842.
+- Z gq + qg without `s_vewknf`; the 0.45% gap is within the noise of `s_oewk_fs`.
+- Single sectors that can be isolated: W+ gq + qg `s_vewk` 5.231 vs 5.230 (P_qg times the EW virtual); Z `s_qq` -0.00851 vs -0.00850
+  (P_q qb^(1,1)); the log^2 mu coefficient of W+ gq + qg also matches.
+
+What it tests: all coefficients of log mu in the S sectors, including the products of one-loop kernels with the finite soft
+and virtual functions at boosted kinematics. For gq/qg `s_12` of W this includes the W-specific term of `calG_gq_cc`
+(lepton-quark charge correlation), which enters r0 through the NLO EW sectors convolved with P_qg.
+What it does not test: terms without log mu (constants such as the zeta2 terms, the finite parts of the triple-collinear kernels).

@@ -154,16 +154,16 @@ channels are to be provided by Christian.
 |---|---|---|---|
 | S8 | `s_oqcd`, `s_oewk_is`, `s_oewk_fs_53/54`: general; "agreement oldcode T/F for NC, limits work for + and - CC". The W elastic function `calG_ONLOQCD_gq` is never exercised by the NC comparison | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90` | 🟡 |
 | S9 | `calG_ONLOQCD_gq`: (a) `gq` passed `Lim_Ei(2)` in the scale log, now `Lim_Ei(1)` (energy of the incoming partons) as `qg`; (b) the function filled only the (g,q) element, so the term was missing in `qg s_oqcd` for W. After the fixes gq = qg (W+ 0.3584(9) vs 0.3592(8) fb, l l' + jet setup) and the gluon channels agree with POWHEG (C3.7) | `mod_xsects_nnlo_s_gq.f90`, `mod_int_sub_nnlo.f90` | ✅ 2026-11-13 |
-| S10 | gq, qg `s_12`, `s_vewk` for W. `s_vewk`: P_qg kernel times the finite EW virtual `_gen`. `s_12`: the Z formula (`Z.nb`, `FINITEgq`) with general charges: double boost with the charge of the other leg squared; triple-collinear kernel with the charge of the quark from the gluon splitting squared; boosted term P~gq(z) [genGnloQCD + (3 L - 4 zeta2) Q_i^2 - 2 log(z) Ql Q_i log(s_il/s12)] (`calG_gq_cc`). **Not derived**: the charge structure is taken from the q qb' case (`W.nb`), where the same terms appear with P~qq, and from the I-operator at the boosted kinematics; reduces to the Z formula for Z charges. CP test and gq = qg pass. `s_vewknf` still Z only | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90`, `IntSub/mod_int_sub_nnlo.f90` | 🟡 2026-11-15 (needs derivation or benchmark) |
+| S10 | gq, qg `s_12`, `s_vewk` for W. `s_vewk`: P_qg kernel times the finite EW virtual `_gen`. `s_12`: the Z formula (`Z.nb`, `FINITEgq`) with general charges: double boost with the charge of the other leg squared; triple-collinear kernel with the charge of the quark from the gluon splitting squared; boosted term P~gq(z) [genGnloQCD + (3 L - 4 zeta2) Q_i^2 - 2 log(z) Ql Q_i log(s_il/s12)] (`calG_gq_cc`). **Not derived**: the charge structure is taken from the q qb' case (`W.nb`), where the same terms appear with P~qq, and from the I-operator at the boosted kinematics; reduces to the Z formula for Z charges. CP test and gq = qg pass; scale dependence correct (C4.4), which fixes all log mu terms but not the constants. `s_vewknf` still Z only | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90`, `IntSub/mod_int_sub_nnlo.f90` | 🟡 2026-11-15 (constants need derivation or benchmark) |
 | S10b | `gq s_oewk_fs_53/54` zero at every point: two debug lines set `xx(xE)`, `xx(xRHO)` to fixed values. Removed; Z gq = qg mirror | `mod_xsects_nnlo_s_gq.f90` | ✅ 2026-11-13 |
 
 ### 6c. aq, qa, ag, ga
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| S11 | `aq` for W: `s_vqcd`, `s_12`, `s_oewk` with the squared charge of the quark from the photon splitting (`multiply_IS_charges_sq`, `transition`), no gamma gamma -> l nu terms; `s_oqcd` was already general. CP test passes | `mod_xsects_nnlo_s_aq.f90` | 🟡 2026-11-15 (no benchmark) |
-| S12 | `qa` for W: mirror of S11, all four sectors. CP test and aq = qa pass | `mod_xsects_nnlo_s_qa.f90` | 🟡 2026-11-15 (no benchmark) |
-| S13 | `ag`, `ga` for W: `s_12`, `s_oqcd`, `s_oewk` with the charge of the quark from the photon splitting; the gamma gamma -> l l terms are absent. CP test and ag = ga pass. `s_ag_oqcd_hppt` (unused) still Z only | `mod_xsects_nnlo_s_ag.f90`, `_ga.f90` | 🟡 2026-11-15 (no benchmark) |
+| S11 | `aq` for W: `s_vqcd`, `s_12`, `s_oewk` with the squared charge of the quark from the photon splitting (`multiply_IS_charges_sq`, `transition`), no gamma gamma -> l nu terms; `s_oqcd` was already general. CP test and RGE test (C4.4) pass | `mod_xsects_nnlo_s_aq.f90` | 🟡 2026-11-15 (no benchmark) |
+| S12 | `qa` for W: mirror of S11, all four sectors. CP test, aq = qa and RGE test (C4.4) pass | `mod_xsects_nnlo_s_qa.f90` | 🟡 2026-11-15 (no benchmark) |
+| S13 | `ag`, `ga` for W: `s_12`, `s_oqcd`, `s_oewk` with the charge of the quark from the photon splitting; the gamma gamma -> l l terms are absent. CP test, ag = ga and RGE test (C4.4) pass. `s_ag_oqcd_hppt` (unused) still Z only | `mod_xsects_nnlo_s_ag.f90`, `_ga.f90` | 🟡 2026-11-15 (no benchmark) |
 | S14 | HOPPET tables `xPij_a` with `Qdn2/Qup2` weights: used only by the gamma gamma Born terms, which do not exist for W. Nothing to do | `IntSub/mod_hoppet_nnlo.f90` | – |
 
 ### 6d. Mathematica side
@@ -232,7 +232,8 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 | C4.1 | `-MGcheck` for all `_gen` trees incl. g+gamma and four-quark, W±; add loop amplitudes vs OpenLoops/MadLoop points; the W four-quark amplitudes are OpenLoops, validated by C3.10 | 🔧 |
 | C4.2 | Pole check (`-checkpoles`) for `_gen` one-loop wrappers | ❌ |
 | C4.3 | Z regression: `OLDCODE=true` vs `false` builds and old published numbers after every change; script it (I11) | manual |
-| C4.4 | Independence of technical parameters: `buff*`, damping exponents, partition choice; mu_R/mu_F logs | ❌ |
+| C4.4 | Scale logs: RGE test of all S sectors (`f90/tests/rge/`, CHECKS), slope in log mu^2 against splitting functions times lower orders. W+, W-: gq, aq, ag, q qb close at the per-mille level (noise limited); Z: gq, q qb | ✅ 2026-11-15 |
+| C4.4b | Independence of technical parameters: `buff*`, damping exponents, partition choice | ❌ |
 | C4.5 | W+ vs W- consistency: charge conjugation relates partonic W- to W+ with q <-> qb | ❌ |
 | C4.6 | `qa` = mirror of `aq`, `ga` = mirror of `ag`, `qg` = mirror of `gq` (automated diff test with x1 <-> x2) | ❌ |
 | C4.7 | Inclusive mixed corrections vs literature for on-shell/off-shell W where available | ❌ |
