@@ -23,9 +23,9 @@ nnlo ag rr_5262a :  -4.7443260119393628E-003 fb
 nnlo ag rr_5262b :  8.4493861134388899E-003 fb
 nnlo ag rr_5262c :  6.9938797656759321E-003 fb
 nnlo ag rr_5262d :  5.7226643711289398E-003 fb
-nnlo ag s_12 : STOP xsect_nnlo_s_ag_s12: not implemented for W
-nnlo ag s_oewk : STOP xsect_nnlo_s_ag_oewk: not implemented for W
-nnlo ag s_oqcd : STOP xsect_nnlo_s_ag_oqcd: not implemented for W
+nnlo ag s_12 :  3.3010140161799629E-003 fb
+nnlo ag s_oewk :  -5.1161197380927823E-002 fb
+nnlo ag s_oqcd :  -2.0550316687080856E-003 fb
 nnlo aq rr_5161a :  -7.4520792446714510E-003 fb
 nnlo aq rr_5161b :  -4.6518685006307374E-003 fb
 nnlo aq rr_5161c :  -6.2299302337059589E-003 fb
@@ -37,10 +37,10 @@ nnlo aq rr_5262b :  9.5064952769097211E-002 fb
 nnlo aq rr_5262c :  -7.4042391248463707E-002 fb
 nnlo aq rr_5262d :  -9.0977251533547354E-002 fb
 nnlo aq rvqcd_is :  -0.26457068959242819 fb
-nnlo aq s_12 : STOP xsect_nnlo_s_aq_s12: not implemented for W
-nnlo aq s_oewk : STOP xsect_nnlo_s_aq_oewk: not implemented for W
+nnlo aq s_12 :  -5.2848170110492976E-003 fb
+nnlo aq s_oewk :  0.40516043307193961 fb
 nnlo aq s_oqcd :  3.8991911714742859E-003 fb
-nnlo aq s_vqcd : STOP xsect_nnlo_s_aq_vqcd: not implemented for W
+nnlo aq s_vqcd :  4.0544656514565286E-003 fb
 nnlo ga rr_5161a :  6.3048043153922763E-003 fb
 nnlo ga rr_5161b :  7.5128705417228953E-003 fb
 nnlo ga rr_5161c :  2.1015256133413798E-003 fb
@@ -48,9 +48,9 @@ nnlo ga rr_5161d :  7.4179299031397090E-003 fb
 nnlo ga rr_5162 :  3.7633407243358456E-003 fb
 nnlo ga rr_5261 :  -1.1414906052858160E-003 fb
 nnlo ga rr_5262 :  4.0655693071799089E-003 fb
-nnlo ga s_12 : STOP xsect_nnlo_s_ga_s12: not implemented for W
-nnlo ga s_oewk : STOP xsect_nnlo_s_ga_oewk: not implemented for W
-nnlo ga s_oqcd : STOP xsect_nnlo_s_ga_oqcd: not implemented for W
+nnlo ga s_12 :  3.2878828745642754E-003 fb
+nnlo ga s_oewk :  -5.5308516261101559E-002 fb
+nnlo ga s_oqcd :  -1.7014481884988484E-003 fb
 nnlo gq rr_5161a :  -6.3425222554418431E-002 fb
 nnlo gq rr_5161b :  -1.7767266885650589E-003 fb
 nnlo gq rr_5161c :  -3.0651284328381983E-003 fb
@@ -60,12 +60,12 @@ nnlo gq rr_5163 :  -0.18007719897817445 fb
 nnlo gq rr_5164 :  -0.72399860296395280 fb
 nnlo gq rvewk_is :  -1.8597035163588231 fb
 nnlo gq rvewknf_is : STOP xsect_nnlo_rvewknf_is_gq: not implemented for W
-nnlo gq s_12 : STOP xsect_nnlo_s_gq_s12: not implemented for W
+nnlo gq s_12 :  0.13851154416906974 fb
 nnlo gq s_oewk_fs_53 :  0.13123410068174432 fb
 nnlo gq s_oewk_fs_54 :  0.11189998634135116 fb
 nnlo gq s_oewk_is :  -4.3183983383915110E-002 fb
 nnlo gq s_oqcd :  0.16210550466490453 fb
-nnlo gq s_vewk : STOP xsect_nnlo_s_gq_vewk: not implemented for W
+nnlo gq s_vewk :  1.9815783789761894 fb
 nnlo gq s_vewknf : STOP xsect_nnlo_s_gq_vewknf: not implemented for W
 nnlo ns rvewk_is :  -9.5558046272833916E-002 fb
 nnlo ns rvewknf_is : STOP xsect_nnlo_rvewknf_is_ns: not implemented for W
@@ -118,10 +118,10 @@ nnlo qa rr_5262b :  -1.8946216074440664E-003 fb
 nnlo qa rr_5262c :  -4.5617177285872702E-003 fb
 nnlo qa rr_5262d :  2.7504718813502476E-003 fb
 nnlo qa rvqcd_is :  -0.28028924815268480 fb
-nnlo qa s_12 : STOP xsect_nnlo_s_qa_s12: not implemented for W
-nnlo qa s_oewk : STOP xsect_nnlo_s_qa_oewk: not implemented for W
-nnlo qa s_oqcd : STOP xsect_nnlo_s_qa_oqcd: not implemented for W
-nnlo qa s_vqcd : STOP xsect_nnlo_s_qa_vqcd: not implemented for W
+nnlo qa s_12 :  -5.1825060174304476E-003 fb
+nnlo qa s_oewk :  0.63246496598675794 fb
+nnlo qa s_oqcd :  1.7750207032187343E-003 fb
+nnlo qa s_vqcd :  3.9366955541622452E-003 fb
 nnlo qg rr_5261 :  -1.9281710938168935E-002 fb
 nnlo qg rr_5262a :  1.4109459615292831E-003 fb
 nnlo qg rr_5262b :  -5.5388270590195380E-003 fb
@@ -131,10 +131,10 @@ nnlo qg rr_5263 :  -7.4111399376673243E-002 fb
 nnlo qg rr_5264 :  6.7147948027419843E-002 fb
 nnlo qg rvewk_is :  -1.9112257948664642 fb
 nnlo qg rvewknf_is : STOP xsect_nnlo_rvewknf_is_qg: not implemented for W
-nnlo qg s_12 : STOP xsect_nnlo_s_qg_s12: not implemented for W
+nnlo qg s_12 :  0.12088546448033537 fb
 nnlo qg s_oewk_fs_53 :  0.15101962230377039 fb
 nnlo qg s_oewk_fs_54 :  0.55382376022507618 fb
 nnlo qg s_oewk_is :  -1.1226787927756096E-002 fb
 nnlo qg s_oqcd :  0.16472291797347524 fb
-nnlo qg s_vewk : STOP xsect_nnlo_s_qg_vewk: not implemented for W
+nnlo qg s_vewk :  1.9788085855057940 fb
 nnlo qg s_vewknf : STOP xsect_nnlo_s_qg_vewknf: not implemented for W

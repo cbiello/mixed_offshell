@@ -27,6 +27,7 @@ contains
 
   function xsect_nnlo_s_ga_s12(yRnd,ff,vegasweight)
     use mod_kinematics_lo
+    real(dp) :: res_gen(-5:7,-5:7)
     integer :: xsect_nnlo_s_ga_s12
     real(dp15) :: yRnd(30),ff(1),vegasweight
     type(KinConfig) :: LOProc
@@ -37,7 +38,6 @@ contains
     real(dp) :: res_lo_1(1,1),res_lo_2(2,2)
 
     xsect_nnlo_s_ga_s12 = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_s_ga_s12: not implemented for W'
 
     ff(1) = zero
 
@@ -57,7 +57,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     LOProc%npart = 4
 
     call cut_histo(LOProc)
@@ -67,29 +67,41 @@ contains
 
     else
 
-       !-- single boost
-       call res_treeAA_aa(LOProc%AmpMom,res_lo_1(1,1))
-       call get_respdf_hoppet(xPij,PDFs,aa_lumi,1,1,LOProc,res_lo_1,respdf_1,myPDFs1_Lmu=[xPij_Lmu,xPij_Lmu2])
-       respdf_1 = Tr * (Qup2*nup + Qdn2*ndn) * respdf_1 * LOProc%wgt
+       if (Vcharge == 0) then
+          !-- single boost
+          call res_treeAA_aa(LOProc%AmpMom,res_lo_1(1,1))
+          call get_respdf_hoppet(xPij,PDFs,aa_lumi,1,1,LOProc,res_lo_1,respdf_1,myPDFs1_Lmu=[xPij_Lmu,xPij_Lmu2])
+          respdf_1 = Tr * (Qup2*nup + Qdn2*ndn) * respdf_1 * LOProc%wgt
 
-       !-- F[z1.p1,z2.p2]
-       call res_tree_qqb(LOProc%AmpMom,res_lo_2)
-       res_lo_2(:,1) = Qdn2 * res_lo_2(:,1)
-       res_lo_2(:,2) = Qup2 * res_lo_2(:,2)
+          !-- F[z1.p1,z2.p2]
+          call res_tree_qqb(LOProc%AmpMom,res_lo_2)
+          res_lo_2(:,1) = Qdn2 * res_lo_2(:,1)
+          res_lo_2(:,2) = Qup2 * res_lo_2(:,2)
 
-       call get_respdf_hoppet(xPij_A_2,xPij_A_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,1),&
-          myPDFs1_Lmu=[xPij_A_2_Lmu],myPDFs2_Lmu=[xPij_A_1_Lmu])
+          call get_respdf_hoppet(xPij_A_2,xPij_A_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,1),&
+             myPDFs1_Lmu=[xPij_A_2_Lmu],myPDFs2_Lmu=[xPij_A_1_Lmu])
 
-       call get_respdf_hoppet(xPij_B_2,xPij_B_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,2),&
-          myPDFs2_Lmu=[xPij_B_1_Lmu])
+          call get_respdf_hoppet(xPij_B_2,xPij_B_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,2),&
+             myPDFs2_Lmu=[xPij_B_1_Lmu])
 
-       call get_respdf_hoppet(xPij_C_2,xPij_C_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,3),&
-          myPDFs1_Lmu=[xPij_C_2_Lmu])
+          call get_respdf_hoppet(xPij_C_2,xPij_C_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,3),&
+             myPDFs1_Lmu=[xPij_C_2_Lmu])
 
-       call get_respdf_hoppet(xPij_D_2,xPij_D_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,4))
+          call get_respdf_hoppet(xPij_D_2,xPij_D_1,ns_lumi,1,1,LOProc,res_lo_2,respdf_tmp(:,4))
 
-       respdf_2 = sum(respdf_tmp,2)
-       respdf_2 = Tr * xn * respdf_2 * LOProc%wgt
+          respdf_2 = sum(respdf_tmp,2)
+          respdf_2 = Tr * xn * respdf_2 * LOProc%wgt
+       else
+          !-- no gamma gamma -> l nu; charge of the quark from the photon splitting
+          respdf_1 = zero
+          call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
+          res_gen = multiply_IS_charges_sq(res_gen,2)
+          call get_respdf_hoppet_gen(xPij_A_2,xPij_A_1,1,1,LOProc,res_gen,respdf_tmp(:,1),myPDFs1_Lmu=[xPij_A_2_Lmu],myPDFs2_Lmu=[xPij_A_1_Lmu])
+          call get_respdf_hoppet_gen(xPij_B_2,xPij_B_1,1,1,LOProc,res_gen,respdf_tmp(:,2),myPDFs2_Lmu=[xPij_B_1_Lmu])
+          call get_respdf_hoppet_gen(xPij_C_2,xPij_C_1,1,1,LOProc,res_gen,respdf_tmp(:,3),myPDFs1_Lmu=[xPij_C_2_Lmu])
+          call get_respdf_hoppet_gen(xPij_D_2,xPij_D_1,1,1,LOProc,res_gen,respdf_tmp(:,4))
+          respdf_2 = Tr * xn * sum(respdf_tmp,2) * LOProc%wgt
+       endif
 
        respdf = respdf_1 + respdf_2
 
@@ -113,6 +125,7 @@ contains
   function xsect_nnlo_s_ga_oewk(yRnd,ff,vegasweight)
     use mod_kinematics_nlo_z
     implicit none
+    real(dp) :: res_gen(-5:7,-5:7)
     integer :: xsect_nnlo_s_ga_oewk
     real(dp15) :: yRnd(30),ff(1),vegasweight
     type(KinConfig) :: HardProc,C1Lim,C2Lim
@@ -124,7 +137,6 @@ contains
     real(dp) :: Pqg0,res_nlo(2,2),res_lo(2,2),res_aa,res_ag(1,1)
 
     xsect_nnlo_s_ga_oewk = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_s_ga_oewk: not implemented for W'
 
     ff(1) = zero
     kin = 0
@@ -155,7 +167,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut) then
@@ -165,11 +177,17 @@ contains
 
     else
 
-       call res_tree_a_qa(HardProc%AmpMom,res_nlo)
-       res_ag = ndn*(res_nlo(1,1)+res_nlo(2,1))+&
-                nup*(res_nlo(1,2)+res_nlo(2,2))
+       if (Vcharge == 0) then
+          call res_tree_a_qa(HardProc%AmpMom,res_nlo)
+          res_ag = ndn*(res_nlo(1,1)+res_nlo(2,1))+&
+                   nup*(res_nlo(1,2)+res_nlo(2,2))
 
-       call get_respdf(ga_lumi,1,1,HardProc,res_ag,respdf)
+          call get_respdf(ga_lumi,1,1,HardProc,res_ag,respdf)
+       else
+          call res_tree_a_qa_gen(HardProc%AmpMom,res_gen)
+          res_gen = transition('g -> q','none',res_gen)
+          call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+       endif
 
        EC    = HardProc%Lim_Ei(1)
        eta51 = HardProc%Lim_etaij(1,5)
@@ -194,7 +212,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 52                           !!
     !!-----------------------------------------------------------------------!!
-    C2Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C2Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C2Lim)
 
     if (C2Lim%makecut) then
@@ -204,11 +222,17 @@ contains
 
     else
 
-       call res_tree_qqb(C2Lim%AmpMom,res_lo)
-       res_ag = Qdn2*ndn*(res_lo(1,1)+res_lo(2,1))+&
-                Qup2*nup*(res_lo(1,2)+res_lo(2,2))
+       if (Vcharge == 0) then
+          call res_tree_qqb(C2Lim%AmpMom,res_lo)
+          res_ag = Qdn2*ndn*(res_lo(1,1)+res_lo(2,1))+&
+                   Qup2*nup*(res_lo(1,2)+res_lo(2,2))
 
-       call get_respdf(ga_lumi,1,1,C2Lim,res_ag,respdf)
+          call get_respdf(ga_lumi,1,1,C2Lim,res_ag,respdf)
+       else
+          call res_tree_qqb_gen(C2Lim%AmpMom,res_gen)
+          res_gen = transition('g -> q','ga -> q',multiply_IS_charges_sq(res_gen,2))
+          call get_respdf_gen(1,1,C2Lim,res_gen,respdf)
+       endif
 
        EC  = C2Lim%Lim_Ei(1)
        s25 = C2Lim%Lim_sij(2,5)
@@ -236,7 +260,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C1Lim)
 
     if (C1Lim%makecut) then
@@ -246,11 +270,15 @@ contains
 
     else
 
-       call res_treeAA_aa(C1Lim%AmpMom,res_aa)
-       !-- factors 2 from q-qb and qb-q
-       res_ag = 2 * (Qdn2*ndn + Qup2*nup) * res_aa
+       if (Vcharge == 0) then
+          call res_treeAA_aa(C1Lim%AmpMom,res_aa)
+          !-- factors 2 from q-qb and qb-q
+          res_ag = 2 * (Qdn2*ndn + Qup2*nup) * res_aa
 
-       call get_respdf(ga_lumi,1,1,C1Lim,res_ag,respdf)
+          call get_respdf(ga_lumi,1,1,C1Lim,res_ag,respdf)
+       else
+          respdf = zero   !-- no gamma gamma -> l nu
+       endif
 
        eta51 = C1Lim%Lim_KinInv(4)
        EC    = C1Lim%Lim_Ei(1)
@@ -292,6 +320,7 @@ contains
   function xsect_nnlo_s_ga_oqcd(yRnd,ff,vegasweight)
     use mod_kinematics_nlo_z
     implicit none
+    real(dp) :: res_gen(-5:7,-5:7)
     integer :: xsect_nnlo_s_ga_oqcd
     real(dp15) :: yRnd(30),ff(1),vegasweight
     type(KinConfig) :: HardProc,C1Lim
@@ -303,7 +332,6 @@ contains
     real(dp)    :: z,zz,s15,Pqg0,EC
 
     xsect_nnlo_s_ga_oqcd = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_s_ga_oqcd: not implemented for W'
 
     ff(1) = zero
 
@@ -333,7 +361,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    HardProc%ids(1:5) = [0,0,id_el,-id_el,id_q]
+    HardProc%ids(1:5) = [0,0,lep_ids(1),lep_ids(2),id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -343,12 +371,18 @@ contains
 
     else    
 
-       call res_tree_g_gq(HardProc%AmpMom,res_nlo)
+       if (Vcharge == 0) then
+          call res_tree_g_gq(HardProc%AmpMom,res_nlo)
 
-       res_nlo_ga(1,1) = ndn * Qdn2 * sum(res_nlo(:,1)) &
-                       + nup * Qup2 * sum(res_nlo(:,2))
+          res_nlo_ga(1,1) = ndn * Qdn2 * sum(res_nlo(:,1)) &
+                          + nup * Qup2 * sum(res_nlo(:,2))
 
-       call get_respdf(ga_lumi,1,1,HardProc,res_nlo_ga,respdf)
+          call get_respdf(ga_lumi,1,1,HardProc,res_nlo_ga,respdf)
+       else
+          call res_tree_g_gq_gen(HardProc%AmpMom,res_gen)
+          res_gen = transition('none','ga -> q',multiply_IS_charges_sq(res_gen,2))
+          call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+       endif
 
        EC = HardProc%Lim_Ei(1)
        call fill_sv_logs(HardProc%muf(1)**2,4*EC**2,sv_logs)
@@ -367,7 +401,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                          Collinear Limit 51                           !!
     !!-----------------------------------------------------------------------!!
-    C1Lim%ids(1:4) = [0,0,id_el,-id_el]
+    C1Lim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(C1Lim)
     
     if (C1Lim%makecut.or.C1Lim%flag) then
@@ -377,12 +411,18 @@ contains
 
     else
 
-       call res_tree_qqb(C1Lim%AmpMom,res_nlo)
+       if (Vcharge == 0) then
+          call res_tree_qqb(C1Lim%AmpMom,res_nlo)
 
-       res_nlo_ga(1,1) = ndn * Qdn2 * sum(res_nlo(:,1)) &
-                       + nup * Qup2 * sum(res_nlo(:,2))
+          res_nlo_ga(1,1) = ndn * Qdn2 * sum(res_nlo(:,1)) &
+                          + nup * Qup2 * sum(res_nlo(:,2))
 
-       call get_respdf(ga_lumi,1,1,C1Lim,res_nlo_ga,respdf)
+          call get_respdf(ga_lumi,1,1,C1Lim,res_nlo_ga,respdf)
+       else
+          call res_tree_qqb_gen(C1Lim%AmpMom,res_gen)
+          res_gen = transition('g -> q','ga -> q',multiply_IS_charges_sq(res_gen,2))
+          call get_respdf_gen(1,1,C1Lim,res_gen,respdf)
+       endif
 
        EC = C1Lim%Lim_Ei(1)
        call fill_sv_logs(C1Lim%muf(1)**2,4*EC**2,sv_logs)
