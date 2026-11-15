@@ -29,13 +29,13 @@ Legend: ✅ done and checked · 🟡 code exists, not validated · 🔧 partial 
 | S ns: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
 | S ns: `s_qqb`, `s_qq` | ✅ | ✅ same code as Z | ✅ same code as Z |
 | S gq, qg: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
-| S gq, qg: `s_12`, `s_vewk` | ✅ | ❌ | ❌ |
-| S aq, qa, ag, ga (all) | ✅ | ❌ | ❌ |
+| S gq, qg: `s_12`, `s_vewk` | ✅ | 🟡 `s_12` formula not derived (S10) | same |
+| S aq, qa, ag, ga (all) | ✅ | 🟡 symmetry checks only | same |
 | Limit-scaling checks usable on all sectors | 🔧 | 🔧 | 🔧 |
 | Fortran vs Mathematica integrated CT check | – | 🔧 (one term) | ❌ |
 
 Sectors that are still Z-only stop for W (I3).
-Missing for W: `s_12`, `s_vewk` of gq, qg (S10); all S sectors of aq, qa, ag, ga (S11-S14); VV and the `nf` pieces (out of scope for now).
+Missing for W: VV and the `nf` pieces (out of scope for now). No benchmark yet for the S sectors of gq/qg (`s_12`, `s_vewk`) and of the photon-induced channels.
 
 ## 1. Infrastructure and hygiene (do first)
 
@@ -64,6 +64,7 @@ Missing for W: `s_12`, `s_vewk` of gq, qg (S10); all S sectors of aq, qa, ag, ga
 | I16c | `ns_ga rr_5161a/5262a` (old = -58 fb): **old branch incomplete**, five defects: S6 never calls `res_tree_g_qqb`; S6 and S5S6 pass the unset `res_tmp_vect` instead of `res_tmp_vect_old` and leave the result in `respdf_vect` while the code reads `respdf_tmp`; TC, TCS6, TCS5 fill `respdf` instead of `respdf_tmp(:,1)`. With these repaired, old = new to 11 digits, so the **new code is validated for Z in sector a** | `mod_xsects_nnlo_rr_ns.f90` (`xsect_nnlo_rr_5i6ia_ns_ga`) | ✅ fixed (old = new to 11 digits) |
 | I16d | `rvqcd_fs_53/54`, `rvqcd_is` (agree to 1e-7..1e-9): not a bug. Old code uses the analytic one-loop amplitude (`res_qcdloop_j`), new code uses OpenLoops; the difference is numerical precision | – | ✅ understood |
 | I17 | Vegas reliability with a resolved photon: (a) the technical mass rescaling `-qmin_rsc 20` (default) biases the initial-state photon sectors low for hard-photon cuts (`nloewk ns r_is` W+: 1.495-1.517 fb over seeds); (b) with 300k/1M points many RR/S sectors are 1-3% low with underestimated errors. For now: `-qmin_rsc 1` and 1.5M/5M points. To do: check the production NNLO setup of the same sectors (`rr_5161/5262/5162/5261`, `rvqcd_is`, `s_oewk_is`) with several seeds, and decide the default | `Parms/mod_proc_parms.f90`, `Vegas/` | 🔧 found 2026-11-13 |
+| I18 | `-seed` did not reach the Fortran generator that picks the sign of the lepton rapidity solution: runs with different seeds shared that sequence, so their average was correlated (seen as a fake gq/qg difference of 1.4% in `s_12`, 8 seeds). The generator now follows `-seed`; seed 0 is unchanged. Averages over seeds made before this date have underestimated errors | `mod_chooser.f90` | ✅ 2026-11-15 |
 
 ## 2. NLO (done; remaining loose ends)
 
@@ -153,17 +154,17 @@ channels are to be provided by Christian.
 |---|---|---|---|
 | S8 | `s_oqcd`, `s_oewk_is`, `s_oewk_fs_53/54`: general; "agreement oldcode T/F for NC, limits work for + and - CC". The W elastic function `calG_ONLOQCD_gq` is never exercised by the NC comparison | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90` | 🟡 |
 | S9 | `calG_ONLOQCD_gq`: (a) `gq` passed `Lim_Ei(2)` in the scale log, now `Lim_Ei(1)` (energy of the incoming partons) as `qg`; (b) the function filled only the (g,q) element, so the term was missing in `qg s_oqcd` for W. After the fixes gq = qg (W+ 0.3584(9) vs 0.3592(8) fb, l l' + jet setup) and the gluon channels agree with POWHEG (C3.7) | `mod_xsects_nnlo_s_gq.f90`, `mod_int_sub_nnlo.f90` | ✅ 2026-11-13 |
-| S10 | `s_12`, `s_vewk` (and `s_vewknf`): Z only | :66-255 in both | ❌ |
+| S10 | gq, qg `s_12`, `s_vewk` for W. `s_vewk`: P_qg kernel times the finite EW virtual `_gen`. `s_12`: the Z formula (`Z.nb`, `FINITEgq`) with general charges: double boost with the charge of the other leg squared; triple-collinear kernel with the charge of the quark from the gluon splitting squared; boosted term P~gq(z) [genGnloQCD + (3 L - 4 zeta2) Q_i^2 - 2 log(z) Ql Q_i log(s_il/s12)] (`calG_gq_cc`). **Not derived**: the charge structure is taken from the q qb' case (`W.nb`), where the same terms appear with P~qq, and from the I-operator at the boosted kinematics; reduces to the Z formula for Z charges. CP test and gq = qg pass. `s_vewknf` still Z only | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90`, `IntSub/mod_int_sub_nnlo.f90` | 🟡 2026-11-15 (needs derivation or benchmark) |
 | S10b | `gq s_oewk_fs_53/54` zero at every point: two debug lines set `xx(xE)`, `xx(xRHO)` to fixed values. Removed; Z gq = qg mirror | `mod_xsects_nnlo_s_gq.f90` | ✅ 2026-11-13 |
 
 ### 6c. aq, qa, ag, ga
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| S11 | `aq`: `s_12`, `s_vqcd`, `s_oewk` Z only; `s_oqcd` first pass (general amplitudes only, Z ids, debug `stop`) | `mod_xsects_nnlo_s_aq.f90` | ❌ |
-| S12 | `qa`: everything Z only | `mod_xsects_nnlo_s_qa.f90` | ❌ |
-| S13 | `ag`, `ga`: everything Z only. Terms built on gamma gamma -> l l vanish for W (cf. RR8) | `mod_xsects_nnlo_s_ag.f90`, `_ga.f90` | ❌ |
-| S14 | HOPPET tables: `xPij_a` (aq/qa) carry `Qdn2/Qup2` weights; make them charge-free and apply charges per leg | `IntSub/mod_hoppet_nnlo.f90` :319, `mod_hoppet_nlo.f90` :87 | ❌ |
+| S11 | `aq` for W: `s_vqcd`, `s_12`, `s_oewk` with the squared charge of the quark from the photon splitting (`multiply_IS_charges_sq`, `transition`), no gamma gamma -> l nu terms; `s_oqcd` was already general. CP test passes | `mod_xsects_nnlo_s_aq.f90` | 🟡 2026-11-15 (no benchmark) |
+| S12 | `qa` for W: mirror of S11, all four sectors. CP test and aq = qa pass | `mod_xsects_nnlo_s_qa.f90` | 🟡 2026-11-15 (no benchmark) |
+| S13 | `ag`, `ga` for W: `s_12`, `s_oqcd`, `s_oewk` with the charge of the quark from the photon splitting; the gamma gamma -> l l terms are absent. CP test and ag = ga pass. `s_ag_oqcd_hppt` (unused) still Z only | `mod_xsects_nnlo_s_ag.f90`, `_ga.f90` | 🟡 2026-11-15 (no benchmark) |
+| S14 | HOPPET tables `xPij_a` with `Qdn2/Qup2` weights: used only by the gamma gamma Born terms, which do not exist for W. Nothing to do | `IntSub/mod_hoppet_nnlo.f90` | – |
 
 ### 6d. Mathematica side
 
@@ -220,7 +221,7 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 | C3.4 | NLO EW generator for l l' + jet: `NSC-lnujQCD` (POWHEG-BOX-RES, OpenLoops `ppllj_ew`, `ppllaj`; l nu j for W+/W-, l l j for Z). Stage 1: q qb', gq, qg; no photon-induced channels, no four-quark interference. README in the generator directory | ✅ 2026-11-13 |
 | C3.5 | Analyses in this code that match C3.3 and C3.4: `V_lla_nloqcd` (resolved photon) and `V_llj_nloew` (resolved jet, dressed leptons and quarks), Z, W+, W- | ✅ 2026-11-13 |
 | C3.6 | NLO QCD l l' gamma: sum of the 39 sectors with a resolved photon against `NSC-lnuaEW` (no damping): W+ 6.1928(21) vs 6.1896(49), W- 3.7968(12) vs 3.8011(38), Z 13.1031(31) vs 13.1107(112) fb. Needs `-qmin_rsc 1` and 1.5M/5M points (`f90/tests/powheg/lla/`) | ✅ 2026-11-13 |
-| C3.7 | NLO EW l l' + jet against `NSC-lnujQCD`: sum of 33 sectors (`nloqcd r_is` = LO, `rvewk_is`, RR `ns_ga`/`gq`/`qg`, `s_oqcd`), split in q qb' and gluon channels. Correction W+ -38.82(2) vs -38.86(8), W- -24.93(1) vs -25.01(5), Z -18.64(1) vs -18.63(7) fb; LO within 0.06% (mixed_ll low by 2 sigma, open). Found S3, S9. Numbers and recipe in `f90/tests/powheg/llj/` | ✅ 2026-11-14 |
+| C3.7 | NLO EW l l' + jet against `NSC-lnujQCD`: sum of 33 sectors (`nloqcd r_is` = LO, `rvewk_is`, RR `ns_ga`/`gq`/`qg`, `s_oqcd`), split in q qb' and gluon channels. Correction W+ -38.82(2) vs -38.86(8), W- -24.93(1) vs -25.01(5), Z -18.64(1) vs -18.63(7) fb; LO within 0.06% (mixed_ll low by 2 sigma, open; not the seed issue I18: four independent seeds give W+ 555.14(6) against POWHEG 555.51(20)). Found S3, S9. Numbers and recipe in `f90/tests/powheg/llj/` | ✅ 2026-11-14 |
 | C3.9 | Generator for the four-quark interference at O(alpha_s alpha^3): `NSC-lnujjMIX` (POWHEG-BOX-RES, Born only, OpenLoops `pplnjj_ew`, `pplljj_qcdew`), W+, W-, Z; analysis `V_lljj_4q` here. README in the generator directory | ✅ 2026-11-14 |
 | C3.10 | Four-quark hard events with two jets against `NSC-lnujjMIX`, opposite-sign / same-sign initial states: W+ -0.5690(10) vs -0.5683(8), 0.4598(13) vs 0.4628(42); W- -0.3862(9) vs -0.3864(8), 0.2614(6) vs 0.2644(35); Z -0.4488(7) vs -0.4496(6), 0.3086(8) vs 0.3080(28) fb. Found RR11b. Does not test the TC counterterms (covered by `-checklim`) nor `s_qqb`/`s_qq`. Numbers and recipe in `f90/tests/powheg/lljj/` | ✅ 2026-11-14 |
 | C3.8 | Script that runs and sums the right sectors for C3.1, C3.2, C3.6, C3.7 and prints the ratio to POWHEG | ❌ |
@@ -271,9 +272,9 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 | nnlo ns s_qqb / s_qq | ✅ | – | ✅ | ✅ | – | ✅ |
 | nnlo gq/qg s_oqcd | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
 | nnlo gq/qg s_oewk_* | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) |
-| nnlo gq/qg s_12, s_vewk | ❌ | – | | ❌ | – | |
-| nnlo aq/qa s_* | ❌ | | | ❌ | | |
-| nnlo ag/ga s_* | ❌ | | | ❌ | | |
+| nnlo gq/qg s_12, s_vewk | 🟡 | – | | 🟡 | – | |
+| nnlo aq/qa s_* | 🟡 | | | 🟡 | | |
+| nnlo ag/ga s_* | 🟡 | | | 🟡 | | |
 
 ## 10. Open questions for the team
 

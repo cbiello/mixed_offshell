@@ -232,3 +232,26 @@ Consistency of the W counterterms and integrated sectors with the Z ones (2026-1
 
 With the pointwise TC limit and the POWHEG comparison of the hard events, what is left untested for W is only what is common
 to Z: that the notebook kernels are the integral of the TC counterterm (`Z.nb` holds the results, not the derivation).
+
+## Integrated sectors of gq/qg and of the photon-induced channels for W (2026-11-15)
+
+New W code: gq, qg `s_12`, `s_vewk`; aq, qa `s_vqcd`, `s_12`, `s_oewk` (qa also `s_oqcd`); ag, ga `s_12`, `s_oqcd`, `s_oewk`.
+Z regression unchanged. No benchmark and no notebook for these sectors: the checks below test the wiring, not the formulas.
+The gq/qg `s_12` formula for W is not derived (PLAN S10).
+
+CP test (W- in p p against W+ in pbar pbar, 4 seeds each, `W_ATLAS`, 14 TeV), difference / error:
+
+| Sector | gq | qg | aq | qa | ag | ga |
+|---|---|---|---|---|---|---|
+| s_12 | -0.2 | -0.0 | -1.1 | 0.6 | 0.3 | -0.2 |
+| s_vewk | 0.8 | -1.0 | | | | |
+| s_vqcd | | | -0.4 | -1.1 | | |
+| s_oqcd | | | 1.3 | -1.5 | 0.5 | -1.4 |
+| s_oewk | | | 1.8 | -0.8 | 1.0 | 0.2 |
+
+Mirror (W-, fb): gq `s_12` 0.13523(30), qg 0.13485(30); gq `s_vewk` 1.6511(4), qg 1.6509(4); aq `s_12` -5.237(4)e-3, qa -5.237(4)e-3;
+ag `s_12` 3.278(1)e-3, ga 3.277(1)e-3.
+
+Seeds: before I18 (PLAN) runs with different `-seed` shared the generator of the lepton rapidity sign. With 8 seeds gq `s_12`
+came out 0.13595(30) and qg 0.13404(30) (4.5 sigma apart); each charge structure of the boosted term taken alone was symmetric.
+After the fix the two agree (numbers above). The four-quark CP result for `ns_qqb` (only a + c symmetric) is unchanged with independent seeds.
