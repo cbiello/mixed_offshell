@@ -1,0 +1,10 @@
+nnlo ns_qqb rr_5161a
+nnlo ns_qqb rr_5161c
+nnlo ns_qqb rr_5262a
+nnlo ns_qqb rr_5262c
+nnlo ns_qq rr_5161a
+nnlo ns_qq rr_5161c
+nnlo ns_qq rr_5262a
+nnlo ns_qq rr_5262c
+nnlo ns_qqb_w rr
+nnlo ns_qqp_w rr
