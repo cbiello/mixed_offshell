@@ -12,7 +12,7 @@ module mod_int_sub_nnlo
   public :: fin_ns_v7_cc
   public :: genGnloQCD_cc, legfinalcalG_cc
   public :: Pqqbqqb, Pqqbqqb_Lmu
-  public :: calG_QqQl,calG_QqQl_L,calG_CF,calG_Q2
+  public :: calG_QqQl,calG_QqQl_L,calG_CF,calG_Q2,calG_gq_cc
   public :: calG_ONLOQCD_gq
 
   interface calG_CF
@@ -490,6 +490,34 @@ contains
     enddo
 
   end function legfinalcalG_cc
+
+  !-- boosted term of gq/qg s_12 for W, ileg = leg of the gluon splitting, lmu = log(mu^2/4EC^2):
+  !-- genGnloQCD + (3 lmu - 4 zeta2) Q_i^2 - 2 log(z) Ql Q_i log(s_il/s12)
+  function calG_gq_cc(proc,ampl,lmu,z,Qlept,ilept,ileg) result(res)
+    use mod_process, only: KinConfig
+    implicit none
+    type(KinConfig),   intent(in) :: proc
+    real(dp),          intent(in) :: Qlept,ampl(-5:7,-5:7),lmu(:),z
+    integer,           intent(in) :: ilept,ileg
+    real(dp) :: res(-5:7,-5:7,size(lmu))
+    real(dp) :: Qi,lsil
+    integer  :: al,be
+
+    res = legfinalcalG_cc(proc,ampl,lmu,Qlept,ilept,ileg)
+    lsil = log(mdot(proc%AmpMom(:,ileg),proc%AmpMom(:,ilept))/mdot(proc%AmpMom(:,1),proc%AmpMom(:,2)))
+    do al = -5,5
+       do be = -5,5
+          Qi = merge(Q_IS(al),Q_IS(be),ileg == 1)
+          res(al,be,:) = res(al,be,:) - ampl(al,be)*(4*zeta2*Qi**2 + 2*log(z)*Qlept*Qi*lsil)
+       enddo
+    enddo
+
+  contains
+    real(dp) function mdot(p,q)
+      real(dp), intent(in) :: p(4),q(4)
+      mdot = p(1)*q(1) - sum(p(2:4)*q(2:4))
+    end function mdot
+  end function calG_gq_cc
 
   function fin_ns_v7_cc(proc,ampl,lmu,Qlept,ilept)
     use mod_process, only: KinConfig

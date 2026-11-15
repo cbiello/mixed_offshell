@@ -76,9 +76,10 @@ contains
     real(dp) :: EC
     real(dp) :: kin(2),FintNNLO_s_gq_s12(2)
     real(dp) :: res_lo(2,2),Pqg0,gq_int_sub(2,2)
+    real(dp) :: res_gen(-5:7,-5:7),amp_gen(-5:7,-5:7),res_calG(-5:7,-5:7,ipdf)
+    integer  :: k
 
     xsect_nnlo_s_gq_s12 = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_s_gq_s12: not implemented for W'
 
     ff(1) = zero
 
@@ -105,7 +106,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(LOProc)
 
     if (LOProc%makecut) then
@@ -115,27 +116,46 @@ contains
 
     else
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
+       if (Vcharge == 0) then
+          call res_tree_qqb(LOProc%AmpMom,res_lo)
+          res_lo(:,1) = Qdn2 * res_lo(:,1)
+          res_lo(:,2) = Qup2 * res_lo(:,2)
 
-       !-- F[z1.p1,z2.p2]
-       call get_respdf_hoppet(xPij_A_1,xPij_A_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,1),&
-          myPDFs1_Lmu=[xPij_A_1_Lmu],myPDFs2_Lmu=[xPij_A_2_Lmu])
+          !-- F[z1.p1,z2.p2]
+          call get_respdf_hoppet(xPij_A_1,xPij_A_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,1),&
+             myPDFs1_Lmu=[xPij_A_1_Lmu],myPDFs2_Lmu=[xPij_A_2_Lmu])
 
-       call get_respdf_hoppet(xPij_B_1,xPij_B_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,2),&
-          myPDFs1_Lmu=[xPij_B_1_Lmu])
+          call get_respdf_hoppet(xPij_B_1,xPij_B_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,2),&
+             myPDFs1_Lmu=[xPij_B_1_Lmu])
 
-       call get_respdf_hoppet(xPij_C_1,xPij_C_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,3),&
-          myPDFs2_Lmu=[xPij_C_2_Lmu])
+          call get_respdf_hoppet(xPij_C_1,xPij_C_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,3),&
+             myPDFs2_Lmu=[xPij_C_2_Lmu])
 
-       call get_respdf_hoppet(xPij_D_1,xPij_D_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,4))
+          call get_respdf_hoppet(xPij_D_1,xPij_D_2,ns_lumi,1,1,LOProc,res_lo,respdf_tmp(:,4))
 
-       respdf_1 = sum(respdf_tmp,2)
+          respdf_1 = sum(respdf_tmp,2)
 
-       !-- F[z.p1,p2]
-       call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_2,&
-            myPDFs1_Lmu=[xPij_Lmu,xPij_Lmu2])
+          !-- F[z.p1,p2]
+          call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_2,&
+               myPDFs1_Lmu=[xPij_Lmu,xPij_Lmu2])
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
+
+          !-- F[z1.p1,z2.p2]: photon collinear to leg 2
+          amp_gen = multiply_IS_charges_sq(res_gen,2)
+          call get_respdf_hoppet_gen(xPij_A_1,xPij_A_2,1,1,LOProc,amp_gen,respdf_tmp(:,1),&
+             myPDFs1_Lmu=[xPij_A_1_Lmu],myPDFs2_Lmu=[xPij_A_2_Lmu])
+          call get_respdf_hoppet_gen(xPij_B_1,xPij_B_2,1,1,LOProc,amp_gen,respdf_tmp(:,2),&
+             myPDFs1_Lmu=[xPij_B_1_Lmu])
+          call get_respdf_hoppet_gen(xPij_C_1,xPij_C_2,1,1,LOProc,amp_gen,respdf_tmp(:,3),&
+             myPDFs2_Lmu=[xPij_C_2_Lmu])
+          call get_respdf_hoppet_gen(xPij_D_1,xPij_D_2,1,1,LOProc,amp_gen,respdf_tmp(:,4))
+          respdf_1 = sum(respdf_tmp,2)
+
+          !-- single boost: photon from the quark line of the gluon splitting
+          amp_gen = multiply_IS_charges_sq(res_gen,1)
+          call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,amp_gen,respdf_2,myPDFs1_Lmu=[xPij_Lmu,xPij_Lmu2])
+       endif
 
        respdf = Tr*(respdf_1 + respdf_2)*LOProc%wgt
 
@@ -148,7 +168,7 @@ contains
 
     !! ----------------------- Soft-photon component ----------------------- !!
 
-    LOProc_z%ids(1:4) = [0,0,id_el,-id_el]
+    LOProc_z%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(LOProc_z)
 
     if (LOProc_z%makecut) then
@@ -158,21 +178,28 @@ contains
 
     else
 
-       call res_tree_qqb(LOProc_z%AmpMom,res_lo)
-
-       gq_int_sub = reshape(calG_QqQl(LOProc_z,z,[Qdn,-Qdn, Qup,-Qup],Q_lep,icoll=1,chrg=+1),[2,2])
-
-       res_lo(:,1) = gq_int_sub(:,1) * res_lo(:,1)
-       res_lo(:,2) = gq_int_sub(:,2) * res_lo(:,2)
-
-       call get_respdf(gq_lumi,1,1,LOProc_z,res_lo,respdf)
-
        EC = LOProc_z%Lim_Ei(1)
        call fill_sv_logs(LOProc_z%muf(1)**2,4*EC**2,sv_logs)
 
-       tildePqgNLO = PqgNLO - Pqg0 * sv_logs
+       if (Vcharge == 0) then
+          call res_tree_qqb(LOProc_z%AmpMom,res_lo)
 
-       respdf = Tr * tildePqgNLO * respdf * LOProc_z%wgt
+          gq_int_sub = reshape(calG_QqQl(LOProc_z,z,[Qdn,-Qdn, Qup,-Qup],Q_lep,icoll=1,chrg=+1),[2,2])
+
+          res_lo(:,1) = gq_int_sub(:,1) * res_lo(:,1)
+          res_lo(:,2) = gq_int_sub(:,2) * res_lo(:,2)
+
+          call get_respdf(gq_lumi,1,1,LOProc_z,res_lo,respdf)
+       else
+          call res_tree_qqb_gen(LOProc_z%AmpMom,res_gen)
+          res_calG = calG_gq_cc(LOProc_z,res_gen,sv_logs,z,Qlept_chg,ilept_chg,1)
+          do k = 1,ipdf
+             res_calG(:,:,k) = transition('g -> q','none',res_calG(:,:,k))
+          enddo
+          call get_respdf_gen_mu(1,1,LOProc_z,res_calG,respdf)
+       endif
+
+       respdf = Tr * (PqgNLO - Pqg0 * sv_logs) * respdf * LOProc_z%wgt
 
        FintNNLO_s_gq_s12(2) = respdf(1)
        kin(2) = respdf(1)
@@ -202,9 +229,9 @@ contains
     real(dp) :: xx(kLO_max_full)
     real(dp) :: respdf(ipdf)
     real(dp) :: res_tree(2,3),res_nlo(2,3),kin(1)
+    real(dp) :: res_tree_gen(-5:7,-5:7),res_nlo_gen(-5:7,-5:7)
 
     xsect_nnlo_s_gq_vewk = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_s_gq_vewk: not implemented for W'
 
     ff(1) = zero
 
@@ -224,7 +251,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(LOProc)
 
     if (LOProc%makecut) then
@@ -233,10 +260,15 @@ contains
 
     else
 
-       call res_ewkloop_qqb(LOProc%AmpMom,res_tree,res_nlo)
+       if (Vcharge == 0) then
+          call res_ewkloop_qqb(LOProc%AmpMom,res_tree,res_nlo)
 
-       !-- F[z1,2]
-       call get_respdf_hoppet(xPij,PDFs,ns_lumi_splitb,1,1,LOProc,res_nlo,respdf,myPDFs1_Lmu=[xPij_Lmu])
+          !-- F[z1,2]
+          call get_respdf_hoppet(xPij,PDFs,ns_lumi_splitb,1,1,LOProc,res_nlo,respdf,myPDFs1_Lmu=[xPij_Lmu])
+       else
+          call res_ewkloop_qqb_gen(LOProc%AmpMom,res_tree_gen,res_nlo_gen)
+          call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,res_nlo_gen,respdf,myPDFs1_Lmu=[xPij_Lmu])
+       endif
        respdf = Tr*respdf*LOProc%wgt
 
        kin(1) = respdf(1)
