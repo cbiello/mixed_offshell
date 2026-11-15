@@ -137,13 +137,13 @@ contains
     call setup_histo()
 
     !----------------------------------------------------------------
-    !-- setup random number generator, for lepton rapidity
+    !-- setup random number generator, for lepton rapidity; follows -seed so that runs with different seeds are independent
     !----------------------------------------------------------------
     call random_seed(size=sizeseed)
     allocate (iseed(sizeseed))
     do i = mpi_rank + 1, mpi_rank + sizeseed
        k = mod(i,sizeseed) + 1
-       iseed(k) = int(123456789*sin(twopi*k*(mpi_rank+1)/sizeseed/mpi_size/sqrt(pi)))
+       iseed(k) = int(123456789*sin(twopi*k*(mpi_rank+1)/sizeseed/mpi_size/sqrt(pi))) + seed*k
     enddo
     call random_seed(put=iseed)
     deallocate(iseed)
