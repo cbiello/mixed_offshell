@@ -731,19 +731,9 @@ contains
 
     else    
 
-       if (Vcharge == 0) then
-          call res_tree_qqb(LOProc%AmpMom,res_lo)
-          res_lo(:,1) = Qdn2 * res_lo(:,1)
-          res_lo(:,2) = Qup2 * res_lo(:,2)
-
-          call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-
-          call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-       else
-          call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
-          call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,multiply_IS_charges_sq(res_gen,1),respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-          call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,multiply_IS_charges_sq(res_gen,2),respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-       endif
+       call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
+       call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,multiply_IS_charges_sq(res_gen,1),respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+       call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,multiply_IS_charges_sq(res_gen,2),respdf_2,myPDFs2_Lmu=[xPij_Lmu])
 
        respdf = CF * (respdf_1 + respdf_2) * LOProc%wgt
 
@@ -806,20 +796,10 @@ contains
        
     else    
 
-       if (Vcharge == 0) then
-          call res_tree_qqb(LOProc%AmpMom,res_lo)
-          res_lo(:,1) = Qdn2 * res_lo(:,1)
-          res_lo(:,2) = Qup2 * res_lo(:,2)
-
-          !-- xPij(a) is built from the PDF of the antiparticle of a: no swap of the Born
-          call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-
-          call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-       else
-          call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
-          call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,multiply_IS_charges_sq(res_gen,1),respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-          call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,multiply_IS_charges_sq(res_gen,2),respdf_2,myPDFs2_Lmu=[xPij_Lmu])
-       endif
+       !-- xPij(a) is built from the PDF of the antiparticle of a
+       call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
+       call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,multiply_IS_charges_sq(res_gen,1),respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+       call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,multiply_IS_charges_sq(res_gen,2),respdf_2,myPDFs2_Lmu=[xPij_Lmu])
 
        respdf = CF * (respdf_1 + respdf_2) * LOProc%wgt
 

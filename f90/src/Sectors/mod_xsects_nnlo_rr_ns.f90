@@ -2630,26 +2630,14 @@ contains
        split(1)  = two*Cf*Pqbqq_id_symm(s56,-si5,-si6,z5,z6,zi) !-- emitter is a quark
        split(-1) = two*Cf*Pqbqq_id_symm(s56,-si6,-si5,z6,z5,zi) !-- emitter is an antiquark
 
-       if (Vcharge == 0) then
-          call res_tree_qqb(TCLim%AmpMom,res_lo)
-
-          res_lo(:,1) = res_lo(:,1) * Qdn2
-          res_lo(:,2) = res_lo(:,2) * Qup2
-
-          res_lo(i,:) = res_lo(i,:) * split(1)  !-- qqb -> qqb
-          res_lo(j,:) = res_lo(j,:) * split(-1) !-- qbq -> qqb
-
-          call get_respdf(ns_lumi,1,1,TCLim,res_lo,respdf)
-       else
-          call res_tree_qqb_gen(TCLim%AmpMom,res_gen)
-          res_gen = multiply_IS_charges_sq(res_gen,i)
-          do a = -5,5
-             do b = -5,5
-                res_gen(a,b) = res_gen(a,b) * split(sign(1,merge(a,b,i == 1)))
-             enddo
+       call res_tree_qqb_gen(TCLim%AmpMom,res_gen)
+       res_gen = multiply_IS_charges_sq(res_gen,i)
+       do a = -5,5
+          do b = -5,5
+             res_gen(a,b) = res_gen(a,b) * split(sign(1,merge(a,b,i == 1)))
           enddo
-          call get_respdf_gen(1,1,TCLim,res_gen,respdf)
-       endif
+       enddo
+       call get_respdf_gen(1,1,TCLim,res_gen,respdf)
 
        respdf = -respdf*TCLim%wgt
        FintNNLO_ns(2) = respdf(1)
@@ -2768,32 +2756,16 @@ contains
 
        split = Cf*Pqbqq_id_symm(-si5,-si6,s56,zi,z5,z6) !-- extra factor 1/2 w.r.t qqb case from 1/2!
 
-       if (Vcharge == 0) then
-          call res_tree_qqb(TCLim%AmpMom,res_lo)
-
-          res_lo(:,1) = res_lo(:,1) * Qdn2
-          res_lo(:,2) = res_lo(:,2) * Qup2
-
-          if (i.eq.1) then
-             res_tmp(i,:) = res_lo(j,:) * split !-- qq channel needs qb q reduced me2
-             res_tmp(j,:) = res_lo(i,:) * split
-          elseif (i.eq.2) then
-             res_tmp = res_lo * split !-- qq channel need q qb reduced me2
-          endif
-
-          call get_respdf(qq_lumi,1,1,TCLim,res_tmp,respdf)
-       else
-          !-- leg i enters the reduced matrix element as its antiparticle
-          call res_tree_qqb_gen(TCLim%AmpMom,born)
-          born = multiply_IS_charges_sq(born,i) * split
-          res_gen = zero
-          do a = -5,5
-             do b = -5,5
-                if (a*b > 0) res_gen(a,b) = merge(born(-a,b),born(a,-b),i == 1)
-             enddo
+       !-- leg i enters the reduced matrix element as its antiparticle
+       call res_tree_qqb_gen(TCLim%AmpMom,born)
+       born = multiply_IS_charges_sq(born,i) * split
+       res_gen = zero
+       do a = -5,5
+          do b = -5,5
+             if (a*b > 0) res_gen(a,b) = merge(born(-a,b),born(a,-b),i == 1)
           enddo
-          call get_respdf_gen(1,1,TCLim,res_gen,respdf)
-       endif
+       enddo
+       call get_respdf_gen(1,1,TCLim,res_gen,respdf)
 
        respdf = -respdf*TCLim%wgt
        FintNNLO_ns(2) = respdf(1)
