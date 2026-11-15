@@ -52,7 +52,7 @@ contains
     real(dp)                :: as,asontwopi
     real(dp15)              :: alphasPDF
 
-    as = alphasPDF(real(muR,kind=dp15))
+    as = alphasPDF(real(merge(pdfscale,muR,pdfscale > zero),kind=dp15))
     asontwopi = as/twopi
 
     pref = asontwopi**as_ord * (aem/twopi)**aem_ord
@@ -826,6 +826,7 @@ contains
       svlogs(2) = log(muf2/muref2/4)
       svlogs(3) = log(muf2/muref2*4)
     endif
+    if (rge /= 'none') svlogs = log(muf2/muref2)
 
   end subroutine fill_sv_logs
 

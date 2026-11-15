@@ -109,6 +109,7 @@ contains
     call set_outfile(pref,outputfile,gridfile,seednr)
 
     call set_ew_parms_cms(ew_scheme,outdev)
+    if (rge /= 'none') call rge_shift_pdfs()
     call set_qcd_parms()
     call set_proc_parms()
 

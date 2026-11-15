@@ -134,6 +134,13 @@ module mod_parms
   real(dp), public, save  :: Q4
   !-- W: index and outgoing charge of the charged lepton (W+: 4, +1; W-: 3, -1)
   logical,  public, save  :: cptest = .false. !-- -cptest: antiproton beams (q <-> qbar in the PDFs)
+  !-- RGE test. -pdfscale Q: PDFs and alpha_s at Q, logs still follow -mu.
+  !-- -rge qg|qq|qg11|qa|qqs|qa11 (needs -mu = -pdfscale): the scale-variation weights mu/2, 2 mu become PDFs -+ rgescale * delta with
+  !-- all logs at the central scale; delta = as/2pi TR Pqg x g, a/2pi Q^2 Pqq x q, as a/4pi^2 Q^2 Pqg^(1,1) x g on the quarks
+  !-- and qa, qqs, qa11: a/2pi Nc Q^2 Pqg x photon, as/2pi CF Pqq x q, as a/4pi^2 CF Nc Q^2 Pqg^(1,1)/TR x photon
+  real(dp), public, save  :: pdfscale = zero
+  character(len=8), public, save :: rge = 'none'
+  real(dp), public, save  :: rgescale = one
   integer,  public, save  :: ilept_chg = 4
   real(dp), public, save  :: Qlept_chg = one
   !-- boson: 0 = Z, -1 = W-, +1 = W+ (set by -boson z/wm/wp)
@@ -218,6 +225,9 @@ contains
     !-- select only up-quarks
     only_up = log_val_opt_witharg('-only_up',.false.)
     cptest = log_val_opt('-cptest',.false.)
+    pdfscale = real_val_opt('-pdfscale',zero)
+    rge = trim(string_val_opt('-rge','none'))
+    rgescale = real_val_opt('-rgescale',one)
     if(only_up) then
       flag_down = 0
     else
