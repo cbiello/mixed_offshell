@@ -78,8 +78,8 @@ nnlo ns s_oewk_fs_54 :  -0.94638083587169564 fb
 nnlo ns s_oewk_is : STOP W_ATLAS: lepton ids not set
 nnlo ns s_oewk_is_ra :  -1.5593015525201197 fb
 nnlo ns s_oqcd :  1.7164130333412363E-002 fb
-nnlo ns s_qq : STOP xsect_nnlo_s_ns_qq: not implemented for W
-nnlo ns s_qqb : STOP xsect_nnlo_s_ns_qqb: not implemented for W
+nnlo ns s_qq :  -4.4947875664527034E-003 fb
+nnlo ns s_qqb :  0.13985297358061782 fb
 nnlo ns s_vewk :  -22.539381152654439 fb
 nnlo ns s_vewknf : STOP xsect_nnlo_s_ns_vewknf: not implemented for W
 nnlo ns s_vqcd :  0.71168328028829009 fb
@@ -97,17 +97,16 @@ nnlo ns_ga rr_5262a :  0.34534794317995748 fb
 nnlo ns_ga rr_5262c :  1.8864128223209820E-002 fb
 nnlo ns_ga rr_5263 :  0.72087397473970272 fb
 nnlo ns_ga rr_5264 :  -6.2694524305471719E-002 fb
-nnlo ns_qq rr_5161a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
-nnlo ns_qq rr_5161c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
-nnlo ns_qq rr_5262a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
-nnlo ns_qq rr_5262c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W
-nnlo ns_qqb rr_5161a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
-nnlo ns_qqb rr_5161c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
-nnlo ns_qqb rr_5262a : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
-nnlo ns_qqb rr_5262c : STOP xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W
-nnlo ns_qqb_w rr :  Eur.Phys.J. C75 (2015) 3, 132 (http://arxiv.org/abs/1412.7420)
-nnlo ns_qqp_w rr :  Eur.Phys.J. C75 (2015) 3, 132 (http://arxiv.org/abs/1412.7420)
-nnlo ns_qqpb_w rr :  Eur.Phys.J. C75 (2015) 3, 132 (http://arxiv.org/abs/1412.7420)
+nnlo ns_qq rr_5161a :  3.3834720018451649E-002 fb
+nnlo ns_qq rr_5161c :  5.7220504611697282E-002 fb
+nnlo ns_qq rr_5262a :  2.8871307490928411E-002 fb
+nnlo ns_qq rr_5262c :  5.4620569202637602E-002 fb
+nnlo ns_qqb rr_5161a :  -6.0285315877858507E-002 fb
+nnlo ns_qqb rr_5161c :  -0.19536999513473796 fb
+nnlo ns_qqb rr_5262a :  -6.7484659935326249E-002 fb
+nnlo ns_qqb rr_5262c :  -0.13667204616309733 fb
+nnlo ns_qqb_w rr :  -4.9971353418284556E-002 fb
+nnlo ns_qqp_w rr :  0.13565222289607665 fb
 nnlo qa rr_5161a :  -1.4343251360358302E-002 fb
 nnlo qa rr_5161b :  1.9611709870748572E-002 fb
 nnlo qa rr_5161c :  -4.4737988110430990E-002 fb

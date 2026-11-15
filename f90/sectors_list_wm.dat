@@ -137,4 +137,3 @@
  -corr nnlo -ch ns_qq -sec rr_5262c            
  -corr nnlo -ch ns_qqb_w -sec rr                  
  -corr nnlo -ch ns_qqp_w -sec rr                  
- -corr nnlo -ch ns_qqpb_w -sec rr                  

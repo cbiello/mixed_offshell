@@ -11,7 +11,7 @@ module mod_xsects_nnlo_rr_ns
   use mod_splittings_bare
   use mod_eikonals
   use mod_partitions
-  use mod_ol_interface, only: OL_rr_id,gsq_ol,eesq_ol
+  use mod_ol_interface, only: OL_rr_id,gsq_ol,eesq_ol,res_tree_4q_gen,c4q_qqb,c4q_qq,c4q_fin_os,c4q_fin_ss
   use openloops
   use mod_limvals
   implicit none
@@ -2541,10 +2541,10 @@ contains
     real(dp) :: res_lo(2,2),res_nnlo(2,2)
     real(dp) :: respdf(ipdf)
     real(dp) :: si5,si6,s56,z5,z6,zi
-    real(dp) :: damp
+    real(dp) :: damp,res_gen(-5:7,-5:7),split(-1:1)
+    integer  :: a,b
     
     xsect_nnlo_rr_5i6iac_ns_4q_qqb = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5i6iac_ns_4q_qqb: not implemented for W'
 
     ff(1) = zero
 
@@ -2575,7 +2575,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -2587,8 +2587,13 @@ contains
 
        call partition_nnlo_fact(HardProc,damp,iconf_qcd=[1,2,5],i_qcd=i)
        
-       call res_tree_qqb_qqb(HardProc%AmpMom,res_nnlo)
-       call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo,respdf)
+       if (Vcharge == 0) then
+          call res_tree_qqb_qqb(HardProc%AmpMom,res_nnlo)
+          call get_respdf(ns_lumi,1,1,Hardproc,res_nnlo,respdf)
+       else
+          call res_tree_4q_gen(HardProc%AmpMom,c4q_qqb,res_gen)
+          call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+       endif
 
        respdf = respdf*HardProc%wgt*damp
 
@@ -2603,7 +2608,7 @@ contains
     !!                                   TC                                  !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids(1:4) = [0,0,id_el,-id_el]
+    TCLim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(TCLim)
 
     if (TCLim%makecut.or.TCLim%flag) then
@@ -2613,11 +2618,6 @@ contains
        
     else
 
-       call res_tree_qqb(TCLim%AmpMom,res_lo)
-
-       res_lo(:,1) = res_lo(:,1) * Qdn2
-       res_lo(:,2) = res_lo(:,2) * Qup2
-
        !-- TC
        si5 = TCLim%Lim_sij(i,5)
        si6 = TCLim%Lim_sij(i,6)
@@ -2626,11 +2626,30 @@ contains
        z5 = TCLim%Lim_z(1)
        z6 = TCLim%Lim_z(2)
        zi = TCLim%Lim_z(3)
-              
-       res_lo(i,:) = res_lo(i,:) * two*Cf*Pqbqq_id_symm(s56,-si5,-si6,z5,z6,zi) !-- qqb -> qqb
-       res_lo(j,:) = res_lo(j,:) * two*Cf*Pqbqq_id_symm(s56,-si6,-si5,z6,z5,zi) !-- qbq -> qqb
-       
-       call get_respdf(ns_lumi,1,1,TCLim,res_lo,respdf)
+
+       split(1)  = two*Cf*Pqbqq_id_symm(s56,-si5,-si6,z5,z6,zi) !-- emitter is a quark
+       split(-1) = two*Cf*Pqbqq_id_symm(s56,-si6,-si5,z6,z5,zi) !-- emitter is an antiquark
+
+       if (Vcharge == 0) then
+          call res_tree_qqb(TCLim%AmpMom,res_lo)
+
+          res_lo(:,1) = res_lo(:,1) * Qdn2
+          res_lo(:,2) = res_lo(:,2) * Qup2
+
+          res_lo(i,:) = res_lo(i,:) * split(1)  !-- qqb -> qqb
+          res_lo(j,:) = res_lo(j,:) * split(-1) !-- qbq -> qqb
+
+          call get_respdf(ns_lumi,1,1,TCLim,res_lo,respdf)
+       else
+          call res_tree_qqb_gen(TCLim%AmpMom,res_gen)
+          res_gen = multiply_IS_charges_sq(res_gen,i)
+          do a = -5,5
+             do b = -5,5
+                res_gen(a,b) = res_gen(a,b) * split(sign(1,merge(a,b,i == 1)))
+             enddo
+          enddo
+          call get_respdf_gen(1,1,TCLim,res_gen,respdf)
+       endif
 
        respdf = -respdf*TCLim%wgt
        FintNNLO_ns(2) = respdf(1)
@@ -2661,10 +2680,10 @@ contains
     real(dp) :: res_lo(2,2),res_nnlo(2,2),res_tmp(2,2),split
     real(dp) :: respdf(ipdf)
     real(dp) :: si5,si6,s56,z5,z6,zi
-    real(dp) :: damp
+    real(dp) :: damp,res_gen(-5:7,-5:7),born(-5:7,-5:7)
+    integer  :: a,b
     
     xsect_nnlo_rr_5i6iac_ns_4q_qq = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_5i6iac_ns_4q_qq: not implemented for W'
 
     ff(1) = zero
 
@@ -2695,7 +2714,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -2707,8 +2726,13 @@ contains
 
        call partition_nnlo_fact(HardProc,damp,iconf_qcd=[1,2,5],i_qcd=i)
        
-       call res_tree_qq_qq(HardProc%AmpMom,res_nnlo)
-       call get_respdf(qq_lumi,1,1,Hardproc,res_nnlo,respdf)
+       if (Vcharge == 0) then
+          call res_tree_qq_qq(HardProc%AmpMom,res_nnlo)
+          call get_respdf(qq_lumi,1,1,Hardproc,res_nnlo,respdf)
+       else
+          call res_tree_4q_gen(HardProc%AmpMom,c4q_qq,res_gen)
+          call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+       endif
 
        respdf = respdf*HardProc%wgt*damp
 
@@ -2723,7 +2747,7 @@ contains
     !!                                   TC                                  !!
     !!-----------------------------------------------------------------------!!
 
-    TCLim%ids(1:4) = [0,0,id_el,-id_el]
+    TCLim%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     call cut_histo(TCLim)
 
     if (TCLim%makecut.or.TCLim%flag) then
@@ -2732,11 +2756,6 @@ contains
        FintNNLO_ns(2) = zero
        
     else
-
-       call res_tree_qqb(TCLim%AmpMom,res_lo)
-
-       res_lo(:,1) = res_lo(:,1) * Qdn2
-       res_lo(:,2) = res_lo(:,2) * Qup2
 
        !-- TC
        si5 = TCLim%Lim_sij(i,5)
@@ -2749,14 +2768,32 @@ contains
 
        split = Cf*Pqbqq_id_symm(-si5,-si6,s56,zi,z5,z6) !-- extra factor 1/2 w.r.t qqb case from 1/2!
 
-       if (i.eq.1) then
-          res_tmp(i,:) = res_lo(j,:) * split !-- qq channel needs qb q reduced me2
-          res_tmp(j,:) = res_lo(i,:) * split
-       elseif (i.eq.2) then
-          res_tmp = res_lo * split !-- qq channel need q qb reduced me2
+       if (Vcharge == 0) then
+          call res_tree_qqb(TCLim%AmpMom,res_lo)
+
+          res_lo(:,1) = res_lo(:,1) * Qdn2
+          res_lo(:,2) = res_lo(:,2) * Qup2
+
+          if (i.eq.1) then
+             res_tmp(i,:) = res_lo(j,:) * split !-- qq channel needs qb q reduced me2
+             res_tmp(j,:) = res_lo(i,:) * split
+          elseif (i.eq.2) then
+             res_tmp = res_lo * split !-- qq channel need q qb reduced me2
+          endif
+
+          call get_respdf(qq_lumi,1,1,TCLim,res_tmp,respdf)
+       else
+          !-- leg i enters the reduced matrix element as its antiparticle
+          call res_tree_qqb_gen(TCLim%AmpMom,born)
+          born = multiply_IS_charges_sq(born,i) * split
+          res_gen = zero
+          do a = -5,5
+             do b = -5,5
+                if (a*b > 0) res_gen(a,b) = merge(born(-a,b),born(a,-b),i == 1)
+             enddo
+          enddo
+          call get_respdf_gen(1,1,TCLim,res_gen,respdf)
        endif
-       
-       call get_respdf(qq_lumi,1,1,TCLim,res_tmp,respdf)
 
        respdf = -respdf*TCLim%wgt
        FintNNLO_ns(2) = respdf(1)
@@ -2785,10 +2822,9 @@ contains
     type(KinConfig) :: HardProc
     real(dp) :: FintNNLO_ns(1),kin(1),res_nnlo(2,3)
     real(dp15) :: p_ol(4,6), res_ol(2,2)
-    real(dp) :: respdf(ipdf)
+    real(dp) :: respdf(ipdf),res_gen(-5:7,-5:7)
 
     xsect_nnlo_rr_ns_qqb_w = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_ns_qqb_w: not implemented for W'
 
     ff(1) = zero
 
@@ -2818,7 +2854,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -2828,17 +2864,23 @@ contains
        
     else
 
-       p_ol = HardProc%AmpMom
+       if (Vcharge == 0) then
+          p_ol = HardProc%AmpMom
 
-       call evaluate_tree(OL_rr_id(1),p_ol,res_ol(1,1)) !-- q  qx, q = d,s
-       call evaluate_tree(OL_rr_id(2),p_ol,res_ol(2,1)) !-- qx q
-       call evaluate_tree(OL_rr_id(3),p_ol,res_ol(1,2)) !-- Q  Qx, Q = u,c
-       call evaluate_tree(OL_rr_id(4),p_ol,res_ol(2,2)) !-- Qx Q
-       res_ol = res_ol/gsq_ol/eesq_ol
-       res_nnlo(1:2,1:2) = res_ol(1:2,1:2)
-       res_nnlo(:,3) = zero
+          call evaluate_tree(OL_rr_id(1),p_ol,res_ol(1,1)) !-- q  qx, q = d,s
+          call evaluate_tree(OL_rr_id(2),p_ol,res_ol(2,1)) !-- qx q
+          call evaluate_tree(OL_rr_id(3),p_ol,res_ol(1,2)) !-- Q  Qx, Q = u,c
+          call evaluate_tree(OL_rr_id(4),p_ol,res_ol(2,2)) !-- Qx Q
+          res_ol = res_ol/gsq_ol/eesq_ol
+          res_nnlo(1:2,1:2) = res_ol(1:2,1:2)
+          res_nnlo(:,3) = zero
 
-       call get_respdf(ns_lumi_splitb,1,1,Hardproc,res_nnlo,respdf)
+          call get_respdf(ns_lumi_splitb,1,1,Hardproc,res_nnlo,respdf)
+       else
+          !-- all four-quark channels without a singular limit, q qb' initial states
+          call res_tree_4q_gen(HardProc%AmpMom,c4q_fin_os,res_gen)
+          call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+       endif
 
        respdf = respdf*HardProc%wgt
 
@@ -2868,10 +2910,9 @@ contains
     type(KinConfig) :: HardProc
     real(dp) :: FintNNLO_ns(1),kin(1),res_nnlo(2,2)
     real(dp15) :: p_ol(4,6), res_ol(2,2)
-    real(dp) :: respdf(ipdf)
+    real(dp) :: respdf(ipdf),res_gen(-5:7,-5:7)
 
     xsect_nnlo_rr_ns_qqp_w = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_ns_qqp_w: not implemented for W'
 
     ff(1) = zero
 
@@ -2901,7 +2942,7 @@ contains
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
 
-    HardProc%ids(1:6) = [0,0,id_el,-id_el,id_q,id_q]
+    HardProc%ids(1:6) = [0,0,lep_ids(1),lep_ids(2),id_q,id_q]
     call cut_histo(HardProc)
 
     if (HardProc%makecut.or.HardProc%flag) then
@@ -2911,16 +2952,22 @@ contains
        
     else
 
-       p_ol = HardProc%AmpMom
+       if (Vcharge == 0) then
+          p_ol = HardProc%AmpMom
 
-       call evaluate_tree(OL_rr_id(5),p_ol,res_ol(1,1)) !-- d  u
-       call evaluate_tree(OL_rr_id(6),p_ol,res_ol(2,1)) !-- dx ux
-       call evaluate_tree(OL_rr_id(7),p_ol,res_ol(1,2)) !-- u  d
-       call evaluate_tree(OL_rr_id(8),p_ol,res_ol(2,2)) !-- ux dx
-       res_ol = res_ol/gsq_ol/eesq_ol
-       res_nnlo = res_ol
+          call evaluate_tree(OL_rr_id(5),p_ol,res_ol(1,1)) !-- d  u
+          call evaluate_tree(OL_rr_id(6),p_ol,res_ol(2,1)) !-- dx ux
+          call evaluate_tree(OL_rr_id(7),p_ol,res_ol(1,2)) !-- u  d
+          call evaluate_tree(OL_rr_id(8),p_ol,res_ol(2,2)) !-- ux dx
+          res_ol = res_ol/gsq_ol/eesq_ol
+          res_nnlo = res_ol
 
-       call get_respdf(qQp_lumi,1,1,Hardproc,res_nnlo,respdf)
+          call get_respdf(qQp_lumi,1,1,Hardproc,res_nnlo,respdf)
+       else
+          !-- all four-quark channels without a singular limit, q q' and qb qb' initial states
+          call res_tree_4q_gen(HardProc%AmpMom,c4q_fin_ss,res_gen)
+          call get_respdf_gen(1,1,HardProc,res_gen,respdf)
+       endif
 
        respdf = respdf*HardProc%wgt
 
@@ -2953,7 +3000,7 @@ contains
     real(dp) :: respdf(ipdf)
 
     xsect_nnlo_rr_ns_qqpb_w = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_rr_ns_qqpb_w: not implemented for W'
+    if (Vcharge /= 0) stop 'xsect_nnlo_rr_ns_qqpb_w: for W these channels are in ns_qqb_w'
 
     ff(1) = zero
 

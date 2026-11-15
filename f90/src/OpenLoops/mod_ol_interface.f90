@@ -8,9 +8,12 @@ module mod_ol_interface
   integer,  public :: OL_id(9), OL_rr_id(12)
   real(dp15), public, save :: as_ol,aem_ol,gsq_ol,eesq_ol
   real(dp), public, parameter :: mu_ol = 100._dp
+  !-- W four-quark channels: classes and table (incoming 1,2; outgoing 5,6; PDG ids)
+  integer, public, parameter :: c4q_qqb = 1, c4q_qq = 2, c4q_fin_os = 3, c4q_fin_ss = 4
+  integer :: n4q = 0, ch4q(4,28), class4q(28), id4q(28)
   private
 
-  public :: initialise_ol
+  public :: initialise_ol, res_tree_4q_gen, born_w
   
 contains
 
@@ -245,13 +248,15 @@ contains
       call set_orders_rr()
       istart_rr = 1
 
-      if(ch.eq.'ns_qqb_w') then
+      if (Vcharge /= 0) then
+         if (ch(1:5).eq.'ns_qq') call register_4q()
+      elseif(ch.eq.'ns_qqb_w') then
 
      if (Vcharge == 0) then
-        OL_rr_id(istart_rr)   = register_process(" 2 -2 -> 11 -11 1 -1",1) !-- d  db -> e- e+ u ub
-        OL_rr_id(istart_rr+1) = register_process("-2  2 -> 11 -11 1 -1",1) !-- db d  -> e- e+ u ub
-        OL_rr_id(istart_rr+2) = register_process(" 1 -1 -> 11 -11 2 -2",1) !-- u  ub -> e- e+ d db
-        OL_rr_id(istart_rr+3) = register_process("-1  1 -> 11 -11 2 -2",1) !-- ub u  -> e- e+ d db
+        OL_rr_id(istart_rr)   = register_process(" 1 -1 -> 11 -11 2 -2",1) !-- d  db -> e- e+ u ub
+        OL_rr_id(istart_rr+1) = register_process("-1  1 -> 11 -11 2 -2",1) !-- db d  -> e- e+ u ub
+        OL_rr_id(istart_rr+2) = register_process(" 2 -2 -> 11 -11 1 -1",1) !-- u  ub -> e- e+ d db
+        OL_rr_id(istart_rr+3) = register_process("-2  2 -> 11 -11 1 -1",1) !-- ub u  -> e- e+ d db
      else
         print*, 'TO IMPLEMENT OL rr for W in the 4q case'
         stop
@@ -260,10 +265,10 @@ contains
       elseif(ch.eq.'ns_qqp_w') then
 
      if (Vcharge == 0) then
-        OL_rr_id(istart_rr+4) = register_process(" 2  1 -> 11 -11  2  1",1) !-- d  u  -> e- e+ d  u
-        OL_rr_id(istart_rr+5) = register_process("-2 -1 -> 11 -11 -2 -1",1) !-- db ub -> e- e+ db ub
-        OL_rr_id(istart_rr+6) = register_process(" 1  2 -> 11 -11  2  1",1) !-- u  d  -> e- e+ d  u
-        OL_rr_id(istart_rr+7) = register_process("-1 -2 -> 11 -11 -2 -1",1) !-- ub db -> e- e+ db ub
+        OL_rr_id(istart_rr+4) = register_process(" 1  2 -> 11 -11  1  2",1) !-- d  u  -> e- e+ d  u
+        OL_rr_id(istart_rr+5) = register_process("-1 -2 -> 11 -11 -1 -2",1) !-- db ub -> e- e+ db ub
+        OL_rr_id(istart_rr+6) = register_process(" 2  1 -> 11 -11  1  2",1) !-- u  d  -> e- e+ d  u
+        OL_rr_id(istart_rr+7) = register_process("-2 -1 -> 11 -11 -1 -2",1) !-- ub db -> e- e+ db ub
      else
         print*, 'TO IMPLEMENT OL rr for W in the 4q case'
         stop
@@ -272,10 +277,10 @@ contains
       elseif(ch.eq.'ns_qqpb_w') then
 
      if (Vcharge == 0) then
-        OL_rr_id(istart_rr+8)  = register_process(" 2 -1 -> 11 -11  2 -1",1)  !-- d  ub -> e- e+ d  ub
-        OL_rr_id(istart_rr+9)  = register_process("-2  1 -> 11 -11 -2  1",1)  !-- db u  -> e- e+ db u
-        OL_rr_id(istart_rr+10) = register_process("-1  2 -> 11 -11  2 -1",1)  !-- ub d  -> e- e+ d  ub
-        OL_rr_id(istart_rr+11) = register_process(" 1 -2 -> 11 -11 -2  1",1)  !-- u  db -> e- e+ db u
+        OL_rr_id(istart_rr+8)  = register_process(" 1 -2 -> 11 -11  1 -2",1)  !-- d  ub -> e- e+ d  ub
+        OL_rr_id(istart_rr+9)  = register_process("-1  2 -> 11 -11 -1  2",1)  !-- db u  -> e- e+ db u
+        OL_rr_id(istart_rr+10) = register_process("-2  1 -> 11 -11  1 -2",1)  !-- ub d  -> e- e+ d  ub
+        OL_rr_id(istart_rr+11) = register_process(" 2 -1 -> 11 -11 -1  2",1)  !-- u  db -> e- e+ db u
      else
         print*, 'TO IMPLEMENT OL rr for W in the 4q case'
         stop
@@ -308,6 +313,45 @@ contains
     eesq_ol = aem_ol * four * pi
     
   contains
+
+    !-- W+, W-: q q' -> l l' q'' q''' at O(alpha_s alpha^3) (tree interference), library pplnjj_ew.
+    !-- Non-zero only for the crossings of 0 -> l l' (ub d)(u ub) and (ub d)(d db) within one generation (W+).
+    !-- Classes: qqb (Born pair in, q qb out) and qq (identical pair out) have a triple-collinear limit; the rest is finite
+    subroutine register_4q()
+      integer :: gen,s,i,j,k,l,out(4),c(4)
+      character(len=60) :: proc
+
+      n4q = 0
+      do gen = 0,2,2
+         do s = 1,2
+            out = [-(2+gen),1+gen,s+gen,-(s+gen)]
+            if (Vcharge == -1) out(1:2) = -out(1:2)
+            do i = 1,4
+               do j = 1,4
+                  if (i == j) cycle
+                  k = minval(pack([1,2,3,4],[1,2,3,4] /= i .and. [1,2,3,4] /= j))
+                  l = 10 - i - j - k
+                  c = [-out(i),-out(j),max(out(k),out(l)),min(out(k),out(l))]
+                  if (any(all(ch4q(:,1:n4q) == spread(c,2,n4q),dim=1))) cycle
+                  n4q = n4q + 1
+                  ch4q(:,n4q) = c
+                  write(proc,'(2(i0,1x),"-> ",4(i0,1x))') c(1:2),lep_ids,c(3:4)
+                  id4q(n4q) = register_process(trim(proc),1)
+                  if (id4q(n4q) < 0) stop 'register_4q: process not found, install pplnjj_ew'
+                  if (born_w(c(1),c(2)) .and. c(3) == -c(4)) then
+                     class4q(n4q) = c4q_qqb
+                  elseif (c(3) == c(4) .and. ((c(1) == c(3) .and. born_w(-c(1),c(2))) .or. &
+                       (c(2) == c(3) .and. born_w(c(1),-c(2))))) then
+                     class4q(n4q) = c4q_qq
+                  else
+                     class4q(n4q) = merge(c4q_fin_os,c4q_fin_ss,c(1)*c(2) < 0)
+                  endif
+               enddo
+            enddo
+         enddo
+      enddo
+
+    end subroutine register_4q
 
     !-- q qb -> e- e+ [NLO QCD]
     subroutine register_red_qcd(istart)
@@ -424,5 +468,34 @@ contains
     end subroutine set_orders_rr
 
   end subroutine initialise_ol
+
+  !-- true for the q qb' pairs of the W Born
+  logical function born_w(a,b)
+    integer, intent(in) :: a,b
+    integer :: q,qb
+
+    q = max(a,b); qb = -min(a,b)
+    born_w = a*b < 0 .and. mod(q,2) /= mod(qb,2) .and. (q+1)/2 == (qb+1)/2 .and. q <= 4 &
+         .and. mod(q,2) == merge(0,1,Vcharge == 1)
+
+  end function born_w
+
+  !-- sum over the final states of the W four-quark channels of a class, coupling g^2 e^2 stripped
+  subroutine res_tree_4q_gen(p,class,res)
+    use openloops
+    real(dp), intent(in)  :: p(:,:)
+    integer, intent(in)   :: class
+    real(dp), intent(out) :: res(-5:7,-5:7)
+    real(dp15) :: m2
+    integer :: n
+
+    res = zero
+    do n = 1,n4q
+       if (class4q(n) /= class) cycle
+       call evaluate_tree(id4q(n),real(p(:,1:6),dp15),m2)
+       res(ch4q(1,n),ch4q(2,n)) = res(ch4q(1,n),ch4q(2,n)) + m2/gsq_ol/eesq_ol
+    enddo
+
+  end subroutine res_tree_4q_gen
   
 end module mod_ol_interface

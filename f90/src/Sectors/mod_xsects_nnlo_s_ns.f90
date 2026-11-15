@@ -698,10 +698,10 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf)
+    real(dp)    :: res_gen(-5:7,-5:7)
     real(dp)    :: res_lo(2,2)
 
     xsect_nnlo_s_ns_qqb = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_s_ns_qqb: not implemented for W'
 
     ff(1) = zero
 
@@ -721,7 +721,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     LOProc%npart = 4
 
     call cut_histo(LOProc)
@@ -731,13 +731,19 @@ contains
 
     else    
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
+       if (Vcharge == 0) then
+          call res_tree_qqb(LOProc%AmpMom,res_lo)
+          res_lo(:,1) = Qdn2 * res_lo(:,1)
+          res_lo(:,2) = Qup2 * res_lo(:,2)
 
-       call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+          call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
 
-       call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+          call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
+          call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,multiply_IS_charges_sq(res_gen,1),respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+          call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,multiply_IS_charges_sq(res_gen,2),respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+       endif
 
        respdf = CF * (respdf_1 + respdf_2) * LOProc%wgt
 
@@ -767,10 +773,10 @@ contains
     !--
     real(dp)    :: xx(kLO_max_full)
     real(dp)    :: kin(1),respdf(ipdf),respdf_1(ipdf),respdf_2(ipdf)
-    real(dp)    :: res_lo(2,2), res_swp(2,2)
+    real(dp)    :: res_gen(-5:7,-5:7)
+    real(dp)    :: res_lo(2,2)
     
     xsect_nnlo_s_ns_qq = 0
-    if (Vcharge /= 0) stop 'xsect_nnlo_s_ns_qq: not implemented for W'
 
     ff(1) = zero
 
@@ -790,7 +796,7 @@ contains
     !!-----------------------------------------------------------------------!!
     !!                             Hard Process                              !!
     !!-----------------------------------------------------------------------!!
-    LOProc%ids(1:4) = [0,0,id_el,-id_el]
+    LOProc%ids(1:4) = [0,0,lep_ids(1),lep_ids(2)]
     LOProc%npart = 4
 
     call cut_histo(LOProc)
@@ -800,16 +806,20 @@ contains
        
     else    
 
-       call res_tree_qqb(LOProc%AmpMom,res_lo)
-       res_lo(:,1) = Qdn2 * res_lo(:,1)
-       res_lo(:,2) = Qup2 * res_lo(:,2)
+       if (Vcharge == 0) then
+          call res_tree_qqb(LOProc%AmpMom,res_lo)
+          res_lo(:,1) = Qdn2 * res_lo(:,1)
+          res_lo(:,2) = Qup2 * res_lo(:,2)
 
-       res_swp(1,1) = res_lo(2,1); res_swp(2,1) = res_lo(1,1); !-- d <--> db
-       res_swp(1,2) = res_lo(2,2); res_swp(2,2) = res_lo(1,2); !-- u <--> ub
+          !-- xPij(a) is built from the PDF of the antiparticle of a: no swap of the Born
+          call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_lo,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
 
-       call get_respdf_hoppet(xPij,PDFs,ns_lumi,1,1,LOProc,res_swp,respdf_1,myPDFs1_Lmu=[xPij_Lmu])
-
-       call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+          call get_respdf_hoppet(PDFs,xPij,ns_lumi,1,1,LOProc,res_lo,respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+       else
+          call res_tree_qqb_gen(LOProc%AmpMom,res_gen)
+          call get_respdf_hoppet_gen(xPij,PDFs,1,1,LOProc,multiply_IS_charges_sq(res_gen,1),respdf_1,myPDFs1_Lmu=[xPij_Lmu])
+          call get_respdf_hoppet_gen(PDFs,xPij,1,1,LOProc,multiply_IS_charges_sq(res_gen,2),respdf_2,myPDFs2_Lmu=[xPij_Lmu])
+       endif
 
        respdf = CF * (respdf_1 + respdf_2) * LOProc%wgt
 
