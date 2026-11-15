@@ -221,4 +221,14 @@ Further checks of the W four-quark sectors (2026-11-14, `W_ATLAS`):
 - Leg mirror of the integrated sectors (convolution on leg 1 against leg 2, symmetric cuts): `s_qqb` W+ 0.105941(64) vs
   0.105994(65), W- 0.070265(42) vs 0.070241(41); `s_qq` W+ -3.8955(5)e-4 vs -3.8895(5)e-4, W- -2.2623(22)e-3 vs -2.2575(21)e-3 fb.
 
-Not tested independently: the kernels of `s_qqb`, `s_qq` themselves (same as Z) and the cancellation between RR and S.
+Consistency of the W counterterms and integrated sectors with the Z ones (2026-11-15):
+
+- The W code run for Z reproduces the old Z code at the regression points: TC counterterm of the 8 RR sectors to 12 digits,
+  `s_qqb` and `s_qq` to 14 digits. The old Z branches are removed, Z now runs the same code as W there.
+- Kernels against the notebook (`math/subtraction-notebooks/checks/verify_4q_fortran.wls`): `mySub_ns_qqb`, `mySub_ns_qq` and
+  their `_Lmu` parts equal `FINITEqqbqqb`, `FINITEqqqq` of `Z.nb` (ratio 1 to 15 digits at six values of z).
+- The scale term of `s_qq` is -2 P_A(z), P_A = 4(1-z) + 2(1+z) log z + 2 p_qq(-z) S2(z): the known two-loop q -> qbar
+  splitting function with CF (CF - CA/2) -> 2 CF Q^2, as required by the collinear renormalisation.
+
+With the pointwise TC limit and the POWHEG comparison of the hard events, what is left untested for W is only what is common
+to Z: that the notebook kernels are the integral of the TC counterterm (`Z.nb` holds the results, not the derivation).

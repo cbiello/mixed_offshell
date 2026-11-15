@@ -18,24 +18,24 @@ Legend: ✅ done and checked · 🟡 code exists, not validated · 🔧 partial 
 |---|---|---|---|
 | LO, NLO QCD, NLO EW (ns, gq, qg, aq, qa) | ✅ | ✅ POWHEG | ✅ POWHEG |
 | VV (two-loop) | ✅ | ⏸ | ⏸ |
-| RV, EW loop + gluon (`rvewk_is`: ns, gq, qg) | ✅ | ns 🟡 (limits ✅); gq, qg 🔧 integrand Z | same |
+| RV, EW loop + gluon (`rvewk_is`: ns, gq, qg) | ✅ | ✅ POWHEG | ✅ POWHEG |
 | RV, QCD loop + photon (`rvqcd_*` ns) | ✅ | ✅ limits | ✅ limits |
 | RV, QCD loop + photon (aq, qa) | ✅ | ✅ limits | ✅ limits |
 | RR `ns_ga` | ✅ | ✅ limits | ✅ limits |
 | RR `gq`, `qg` | ✅ | ✅ limits | ✅ limits |
 | RR `aq`, `qa`, `ag`, `ga` | ✅ | ✅ limits | ✅ limits |
-| RR four-quark | ✅ | ✅ | ✅ |
-| S ns: `s_12`, `s_vqcd`, `s_vewk` | ✅ | 🟡 | ❌ (`stop`) |
-| S ns: `s_oqcd`, `s_oewk_*` | ✅ | 🟡 | 🟡 |
-| S ns: `s_qqb`, `s_qq` | ✅ | ❌ | ❌ |
-| S gq, qg: `s_oqcd`, `s_oewk_*` | ✅ | 🟡 | 🟡 |
+| RR four-quark | ✅ | ✅ limits, POWHEG | ✅ limits, POWHEG |
+| S ns: `s_12`, `s_vqcd`, `s_vewk` | ✅ | ✅ notebook | ✅ CP test |
+| S ns: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
+| S ns: `s_qqb`, `s_qq` | ✅ | ✅ same code as Z | ✅ same code as Z |
+| S gq, qg: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
 | S gq, qg: `s_12`, `s_vewk` | ✅ | ❌ | ❌ |
 | S aq, qa, ag, ga (all) | ✅ | ❌ | ❌ |
 | Limit-scaling checks usable on all sectors | 🔧 | 🔧 | 🔧 |
 | Fortran vs Mathematica integrated CT check | – | 🔧 (one term) | ❌ |
 
-Important: sectors that are still Z-only have **no guard**. A W build runs them and
-silently returns neutral-current numbers.
+Sectors that are still Z-only stop for W (I3).
+Missing for W: `s_12`, `s_vewk` of gq, qg (S10); all S sectors of aq, qa, ag, ga (S11-S14); VV and the `nf` pieces (out of scope for now).
 
 ## 1. Infrastructure and hygiene (do first)
 
@@ -144,7 +144,7 @@ channels are to be provided by Christian.
 | S3 | `s_oqcd` W±: `calG_ONLOQCD_ns` had the wrong sign of the `Qlept*Q_IS` terms (with Qlept = Q1 + Q2 the `log(E_C/E_l) log(mu)` terms must cancel, they do only in `genGnloQCD_cc`). `ns s_oqcd` now uses `genGnloQCD_cc`, `calG_ONLOQCD_ns` removed. Shift of the l l' + jet rate: W+ +4.50 fb, W- +2.58 fb (1.4% of the q qb' LO); agreement with POWHEG after the fix (C3.7) | `mod_xsects_nnlo_s_ns.f90`, `mod_int_sub_nnlo.f90` | ✅ 2026-11-13 |
 | S4 | `s_oewk_is`: the routine wired to `-sec s_oewk_is` is an unfinished draft (broken for Z too); the working one is `_raoul` under `s_oewk_is_ra`. Rewire, delete the draft | :1531-2491, :3181-4216; `Chooser/mod_run_proc_s_ns.f90` | 🔧 |
 | S5 | `s_oewk_fs_53/54` (`_raoul`): general; "limits checked for W- only". Check W+; remove legacy `oewk_fs_5i`; `Q_lep2` left at :4861 | :4220-5019 | 🟡 |
-| S6 | `s_qqb`, `s_qq` for W: Born `_gen` times the squared charge of the convoluted leg, `get_respdf_hoppet_gen`. The same code run for Z reproduces the legacy `s_qqb` to 14 digits. Legacy Z `s_qq`: the leg-1 term swapped quark and antiquark in the Born although `xPij` is already built from the conjugate PDF (per-leg mirror test with a charge-asymmetric cut: -2.707e-3 vs -0.703e-3 fb before, -2.716e-3 vs -2.711e-3 after); totals with symmetric cuts unaffected. Fixed. W: CP test and leg mirror pass (CHECKS); the kernels are the Z ones, RR + S cancellation not tested independently | `mod_xsects_nnlo_s_ns.f90` | ✅ 2026-11-14 |
+| S6 | `s_qqb`, `s_qq` for W: Born `_gen` times the squared charge of the convoluted leg, `get_respdf_hoppet_gen`. The same code run for Z reproduces the legacy `s_qqb` to 14 digits. Legacy Z `s_qq`: the leg-1 term swapped quark and antiquark in the Born although `xPij` is already built from the conjugate PDF (per-leg mirror test with a charge-asymmetric cut: -2.707e-3 vs -0.703e-3 fb before, -2.716e-3 vs -2.711e-3 after); totals with symmetric cuts unaffected. Fixed. W: CP test and leg mirror pass. Z and W share one code path (RR counterterm and S; old Z branches removed after agreement to 12-14 digits); kernels equal `Z.nb` (`checks/verify_4q_fortran.wls`). The derivation of the kernels is not in the notebooks | `mod_xsects_nnlo_s_ns.f90` | ✅ 2026-11-14 |
 | S7 | `s_vewknf` (see V2) | :3111 | ⏸ |
 
 ### 6b. gq, qg
@@ -169,7 +169,7 @@ channels are to be provided by Christian.
 
 | ID | Task | Status |
 |---|---|---|
-| M1 | Add to `math/`: W- ns; W± for gq/qg, aq/qa, ag/ga, four-quark; ONLO functions | ❌ (Christian) |
+| M1 | Add to `math/`: W- ns; W± for gq/qg, aq/qa, ag/ga; ONLO functions. Four-quark: nothing to add for W (same kernels as Z, charge of the convoluted leg); the derivation of the Z kernels is missing in `Z.nb` | ❌ (Christian) |
 | M2 | One notebook convention for charges/legs shared with the Fortran (`Qq, Qqp, Qlept, ilept`) | ❌ |
 
 ## 7. Validation (mandatory for every item above)
@@ -194,7 +194,7 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 | C2.1 | Extend `math/validate_DYp7.wl` from term [7] to all of `FINITEDYp[1..7,60]` (symbolic, kernels included) | 🔧 |
 | C2.2 | Numerical check: evaluate each finite-remainder term at fixed `(z, eta, mu)` in both codes (Fortran test driver + notebook export), per channel and boson | ❌ |
 | C2.3 | Resolve S3 (`calG_ONLOQCD_ns` vs `genGnloQCD_cc`) and S9: settled by the POWHEG comparison C3.7 | ✅ 2026-11-13 |
-| C2.4 | Same for W-, gq/qg, photon-induced and four-quark once M1 is in | ❌ |
+| C2.4 | Same for W-, gq/qg, photon-induced once M1 is in. Four-quark: done numerically (kernels of `s_qqb`, `s_qq` against `Z.nb`, CHECKS) | 🟡 |
 | C2.5 | Store logs of the validation runs in the repo | ❌ |
 
 ### C3. POWHEG benchmarks
@@ -254,21 +254,21 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 | corr ch sec | W+ code | W+ C1 | W+ C2 | W- code | W- C1 | W- C2 |
 |---|---|---|---|---|---|---|
 | nnlo ns rvewk_is | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
-| nnlo ns rvqcd_is | 🟡 | | – | 🟡 | | – |
-| nnlo ns rvqcd_fs_53/54 | 🟡 | | – | 🟡 | | – |
+| nnlo ns rvqcd_is | ✅ | ✅ | – | ✅ | ✅ | – |
+| nnlo ns rvqcd_fs_53/54 | ✅ | ✅ | – | ✅ | ✅ | – |
 | nnlo gq/qg rvewk_is | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
-| nnlo aq/qa rvqcd_is | ❌ | | – | ❌ | | – |
-| nnlo ns_ga rr (10 sectors) | 🟡 | | – | 🟡 | | – |
-| nnlo gq rr (7) | 🟡 | | – | 🟡 | | – |
-| nnlo qg rr (7) | 🟡 | | – | 🟡 | | – |
-| nnlo aq/qa rr (10+10) | ❌ | | – | ❌ | | – |
-| nnlo ag/ga rr (6+6) | ❌ | | – | ❌ | | – |
+| nnlo aq/qa rvqcd_is | ✅ | ✅ | – | ✅ | ✅ | – |
+| nnlo ns_ga rr (10 sectors) | ✅ | ✅ | – | ✅ | ✅ | – |
+| nnlo gq rr (7) | ✅ | ✅ | – | ✅ | ✅ | – |
+| nnlo qg rr (7) | ✅ | ✅ | – | ✅ | ✅ | – |
+| nnlo aq/qa rr (10+10) | ✅ | ✅ | – | ✅ | ✅ | – |
+| nnlo ag/ga rr (6+6) | ✅ | ✅ | – | ✅ | ✅ | – |
 | nnlo ns 4q rr (8 + 2) | ✅ | ✅ | – | ✅ | ✅ | – |
-| nnlo ns s_12 / s_vqcd / s_vewk | 🟡 | – | 🔧 | ❌ | – | |
+| nnlo ns s_12 / s_vqcd / s_vewk | ✅ | – | ✅ notebook | ✅ | – | ✅ CP test |
 | nnlo ns s_oqcd | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
 | nnlo ns s_oewk_is(_ra) | 🟡 | | | 🟡 | 🟡 | |
 | nnlo ns s_oewk_fs_53/54 | 🟡 | | | 🟡 | 🟡 | |
-| nnlo ns s_qqb / s_qq | ✅ | – | 🟡 Z kernels reused | ✅ | – | 🟡 Z kernels reused |
+| nnlo ns s_qqb / s_qq | ✅ | – | ✅ | ✅ | – | ✅ |
 | nnlo gq/qg s_oqcd | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
 | nnlo gq/qg s_oewk_* | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) |
 | nnlo gq/qg s_12, s_vewk | ❌ | – | | ❌ | – | |
