@@ -48,7 +48,7 @@ make remove && make -j16            # clean rebuild only when the analysis or fl
 ```
 
 - Dependencies: LHAPDF, HOPPET, handyG, OpenLoops with process libraries
-  `pplla ppllj ppllj_ew pplljj_qcdew` (the W channels live in the same `ppll*` libraries;
+  `pplla ppllaj ppllj ppllj_ew pplljj_qcdew pplnjj_ew` (the W channels live in the same `ppll*` libraries;
   `ppllj` is required by `nloqcd v` but missing from `README.md`).
 - Each run integrates one sector with Vegas and writes `histo/<analysis>_<corr>_<ch>_<sec>_...histo`.
   A physical result is the sum of all sectors, combined with the tools in `bin/`.
@@ -139,7 +139,7 @@ Two generations coexist.
 | + g (ns, gq, qg) | `res_tree_g_qqb_gen`, `_g_gq_gen`, `_g_qg_gen` | `res_ewkloop_g_qqb_gen`, `_g_gq_gen`, `_g_qg_gen` (+ `_nf_gen`) |
 | + gamma (ns, aq, qa) | `res_tree_a_qqb_gen`, `_a_aq_gen`, `_a_qa_gen` (W: MCFM `agamtree`, includes emission off the W) | `ol_res_qcdloop_a_qqb_gen`, `_a_aq_gen`, `_a_qa_gen` |
 | + g gamma (ns, gq, qg, aq, qa, ag, ga) | `res_tree_ga_*_gen` (W: `ubdgmsq`) | – |
-| four quarks | legacy `res_tree_qqb_qqb`, `res_tree_qq_qq`; OpenLoops for `ns_*_w` (Z only) | – |
+| four quarks | Z: legacy `res_tree_qqb_qqb`, `res_tree_qq_qq`, OpenLoops `pplljj_qcdew` for `ns_*_w`; W: OpenLoops `pplnjj_ew` for all channels (`res_tree_4q_gen` in `mod_ol_interface`) | – |
 | gamma gamma -> l l | `res_treeAA_aa(_gen)` (zero for W) | `res_ewkloopAA_aa` |
 | two-loop | – | `mod_amplitudes_twol_nf_ppll`, `TwoLoop/` (Z only) |
 
@@ -194,7 +194,7 @@ Files with no `_oldcode` and no `Vcharge` branch are untouched Z code.
 ## 10. Analyses
 
 `analysis/mod_cut_histo_<name>.f90` provides `init_user_histo` and `cut_histo(event)`.
-Benchmark analyses for all three bosons: `V_lla_nloqcd` (resolved photon) and `V_llj_nloew` (resolved jet, photon recombination).
+Benchmark analyses for all three bosons: `V_lla_nloqcd` (resolved photon), `V_llj_nloew` (resolved jet, photon recombination), `V_lljj_4q` (two resolved jets).
 W analyses: `W_ATLAS` (high-mT ATLAS-like cuts), `W_ATLASNLOEW`, `W_ATLASNLOQCD`
 (POWHEG benchmark setups), `w_dflt`. `mod_cut_histo_aux` has photon recombination
 (`recombine_photons`), driven by `event%ids`.

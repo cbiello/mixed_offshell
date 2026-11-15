@@ -173,3 +173,52 @@ in the code are the ONLO-EWK terms of the notebooks (q qb: `W.nb`, CF [Ptilde + 
 CF (2 pi^2/3 - 3 lmu); gq: `Z.nb`, TR [Ptilde_gq + P_qg log(eta/2) omega]); all nine pass the `-checkint` scan for W+ and W-.
 `gq s_oewk_fs_53/54` was zero at every point (two debug lines overwrote the integration variables): fixed, Z gq = qg mirror
 (0.0925 fb each in the l l gamma setup).
+
+## Four-quark channels (2026-11-14)
+
+W+/W- `ns_qqb`, `ns_qq` (`rr_5161a/c`, `rr_5262a/c`): hard matrix element from OpenLoops `pplnjj_ew`, triple-collinear
+counterterm from the Born `_gen` with the squared charge of the emitting leg. `-checklim` (pointwise TC limit): the
+difference closes as sqrt(depth) in all 16 sectors (slowest points, W- `ns_qqb rr_5262a`: 0.92, 0.52, 0.10 at 1e-6, 1e-8, 1e-10).
+The `-checkint` scan is not sensitive here (logarithmic singularity only: a mutated counterterm passes it).
+
+Integrated `s_qqb`, `s_qq`: the generic code run for Z reproduces the legacy `s_qqb` to 14 digits. Legacy Z `s_qq` had quark
+and antiquark exchanged in the Born of the leg-1 term; per-leg mirror test with a charge-asymmetric cut: -2.707e-3 vs
+-0.703e-3 fb before, -2.716e-3 vs -2.711e-3 fb after the fix.
+
+Hard events with two jets against POWHEG `NSC-lnujjMIX` (13 TeV, both partons pT > 30, Delta R > 0.4; `f90/tests/powheg/lljj/`):
+
+| | initial state | POWHEG [fb] | mixed_ll [fb] | difference [fb] |
+|---|---|---|---|---|
+| W+ | opposite sign | -0.5683 +- 0.0008 | -0.5690 +- 0.0010 | -0.0008 +- 0.0013 |
+| W+ | same sign | 0.4628 +- 0.0042 | 0.4598 +- 0.0013 | -0.0031 +- 0.0044 |
+| W- | opposite sign | -0.3864 +- 0.0008 | -0.3862 +- 0.0009 | 0.0002 +- 0.0012 |
+| W- | same sign | 0.2644 +- 0.0035 | 0.2614 +- 0.0006 | -0.0030 +- 0.0036 |
+| Z | opposite sign | -0.4496 +- 0.0006 | -0.4488 +- 0.0007 | 0.0007 +- 0.0009 |
+| Z | same sign | 0.3080 +- 0.0028 | 0.3086 +- 0.0008 | 0.0006 +- 0.0030 |
+
+Found with this check: Z `ns_qqb_w`, `ns_qqp_w`, `ns_qqpb_w` registered the OpenLoops processes with u and d exchanged
+(shifts of 3 to 6 sigma per channel in this setup; in the regression run `ns_qqpb_w` goes from -0.199 to -0.051 fb). Fixed.
+The integrated `s_qqb`, `s_qq` and the counterterms are not covered by this benchmark.
+
+Further checks of the W four-quark sectors (2026-11-14, `W_ATLAS`):
+
+- Regression: Z, W+, W- all sectors agree with the references after the fixes.
+- `-checkint` scan: the 8 RR sectors and `s_qqb`, `s_qq` pass for W+ and W- (weak test for RR, see above).
+- CP test (`tests/cptest.sh`, W- in p p against W+ in pbar pbar):
+
+| Sector | W- [fb] | W+, pbar pbar [fb] | difference / error |
+|---|---|---|---|
+| ns s_qqb | 0.140551 +- 0.000035 | 0.140535 +- 0.000035 | 0.3 |
+| ns s_qq | -0.004520 +- 0.000002 | -0.004518 +- 0.000002 | -0.7 |
+| ns_qqb rr_5161a + c | -0.20815 +- 0.00068 | -0.20907 +- 0.00065 | 1.0 |
+| ns_qqb rr_5262a + c | -0.20854 +- 0.00073 | -0.20975 +- 0.00068 | 1.2 |
+| ns_qq rr_5161a, c, 5262a, c | 0.0273, 0.0662, 0.0271, 0.0672 | 0.0276, 0.0677, 0.0275, 0.0675 | -1.1, -2.2, -1.2, -0.5 |
+| ns_qqb_w rr | -0.0468 +- 0.0069 | -0.0542 +- 0.0056 | 0.8 |
+| ns_qqp_w rr | 0.1261 +- 0.0016 | 0.1263 +- 0.0010 | -0.1 |
+
+  For `ns_qqb` only the sum a + c is CP symmetric: the sectors order the quark (5) against the antiquark (6), and CP exchanges
+  the two (a alone differs by 6%, 8 sigma).
+- Leg mirror of the integrated sectors (convolution on leg 1 against leg 2, symmetric cuts): `s_qqb` W+ 0.105941(64) vs
+  0.105994(65), W- 0.070265(42) vs 0.070241(41); `s_qq` W+ -3.8955(5)e-4 vs -3.8895(5)e-4, W- -2.2623(22)e-3 vs -2.2575(21)e-3 fb.
+
+Not tested independently: the kernels of `s_qqb`, `s_qq` themselves (same as Z) and the cancellation between RR and S.

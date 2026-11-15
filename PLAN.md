@@ -24,7 +24,7 @@ Legend: ✅ done and checked · 🟡 code exists, not validated · 🔧 partial 
 | RR `ns_ga` | ✅ | ✅ limits | ✅ limits |
 | RR `gq`, `qg` | ✅ | ✅ limits | ✅ limits |
 | RR `aq`, `qa`, `ag`, `ga` | ✅ | ✅ limits | ✅ limits |
-| RR four-quark | ✅ | ❌ | ❌ |
+| RR four-quark | ✅ | ✅ | ✅ |
 | S ns: `s_12`, `s_vqcd`, `s_vewk` | ✅ | 🟡 | ❌ (`stop`) |
 | S ns: `s_oqcd`, `s_oewk_*` | ✅ | 🟡 | 🟡 |
 | S ns: `s_qqb`, `s_qq` | ✅ | ❌ | ❌ |
@@ -125,8 +125,9 @@ General amplitudes exist for every channel with g + gamma or q + gamma in the fi
 | RR7 | `ag`, `ga` (7 sectors each) generalised for W±: flavour sums per leg with the new `collapse_leg` (quarks or antiquarks of one leg, optionally with their charge). Z reproduces the old numbers (`ag rr_5262a` to 6e-11 without grid adaptation, 2.5e-6 with it: rounding in a strongly cancelling sector); W limits close | `mod_xsects_nnlo_rr_ag.f90`, `_ga.f90`, `mod_aux_sectors.f90` | ✅ limits (2026-11-12) |
 | RR8 | Limits built on gamma gamma -> l l: kept in the code, `res_treeAA_aa_gen` is zero for W, and the scan shows that the W integrand is integrable there without them | RR6, RR7 | ✅ |
 | RR9 | `res_tree_ga_ag_gen`/`_ga_gen` for W: not compared with MadGraph yet, but all their collinear limits (onto validated lower-multiplicity amplitudes) close for W+ and W-. Fixed on the way: `res_tree_ga_aq_gen`/`_qa_gen` filled a spurious photon-photon entry | `Amplitudes/` | 🟡 limits ✅, MG check open |
-| RR10 | Four-quark singular channels (`ns_qqb`, `ns_qq`, TC limit only): Z legacy amplitudes. Need q qb' -> l nu q'' qb'' amplitudes at O(alpha_s alpha) interference and the TC counterterm with W flavours | `mod_xsects_nnlo_rr_ns.f90` :2641-2883 | ❌ |
-| RR11 | Four-quark finite channels (`ns_qqb_w`, `ns_qqp_w`, `ns_qqpb_w`): OpenLoops registration stops for W ("TO IMPLEMENT OL rr for W in the 4q case"). Enumerate W flavour channels, register, add luminosities (`qQpb_lumi_wp/_wm` exist, unused) | `mod_ol_interface.f90` :248-284, `rr_ns` :2885-3126 | ❌ |
+| RR10 | Four-quark singular channels for W (`ns_qqb`, `ns_qq`, four sectors each): hard matrix element from OpenLoops (`res_tree_4q_gen`, classes `c4q_qqb`, `c4q_qq`), TC counterterm with the Born `_gen` and the charge of the emitting leg. Pointwise TC limit (`-checklim`) closes as sqrt(depth) in all 16 W+/W- sectors. The integrability scan is not sensitive here (logarithmic singularity only) | `mod_xsects_nnlo_rr_ns.f90`, `OpenLoops/mod_ol_interface.f90` | ✅ 2026-11-14 |
+| RR11 | Four-quark finite channels for W: all other crossings, `ns_qqb_w` (q qb' initial states) and `ns_qqp_w` (q q', qb qb'); `ns_qqpb_w` is not used for W. Channels are generated in `register_4q` (crossings of 0 -> l nu (ub d)(u ub), (ub d)(d db) per generation; every other flavour structure vanishes at this order, checked numerically). Needs the OpenLoops library `pplnjj_ew` | idem | ✅ 2026-11-14 |
+| RR11b | Z finite four-quark channels (`ns_qqb_w`, `ns_qqp_w`, `ns_qqpb_w`, old code): OpenLoops processes registered with u and d exchanged (PDG 2 taken as d), so each amplitude was folded with the luminosity of the other isospin. Fixed; with two jets the channels move by 3 to 6 sigma (C3.10), in the regression setup `ns_qqpb_w` goes from -0.199 to -0.051 fb | `OpenLoops/mod_ol_interface.f90` | ✅ 2026-11-14 |
 | RR12 | List, on paper, all partonic channels at O(alpha_s alpha) for W+ and W- with their singular limits, and map each to a sector. Use it to confirm nothing is missing (notes exist for Z in `notes/chiara_federica`) | new note | ❌ |
 
 ## 6. Integrated subtraction ("S" sectors)
@@ -143,7 +144,7 @@ channels are to be provided by Christian.
 | S3 | `s_oqcd` W±: `calG_ONLOQCD_ns` had the wrong sign of the `Qlept*Q_IS` terms (with Qlept = Q1 + Q2 the `log(E_C/E_l) log(mu)` terms must cancel, they do only in `genGnloQCD_cc`). `ns s_oqcd` now uses `genGnloQCD_cc`, `calG_ONLOQCD_ns` removed. Shift of the l l' + jet rate: W+ +4.50 fb, W- +2.58 fb (1.4% of the q qb' LO); agreement with POWHEG after the fix (C3.7) | `mod_xsects_nnlo_s_ns.f90`, `mod_int_sub_nnlo.f90` | ✅ 2026-11-13 |
 | S4 | `s_oewk_is`: the routine wired to `-sec s_oewk_is` is an unfinished draft (broken for Z too); the working one is `_raoul` under `s_oewk_is_ra`. Rewire, delete the draft | :1531-2491, :3181-4216; `Chooser/mod_run_proc_s_ns.f90` | 🔧 |
 | S5 | `s_oewk_fs_53/54` (`_raoul`): general; "limits checked for W- only". Check W+; remove legacy `oewk_fs_5i`; `Q_lep2` left at :4861 | :4220-5019 | 🟡 |
-| S6 | `s_qqb`, `s_qq`: Z only, no guard (goes with RR10) | :698-835 | ❌ |
+| S6 | `s_qqb`, `s_qq` for W: Born `_gen` times the squared charge of the convoluted leg, `get_respdf_hoppet_gen`. The same code run for Z reproduces the legacy `s_qqb` to 14 digits. Legacy Z `s_qq`: the leg-1 term swapped quark and antiquark in the Born although `xPij` is already built from the conjugate PDF (per-leg mirror test with a charge-asymmetric cut: -2.707e-3 vs -0.703e-3 fb before, -2.716e-3 vs -2.711e-3 after); totals with symmetric cuts unaffected. Fixed. W: CP test and leg mirror pass (CHECKS); the kernels are the Z ones, RR + S cancellation not tested independently | `mod_xsects_nnlo_s_ns.f90` | ✅ 2026-11-14 |
 | S7 | `s_vewknf` (see V2) | :3111 | ⏸ |
 
 ### 6b. gq, qg
@@ -184,7 +185,7 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 | C1.3 | Extend `xsect_selector` beyond RR `ns_ga`: RR gq/qg/aq/qa/ag/ga/4q, all RV, all ONLO | ❌ |
 | C1.4 | Make it W-aware (which limits are singular per sector: no lepton-collinear pole on the neutrino; no gamma gamma TC) | 🔧 |
 | C1.5 | Output one table per sector (limit, slope, grade); store reference tables for Z, W+, W- | ❌ |
-| C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Still to run: `rvewk`, four-quark, S sectors | 🟡 |
+| C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Four-quark RR and `s_qqb`, `s_qq` pass for W+, W- (2026-11-14). Still to run: `rvewk`, other S sectors | 🟡 |
 | C1.7 | Priority targets for W (cannot be seen in Z): RV6a, RV6b, RV7a, RV7b, RV3, N2, RR5, RR8. Each needs a recorded scaling table for W+ and W- before it is ticked | ❌ |
 
 ### C2. Integrated counterterm left-over, Fortran vs Mathematica
@@ -220,12 +221,14 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 | C3.5 | Analyses in this code that match C3.3 and C3.4: `V_lla_nloqcd` (resolved photon) and `V_llj_nloew` (resolved jet, dressed leptons and quarks), Z, W+, W- | ✅ 2026-11-13 |
 | C3.6 | NLO QCD l l' gamma: sum of the 39 sectors with a resolved photon against `NSC-lnuaEW` (no damping): W+ 6.1928(21) vs 6.1896(49), W- 3.7968(12) vs 3.8011(38), Z 13.1031(31) vs 13.1107(112) fb. Needs `-qmin_rsc 1` and 1.5M/5M points (`f90/tests/powheg/lla/`) | ✅ 2026-11-13 |
 | C3.7 | NLO EW l l' + jet against `NSC-lnujQCD`: sum of 33 sectors (`nloqcd r_is` = LO, `rvewk_is`, RR `ns_ga`/`gq`/`qg`, `s_oqcd`), split in q qb' and gluon channels. Correction W+ -38.82(2) vs -38.86(8), W- -24.93(1) vs -25.01(5), Z -18.64(1) vs -18.63(7) fb; LO within 0.06% (mixed_ll low by 2 sigma, open). Found S3, S9. Numbers and recipe in `f90/tests/powheg/llj/` | ✅ 2026-11-14 |
+| C3.9 | Generator for the four-quark interference at O(alpha_s alpha^3): `NSC-lnujjMIX` (POWHEG-BOX-RES, Born only, OpenLoops `pplnjj_ew`, `pplljj_qcdew`), W+, W-, Z; analysis `V_lljj_4q` here. README in the generator directory | ✅ 2026-11-14 |
+| C3.10 | Four-quark hard events with two jets against `NSC-lnujjMIX`, opposite-sign / same-sign initial states: W+ -0.5690(10) vs -0.5683(8), 0.4598(13) vs 0.4628(42); W- -0.3862(9) vs -0.3864(8), 0.2614(6) vs 0.2644(35); Z -0.4488(7) vs -0.4496(6), 0.3086(8) vs 0.3080(28) fb. Found RR11b. Does not test the TC counterterms (covered by `-checklim`) nor `s_qqb`/`s_qq`. Numbers and recipe in `f90/tests/powheg/lljj/` | ✅ 2026-11-14 |
 | C3.8 | Script that runs and sums the right sectors for C3.1, C3.2, C3.6, C3.7 and prints the ratio to POWHEG | ❌ |
 
 ### C4. Further checks
 | ID | Task | Status |
 |---|---|---|
-| C4.1 | `-MGcheck` for all `_gen` trees incl. g+gamma and four-quark, W±; add loop amplitudes vs OpenLoops/MadLoop points | 🔧 |
+| C4.1 | `-MGcheck` for all `_gen` trees incl. g+gamma and four-quark, W±; add loop amplitudes vs OpenLoops/MadLoop points; the W four-quark amplitudes are OpenLoops, validated by C3.10 | 🔧 |
 | C4.2 | Pole check (`-checkpoles`) for `_gen` one-loop wrappers | ❌ |
 | C4.3 | Z regression: `OLDCODE=true` vs `false` builds and old published numbers after every change; script it (I11) | manual |
 | C4.4 | Independence of technical parameters: `buff*`, damping exponents, partition choice; mu_R/mu_F logs | ❌ |
@@ -260,12 +263,12 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 | nnlo qg rr (7) | 🟡 | | – | 🟡 | | – |
 | nnlo aq/qa rr (10+10) | ❌ | | – | ❌ | | – |
 | nnlo ag/ga rr (6+6) | ❌ | | – | ❌ | | – |
-| nnlo ns 4q rr | ❌ | | – | ❌ | | – |
+| nnlo ns 4q rr (8 + 2) | ✅ | ✅ | – | ✅ | ✅ | – |
 | nnlo ns s_12 / s_vqcd / s_vewk | 🟡 | – | 🔧 | ❌ | – | |
 | nnlo ns s_oqcd | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
 | nnlo ns s_oewk_is(_ra) | 🟡 | | | 🟡 | 🟡 | |
 | nnlo ns s_oewk_fs_53/54 | 🟡 | | | 🟡 | 🟡 | |
-| nnlo ns s_qqb / s_qq | ❌ | – | | ❌ | – | |
+| nnlo ns s_qqb / s_qq | ✅ | – | 🟡 Z kernels reused | ✅ | – | 🟡 Z kernels reused |
 | nnlo gq/qg s_oqcd | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
 | nnlo gq/qg s_oewk_* | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) |
 | nnlo gq/qg s_12, s_vewk | ❌ | – | | ❌ | – | |
