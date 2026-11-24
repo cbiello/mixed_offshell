@@ -551,3 +551,30 @@ NLO real and RV sectors (16: `nloqcd`/`nloewk` `r_is`, `r_fs_53/54`, `rvewk_is`,
 `limval_onlo` and `-checklim` sends them to `check_limits_onlo`. W+ and W-, one point per sector: 30 limits with counterterm,
 all converge (soft as x, collinear as sqrt x); 50 limits without own counterterm, all integrable, among them the photon
 collinear to the neutrino (`r_fs_53`, `rvqcd_fs_53` for W+; `_54` for W-) and the soft limit of `nloqcd r_is` (covered by C1 + C2).
+
+## Intensive limit checks, W+ and W- (PLAN C1.5, C1.7, 2026-11-24)
+
+`tests/checklim_run.sh wp|wm 200 csv` and `tests/checklim_analyse.py csv ref` (manual `f90/tests/CHECKLIM.md`):
+94 sectors, 200 points each that pass the cuts, depths 1e-1..1e-10. W+: 1,866 limit/pair rows, all with at least 95% of
+the points passing. W-: 1,881 rows, one below 95%: `qg rr_5262d` C56 integrability, one point, where the lepton dressing
+is not collinear safe (PLAN team question 10). The remaining single-point flags are cut edges (the counterterm's Born
+just below the mT cut, e.g. 199.9997 GeV, while H approaches it as sqrt x), double precision at triple and quadruple
+limits, and sign crossings of A - B; the analysis does not count them (CHECKLIM.md).
+
+C1.7 targets (median |A/B - 1| over pair rows and points; slope = median per-row Theil-Sen slope, expected 1/2 for
+collinear limits; int = limits without own counterterm, graded integrable):
+
+| Target | Sectors | Rows (pairs, int) | W+ min pass | W- min pass | W+ 1e-2 | 1e-4 | 1e-6 | 1e-8 | W- 1e-2 | 1e-4 | 1e-6 | 1e-8 | slopes |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| RV6a C2 | ns `rvqcd_is` | 2, 0 | 1.000 | 0.989 | 3e-1 | 2e-2 | 2e-3 | 2e-4 | 3e-1 | 2e-2 | 2e-3 | 2e-4 | 0.50-0.53 |
+| RV6b SC2 | ns `rvqcd_is` | 1, 0 | 1.000 | 1.000 | 2e-1 | 2e-2 | 2e-3 | 2e-4 | 2e-1 | 2e-2 | 2e-3 | 2e-4 | 0.50 |
+| RV7a C1 | ns `rvqcd_fs_53/54` | 2, 1 | 1.000 | 1.000 | 5e-2 | 2e-3 | 2e-4 | 2e-5 | 5e-2 | 2e-3 | 2e-4 | 2e-5 | 0.52-0.58 |
+| RV7b SC1 | ns `rvqcd_fs_53/54` | 1, 1 | 1.000 | 1.000 | 6e-2 | 2e-3 | 2e-4 | 2e-5 | 6e-2 | 2e-3 | 2e-4 | 2e-5 | 0.59-0.60 |
+| RV3 C1, C2 | ns, gq, qg `rvewk_is` | 4, 2 | 0.990 | 0.995 | 5e-2 | 7e-3 | 8e-4 | 9e-5 | 4e-2 | 3e-3 | 5e-4 | 6e-5 | 0.46-0.54 |
+| N2 | `nloewk` aq, qa `r_is` | 2, 8 | 1.000 | 1.000 | 1e-1 | 8e-3 | 9e-4 | 9e-5 | 2e-1 | 2e-2 | 2e-3 | 2e-4 | 0.49-0.50 |
+| RR5 | `ns_ga`, gq, qg `rr_5163/5164/5263/5264` | 216, 56 | 1.000 | 1.000 | 3e-2 | 2e-3 | 2e-4 | 2e-5 | 3e-2 | 2e-3 | 2e-4 | 2e-5 | 0.5-1.0 |
+| RR8 (TC, int only) | aq, qa, ag, ga RR | 0, 167-173 | 0.984 | 0.977 | | | | | | | | | |
+
+In RV7a/b the neutrino sector (`fs_53` for W+, `fs_54` for W-) has no C1 counterterm and is integrable; the charged-lepton
+sector converges as sqrt x. In RR5 the pairs S5 = S5C5 in the C5 limit agree to 2e-16 at every depth (slope 0, passing).
+RR8: the lowest rows (97.7-99.5%) are TC with three or four variables at the edge, where double precision runs out.
