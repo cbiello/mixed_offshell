@@ -531,3 +531,18 @@ C1 + C2): x^k |H + counterterms| (k = variables at the edge) must fall between d
 The W+ flag (`aq rr_5161b`, S6+X+Y) is double precision with three variables at the edge: x^3 |H + CT| falls to 1e-4 and
 then rises; integrable on 7 further points (one cut). The first version tested H alone and flagged `ns s_oqcd` soft:
 there the soft gluon is cancelled by C1 + C2 (1/(rho(1-rho)) = 1/rho + 1/(1-rho)), so H + counterterms is the right test.
+
+## C1 limit of `qg s_oewk_fs_54` against the gq mirror (PLAN C1.9, 2026-11-24)
+
+The C1.3 table (one point) showed 4e-4 -> 2e-4 between depths 1e-3 and 1e-6 for W+ `qg s_oewk_fs_54`. With 30 points
+(28 series of a kinematic group with H and C1), median |H/C1 - 1| in the limit photon collinear to the charged lepton:
+
+| Sector | 1e-3 | 1e-4 | 1e-5 | 1e-6 | 1e-7 | 1e-8 | 1e-10 |
+|---|---|---|---|---|---|---|---|
+| W+ `qg s_oewk_fs_54` | 1.0e-2 | 3.0e-3 | 8.9e-4 | 2.8e-4 | 9.0e-5 | 2.9e-5 | 2.9e-6 |
+| W+ `gq s_oewk_fs_54` | 1.6e-2 | 6.5e-3 | 2.2e-3 | 7.1e-4 | 2.3e-4 | 7.2e-5 | 7.2e-6 |
+| W- `qg s_oewk_fs_53` | 9.4e-3 | 2.7e-3 | 8.7e-4 | 2.7e-4 | 8.6e-5 | 2.7e-5 | 2.7e-6 |
+| W- `gq s_oewk_fs_53` | 1.5e-2 | 4.8e-3 | 1.8e-3 | 5.9e-4 | 1.9e-4 | 6.0e-5 | 6.0e-6 |
+
+All fall as sqrt x. In a few series H - C1 changes sign between 1e-3 and 1e-4 (qg W+: 3 of 28, gq W+: 2, qg W-: 0,
+gq W-: 3); the point of the C1.3 table was one of them. Not a bug.
