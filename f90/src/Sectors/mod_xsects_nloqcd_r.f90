@@ -190,6 +190,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_HC1C2 = FintNLO_ns
+    limval_onlo = 0
+    limval_onlo([1,3,4]) = FintNLO_ns
     limval_nlo_is = zero
     limval_nlo_is(1) = FintNLO_ns(1)
     limval_nlo_is(3:4) = FintNLO_ns(2:3)  ! coll
@@ -323,6 +325,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_HC = FintNLO_gq
+    limval_onlo = 0
+    limval_onlo([1,3]) = FintNLO_gq
     limval_nlo(1) = FintNLO_gq(1)
     limval_nlo(3) = FintNLO_gq(2)
 #endif
@@ -454,6 +458,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_HC = FintNLO_qg
+    limval_onlo = 0
+    limval_onlo([1,4]) = FintNLO_qg
 #endif
 
   end function xsect_nloqcd_r_is_qg

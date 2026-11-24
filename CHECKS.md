@@ -546,3 +546,8 @@ The C1.3 table (one point) showed 4e-4 -> 2e-4 between depths 1e-3 and 1e-6 for 
 
 All fall as sqrt x. In a few series H - C1 changes sign between 1e-3 and 1e-4 (qg W+: 3 of 28, gq W+: 2, qg W-: 0,
 gq W-: 3); the point of the C1.3 table was one of them. Not a bug.
+
+NLO real and RV sectors (16: `nloqcd`/`nloewk` `r_is`, `r_fs_53/54`, `rvewk_is`, `rvqcd_is`, `rvqcd_fs_53/54`) now fill
+`limval_onlo` and `-checklim` sends them to `check_limits_onlo`. W+ and W-, one point per sector: 30 limits with counterterm,
+all converge (soft as x, collinear as sqrt x); 50 limits without own counterterm, all integrable, among them the photon
+collinear to the neutrino (`r_fs_53`, `rvqcd_fs_53` for W+; `_54` for W-) and the soft limit of `nloqcd r_is` (covered by C1 + C2).

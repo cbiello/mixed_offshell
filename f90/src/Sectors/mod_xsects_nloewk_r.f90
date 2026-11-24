@@ -288,6 +288,8 @@ contains
     limval_nlo_is(2) = FintNLO_ns(4)  ! soft
     limval_nlo_is(3:4) = FintNLO_ns(2:3)  ! coll
     FintNLO_ew = FintNLO_ns           !-- H, C1, C2, S, SC1, SC2 for -checklim (xsect_checklim_nlo6)
+    limval_onlo = 0
+    limval_onlo([1,3,4,2,5,6]) = FintNLO_ns
 #endif
 
   end function xsect_nloewk_r_is_ns
@@ -531,6 +533,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_ew(1:4) = FintNLO_ns
+    limval_onlo = 0
+    limval_onlo([1,3,2,5]) = FintNLO_ns
     limval_nlo = FintNLO_ns
     limval_nlo(2) = FintNLO_ns(3)   ! soft
     limval_nlo(3) = FintNLO_ns(2)   ! soft
@@ -672,6 +676,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_ew(1:4) = FintNLO_aa
+    limval_onlo = 0
+    limval_onlo([1,3,2,5]) = FintNLO_aa
 #endif
 
   end function xsect_nlo_5i_a_aa
@@ -850,6 +856,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_ew(1:3) = FintNLO_ns
+    limval_onlo = 0
+    limval_onlo([1,3,4]) = FintNLO_ns
     limval_nlo_is(1) = FintNLO_ns(1)
     limval_nlo_is(3:4) = FintNLO_ns(2:3)   ! coll
 #endif
@@ -1031,6 +1039,8 @@ contains
     
 #if(_withchecks == 1)
     FintNLO_ew(1:3) = FintNLO_ns
+    limval_onlo = 0
+    limval_onlo([1,3,4]) = FintNLO_ns
 #endif
     
   end function xsect_nloewk_r_is_qa

@@ -40,7 +40,6 @@ contains
     vg_chi2 = -1
 
     if (checklim) then
-       if(corr(1:3).eq.'nlo')                    call vegas_integrate(NLOdim_vegas,xsect_checklim,vg_result,vg_error,vg_chi2)
        if(corr.eq.'nnlo' .and. sec(1:2).eq.'rr' .and. ch(1:5).eq.'ns_qq') &      !-- other RR: check_limits_rr in vegas_integrate
             call vegas_integrate(NNLOdim_vegas,xsect_checklim,vg_result,vg_error,vg_chi2)
     endif

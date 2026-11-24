@@ -24,9 +24,6 @@ contains
     implicit none
     real(dp15), intent(out) :: vg_result,vg_error,vg_chi2
 
-    if (checklim) then
-       call vegas_integrate(NLOdim_vegas,xsect_checklim,vg_result,vg_error,vg_chi2)
-    endif
         
     if (corr.eq.'nnlo' .and. ch.eq.'ns') then
        

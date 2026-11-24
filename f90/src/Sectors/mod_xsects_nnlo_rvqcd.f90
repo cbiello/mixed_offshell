@@ -1,6 +1,7 @@
 !-- extra photon emission, qcd loop
 module mod_xsects_nnlo_rvqcd
   use mod_types
+  use mod_limvals
   use mod_consts_dp
   use mod_parms
   use mod_proc_parms
@@ -297,6 +298,8 @@ contains
   
 #if(_withchecks == 1)
     FintRVQCD_ns(1:6) = FintRV_ns
+    limval_onlo = 0
+    limval_onlo([1,3,4,2,5,6]) = FintRV_ns
 #endif
 
   end function xsect_nnlo_rvqcd_is_ns
@@ -543,6 +546,8 @@ contains
 
 #if(_withchecks == 1)
     FintRVQCD_ns(1:4) = FintRV_ns
+    limval_onlo = 0
+    limval_onlo([1,3,2,5]) = FintRV_ns
 #endif
 
   end function xsect_nnlo_rvqcd_fs_5i_ns
@@ -702,6 +707,8 @@ contains
     
 #if(_withchecks == 1)
     FintRVQCD_aq = FintRV_aq
+    limval_onlo = 0
+    limval_onlo([1,3,4]) = FintRV_aq
 #endif
 
   end function xsect_nnlo_rvqcd_is_aq
@@ -857,6 +864,8 @@ contains
     
 #if(_withchecks == 1)
     FintRVQCD_qa = FintRV_qa
+    limval_onlo = 0
+    limval_onlo([1,3,4]) = FintRV_qa
 #endif
 
   end function xsect_nnlo_rvqcd_is_qa

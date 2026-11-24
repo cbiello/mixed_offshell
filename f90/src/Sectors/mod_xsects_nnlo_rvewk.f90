@@ -1,6 +1,7 @@
 !-- extra gluon emission, ewk loop
 module mod_xsects_nnlo_rvewk
   use mod_types
+  use mod_limvals
   use mod_consts_dp
   use mod_parms
   use mod_proc_parms
@@ -189,6 +190,8 @@ contains
     
 #if(_withchecks == 1)
     FintRVEWK_ns = FintRV_ns
+    limval_onlo = 0
+    limval_onlo([1,3,4]) = FintRV_ns
 #endif
 
   end function xsect_nnlo_rvewk_is_ns
@@ -308,6 +311,8 @@ contains
     
 #if(_withchecks == 1)
     FintRVEWK_gq = FintRV_gq
+    limval_onlo = 0
+    limval_onlo([1,3]) = FintRV_gq
 #endif
 
   end function xsect_nnlo_rvewk_is_gq
@@ -425,6 +430,8 @@ contains
     
 #if(_withchecks == 1)
     FintRVEWK_qg = FintRV_qg
+    limval_onlo = 0
+    limval_onlo([1,4]) = FintRV_qg
 #endif
 
   end function xsect_nnlo_rvewk_is_qg
@@ -554,6 +561,8 @@ contains
 
 #if(_withchecks == 1)
     FintRVEWK_ns = FintRV_ns
+    limval_onlo = 0
+    limval_onlo([1,3,4]) = FintRV_ns
 #endif
 
   end function xsect_nnlo_rvewknf_is_ns
@@ -652,6 +661,8 @@ contains
 
 #if(_withchecks == 1)
     FintRVEWK_gq = FintRV_gq
+    limval_onlo = 0
+    limval_onlo([1,3]) = FintRV_gq
 #endif
 
   end function xsect_nnlo_rvewknf_is_gq
@@ -749,6 +760,8 @@ contains
 
 #if(_withchecks == 1)
     FintRVEWK_qg = FintRV_qg
+    limval_onlo = 0
+    limval_onlo([1,4]) = FintRV_qg
 #endif
 
   end function xsect_nnlo_rvewknf_is_qg

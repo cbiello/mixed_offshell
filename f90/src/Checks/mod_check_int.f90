@@ -205,7 +205,7 @@ contains
              used = used .or. limval_nnlo /= 0
           enddo
        enddo
-       if (all(val(1,:,:) == 0)) then
+       if (all(val(1,2:8,:) == 0)) then            !-- H cut at every depth used for the verdicts
           nempty = nempty + 1
           if (nempty == 1000) stop 'check_limits_rr: H vanishes in every limit at 1000 points that pass the cuts'
           cycle
@@ -244,7 +244,8 @@ contains
 
   end subroutine check_limits_rr
 
-  !-- -checklim for the S sectors with a resolved parton (s_o*), at fixed z. Same idea as check_limits_rr, reading
+  !-- -checklim for the sectors with one resolved emission: NLO real, RV, and S with a resolved parton (s_o*, at fixed z).
+  !-- Same idea as check_limits_rr, reading
   !-- limval_onlo: kinematic group g (as stored by the sector: boosted leg 1, boosted leg 2, z = 1), slot 6(g-1)+k,
   !-- k = H, S, C1 (C for a final-state emitter), C2, SC1 (SC), SC2. Limits: S x(E) -> 0, C1 x(rho) -> 0, C2 x(rho) -> 1.
   subroutine check_limits_onlo(integrand)
@@ -267,7 +268,7 @@ contains
     buff = 0; buff_r = 0; call set_buff()
     override = .true.
     nempty = 0
-    write(6,'(a)') '# -checklim ONLO: S = x(E) -> 0, C1 = x(rho) -> 0, C2 = x(rho) -> 1; X/g = term X of kinematic group g'
+    write(6,'(a)') '# -checklim NLO/RV/ONLO: S = x(E) -> 0, C1 = x(rho) -> 0, C2 = x(rho) -> 1; X/g = term X of kinematic group g'
     do
        call random_number(y0)
        if (eval(y0) == 0) cycle
@@ -280,7 +281,7 @@ contains
              used = used .or. limval_onlo /= 0
           enddo
        enddo
-       if (all(val(1::6,:,:) == 0)) then
+       if (all(val(1::6,2:8,2:6) == 0)) then       !-- H cut at every depth used for the verdicts
           nempty = nempty + 1
           if (nempty == 1000) stop 'check_limits_onlo: H vanishes in every limit at 1000 points that pass the cuts'
           cycle

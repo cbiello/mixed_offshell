@@ -28,7 +28,8 @@ contains
        call check_limits_rr(integrand)
        stop
     endif
-    if (checklim .and. corr == 'nnlo' .and. sec(1:3) == 's_o') then    !-- S sectors with a resolved parton
+    if (checklim .and. ((corr == 'nnlo' .and. (sec(1:3) == 's_o' .or. sec(1:2) == 'rv')) .or. &
+         (corr(1:3) == 'nlo' .and. sec(1:2) == 'r_'))) then           !-- one resolved emission: NLO real, RV, ONLO
        call check_limits_onlo(integrand)
        stop
     endif
