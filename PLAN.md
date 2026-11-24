@@ -171,7 +171,7 @@ channels); older `math/qqchannel_human/DY+_qq.wl` (W+, ns). Missing for W: see M
 | ID | Task | Status |
 |---|---|---|
 | M1 | Add to `math/`: W- ns; W± for gq/qg, aq/qa, ag/ga; ONLO functions. Four-quark: nothing to add for W (same kernels as Z, charge of the convoluted leg); the derivation of the Z kernels is missing in `Z.nb` | 🔧 (Christian). `notes/fabrizio/subtraction_f.wl` holds the derivations of all channels with general leg charges; gq and the photon channels are evaluated from it in `checks/derive_gq_general_charges.wls`, `derive_aq_ag_general_charges.wls` |
-| M2 | One notebook convention for charges/legs shared with the Fortran (`Qq, Qqp, Qlept, ilept`): `fortran_conventions.wl`, maps from `W.nb` and from the all-outgoing charges; q qb' remainder agrees with `W.nb` for W+ and W- (CHECKS) | ✅ 2026-11-24 |
+| M2 | One notebook convention for charges/legs shared with the Fortran (`Qq, Qqp, Qlept, ilept`): `fortran_conventions.wl`, maps from `W.nb` and from the all-outgoing charges; q qb' remainder agrees with `W.nb` for W+ and W- (`bench_fortran_conventions_W.wls`) and with the compiled Fortran kernels and elastic routines to 4e-15 (`run_verify_fortran_conventions.sh`); assembly in `mod_xsects_nnlo_s_ns.f90` read against it. Planted errors flagged. **Only the q qb' channel is checked: gq, qg, aq, qa, ag, ga and four-quark are not in the package and not checked this way.** Also not covered: hoppet convolution, z integration of the plus distributions (same code as Z) (CHECKS) | ✅ q qb' 2026-11-24 |
 
 ## 7. Validation (mandatory for every item above)
 
@@ -195,7 +195,7 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 | C2.1 | Extend `math/qqchannel_human/validate_DYp7.wl` from term [7] to all of `FINITEDYp[1..7,60]` (symbolic, kernels included) | 🔧 |
 | C2.2 | Kernels read from the Fortran and compared with the notebooks at fixed z: four-quark (`verify_4q_fortran.wls`), gq, photon-quark, photon-gluon (`verify_Z_gq_aq_ag_fortran.wls`); assembly transcribed. q qb' for W+ is symbolic (`verify_Wp_qq_fortran.wls`). Terms with a resolved parton of the photon channels: `derive_aq_ag_general_charges.wls` | ✅ 2026-11-15 |
 | C2.3 | Resolve S3 (`calG_ONLOQCD_ns` vs `genGnloQCD_cc`) and S9: settled by the POWHEG comparison C3.7 | ✅ 2026-11-13 |
-| C2.4 | W: photon channels and four-quark use the Z kernels with one squared charge (covered by C2.2). gq, qg `s_12`: derivation with general charges, `derive_gq_general_charges.wls`. W- q qb': CP test only | ✅ 2026-11-15 |
+| C2.4 | W: photon channels and four-quark use the Z kernels with one squared charge (covered by C2.2). gq, qg `s_12`: derivation with general charges, `derive_gq_general_charges.wls`. W- q qb': CP test; Fortran = `fortran_conventions.wl` = `W.nb` with legs 3 <-> 4 (M2), no independent W- derivation | ✅ 2026-11-24 |
 | C2.5 | Logs of the validation runs: `math/subtraction-notebooks/checks/logs/` (gq and photon channels, derivations with general charges) | ✅ |
 
 ### C3. POWHEG benchmarks
