@@ -2,7 +2,8 @@ module mod_my_vegas
   use mod_types
   use mod_vegas_parms
   use mod_histo
-  use mod_proc_parms, only: checkint
+  use mod_proc_parms, only: checkint, checklim, ch, sec, corr
+  use mod_kinematics_nnlo_tc_is_eu_ac, only: NNLOdim_vegas
   use mod_check_int
   implicit none
   private
@@ -22,6 +23,15 @@ contains
          real(dp15) :: xx(30),ff(1),weight
        end function integrand
     end interface
+
+    if (checklim .and. ndim_in == NNLOdim_vegas .and. ch(1:5) /= 'ns_qq') then   !-- RR; four-quark: xsect_checklim_nnlo4q
+       call check_limits_rr(integrand)
+       stop
+    endif
+    if (checklim .and. corr == 'nnlo' .and. sec(1:3) == 's_o') then    !-- S sectors with a resolved parton
+       call check_limits_onlo(integrand)
+       stop
+    endif
 
     if (checkint) then
        call start_recording(integrand,ndim_in)

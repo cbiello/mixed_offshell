@@ -1,5 +1,6 @@
 module mod_xsects_nnlo_s_ns
   use mod_types
+  use mod_limvals
   use mod_consts_dp
   use mod_parms
   use mod_proc_parms
@@ -1466,6 +1467,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_s_ns_onlo(1:9) = FintNNLO_s_ns_oqcd
+    limval_onlo = 0
+    limval_onlo([1,3,4,7,9,10,13,15,16]) = FintNNLO_s_ns_oqcd
 #endif
 
   end function xsect_nnlo_s_ns_oqcd
@@ -2389,6 +2392,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_s_ns_onlo = FintNNLO_s_ns_oewk
+    limval_onlo = 0
+    limval_onlo([1,3,4,2,5,6,7,9,10,8,11,12,13,15,16,14,17,18]) = FintNNLO_s_ns_oewk
 #endif
 
   end function xsect_nnlo_s_ns_oewk_is
@@ -3457,6 +3462,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_s_ns_onlo = FintNNLO_s_ns_oewk
+    limval_onlo = 0
+    limval_onlo([1,3,4,2,5,6,7,9,10,8,11,12,13,15,16,14,17,18]) = FintNNLO_s_ns_oewk
 #endif
 
     
@@ -4232,6 +4239,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_s_ns_onlo(1:12) = FintNNLO_s_ns_oewk
+    limval_onlo = 0
+    limval_onlo([1,3,2,5,7,9,8,11,13,15,14,17]) = FintNNLO_s_ns_oewk
 #endif
 
   end function xsect_nnlo_s_ns_oewk_fs_5i_raoul

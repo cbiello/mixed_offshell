@@ -383,3 +383,96 @@ copied verbatim, they are private), `Pqq_NLO`, `PqqAP_0_R` and `fin_ns_vqcd_cc`,
 of one kernel or the lepton on the wrong leg gives 2e-4 and 0.2. The assembly in `mod_xsects_nnlo_s_ns.f90` (tables
 A-D, per-leg `Q_IS`, `ilept`, `mu2ref = mll^2` for the hoppet logs, unboosted `EC` in `kinematics_lo_z`) was read against
 `finW`. Not covered here: the hoppet convolution itself and the z integration of the plus distributions (same code as Z).
+
+## Limits of all RR and ONLO sectors with `-checklim` (2026-11-24)
+
+`check_limits_rr` and `check_limits_onlo` (`f90/src/Checks/mod_check_int.f90`, PLAN C1.3) are called from `vegas_integrate`
+with the sector itself. For a random point that passes the cuts, every limit of the sector (RR: S5, S6, X = TC or C5,
+Y = C, C5, C6 or C56 and combinations; ONLO at fixed z: S, C1, C2, SC1, SC2) is set to 1e-1..1e-10 and H and all
+counterterms are printed side by side, with the sign of H. Below: W+, one point per sector, largest relative difference
+between the terms that must cancel, at depth 1e-3 and 1e-6 (soft: falls as x, collinear: as sqrt x).
+Command, from `f90/`: `yes '' | ./mixed_ll -boson wp -corr nnlo -ch gq -sec rr_5161c -checklim | grep -av 'overriding input\|limit depth'`
+
+```
+ag_rr_5161           X: 4e-02 -> 2e-03  Y: 3e-03 -> 7e-05
+ag_rr_5162           X: 9e-02 -> 3e-03  Y: 3e-01 -> 1e-03  X+Y: 9e-02 -> 3e-03
+ag_rr_5261           X: 3e-02 -> 9e-04  Y: 4e-02 -> 1e-03  X+Y: 6e-04 -> 5e-05
+ag_rr_5262a          Y: 7e-03 -> 5e-04
+ag_rr_5262b          only the gamma gamma TC counterterm, zero for W
+ag_rr_5262c          Y: 1e-02 -> 4e-04
+ag_rr_5262d          only the gamma gamma TC counterterm, zero for W
+aq_rr_5161a          S5: 6e-03 -> 6e-06  X: 8e-03 -> 3e-04  S5+X: 1e-02 -> 3e-04  Y: 1e-02 -> 5e-04  S5+Y: 1e-02 -> 5e-04  X+Y: 3e-02 -> 1e-03  S5+X+Y: 2e-02 -> 8e-04
+aq_rr_5161b          S5: 9e-03 -> 9e-06  X: 3e-02 -> 9e-04  S5+X: 4e-02 -> 9e-04  Y: 2e-02 -> 2e-05  S5+Y: 2e-02 -> 2e-05  X+Y: 3e-02 -> 9e-04  S5+X+Y: 4e-02 -> 4e-03
+aq_rr_5161c          S5: 4e-03 -> 4e-06  X: 1e-02 -> 5e-04  S5+X: 2e-02 -> 5e-04
+aq_rr_5161d          S5: 9e-03 -> 9e-06  X: 3e-02 -> 9e-04  S5+X: 4e-02 -> 9e-04  Y: 2e-02 -> 2e-05  S5+Y: 2e-02 -> 2e-05  X+Y: 3e-02 -> 2e-03  S5+X+Y: 4e-02 -> 2e-03
+aq_rr_5162           S5: 4e-03 -> 4e-06
+aq_rr_5261           S5: 6e-03 -> 6e-06  X: 9e-03 -> 3e-04  S5+X: 8e-03 -> 3e-04  Y: 2e-02 -> 7e-04  S5+Y: 1e-02 -> 2e-04  X+Y: 4e-03 -> 2e-04  S5+X+Y: 5e-03 -> 7e-05
+aq_rr_5262a          S5: 5e-03 -> 5e-06
+aq_rr_5262b          S5: 7e-03 -> 7e-06  Y: 3e-03 -> 3e-06  S5+Y: 1e-02 -> 1e-05
+aq_rr_5262c          S5: 1e-03 -> 1e-06  Y: 7e-03 -> 2e-04  S5+Y: 9e-03 -> 2e-04
+aq_rr_5262d          S5: 7e-03 -> 7e-06  Y: 1e-03 -> 1e-06  S5+Y: 7e-03 -> 7e-06
+ga_rr_5161a          Y: 2e-02 -> 6e-04
+ga_rr_5161b          only the gamma gamma TC counterterm, zero for W
+ga_rr_5161c          Y: 2e-03 -> 8e-05
+ga_rr_5161d          only the gamma gamma TC counterterm, zero for W
+ga_rr_5162           X: 2e-02 -> 7e-04  Y: 3e-02 -> 1e-03  X+Y: 1e-02 -> 5e-04
+ga_rr_5261           X: 2e-01 -> 8e-03  Y: 2e-02 -> 5e-04  X+Y: 2e-01 -> 8e-03
+ga_rr_5262           X: 1e-01 -> 4e-03  Y: 5e-03 -> 3e-05
+gq_rr_5161a          S6: 5e-03 -> 5e-06  X: 1e-02 -> 3e-04  S6+X: 4e-03 -> 3e-04
+gq_rr_5161b          S6: 7e-03 -> 8e-06  X: 2e-02 -> 5e-04  S6+X: 2e-02 -> 4e-04  Y: 2e-03 -> 2e-06  S6+Y: 7e-03 -> 8e-06  X+Y: 2e-02 -> 5e-04  S6+X+Y: 2e-02 -> 3e-04
+gq_rr_5161c          S6: 8e-03 -> 8e-06  X: 5e-02 -> 2e-03  S6+X: 5e-02 -> 1e-03  Y: 1e-02 -> 5e-04  S6+Y: 2e-02 -> 6e-04  X+Y: 5e-02 -> 2e-03  S6+X+Y: 6e-02 -> 1e-03
+gq_rr_5161d          S6: 1e-02 -> 1e-05  X: 8e-03 -> 3e-04  S6+X: 2e-02 -> 1e-04  Y: 5e-04 -> 5e-07  S6+Y: 1e-02 -> 1e-05  X+Y: 5e-03 -> 1e-04  S6+X+Y: 1e-02 -> 9e-05
+gq_rr_5162           S6: 3e-03 -> 3e-06  X: 8e-02 -> 3e-03  S6+X: 5e-02 -> 2e-03  Y: 7e-02 -> 2e-03  S6+Y: 7e-02 -> 2e-03  X+Y: 7e-02 -> 2e-03  S6+X+Y: 7e-02 -> 2e-03
+gq_rr_5163           S6: 2e-03 -> 2e-06  X: 4e-02 -> 1e-03  S6+X: 1e-02 -> 4e-04
+gq_rr_5164           S6: 2e-03 -> 2e-06  X: 1e-01 -> 3e-03  S6+X: 6e-02 -> 2e-03  Y: 6e-03 -> 1e-04  S6+Y: 7e-03 -> 1e-04  X+Y: 1e-02 -> 2e-04  S6+X+Y: 1e-02 -> 2e-04
+ns_ga_rr_5161a       S5: 3e-03 -> 3e-06  S6: 3e-03 -> 3e-06  S5+S6: 4e-03 -> 4e-06  X: 8e-02 -> 3e-03  S5+X: 8e-02 -> 3e-03  S6+X: 8e-02 -> 3e-03  S5+S6+X: 8e-02 -> 3e-03  Y: 6e-02 -> 2e-03  S5+Y: 6e-02 -> 2e-03  S6+Y: 6e-02 -> 2e-03  S5+S6+Y: 6e-02 -> 2e-03  X+Y: 3e-02 -> 8e-04  S5+X+Y: 2e-02 -> 5e-04  S6+X+Y: 3e-02 -> 7e-04  S5+S6+X+Y: 2e-02 -> 4e-04
+ns_ga_rr_5161c       S5: 3e-03 -> 3e-06  S6: 3e-03 -> 3e-06  S5+S6: 4e-03 -> 4e-06  X: 9e-02 -> 3e-03  S5+X: 9e-02 -> 3e-03  S6+X: 9e-02 -> 3e-03  S5+S6+X: 9e-02 -> 3e-03  Y: 5e-02 -> 1e-03  S5+Y: 4e-02 -> 1e-03  S6+Y: 5e-02 -> 2e-03  S5+S6+Y: 4e-02 -> 1e-03  X+Y: 7e-02 -> 2e-03  S5+X+Y: 7e-02 -> 2e-03  S6+X+Y: 7e-02 -> 2e-03  S5+S6+X+Y: 7e-02 -> 2e-03
+ns_ga_rr_5162        S5: 3e-03 -> 3e-06  S6: 3e-03 -> 3e-06  S5+S6: 5e-03 -> 5e-06  X: 2e-02 -> 6e-04  S5+X: 1e-03 -> 1e-06  S6+X: 1e-02 -> 4e-04  S5+S6+X: 3e-03 -> 3e-06  Y: 7e-02 -> 2e-03  S5+Y: 6e-02 -> 2e-03  S6+Y: 7e-02 -> 2e-03  S5+S6+Y: 6e-02 -> 2e-03  X+Y: 8e-02 -> 2e-03  S5+X+Y: 6e-02 -> 2e-03  S6+X+Y: 8e-02 -> 2e-03  S5+S6+X+Y: 6e-02 -> 2e-03
+ns_ga_rr_5163        S5: 4e-03 -> 4e-06  S6: 1e-03 -> 1e-06  S5+S6: 4e-03 -> 4e-06  X: 2e-02 -> 6e-04  S5+X: 9e-04 -> 8e-07  S6+X: 2e-02 -> 5e-04  S5+S6+X: 1e-03 -> 1e-06
+ns_ga_rr_5164        S5: 2e-03 -> 2e-06  S6: 2e-03 -> 2e-06  S5+S6: 3e-03 -> 3e-06  X: 6e-03 -> 2e-04  S5+X: 2e-03 -> 2e-06  S6+X: 6e-03 -> 2e-04  S5+S6+X: 3e-03 -> 3e-06  Y: 3e-03 -> 1e-04  S5+Y: 5e-03 -> 1e-04  S6+Y: 3e-03 -> 1e-04  S5+S6+Y: 4e-03 -> 1e-04  X+Y: 9e-03 -> 1e-04  S5+X+Y: 5e-03 -> 1e-04  S6+X+Y: 8e-03 -> 1e-04  S5+S6+X+Y: 5e-03 -> 1e-04
+ns_ga_rr_5261        S5: 3e-03 -> 3e-06  S6: 3e-03 -> 3e-06  S5+S6: 4e-03 -> 4e-06  X: 1e-02 -> 5e-04  S5+X: 2e-03 -> 2e-06  S6+X: 1e-02 -> 4e-04  S5+S6+X: 3e-03 -> 3e-06  Y: 5e-02 -> 1e-03  S5+Y: 4e-02 -> 1e-03  S6+Y: 5e-02 -> 1e-03  S5+S6+Y: 4e-02 -> 1e-03  X+Y: 6e-02 -> 2e-03  S5+X+Y: 4e-02 -> 1e-03  S6+X+Y: 6e-02 -> 2e-03  S5+S6+X+Y: 4e-02 -> 1e-03
+ns_ga_rr_5262a       S5: 3e-03 -> 3e-06  S6: 3e-03 -> 3e-06  S5+S6: 3e-03 -> 3e-06  X: 1e-01 -> 4e-03  S5+X: 1e-01 -> 4e-03  S6+X: 1e-01 -> 4e-03  S5+S6+X: 1e-01 -> 4e-03  Y: 8e-02 -> 2e-03  S5+Y: 8e-02 -> 2e-03  S6+Y: 8e-02 -> 2e-03  S5+S6+Y: 8e-02 -> 2e-03  X+Y: 3e-02 -> 7e-04  S5+X+Y: 2e-02 -> 5e-04  S6+X+Y: 3e-02 -> 6e-04  S5+S6+X+Y: 2e-02 -> 4e-04
+ns_ga_rr_5262c       S5: 3e-03 -> 3e-06  S6: 3e-03 -> 3e-06  S5+S6: 4e-03 -> 4e-06  X: 1e-01 -> 4e-03  S5+X: 1e-01 -> 4e-03  S6+X: 1e-01 -> 4e-03  S5+S6+X: 1e-01 -> 4e-03  Y: 5e-02 -> 2e-03  S5+Y: 4e-02 -> 1e-03  S6+Y: 5e-02 -> 2e-03  S5+S6+Y: 4e-02 -> 1e-03  X+Y: 1e-01 -> 3e-03  S5+X+Y: 1e-01 -> 3e-03  S6+X+Y: 1e-01 -> 3e-03  S5+S6+X+Y: 1e-01 -> 3e-03
+ns_ga_rr_5263        S5: 3e-03 -> 3e-06  S6: 1e-03 -> 1e-06  S5+S6: 3e-03 -> 3e-06  X: 2e-02 -> 5e-04  S5+X: 2e-03 -> 2e-06  S6+X: 1e-02 -> 4e-04  S5+S6+X: 3e-03 -> 3e-06
+ns_ga_rr_5264        S5: 2e-03 -> 2e-06  S6: 2e-03 -> 2e-06  S5+S6: 3e-03 -> 3e-06  X: 6e-03 -> 2e-04  S5+X: 1e-03 -> 1e-06  S6+X: 6e-03 -> 2e-04  S5+S6+X: 2e-03 -> 2e-06  Y: 5e-03 -> 1e-04  S5+Y: 5e-03 -> 1e-04  S6+Y: 3e-03 -> 1e-04  S5+S6+Y: 5e-03 -> 1e-04  X+Y: 8e-03 -> 1e-04  S5+X+Y: 4e-03 -> 1e-04  S6+X+Y: 7e-03 -> 1e-04  S5+S6+X+Y: 4e-03 -> 1e-04
+qa_rr_5161a          S5: 5e-03 -> 5e-06
+qa_rr_5161b          S5: 6e-03 -> 6e-06  Y: 2e-03 -> 2e-06  S5+Y: 5e-03 -> 5e-06
+qa_rr_5161c          S5: 1e-03 -> 1e-06  Y: 8e-03 -> 3e-04  S5+Y: 9e-03 -> 3e-04
+qa_rr_5161d          S5: 5e-03 -> 5e-06  Y: 4e-03 -> 4e-06  S5+Y: 7e-03 -> 7e-06
+qa_rr_5162           S5: 6e-03 -> 6e-06  X: 2e-02 -> 7e-04  S5+X: 9e-03 -> 3e-04  Y: 2e-02 -> 1e-03  S5+Y: 1e-02 -> 6e-04  X+Y: 7e-03 -> 5e-04  S5+X+Y: 3e-03 -> 5e-04
+qa_rr_5261           S5: 2e-03 -> 2e-06
+qa_rr_5262a          S5: 5e-03 -> 5e-06  X: 5e-02 -> 2e-03  S5+X: 6e-02 -> 2e-03  Y: 9e-02 -> 3e-03  S5+Y: 9e-02 -> 3e-03  X+Y: 4e-02 -> 1e-03  S5+X+Y: 2e-02 -> 8e-04
+qa_rr_5262b          S5: 8e-03 -> 8e-06  X: 2e-01 -> 6e-03  S5+X: 2e-01 -> 7e-03  Y: 3e-03 -> 3e-06  S5+Y: 8e-03 -> 8e-06  X+Y: 2e-01 -> 6e-03  S5+X+Y: 2e-01 -> 2e-03
+qa_rr_5262c          S5: 3e-03 -> 3e-06  X: 9e-02 -> 3e-03  S5+X: 9e-02 -> 3e-03
+qa_rr_5262d          S5: 8e-03 -> 8e-06  X: 2e-01 -> 6e-03  S5+X: 2e-01 -> 7e-03  Y: 9e-04 -> 9e-07  S5+Y: 8e-03 -> 8e-06  X+Y: 2e-01 -> 7e-03  S5+X+Y: 2e-01 -> 3e-03
+qg_rr_5261           S6: 4e-03 -> 4e-06  X: 1e-01 -> 4e-03  S6+X: 1e-01 -> 3e-03  Y: 4e-02 -> 1e-03  S6+Y: 4e-02 -> 1e-03  X+Y: 5e-02 -> 1e-03  S6+X+Y: 5e-02 -> 1e-03
+qg_rr_5262a          S6: 6e-03 -> 6e-06  X: 3e-02 -> 9e-04  S6+X: 2e-02 -> 9e-04
+qg_rr_5262b          S6: 8e-03 -> 8e-06  X: 2e-02 -> 5e-04  S6+X: 2e-02 -> 5e-04  Y: 2e-03 -> 2e-06  S6+Y: 8e-03 -> 8e-06  X+Y: 1e-02 -> 4e-04  S6+X+Y: 2e-02 -> 3e-04
+qg_rr_5262c          S6: 9e-03 -> 9e-06  X: 7e-02 -> 2e-03  S6+X: 8e-02 -> 2e-03  Y: 2e-02 -> 7e-04  S6+Y: 2e-02 -> 7e-04  X+Y: 8e-02 -> 2e-03  S6+X+Y: 9e-02 -> 2e-03
+qg_rr_5262d          S6: 1e-02 -> 1e-05  X: 2e-02 -> 5e-04  S6+X: 2e-02 -> 1e-04  Y: 4e-03 -> 4e-06  S6+Y: 1e-02 -> 1e-05  X+Y: 1e-02 -> 4e-04  S6+X+Y: 1e-02 -> 5e-05
+qg_rr_5263           S6: 2e-03 -> 2e-06  X: 6e-03 -> 2e-04  S6+X: 4e-03 -> 1e-04
+qg_rr_5264           S6: 3e-03 -> 3e-06  X: 5e-02 -> 2e-03  S6+X: 3e-02 -> 1e-03  Y: 6e-02 -> 2e-03  S6+Y: 6e-02 -> 2e-03  X+Y: 9e-03 -> 1e-04  S6+X+Y: 8e-03 -> 6e-05
+ag_s_oewk            C1: 5e-02 -> 1e-03
+ag_s_oqcd            C2: 6e-03 -> 3e-04
+aq_s_oewk            C1: 4e-02 -> 2e-03
+aq_s_oqcd            S: 1e+00 -> 1e-03  C1: 1e-02 -> 4e-04  C2: 6e-03 -> 2e-04  SC1: 2e-03 -> 2e-06  SC2: 1e-03 -> 1e-06
+ga_s_oewk            C2: 1e-02 -> 2e-04
+ga_s_oqcd            C1: 1e-02 -> 4e-04
+gq_s_oewk_fs_53      S: 6e-03 -> 6e-06
+gq_s_oewk_fs_54      S: 4e-03 -> 4e-06  C1: 8e-02 -> 1e-03  SC1: 5e-02 -> 9e-05
+gq_s_oewk_is         S: 4e-03 -> 4e-06  C1: 4e-02 -> 1e-03  C2: 2e-02 -> 4e-04  SC1: 4e-02 -> 1e-03  SC2: 2e-02 -> 4e-04
+gq_s_oqcd            C1: 1e-01 -> 3e-03
+ns_s_oewk_fs_53      S: 6e-05 -> 6e-08
+ns_s_oewk_fs_54      S: 1e-03 -> 1e-06  C1: 6e-03 -> 2e-04  SC1: 7e-03 -> 2e-04
+ns_s_oewk_is_ra      S: 2e-03 -> 2e-06  C1: 5e-01 -> 5e-03  C2: 3e-01 -> 9e-03  SC1: 4e-02 -> 2e-03  SC2: 3e-01 -> 9e-03
+ns_s_oqcd            C1: 2e-01 -> 2e-03  C2: 2e-01 -> 3e-03
+qa_s_oewk            C2: 5e-01 -> 1e-02
+qa_s_oqcd            S: 5e-03 -> 5e-06  C1: 1e-02 -> 3e-04  C2: 5e-02 -> 1e-04  SC1: 1e-03 -> 1e-06  SC2: 4e-03 -> 4e-06
+qg_s_oewk_fs_53      S: 2e-03 -> 2e-06
+qg_s_oewk_fs_54      S: 1e-03 -> 1e-06  C1: 4e-04 -> 2e-04  SC1: 2e-03 -> 2e-04
+qg_s_oewk_is         S: 4e-03 -> 4e-06  C1: 4e-02 -> 1e-03  C2: 2e-02 -> 4e-04  SC1: 4e-02 -> 1e-03  SC2: 2e-02 -> 4e-04
+qg_s_oqcd            C2: 2e-01 -> 3e-03
+```
+
+Four-quark (`xsect_checklim_nnlo4q`, W+ `ns_qqb rr_5161a`, depth 1e-6): |H+CT|/H = 5e-4 to 9e-4 on three points.
+Not run: W- and Z (the binary has the W analysis compiled in), many points per sector (PLAN C1.8).

@@ -1,5 +1,6 @@
 module mod_xsects_nnlo_rr_aq
   use mod_types
+  use mod_limvals
   use mod_consts_dp
   use mod_parms
   use mod_proc_parms
@@ -423,6 +424,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_aq = FintNNLO_aq
+    limval_nnlo = zero
+    limval_nnlo([1,2,4,11,7,14,5,8]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5161a_aq
@@ -653,6 +656,8 @@ contains
 #if(_withchecks == 1)
     FintNNLO_rr_tc_aq(1:4) = FintNNLO_aq
     FintNNLO_rr_tc_aq(5:8) = zero
+    limval_nnlo = zero
+    limval_nnlo([1,2,4,7]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5161c_aq
@@ -999,6 +1004,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_aq = FintNNLO_aq
+    limval_nnlo = zero
+    limval_nnlo([1,2,4,11,5,8,7,14]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5161bd_aq
@@ -1240,6 +1247,8 @@ contains
 #if(_withchecks == 1)
     FintNNLO_rr_tc_aq(1:4) = FintNNLO_aq
     FintNNLO_rr_tc_aq(5:8) = zero
+    limval_nnlo = zero
+    limval_nnlo([1,2,4,7]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5262a_aq
@@ -1586,6 +1595,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_aq = FintNNLO_aq
+    limval_nnlo = zero
+    limval_nnlo([1,2,4,11,7,14,5,8]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5262c_aq
@@ -1931,6 +1942,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_aq = FintNNLO_aq
+    limval_nnlo = zero
+    limval_nnlo([1,2,4,11,5,8,7,14]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5262bd_aq
@@ -2062,6 +2075,8 @@ contains
 #if(_withchecks == 1)
     FintNNLO_rr_dc_aq(1:2) = FintNNLO_aq
     FintNNLO_rr_dc_aq(3:8) = zero
+    limval_nnlo = zero
+    limval_nnlo([1,2]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5162_aq
@@ -2411,6 +2426,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_dc_aq = FintNNLO_aq
+    limval_nnlo = zero
+    limval_nnlo([1,2,7,4,8,14,5,11]) = FintNNLO_aq
 #endif
 
   end function xsect_nnlo_rr_5261_aq

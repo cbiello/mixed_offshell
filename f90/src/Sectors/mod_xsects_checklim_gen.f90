@@ -54,7 +54,6 @@ contains
     !-- NNLO, RR
     if (corr.eq.'nnlo' .and. sec(1:2).eq.'rr') then
        if (ch.eq.'ns_qqb'.or.ch.eq.'ns_qq') then; xsect_checklim = xsect_checklim_nnlo4q(yRnd,ff,vegasweight)
-       elseif (ch.eq.'gq'.or.ch.eq.'qg') then;  xsect_checklim = xsect_checklim_rr_gq(yRnd,ff,vegasweight)
        endif
     endif
 

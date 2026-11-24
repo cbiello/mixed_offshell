@@ -1,5 +1,6 @@
 module mod_xsects_nnlo_s_qa
   use mod_types
+  use mod_limvals
   use mod_consts_dp
   use mod_parms
   use mod_proc_parms
@@ -493,6 +494,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_s_qa_onlo = FintNNLO_s_qa_oqcd
+    limval_onlo = 0
+    limval_onlo([1,3,4,2,5,6]) = FintNNLO_s_qa_oqcd
 #endif
 
   end function xsect_nnlo_s_qa_oqcd
@@ -865,6 +868,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_s_qa_onlo = FintNNLO_s_qa_oewk
+    limval_onlo = 0
+    limval_onlo([1,4,3,7,10,9]) = FintNNLO_s_qa_oewk
 #endif
 
   end function xsect_nnlo_s_qa_oewk

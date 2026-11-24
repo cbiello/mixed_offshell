@@ -9,10 +9,13 @@ module mod_check_int
   use mod_histo, only: nohistos
   use mod_kinematics_nlo, only: NLOdim_vegas, xE, xRHO
   use mod_kinematics_nnlo_tc_is_eu_ac, only: NNLOdim_vegas, xE5, xE6, xRHO5, xRHO6
+  use mod_proc_parms, only: override, buff, buff_rr, buff_r, set_buff
+  use mod_limvals, only: limval_nnlo, limval_onlo
+  use mod_auxfunctions, only: mypause
   implicit none
   private
 
-  public :: check_integrability, start_recording, rec_integrand
+  public :: check_integrability, start_recording, rec_integrand, check_limits_rr, check_limits_onlo
 
   abstract interface
      function integrand_if(xx,ff,weight)
@@ -155,6 +158,164 @@ contains
     end subroutine scan
 
   end subroutine check_integrability
+
+  !-- -checklim for the RR sectors. For random points that pass the cuts, the variables of each limit are set to
+  !-- 1e-1..1e-10 and H and the counterterms are printed side by side from limval_nnlo (slots as in Checks/mod_check_lim:
+  !-- 1 H, 2 S5, 3 S6, 4 X, 5 Y, 6 S5+S6, ...), with S5 = xE5, S6 = xE6, X = xRHO5 (TC or C5), Y = xRHO6 (C, C5, C6, C56).
+  !-- Sign (-1)^(number of limits), so the terms that must cancel agree. Limits and columns: the slots the sector fills.
+  !-- The sectors draw their last two variables themselves: all variables are passed with override.
+  subroutine check_limits_rr(integrand)
+    procedure(integrand_if) :: integrand
+    integer, parameter :: var(4) = [xE5,xE6,xRHO5,xRHO6]
+    integer, parameter :: slot(0:15) = [1,2,3,6,4,7,9,12,5,8,10,13,11,14,15,16]
+    character(2), parameter :: nm(4) = ['S5','S6','X ','Y ']
+    real(dp15) :: y0(30),y(30),ff(1),w
+    real(dp)   :: val(16,10,15),sgn(16)
+    logical    :: used(16)
+    character(11) :: lab(16)
+    integer    :: b,k,il,ir,nempty
+
+    do b = 0,15
+       sgn(slot(b)) = (-1)**popcnt(b)
+       lab(slot(b)) = 'H'
+       if (b > 0) lab(slot(b)) = ''
+       do k = 1,4
+          if (.not. btest(b,k-1)) cycle
+          if (len_trim(lab(slot(b))) > 0) lab(slot(b)) = trim(lab(slot(b)))//'+'
+          lab(slot(b)) = trim(lab(slot(b)))//trim(nm(k))
+       enddo
+    enddo
+    nohistos = .true.
+    buff = 0; buff_rr = 0; call set_buff()
+    override = .true.
+    nempty = 0
+    write(6,'(a)') '# -checklim RR: S5 = x(E5), S6 = x(E6), X = x(rho5) (TC or C5), Y = x(rho6) (C, C5, C6 or C56)'
+    do
+       call random_number(y0)
+       if (eval(y0) == 0) cycle
+       used = .false.
+       do b = 1,15
+          do il = 1,10
+             y = y0
+             do k = 1,4
+                if (btest(b,k-1)) y(var(k)) = 10._dp15**(-il)
+             enddo
+             w = eval(y)
+             val(:,il,b) = sgn*limval_nnlo
+             used = used .or. limval_nnlo /= 0
+          enddo
+       enddo
+       if (.not. any(used(2:16))) then
+          nempty = nempty + 1
+          if (nempty == 1000) stop 'check_limits_rr: no counterterm at 1000 points that pass the cuts'
+          cycle
+       endif
+       write(6,'(/,a,4es12.4)') ' point: x(E5), x(E6), x(rho5), x(rho6) =', y0(var)
+       do b = 1,15
+          if (.not. used(slot(b))) cycle
+          write(6,'(/,a,/,a,*(a16))') ' limit '//trim(lab(slot(b))), '       x(E5)       x(E6)     x(rho5)     x(rho6)', &
+               pack(adjustr(lab),used)
+          do il = 1,10
+             y = y0
+             do k = 1,4
+                if (btest(b,k-1)) y(var(k)) = 10._dp15**(-il)
+             enddo
+             write(6,'(4es12.4,*(es16.8))') y(var), pack(val(:,il,b),used)
+          enddo
+       enddo
+       call mypause()
+    enddo
+
+  contains
+
+    real(dp) function eval(x)                  !-- runs the sector at x, returns H
+      real(dp15), intent(in) :: x(30)
+      real(dp15) :: xx(30)
+      xx = x
+      limval_nnlo = 0
+      ff = 0; w = 1
+      ir = integrand(xx,ff,w)
+      eval = limval_nnlo(1)
+    end function eval
+
+  end subroutine check_limits_rr
+
+  !-- -checklim for the S sectors with a resolved parton (s_o*), at fixed z. Same idea as check_limits_rr, reading
+  !-- limval_onlo: kinematic group g (as stored by the sector: boosted leg 1, boosted leg 2, z = 1), slot 6(g-1)+k,
+  !-- k = H, S, C1 (C for a final-state emitter), C2, SC1 (SC), SC2. Limits: S x(E) -> 0, C1 x(rho) -> 0, C2 x(rho) -> 1.
+  subroutine check_limits_onlo(integrand)
+    procedure(integrand_if) :: integrand
+    character(3), parameter :: nm(6) = ['H  ','S  ','C1 ','C2 ','SC1','SC2']
+    integer, parameter :: sgn(6) = [1,-1,-1,-1,1,1]
+    integer, parameter :: soft(6) = [0,1,0,0,1,1], coll(6) = [0,0,1,2,1,2]   !-- limit of each slot
+    real(dp15) :: y0(30),y(30),ff(1),w
+    real(dp)   :: val(18,10,6)
+    logical    :: used(18)
+    character(6) :: lab(18)
+    integer    :: g,k,il,ir,l,nempty
+
+    do g = 1,3
+       do k = 1,6
+          write(lab(6*(g-1)+k),'(a,"/",i1)') trim(nm(k)),g
+       enddo
+    enddo
+    nohistos = .true.
+    buff = 0; buff_r = 0; call set_buff()
+    override = .true.
+    nempty = 0
+    write(6,'(a)') '# -checklim ONLO: S = x(E) -> 0, C1 = x(rho) -> 0, C2 = x(rho) -> 1; X/g = term X of kinematic group g'
+    do
+       call random_number(y0)
+       if (eval(y0) == 0) cycle
+       used = .false.
+       do l = 2,6
+          do il = 1,10
+             y = point(l,il)
+             w = eval(y)
+             val(:,il,l) = [(sgn(mod(k-1,6)+1)*limval_onlo(k), k = 1,18)]
+             used = used .or. limval_onlo /= 0
+          enddo
+       enddo
+       if (.not. (any(used(2::6)) .or. any(used(3::6)) .or. any(used(4::6)))) then
+          nempty = nempty + 1
+          if (nempty == 1000) stop 'check_limits_onlo: no counterterm at 1000 points that pass the cuts'
+          cycle
+       endif
+       write(6,'(/,a,2es12.4)') ' point: x(E), x(rho) =', y0(xE), y0(xRHO)
+       do l = 2,6
+          if (.not. any(used(l::6))) cycle
+          write(6,'(/,a,/,a,*(a16))') ' limit '//trim(nm(l)), '        x(E)      x(rho)', pack(adjustr(lab),used)
+          do il = 1,10
+             y = point(l,il)
+             write(6,'(2es12.4,*(es16.8))') y(xE), y(xRHO), pack(val(:,il,l),used)
+          enddo
+       enddo
+       call mypause()
+    enddo
+
+  contains
+
+    function point(l,il) result(x)             !-- y0 moved into limit l at depth 1e-il
+      integer, intent(in) :: l,il
+      real(dp15) :: x(30),d
+      d = 10._dp15**(-il)
+      x = y0
+      if (soft(l) == 1) x(xE) = d
+      if (coll(l) == 1) x(xRHO) = d
+      if (coll(l) == 2) x(xRHO) = 1 - d
+    end function point
+
+    real(dp) function eval(x)                  !-- runs the sector at x, returns the largest |H| of the groups
+      real(dp15), intent(in) :: x(30)
+      real(dp15) :: xx(30)
+      xx = x
+      limval_onlo = 0
+      ff = 0; w = 1
+      ir = integrand(xx,ff,w)
+      eval = maxval(abs(limval_onlo(1::6)))
+    end function eval
+
+  end subroutine check_limits_onlo
 
   function median(v) result(m)
     real(dp15), intent(in) :: v(:)

@@ -1,5 +1,6 @@
 module mod_xsects_nnlo_rr_ga
   use mod_types
+  use mod_limvals
   use mod_consts_dp
   use mod_parms
   use mod_proc_parms
@@ -238,6 +239,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_ga = FintNNLO_ga
+    limval_nnlo = zero
+    limval_nnlo([1,4,11,5]) = FintNNLO_ga
 #endif
 
   end function xsect_nnlo_rr_5161a_ga
@@ -437,6 +440,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_ga = FintNNLO_ga
+    limval_nnlo = zero
+    limval_nnlo([1,4,11,5]) = FintNNLO_ga
 #endif
 
   end function xsect_nnlo_rr_5161c_ga
@@ -573,6 +578,8 @@ contains
 #if(_withchecks == 1)
     FintNNLO_rr_tc_ga(1:2) = FintNNLO_ga
     FintNNLO_rr_tc_ga(3:4) = zero
+    limval_nnlo = zero
+    limval_nnlo([1,4]) = FintNNLO_ga
 #endif
 
   end function xsect_nnlo_rr_5161bd_ga
@@ -745,6 +752,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_ga(1:3) = FintNNLO_ga
+    limval_nnlo = zero
+    limval_nnlo([1,4,5]) = FintNNLO_ga
 #endif
 
   end function xsect_nnlo_rr_5262_ga
@@ -963,6 +972,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_dc_ga = FintNNLO_ga
+    limval_nnlo = zero
+    limval_nnlo([1,4,5,11]) = FintNNLO_ga
 #endif
 
   end function xsect_nnlo_rr_5162_ga
@@ -1181,6 +1192,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_dc_ga = FintNNLO_ga
+    limval_nnlo = zero
+    limval_nnlo([1,4,5,11]) = FintNNLO_ga
 #endif
 
   end function xsect_nnlo_rr_5261_ga
