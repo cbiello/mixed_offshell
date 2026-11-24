@@ -375,3 +375,11 @@ and the all-outgoing charges of `notes/fabrizio` (`fromAllOut`), and writes the 
 the Fortran routines and `ilept` as a parameter. `checks/bench_fortran_conventions_W.wls` (Mathematica 13.2, `W.nb`
 evaluated with `run_W_nb.wls`): all ten structures agree for W+ (`ilept = 4`) and W- (`ilept = 3`), general charges.
 Sensitivity: `W.nb` charges read as incoming, or W- without the leg swap, give O(1) differences. Log in `checks/logs/`.
+
+Second link, `fortran_conventions.wl` against the compiled Fortran (`checks/run_verify_fortran_conventions.sh`): a driver
+linked to the objects of `mixed_ll` evaluates the hoppet kernels of `s_12`, `s_vqcd`, `s_vewk` (pieces REAL, VIRT, DELTA;
+copied verbatim, they are private), `Pqq_NLO`, `PqqAP_0_R` and `fin_ns_vqcd_cc`, `genGnloQCD_cc`, `legfinalcalG_cc`,
+`fin_ns_v7_cc` for W+ (u db, db u, c sb), W- (d ub, ub d) and a charge-violating pair. All agree to 4e-15; a 1e-3 change
+of one kernel or the lepton on the wrong leg gives 2e-4 and 0.2. The assembly in `mod_xsects_nnlo_s_ns.f90` (tables
+A-D, per-leg `Q_IS`, `ilept`, `mu2ref = mll^2` for the hoppet logs, unboosted `EC` in `kinematics_lo_z`) was read against
+`finW`. Not covered here: the hoppet convolution itself and the z integration of the plus distributions (same code as Z).
