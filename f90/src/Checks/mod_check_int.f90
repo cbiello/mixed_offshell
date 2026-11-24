@@ -9,7 +9,8 @@ module mod_check_int
   use mod_histo, only: nohistos
   use mod_kinematics_nlo, only: NLOdim_vegas, xE, xRHO
   use mod_kinematics_nnlo_tc_is_eu_ac, only: NNLOdim_vegas, xE5, xE6, xRHO5, xRHO6
-  use mod_proc_parms, only: override, buff, buff_rr, buff_r, set_buff
+  use mod_proc_parms, only: override, buff, buff_rr, buff_r, set_buff, checklim_csv, checklim_npts, checklim_point
+  use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan
   use mod_limvals, only: limval_nnlo, limval_onlo
   use mod_auxfunctions, only: mypause
   implicit none
@@ -173,7 +174,7 @@ contains
     real(dp)   :: val(16,10,15),sgn(16)
     logical    :: used(16)
     character(11) :: lab(16)
-    integer    :: b,k,il,ir,nempty
+    integer    :: b,c,k,il,ir,nempty,npt
 
     do b = 0,15
        sgn(slot(b)) = (-1)**popcnt(b)
@@ -189,10 +190,14 @@ contains
     buff = 0; buff_rr = 0; call set_buff()
     override = .true.
     nempty = 0
+    npt = 0
     write(6,'(a)') '# -checklim RR: S5 = x(E5), S6 = x(E6), X = x(rho5) (TC or C5), Y = x(rho6) (C, C5, C6 or C56)'
     do
-       call random_number(y0)
-       if (eval(y0) == 0) cycle
+       call next_point(y0)
+       if (eval(y0) == 0) then
+          if (len_trim(checklim_point) > 0) stop 'checklim_point: H = 0 at this point'
+          cycle
+       endif
        used = .false.
        do b = 1,15
           do il = 1,10
@@ -208,6 +213,22 @@ contains
        if (all(val(1,2:8,:) == 0)) then            !-- H cut at every depth used for the verdicts
           nempty = nempty + 1
           if (nempty == 1000) stop 'check_limits_rr: H vanishes in every limit at 1000 points that pass the cuts'
+          cycle
+       endif
+       npt = npt + 1
+       if (checklim_csv) then                       !-- one line per limit and pair (ratios A/B), no pause
+          call csv_point(npt,y0)
+          do b = 1,15
+             if (used(slot(b))) then
+                do c = 0,15
+                   if (iand(c,b) == 0 .and. used(slot(c)) .and. used(slot(ior(c,b)))) &
+                        call csv_ratio(npt,lab(slot(b)),lab(slot(c)),lab(slot(ior(c,b))),val(slot(c),:,b),val(slot(ior(c,b)),:,b))
+                enddo
+             else
+                call csv_unc(npt,lab(slot(b)),popcnt(b),[(sum(sgn*val(:,il,b)), il = 1,10)])
+             endif
+          enddo
+          if (npt == checklim_npts .or. len_trim(checklim_point) > 0) stop
           cycle
        endif
        write(6,'(/,a,4es12.4)') ' point: x(E5), x(E6), x(rho5), x(rho6) =', y0(var)
@@ -227,6 +248,7 @@ contains
        do b = 1,15
           if (.not. used(slot(b))) call uncovered(lab(slot(b)),popcnt(b),[(sum(sgn*val(:,il,b)), il = 1,10)])
        enddo
+       if (len_trim(checklim_point) > 0) stop
        call mypause()
     enddo
 
@@ -257,7 +279,8 @@ contains
     real(dp)   :: val(18,10,6)
     logical    :: used(18)
     character(6) :: lab(18)
-    integer    :: g,k,il,ir,l,nempty
+    integer, parameter :: mk(6) = [0,1,2,4,3,5], kof(0:7) = [1,2,3,5,4,6,0,0]   !-- slot <-> set of limits (S 1, C1 2, C2 4)
+    integer    :: g,k,k2,o,il,ir,l,nempty,npt
 
     do g = 1,3
        do k = 1,6
@@ -268,10 +291,14 @@ contains
     buff = 0; buff_r = 0; call set_buff()
     override = .true.
     nempty = 0
+    npt = 0
     write(6,'(a)') '# -checklim NLO/RV/ONLO: S = x(E) -> 0, C1 = x(rho) -> 0, C2 = x(rho) -> 1; X/g = term X of kinematic group g'
     do
-       call random_number(y0)
-       if (eval(y0) == 0) cycle
+       call next_point(y0)
+       if (eval(y0) == 0) then
+          if (len_trim(checklim_point) > 0) stop 'checklim_point: H = 0 at this point'
+          cycle
+       endif
        used = .false.
        do l = 2,6
           do il = 1,10
@@ -284,6 +311,28 @@ contains
        if (all(val(1::6,2:8,2:6) == 0)) then       !-- H cut at every depth used for the verdicts
           nempty = nempty + 1
           if (nempty == 1000) stop 'check_limits_onlo: H vanishes in every limit at 1000 points that pass the cuts'
+          cycle
+       endif
+       npt = npt + 1
+       if (checklim_csv) then                       !-- one line per limit and pair (ratios A/B), no pause
+          call csv_point(npt,y0)
+          do l = 2,6
+             do g = 1,3
+                o = 6*(g-1)
+                if (used(o+l)) then
+                   do k = 1,6
+                      if (iand(mk(k),mk(l)) /= 0) cycle
+                      k2 = kof(ior(mk(k),mk(l)))
+                      if (k2 > 0) then
+                         if (used(o+k) .and. used(o+k2)) call csv_ratio(npt,nm(l),lab(o+k),lab(o+k2),val(o+k,:,l),val(o+k2,:,l))
+                      endif
+                   enddo
+                elseif (any(val(o+1,:,l) /= 0)) then
+                   call csv_unc(npt,lab(o+l),soft(l)+min(coll(l),1),[(sum(sgn*val(o+1:o+6,il,l)), il = 1,10)])
+                endif
+             enddo
+          enddo
+          if (npt == checklim_npts .or. len_trim(checklim_point) > 0) stop
           cycle
        endif
        write(6,'(/,a,2es12.4)') ' point: x(E), x(rho) =', y0(xE), y0(xRHO)
@@ -302,6 +351,7 @@ contains
                   call uncovered(lab(6*(g-1)+l),soft(l)+min(coll(l),1),[(sum(sgn*val(6*g-5:6*g,il,l)), il = 1,10)])
           enddo
        enddo
+       if (len_trim(checklim_point) > 0) stop
        call mypause()
     enddo
 
@@ -328,6 +378,48 @@ contains
     end function eval
 
   end subroutine check_limits_onlo
+
+  !-- -checklim_point <file>: the 30 coordinates of one point (a P line of -checklim_csv); otherwise a random point
+  subroutine next_point(y0)
+    real(dp15), intent(out) :: y0(30)
+    integer :: u
+    if (len_trim(checklim_point) == 0) then
+       call random_number(y0)
+    else
+       open(newunit=u,file=trim(checklim_point),status='old')
+       read(u,*) y0
+       close(u)
+    endif
+  end subroutine next_point
+
+  !-- -checklim_csv (PLAN C1.5): P = point coordinates; R = limit, terms A and B that must agree, A/B at depths 1e-1..1e-10;
+  !-- U = limit without own counterterm, k, x^k |H + counterterms| at the same depths
+  subroutine csv_point(n,y0)
+    integer, intent(in) :: n
+    real(dp15), intent(in) :: y0(30)
+    write(6,'(a,i0,*(",",es24.16))') 'P,',n,y0
+  end subroutine csv_point
+
+  subroutine csv_ratio(n,lim,a,b,va,vb)
+    integer, intent(in) :: n
+    character(*), intent(in) :: lim,a,b
+    real(dp), intent(in) :: va(10),vb(10)
+    real(dp) :: r(10)
+    integer  :: il
+    do il = 1,10
+       r(il) = ieee_value(1._dp,ieee_quiet_nan)
+       if (vb(il) /= 0) r(il) = va(il)/vb(il)
+    enddo
+    write(6,'(a,i0,6a,*(",",es24.16))') 'R,',n,',',trim(lim),',',trim(a),',',trim(b),r
+  end subroutine csv_ratio
+
+  subroutine csv_unc(n,lim,k,h)
+    integer, intent(in) :: n,k
+    character(*), intent(in) :: lim
+    real(dp), intent(in) :: h(:)
+    integer :: il
+    write(6,'(a,i0,3a,i0,*(",",es24.16))') 'U,',n,',',trim(lim),',',k,(abs(h(il))*10._dp**(-k*il), il = 1,10)
+  end subroutine csv_unc
 
   !-- W-awareness (PLAN C1.4): in a limit without its own counterterm (neutrino, gamma gamma TC for W; soft gluon covered
   !-- by C1 + C2) the integrand H + all counterterms must be integrable: x^k |sum| (k = variables at the edge) must fall

@@ -45,6 +45,9 @@ module mod_proc_parms
 
   !-- for checking limits
   logical, public, save  :: checklim = .false.
+  logical, public, save  :: checklim_csv = .false.        !-- compact output, no pause (PLAN C1.5)
+  integer, public, save  :: checklim_npts = 100          !-- points that pass the cuts, -checklim_csv
+  character(len=256), public, save :: checklim_point = '' !-- file with the 30 coordinates of one point to rerun
   logical, public, save  :: checkint = .false.
   real(dp), public, save :: lim
 
@@ -157,6 +160,10 @@ contains
     !-- checklimits
     checklim = log_val_opt('-checklim',.false.)
     lim = real_val_opt('-lim',1E-8_dp)
+    checklim_csv = log_val_opt('-checklim_csv',.false.)
+    if (checklim_csv) checklim = .true.
+    checklim_npts = int_val_opt('-checklim_npts',100)
+    checklim_point = trim(string_val_opt('-checklim_point',''))
     checkint = log_val_opt('-checkint',.false.)
     if (checkint) then !-- the scan goes below the default technical cuts
        buff_rr = 1E-14_dp; buff_r = 1E-14_dp
@@ -204,6 +211,9 @@ contains
     write(idev,*) ' -checklim --> check limits'
     write(idev,*) ' -checkint --> integrability scan of the chosen sector'
     write(idev,*) ' -lim      --> how deep we want to go with the limit'
+    write(idev,*) ' -checklim_csv  --> -checklim, one line per point, limit and pair (ratios A/B), no pause'
+    write(idev,*) ' -checklim_npts --> number of points for -checklim_csv (default 100)'
+    write(idev,*) ' -checklim_point <file> --> -checklim tables for the point whose 30 coordinates are in <file>'
     
   end subroutine help_proc_parms
   
