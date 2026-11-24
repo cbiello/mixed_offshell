@@ -1,0 +1,14 @@
+FVQEDgq = P5 FLM + c FLVQEDfin with c = 1;  FVQEDgqz1dividedbyz: c = 1
+(1) hard, finite remainder of the 5-point EW loop, W+ g u (eps^0 of the pole term - fin):  max |notebook - Fortran| = 0.
+(1) hard, finite remainder of the 5-point EW loop, W+ g dbar (eps^0 of the pole term - fin):  max |notebook - Fortran| = 0.
+(1) hard, finite remainder of the 5-point EW loop, W- g ubar (eps^0 of the pole term - fin):  max |notebook - Fortran| = 0.
+(1) hard, finite remainder of the 5-point EW loop, W- g d (eps^0 of the pole term - fin):  max |notebook - Fortran| = 0.
+(1) four-point Born W+, same relation (sanity):  max |notebook - Fortran| = 0.
+(2) gq: poles of the implied C51 FLVQEDfin: 1/eps^2 -> 0,  1/eps (max over the test points) -> 0.
+(2) gq W+ (lepton leg 4): C51 FLVQEDfin, notebook - Fortran (coefficient of FLM[z p1] over that of FLVQEDfin[z p1]) = 0.
+(2) gq W- (lepton leg 3): C51 FLVQEDfin, notebook - Fortran = 0.
+(2) sensitivity, 5/3 pi^2 -> 3/2 pi^2 in limgen(1): 0.7310818074881006384`4.
+FLRVQCDI^\263q: c = 1;  FLRVQCDI^\263qz1: c = 1
+(1) hard, finite remainder of the 5-point QCD loop, photon-quark:  max |notebook - Fortran| = 0.
+(2) photon-quark: poles of the implied C61 FLVQCDfin: 1/eps^2 -> 0,  1/eps (max over the test points) -> 0.
+(2) photon-quark: C61 FLVQCDfin, notebook - Fortran = 0.

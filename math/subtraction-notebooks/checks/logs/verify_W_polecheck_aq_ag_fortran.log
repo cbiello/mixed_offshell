@@ -1,0 +1,21 @@
+== photon-quark (aq)
+coefficient of FLVQCDfin[gamma,q,nu,l,qp] = ONLO (= ONLO, sector rvqcd_is: verify_W_polecheck_rv_fortran.wls)
+coverage: notebook remainder minus all compared structures = 0
+terms with Log[1-eta12]: {-4*CF*Nc*Qqp^2*z*Log[1 - eta[1, 2]]*Log[eta[1, 2]], 4*CF*Nc*Qqp^2*z^2*Log[1 - eta[1, 2]]*Log[eta[1, 2]], -4*CF*Nc*Qqp^2*Log[2]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], 8*CF*Nc*Qqp^2*z*Log[2]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], -8*CF*Nc*Qqp^2*z^2*Log[2]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], -4*CF*Nc*Qqp^2*Log[EC]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], 8*CF*Nc*Qqp^2*z*Log[EC]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], -8*CF*Nc*Qqp^2*z^2*Log[EC]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], -4*CF*Nc*Qqp^2*Log[1 - z]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], 8*CF*Nc*Qqp^2*z*Log[1 - z]*Log[1 - eta[1, 2]]*Log[eta[1, 2]], -8*CF*Nc*Qqp^2*z^2*Log[1 - z]*Log[1 - eta[1, 2]]*Log[eta[1, 2]]}
+aq single boost depends on: {eta[1, 2], EC}
+s_12   single boost      FLM[z p1,p2]:  notebook - Fortran = 0     (size of the notebook term 139.4430785138857473154`3.)
+s_12   double boost      FLM[z1 p1,z2 p2]:  notebook - Fortran = 0     (size of the notebook term 80.5035768723550024527`3.)
+s_vqcd                   FLVqcd[z p1,p2]:  notebook - Fortran = 0     (size of the notebook term 5.6890479138042486746`3.)
+s_oqcd (resolved gluon)  ONLO FLM[z p1,p2,g]:  notebook - Fortran = 0     (size of the notebook term 4.938006997976998546`3.)
+s_oewk boosted           ONLO FLM[p1,z p2,q']:  notebook - Fortran = 0     (size of the notebook term 12.834280211842123564`3.)
+s_oewk elastic, damp2 = omega[{51,61},{5,6}]:  notebook - Fortran = 0.2048335344472173081696657529734478045505135416050665031029`40.     (size of the notebook term 10.7954135167755333451`3.)
+s_oewk elastic, damp2 = 1 - omega[{51,61},{5,6}]:  notebook - Fortran = 0     (size of the notebook term 10.7954135167755333451`3.)
+sensitivity, aq elastic with 13/2 -> 6: 0.6666666666666666667`6.
+== photon-gluon (ag)
+s_12   double boost      (leg-1 quark charge Qq):  notebook - Fortran = 0     (size of the notebook term 3.2123663551787801973`3.)
+s_oqcd (resolved quark)  (leg-1 quark charge Qq):  notebook - Fortran = 0     (size of the notebook term 5.6890479138042486746`3.)
+s_oewk                   (quark from the gluon q):  notebook - Fortran = 0     (size of the notebook term 1.9256704992759147901`3.)
+s_12   double boost      (leg-1 quark charge Qqp):  notebook - Fortran = 0     (size of the notebook term 3.2123663551787801973`3.)
+s_oqcd (resolved quark)  (leg-1 quark charge Qqp):  notebook - Fortran = 0     (size of the notebook term 5.6890479138042486746`3.)
+s_oewk                   (quark from the gluon qp):  notebook - Fortran = 0     (size of the notebook term 1.9522662492831485531`3.)
+all ag structures used: 0
