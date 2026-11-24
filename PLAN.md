@@ -18,9 +18,9 @@ Legend: ✅ done and checked · 🟡 code exists, not validated · 🔧 partial 
 |---|---|---|---|
 | LO, NLO QCD, NLO EW (ns, gq, qg, aq, qa) | ✅ | ✅ POWHEG | ✅ POWHEG |
 | VV (two-loop) | ✅ | ⏸ | ⏸ |
-| RV, EW loop + gluon (`rvewk_is`: ns, gq, qg) | ✅ | ✅ POWHEG | ✅ POWHEG |
+| RV, EW loop + gluon (`rvewk_is`: ns, gq, qg) | ✅ | ✅ POWHEG; gq finite remainder + counterterm = notebook | ✅ POWHEG |
 | RV, QCD loop + photon (`rvqcd_*` ns) | ✅ | ✅ limits | ✅ limits |
-| RV, QCD loop + photon (aq, qa) | ✅ | ✅ limits | ✅ limits |
+| RV, QCD loop + photon (aq, qa) | ✅ | ✅ limits; aq finite remainder + counterterm = notebook | ✅ limits |
 | RR `ns_ga` | ✅ | ✅ limits | ✅ limits |
 | RR `gq`, `qg` | ✅ | ✅ limits | ✅ limits |
 | RR `aq`, `qa`, `ag`, `ga` | ✅ | ✅ limits | ✅ limits |
@@ -29,10 +29,10 @@ Legend: ✅ done and checked · 🟡 code exists, not validated · 🔧 partial 
 | S ns: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
 | S ns: `s_qqb`, `s_qq` | ✅ | ✅ same code as Z | ✅ same code as Z |
 | S gq, qg: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
-| S gq, qg: `s_12`, `s_vewk` | ✅ | ✅ derived with general charges, RGE | same |
+| S gq, qg: `s_12`, `s_vewk` | ✅ | ✅ derived with general charges, RGE, `W_NNLO_polecheck` notebook | same |
 | S aq, qa, ag, ga (all) | ✅ | ✅ `Z.nb` kernels (`s_12`, `s_vqcd`), derivation with general charges (`s_oqcd`, `s_oewk`), RGE | same |
 | Limit-scaling checks usable on all sectors | 🔧 | 🔧 | 🔧 |
-| Fortran vs Mathematica integrated CT check (terms without a resolved parton) | ✅ gq, photon channels, four-quark (`Z.nb`) | ✅ q qb' (`W.nb`), photon channels, four-quark (Z kernels); gq derived with general charges (`subtraction_f.wl`) | as W+ (CP test) |
+| Fortran vs Mathematica integrated CT check (terms without a resolved parton) | ✅ gq, photon channels, four-quark (`Z.nb`) | ✅ q qb' (`W.nb`), photon channels, four-quark (Z kernels); gq derived with general charges (`subtraction_f.wl`); all non-q qb' channels incl. ONLO and RV against `W_NNLO_polecheck_cleaned.nb`, transcriptions against the compiled code | gq also with the lepton on leg 3; otherwise as W+ (CP test) |
 
 Sectors that are still Z-only stop for W (I3).
 Missing for W: VV and the `nf` pieces (out of scope for now). The resolved-parton S sectors (`s_oqcd`, `s_oewk`) of the photon-induced channels are checked against the derivation, not against an independent generator.

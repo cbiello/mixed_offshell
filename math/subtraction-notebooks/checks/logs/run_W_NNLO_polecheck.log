@@ -1,0 +1,33 @@
+applying delta
+collecting 1...
+factoring...
+collecting 2...
+applying delta
+collecting 1...
+factoring...
+collecting 2...
+applying delta
+collecting 1...
+factoring...
+collecting 2...
+end of chapter 0: {}
+== chapter 1
+cell 129: 46 s, mem 186 MB
+cell 140: 8 s, mem 186 MB
+cell 142: 24 s, mem 186 MB
+cell 144: 122 s, mem 202 MB
+end of chapter 1: {{gqchri, 1}, {total, 1}, {FVQEDgq, 1}, {FVQEDgqz1dividedbyz, 1}, {PqgRV, 1}, {PqgNLO, 1}}
+== chapter 2
+cell 202: 35 s, mem 204 MB
+cell 214: 40 s, mem 217 MB
+end of chapter 2: {{gqchri, 1}, {total, 1}, {FVQEDgq, 1}, {FVQEDgqz1dividedbyz, 1}, {PqgRV, 1}, {PqgNLO, 1}, {aqchri, 2}, {total\[Gamma]qser, 2}, {FVQEDgq, 2}, {FVQEDgqz1dividedbyz, 2}, {FLRVQCD\[Gamma]q, 2}, {FLRVQCD\[Gamma]qz1, 2}, {PqgRV, 2}, {PqgNLO, 2}}
+== chapter 3
+cell 255: 17 s, mem 217 MB
+end of chapter 3: {{gqchri, 1}, {total, 1}, {FVQEDgq, 1}, {FVQEDgqz1dividedbyz, 1}, {PqgRV, 1}, {PqgNLO, 1}, {aqchri, 2}, {total\[Gamma]qser, 2}, {FVQEDgq, 2}, {FVQEDgqz1dividedbyz, 2}, {FLRVQCD\[Gamma]q, 2}, {FLRVQCD\[Gamma]qz1, 2}, {PqgRV, 2}, {PqgNLO, 2}, {agchri, 3}, {total\[Gamma]qser, 3}, {total\[Gamma]gser, 3}, {FVQEDgq, 3}, {FVQEDgqz1dividedbyz, 3}, {FLRVQCD\[Gamma]q, 3}, {FLRVQCD\[Gamma]qz1, 3}, {PqgRV, 3}, {PqgNLO, 3}}
+== chapter 4
+end of chapter 4: {{gqchri, 1}, {total, 1}, {FVQEDgq, 1}, {FVQEDgqz1dividedbyz, 1}, {PqgRV, 1}, {PqgNLO, 1}, {aqchri, 2}, {total\[Gamma]qser, 2}, {FVQEDgq, 2}, {FVQEDgqz1dividedbyz, 2}, {FLRVQCD\[Gamma]q, 2}, {FLRVQCD\[Gamma]qz1, 2}, {PqgRV, 2}, {PqgNLO, 2}, {agchri, 3}, {total\[Gamma]qser, 3}, {total\[Gamma]gser, 3}, {FVQEDgq, 3}, {FVQEDgqz1dividedbyz, 3}, {FLRVQCD\[Gamma]q, 3}, {FLRVQCD\[Gamma]qz1, 3}, {PqgRV, 3}, {PqgNLO, 3}, {fourqwithqpp, 4}, {total\[Gamma]qser, 4}, {total\[Gamma]gser, 4}, {total4qser, 4}, {FVQEDgq, 4}, {FVQEDgqz1dividedbyz, 4}, {FLRVQCD\[Gamma]q, 4}, {FLRVQCD\[Gamma]qz1, 4}, {PqgRV, 4}, {PqgNLO, 4}}
+== chapter 5
+end of chapter 5: {{gqchri, 1}, {total, 1}, {FVQEDgq, 1}, {FVQEDgqz1dividedbyz, 1}, {PqgRV, 1}, {PqgNLO, 1}, {aqchri, 2}, {total\[Gamma]qser, 2}, {FVQEDgq, 2}, {FVQEDgqz1dividedbyz, 2}, {FLRVQCD\[Gamma]q, 2}, {FLRVQCD\[Gamma]qz1, 2}, {PqgRV, 2}, {PqgNLO, 2}, {agchri, 3}, {total\[Gamma]qser, 3}, {total\[Gamma]gser, 3}, {FVQEDgq, 3}, {FVQEDgqz1dividedbyz, 3}, {FLRVQCD\[Gamma]q, 3}, {FLRVQCD\[Gamma]qz1, 3}, {PqgRV, 3}, {PqgNLO, 3}, {fourqwithqpp, 4}, {total\[Gamma]qser, 4}, {total\[Gamma]gser, 4}, {total4qser, 4}, {FVQEDgq, 4}, {FVQEDgqz1dividedbyz, 4}, {FLRVQCD\[Gamma]q, 4}, {FLRVQCD\[Gamma]qz1, 4}, {PqgRV, 4}, {PqgNLO, 4}, {fourqwithqp, 5}, {total\[Gamma]qser, 5}, {total\[Gamma]gser, 5}, {total4qser, 5}, {FVQEDgq, 5}, {FVQEDgqz1dividedbyz, 5}, {FLRVQCD\[Gamma]q, 5}, {FLRVQCD\[Gamma]qz1, 5}, {PqgRV, 5}, {PqgNLO, 5}}
+== chapter 6
+end of chapter 6: {{gqchri, 1}, {total, 1}, {FVQEDgq, 1}, {FVQEDgqz1dividedbyz, 1}, {PqgRV, 1}, {PqgNLO, 1}, {aqchri, 2}, {total\[Gamma]qser, 2}, {FVQEDgq, 2}, {FVQEDgqz1dividedbyz, 2}, {FLRVQCD\[Gamma]q, 2}, {FLRVQCD\[Gamma]qz1, 2}, {PqgRV, 2}, {PqgNLO, 2}, {agchri, 3}, {total\[Gamma]qser, 3}, {total\[Gamma]gser, 3}, {FVQEDgq, 3}, {FVQEDgqz1dividedbyz, 3}, {FLRVQCD\[Gamma]q, 3}, {FLRVQCD\[Gamma]qz1, 3}, {PqgRV, 3}, {PqgNLO, 3}, {fourqwithqpp, 4}, {total\[Gamma]qser, 4}, {total\[Gamma]gser, 4}, {total4qser, 4}, {FVQEDgq, 4}, {FVQEDgqz1dividedbyz, 4}, {FLRVQCD\[Gamma]q, 4}, {FLRVQCD\[Gamma]qz1, 4}, {PqgRV, 4}, {PqgNLO, 4}, {fourqwithqp, 5}, {total\[Gamma]qser, 5}, {total\[Gamma]gser, 5}, {total4qser, 5}, {FVQEDgq, 5}, {FVQEDgqz1dividedbyz, 5}, {FLRVQCD\[Gamma]q, 5}, {FLRVQCD\[Gamma]qz1, 5}, {PqgRV, 5}, {PqgNLO, 5}, {fourqwithqpp, 6}, {total\[Gamma]qser, 6}, {total\[Gamma]gser, 6}, {total4qser, 6}, {FVQEDgq, 6}, {FVQEDgqz1dividedbyz, 6}, {FLRVQCD\[Gamma]q, 6}, {FLRVQCD\[Gamma]qz1, 6}, {PqgRV, 6}, {PqgNLO, 6}}
+done

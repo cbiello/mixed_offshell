@@ -1,0 +1,19 @@
+HOPPET kernels gq, gq_Lmu, gq_b, gq_b_Lmu, TCgq(_Lmu,_Lmu2)   max rel. difference         -15
+3.7 x 10
+HOPPET kernels ns_qq, ns_qqb (and _Lmu)                       max rel. difference         -14
+1.7 x 10
+Pqq_NLO (0),(1) = PA regular + plus, plus part                max rel. difference        -16
+3. x 10
+PqqAP_0_R (0),(1) = PlA                                       max rel. difference 0.
+Pgq_spav = Pqg0                                               max rel. difference 0.
+calG_gq_cc (W+ dbar u, u dbar; W- d ubar, ubar d; two lmu)    max rel. difference         -16
+3.4 x 10
+calG_ONLOQCD_gq (same four, quark on leg 2)                   max rel. difference         -16
+4.4 x 10
+calG_CF (hard)                                                max rel. difference         -16
+1.3 x 10
+col_rvewk_is_qg_gen (x s5i/2)                                 max rel. difference         -16
+1.7 x 10
+col_rvqcd_is_qa (x s5i/2)                                     max rel. difference         -16
+1.7 x 10
+sensitivity, calG_gq_cc without the -4 zeta2 term: 0.093

@@ -1,0 +1,19 @@
+keys: {{fourqwithqpp, 4}, {fourqwithqp, 5}, {fourqwithqpp, 6}}
+== fourqwithqpp, chapter 4: structure InputForm[{FLM[p1, p2*z, p3, p4, z]}], charge Qqpp^2, remaining variables {z, Lh}
+-> Lh^0: max |notebook/Fortran mySub_ns_qqb - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[2.2967188775554827472`3.]
+-> Lh^1: max |notebook/Fortran mySub_ns_qqb - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[1.4513082034590316705`3.]
+-> Lh^0: max |notebook/Fortran mySub_ns_qq - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[0``70.09664497256504]
+-> Lh^1: max |notebook/Fortran mySub_ns_qq - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[0``67.88677879454227]
+-> Lh^2 coefficient: 0
+== fourqwithqp, chapter 5: structure InputForm[{FLM[p1, p2*z, p3, p4, z]}], charge Qqp^2, remaining variables {z, Lh}
+-> Lh^0: max |notebook/Fortran mySub_ns_qqb - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[0``76.68448380817927]
+-> Lh^1: max |notebook/Fortran mySub_ns_qqb - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[0``76.88227868817161]
+-> Lh^0: max |notebook/Fortran mySub_ns_qq - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[4692.0053042659122186138`3.]
+-> Lh^1: max |notebook/Fortran mySub_ns_qq - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[1.965200829074553618215620068837`3.*^11]
+-> Lh^2 coefficient: 0
+== fourqwithqpp, chapter 6: structure InputForm[{FLM[p1, p2*z, p3, p4, z]}], charge Qqpp^2, remaining variables {z, Lh}
+-> Lh^0: max |notebook/Fortran mySub_ns_qqb - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[2.2967188775554827472`3.]
+-> Lh^1: max |notebook/Fortran mySub_ns_qqb - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[1.4513082034590316705`3.]
+-> Lh^0: max |notebook/Fortran mySub_ns_qq - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[0``70.09664497256504]
+-> Lh^1: max |notebook/Fortran mySub_ns_qq - 1| over z = {1/10, 3/10, 1/2, 7/10, 9/10, 99/100}: ScientificForm[0``67.88677879454227]
+-> Lh^2 coefficient: 0

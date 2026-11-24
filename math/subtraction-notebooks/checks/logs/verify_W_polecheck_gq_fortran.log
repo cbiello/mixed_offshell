@@ -1,0 +1,11 @@
+ONLO[FLVQEDfin[pq]] coefficient = 1 (sector rvewk_is: verify_W_polecheck_rv_fortran.wls)
+s_12   single boost      FLM[z p1,p2]:  notebook - Fortran = 0     (size of the notebook term 17.4303848142357184144`3.)
+s_12   double boost      FLM[z1 p1,z2 p2]:  notebook - Fortran = 0     (size of the notebook term 10.0629471090443753066`3.)
+s_vewk                   FLVew[z p1,p2]:  notebook - Fortran = 0     (size of the notebook term 2.133392967676593253`3.)
+s_oqcd elastic           ONLO FLM[pq]:  notebook - Fortran = 0     (size of the notebook term 8.5808365664914181377`3.)
+s_oqcd boosted           ONLO FLM[p1,z p2,pq]:  notebook - Fortran = 0     (size of the notebook term 4.716874603746160083`3.)
+s_oewk (is + fs_53/54)   ONLO FLM[z p1,p2,pa]:  notebook - Fortran = 0     (size of the notebook term 1.915209590640065183`3.)
+sensitivity, -4 zeta2 term dropped:  6.2387391475656274262`6.
+W- (lepton on leg 3), single boost:  0
+W- (lepton on leg 3), s_oqcd elastic: 0
+coverage: notebook remainder minus all compared structures = 0

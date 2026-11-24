@@ -476,3 +476,43 @@ qg_s_oqcd            C2: 2e-01 -> 3e-03
 
 Four-quark (`xsect_checklim_nnlo4q`, W+ `ns_qqb rr_5161a`, depth 1e-6): |H+CT|/H = 5e-4 to 9e-4 on three points.
 Not run: W- and Z (the binary has the W analysis compiled in), many points per sector (PLAN C1.8).
+
+## Non-q qb' channels for W: `W_NNLO_polecheck_cleaned.nb` against the Fortran (2026-11-24)
+
+`math/subtraction-notebooks/W_NNLO_polecheck_cleaned.nb` (Christian): W subtraction with general charges for gq, photon-quark,
+photon-gluon and the four-quark channels, charged lepton on leg 4. `checks/run_verify_W_polecheck.sh` evaluates it headless
+(`run_W_NNLO_polecheck.wls`, the `aux/` files replace the Dropbox paths, the q qb' part is skipped) and checks that the sum of the
+Fortran sectors equals the notebook total: every structure of the finite remainder is matched to the Fortran piece that fills it
+(a coverage line per channel confirms nothing is left over), general charges, five values of z, 40 digits.
+Logs in `checks/logs/verify_W_polecheck_*_fortran.log`.
+
+| Channel | Notebook structure -> Fortran sector, notebook - Fortran = 0 |
+|---|---|
+| gq | FLM[z p1] -> `s_12` (`calG_gq_cc` + `TCgq`, W+ and W-); FLM[z1 p1, z2 p2] -> `s_12` double boost; FLVew[z p1] -> `s_vewk`; ONLO FLM[pq] (+ log eta15 terms) -> `s_oqcd` elastic (W+, W-); ONLO FLM[p1, z p2, pq] -> `s_oqcd` boosted; ONLO FLM[z p1, p2, pa] -> `s_oewk_is` + `s_oewk_fs_53/54`; ONLO[FLVQEDfin] -> `rvewk_is` |
+| photon-quark | `s_12` single and double boost; `s_vqcd`; `s_oqcd`; `s_oewk` boosted and elastic (`calG_CF_hard`); ONLO FLVQCDfin -> `rvqcd_is` |
+| photon-gluon | both flavour orderings: `s_12` double boost, `s_oqcd`, `s_oewk` |
+| four-quark | q qb' -> qb' qb' (two copies): `mySub_ns_qq`; q qb -> ...: `mySub_ns_qqb`; ratio 1 to 30 digits, log(mu) part included |
+
+Real-virtual terms (`verify_W_polecheck_rv_fortran.wls`, from the notebook's own FVQEDgq, FLRVQCDγq, PqgRV, PqgNLO):
+- Hard term: the Fortran finite remainder, OpenLoops eps^0 minus `get_fin_ewk_qqbllb_gen(5,2,3,4,...)` / `get_fin_qcd(2,5)`, equals
+  the notebook definition (eps^0 of its pole term, alpha_B -> 1) for W+ and W-, both flavour orderings, and photon-quark; the
+  four-point Born obeys the same relation. Legs, charge signs and the timelike pi^2 (pair 54 or 53) are what the notebook has.
+- Counterterm: unintegrating the collinear terms of RVgq/RVγq gives the collinear limit of FLVQEDfin / FLVQCDfin implied by the
+  notebook; its poles cancel and its finite part equals `col_rvewk_is_qg_gen` (W+: Q4 term, W-: Q3 term) and `col_rvqcd_is_qa`
+  exactly. Fortran z = E5/E1 = 1 - z of the notebook; the notebook frame has E1 = E2 = EC. 5/3 pi^2 -> 3/2 pi^2 gives 0.73.
+
+Compiled code (`verify_W_polecheck_compiled_fortran.wls`): the transcriptions used above (`W_polecheck_fortran_defs.wl`) agree with
+`fortran_polecheck_driver.f90`, linked against the objects of `mixed_ll`: `calG_gq_cc`, `calG_ONLOQCD_gq` (W+, W-, both orderings,
+two lmu), `calG_CF`, `col_rvewk_is_qg_gen`, `col_rvqcd_is_qa`, `Pqq_NLO`, `PqqAP_0_R`, `Pgq_spav` to 1e-16, HOPPET kernels to 2e-14.
+Only the `get_fin` call arguments stay transcribed (private, next to the OpenLoops calls).
+
+- Sector weights: the Fortran damps (`partition_nnlo_fact`, `partition_nlo_qed`, `calG_CF` damp1/damp2) are partitions of unity
+  with the limits the notebook uses for omega tilde (kept symbolic there). Photon-quark elastic: the weight of
+  log(eta52/(1-eta52)) is 1 - omega[{51,61},{5,6}] (the other choice differs by 0.2).
+- Four-quark: the notebook charge is that of the incoming quark before the splitting (Qqpp); the Fortran squares the charge of
+  the Born leg after it. They are equal in these channels (identical-flavour interference), as the chapter titles state.
+- Sensitivity: dropping the -4 zeta2 Q1^2 term of `calG_gq_cc` gives 6.2; 13/2 -> 6 in `calG_CF_hard` gives 2/3; the wrong
+  four-quark kernel gives O(1) to O(10^11).
+- Not covered here: the mirrored channels qg, qa, ga (separate code; mirror tests above), the local counterterms inside ONLO
+  (`-checkint` scans above), RR sectors, and the poles (the notebook has its own pole-check sections).
+- `s_vewknf` and `rvewknf_is` stop for W ("not implemented") but are still listed in `sectors_list_wp.dat`/`_wm.dat`.
