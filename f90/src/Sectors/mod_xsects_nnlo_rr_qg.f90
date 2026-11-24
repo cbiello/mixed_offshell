@@ -318,6 +318,8 @@ contains
 #if(_withchecks == 1)
     FintNNLO_rr_tc_qg(1:4) = FintNNLO_qg
     FintNNLO_rr_tc_qg(5:8) = zero
+    limval_nnlo = zero
+    limval_nnlo([1,3,4,9]) = FintNNLO_qg   !-- slots as in rr_gq
 #endif
 
   end function xsect_nnlo_rr_5262a_qg
@@ -686,6 +688,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_qg = FintNNLO_qg
+    limval_nnlo = zero
+    limval_nnlo([1,3,4,11,9,15,5,10]) = FintNNLO_qg   !-- slots as in rr_gq
 #endif
 
   end function xsect_nnlo_rr_5262c_qg
@@ -1046,6 +1050,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_tc_qg = FintNNLO_qg
+    limval_nnlo = zero
+    limval_nnlo([1,3,4,11,5,10,9,15]) = FintNNLO_qg   !-- slots as in rr_gq
 #endif
 
   end function xsect_nnlo_rr_5262bd_qg
@@ -1434,6 +1440,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_dc_qg = FintNNLO_qg
+    limval_nnlo = zero
+    limval_nnlo([1,3,10,5,9,15,4,11]) = FintNNLO_qg   !-- slots as in rr_gq
 #endif
 
   end function xsect_nnlo_rr_5261_qg
@@ -1811,6 +1819,8 @@ contains
 
 #if(_withchecks == 1)
     FintNNLO_rr_dc_qg = FintNNLO_qg
+    limval_nnlo = zero
+    limval_nnlo([1,3,10,5,4,9,15,11]) = FintNNLO_qg   !-- slots as in rr_gq
 #endif
 
   end function xsect_nnlo_rr_526k_qg
