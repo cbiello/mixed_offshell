@@ -516,3 +516,18 @@ Only the `get_fin` call arguments stay transcribed (private, next to the OpenLoo
 - Not covered here: the mirrored channels qg, qa, ga (separate code; mirror tests above), the local counterterms inside ONLO
   (`-checkint` scans above), RR sectors, and the poles (the notebook has its own pole-check sections).
 - `s_vewknf` and `rvewknf_is` stop for W ("not implemented") but are still listed in `sectors_list_wp.dat`/`_wm.dat`.
+
+## W-aware limit checks (PLAN C1.4, 2026-11-24)
+
+`check_limits_rr` and `check_limits_onlo` also test every limit in which a sector has no counterterm of its own (for W:
+photon collinear to the neutrino, the gamma gamma -> l l triple-collinear limit; the soft gluon of `ns s_oqcd`, covered by
+C1 + C2): x^k |H + counterterms| (k = variables at the edge) must fall between depths 1e-2 and 1e-8. One point per sector:
+
+| Boson | Sectors | Limits with counterterm | Without: integrable | cut | SINGULAR |
+|---|---|---|---|---|---|
+| W+ | 78 (58 RR, 20 ONLO) | 440 | 620 | 4 | 1 |
+| W- | 78 | 433 | 613 | 7 | 0 |
+
+The W+ flag (`aq rr_5161b`, S6+X+Y) is double precision with three variables at the edge: x^3 |H + CT| falls to 1e-4 and
+then rises; integrable on 7 further points (one cut). The first version tested H alone and flagged `ns s_oqcd` soft:
+there the soft gluon is cancelled by C1 + C2 (1/(rho(1-rho)) = 1/rho + 1/(1-rho)), so H + counterterms is the right test.

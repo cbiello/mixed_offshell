@@ -205,9 +205,9 @@ contains
              used = used .or. limval_nnlo /= 0
           enddo
        enddo
-       if (.not. any(used(2:16))) then
+       if (all(val(1,:,:) == 0)) then
           nempty = nempty + 1
-          if (nempty == 1000) stop 'check_limits_rr: no counterterm at 1000 points that pass the cuts'
+          if (nempty == 1000) stop 'check_limits_rr: H vanishes in every limit at 1000 points that pass the cuts'
           cycle
        endif
        write(6,'(/,a,4es12.4)') ' point: x(E5), x(E6), x(rho5), x(rho6) =', y0(var)
@@ -222,6 +222,10 @@ contains
              enddo
              write(6,'(4es12.4,*(es16.8))') y(var), pack(val(:,il,b),used)
           enddo
+       enddo
+       call uncovered_head()
+       do b = 1,15
+          if (.not. used(slot(b))) call uncovered(lab(slot(b)),popcnt(b),[(sum(sgn*val(:,il,b)), il = 1,10)])
        enddo
        call mypause()
     enddo
@@ -276,9 +280,9 @@ contains
              used = used .or. limval_onlo /= 0
           enddo
        enddo
-       if (.not. (any(used(2::6)) .or. any(used(3::6)) .or. any(used(4::6)))) then
+       if (all(val(1::6,:,:) == 0)) then
           nempty = nempty + 1
-          if (nempty == 1000) stop 'check_limits_onlo: no counterterm at 1000 points that pass the cuts'
+          if (nempty == 1000) stop 'check_limits_onlo: H vanishes in every limit at 1000 points that pass the cuts'
           cycle
        endif
        write(6,'(/,a,2es12.4)') ' point: x(E), x(rho) =', y0(xE), y0(xRHO)
@@ -288,6 +292,13 @@ contains
           do il = 1,10
              y = point(l,il)
              write(6,'(2es12.4,*(es16.8))') y(xE), y(xRHO), pack(val(:,il,l),used)
+          enddo
+       enddo
+       call uncovered_head()
+       do l = 2,6
+          do g = 1,3
+             if (.not. used(6*(g-1)+l) .and. any(val(6*(g-1)+1,:,l) /= 0)) &
+                  call uncovered(lab(6*(g-1)+l),soft(l)+min(coll(l),1),[(sum(sgn*val(6*g-5:6*g,il,l)), il = 1,10)])
           enddo
        enddo
        call mypause()
@@ -316,6 +327,34 @@ contains
     end function eval
 
   end subroutine check_limits_onlo
+
+  !-- W-awareness (PLAN C1.4): in a limit without its own counterterm (neutrino, gamma gamma TC for W; soft gluon covered
+  !-- by C1 + C2) the integrand H + all counterterms must be integrable: x^k |sum| (k = variables at the edge) must fall
+  !-- between depths 1e-2 and 1e-8, else a counterterm is missing. Points where the sum is cut or not finite are skipped.
+  subroutine uncovered_head()
+    write(6,'(/,a,/,a)') ' limits without own counterterm: x^k |H + counterterms| must fall (k = variables at the edge)', &
+         ' limit             1e-02       1e-04       1e-06       1e-08  verdict'
+  end subroutine uncovered_head
+
+  subroutine uncovered(name,k,h)
+    character(*), intent(in) :: name
+    integer, intent(in)  :: k
+    real(dp), intent(in) :: h(:)
+    real(dp) :: f(10)
+    integer  :: il,i1,i2
+    character(10) :: verdict
+    f = [(abs(h(il))*10._dp**(-k*il), il = 1,10)]
+    i1 = findloc(f(2:8) /= 0 .and. f(2:8) == f(2:8),.true.,dim=1) + 1
+    i2 = findloc(f(2:8) /= 0 .and. f(2:8) == f(2:8),.true.,dim=1,back=.true.) + 1
+    if (i1 == 1 .or. i2 - i1 < 2) then
+       verdict = 'cut'
+    elseif (f(i2) < 0.3_dp*f(i1)) then
+       verdict = 'integrable'
+    else
+       verdict = 'SINGULAR'
+    endif
+    write(6,'(1x,a14,4es12.4,2x,a)') name, f(2:8:2), trim(verdict)
+  end subroutine uncovered
 
   function median(v) result(m)
     real(dp15), intent(in) :: v(:)
