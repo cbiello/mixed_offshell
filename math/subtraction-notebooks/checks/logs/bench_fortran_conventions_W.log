@@ -1,0 +1,45 @@
+W+ (ilept = 4)
+   FLVqcd elastic: 0
+   FLVqcd leg1: 0
+   FLVqcd leg2: 0
+   FLVew elastic: 0
+   FLVew leg1: 0
+   FLVew leg2: 0
+   FLM double boost: 0
+   FLM leg1: 0
+   FLM leg2: 0
+   FLM elastic: 0
+W- (ilept = 3)
+   FLVqcd elastic: 0
+   FLVqcd leg1: 0
+   FLVqcd leg2: 0
+   FLVew elastic: 0
+   FLVew leg1: 0
+   FLVew leg2: 0
+   FLM double boost: 0
+   FLM leg1: 0
+   FLM leg2: 0
+   FLM elastic: 0
+sensitivity, must be nonzero:
+  W.nb charges taken as incoming (no sign flip)
+   FLVqcd elastic: 3.68457502729804426113337420931726986484
+   FLVqcd leg1: 0
+   FLVqcd leg2: 0
+   FLVew elastic: 0
+   FLVew leg1: 0
+   FLVew leg2: 0
+   FLM double boost: 0
+   FLM leg1: 25.79142524883264701823177895067385221756
+   FLM leg2: 44.75271778156341402554650675151545216973
+   FLM elastic: 35.3103494667090240281244803658638725632
+  W- legs not swapped in the Fortran remainder
+   FLVqcd elastic: 0.07095401976479205353464859988832691355
+   FLVqcd leg1: 0
+   FLVqcd leg2: 0
+   FLVew elastic: 0
+   FLVew leg1: 0
+   FLVew leg2: 0
+   FLM double boost: 0
+   FLM leg1: 0.24122530260855861178569536727190911188
+   FLM leg2: 16.81928135383952368017022831106964419077
+   FLM elastic: 3.12901993813194771879781274576243237102

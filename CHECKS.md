@@ -366,3 +366,12 @@ points per channel, tolerance 1e-6.
 The stored MadGraph points were made with real couplings. With the default complex-mass scheme every W entry is off by
 the same factor (0.99931470 = 1/(1 + Gamma_W^2/M_W^2) at lo and nloqcd, 0.99885166 with a photon, spread 1.5e-9), which is
 the coupling normalisation only. This closes PLAN RR9.
+
+## One convention for notebooks and Fortran: q qb' against `W.nb` (2026-11-24)
+
+`math/subtraction-notebooks/fortran_conventions.wl` fixes the Fortran convention for the notebooks (legs `p1..p4`,
+`Qq = Q_IS(al)`, `Qqp = Q_IS(be)`, `Q3`, `Q4`, charged lepton `Qlept` on leg `ilept`), maps `W.nb` (`fromWnb[ilept]`)
+and the all-outgoing charges of `notes/fabrizio` (`fromAllOut`), and writes the q qb' finite remainder per sector with
+the Fortran routines and `ilept` as a parameter. `checks/bench_fortran_conventions_W.wls` (Mathematica 13.2, `W.nb`
+evaluated with `run_W_nb.wls`): all ten structures agree for W+ (`ilept = 4`) and W- (`ilept = 3`), general charges.
+Sensitivity: `W.nb` charges read as incoming, or W- without the leg swap, give O(1) differences. Log in `checks/logs/`.

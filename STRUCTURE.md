@@ -32,7 +32,7 @@ Momentum convention everywhere: `q(1) q'(2) -> l(3) l'(4) [+ parton 5] [+ parton
 | `f90/cluster_run/`, `cluster_KIT/`, `cluster_results/` | Batch scripts and old logs |
 | `f90/sectors_list.dat` | Static list of all `-corr/-ch/-sec` combinations (139 lines; not fully in sync with the chooser) |
 | `math/qqchannel_human/` | `DY0_qq.wl`, `DY+_qq.wl`: analytic finite remainders (ns channel); `validate_DYp7.wl`, `run_validate.wls`: symbolic Fortran-vs-notebook check; `tex/DYp_implementation.tex`: term-by-term map |
-| `math/subtraction-notebooks/` | `W.nb`: NNLO subtraction, q qb', general charges; `Z.nb`: Z finite remainders per channel; `aux/`: splittings, soft functions; `checks/`: Fortran-vs-notebook scripts |
+| `math/subtraction-notebooks/` | `W.nb`: NNLO subtraction, q qb', general charges; `Z.nb`: Z finite remainders per channel; `aux/`: splittings, soft functions; `checks/`: Fortran-vs-notebook scripts; `fortran_conventions.wl`: the Fortran charge and leg convention (M2) |
 | `notes/` | Derivation notes (Chiara/Federica: aq, ag, 4q channels; Fabrizio: Z subtraction notebook and pheno numbers; phase space) |
 | `old_code/` | Reference Z-only code from Chiara, Fabrizio, Raoul |
 | `2L/` | Two-loop amplitude material (Z) |

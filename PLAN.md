@@ -171,7 +171,7 @@ channels); older `math/qqchannel_human/DY+_qq.wl` (W+, ns). Missing for W: see M
 | ID | Task | Status |
 |---|---|---|
 | M1 | Add to `math/`: W- ns; W± for gq/qg, aq/qa, ag/ga; ONLO functions. Four-quark: nothing to add for W (same kernels as Z, charge of the convoluted leg); the derivation of the Z kernels is missing in `Z.nb` | 🔧 (Christian). `notes/fabrizio/subtraction_f.wl` holds the derivations of all channels with general leg charges; gq and the photon channels are evaluated from it in `checks/derive_gq_general_charges.wls`, `derive_aq_ag_general_charges.wls` |
-| M2 | One notebook convention for charges/legs shared with the Fortran (`Qq, Qqp, Qlept, ilept`) | ❌ |
+| M2 | One notebook convention for charges/legs shared with the Fortran (`Qq, Qqp, Qlept, ilept`): `fortran_conventions.wl`, maps from `W.nb` and from the all-outgoing charges; q qb' remainder agrees with `W.nb` for W+ and W- (CHECKS) | ✅ 2026-11-24 |
 
 ## 7. Validation (mandatory for every item above)
 
