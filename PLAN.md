@@ -65,6 +65,7 @@ Missing for W: VV and the `nf` pieces (out of scope for now). The resolved-parto
 | I16d | `rvqcd_fs_53/54`, `rvqcd_is` (agree to 1e-7..1e-9): not a bug. Old code uses the analytic one-loop amplitude (`res_qcdloop_j`), new code uses OpenLoops; the difference is numerical precision | – | ✅ understood |
 | I17 | Vegas reliability with a resolved photon: (a) the technical mass rescaling `-qmin_rsc 20` (default) biases the initial-state photon sectors low for hard-photon cuts (`nloewk ns r_is` W+: 1.495-1.517 fb over seeds); (b) with 300k/1M points many RR/S sectors are 1-3% low with underestimated errors. For now: `-qmin_rsc 1` and 1.5M/5M points. To do: check the production NNLO setup of the same sectors (`rr_5161/5262/5162/5261`, `rvqcd_is`, `s_oewk_is`) with several seeds, and decide the default | `Parms/mod_proc_parms.f90`, `Vegas/` | 🔧 found 2026-11-13 |
 | I18 | `-seed` did not reach the Fortran generator that picks the sign of the lepton rapidity solution: runs with different seeds shared that sequence, so their average was correlated (seen as a fake gq/qg difference of 1.4% in `s_12`, 8 seeds). The generator now follows `-seed`; seed 0 is unchanged. Averages over seeds made before this date have underestimated errors | `mod_chooser.f90` | ✅ 2026-11-15 |
+| I19 | Find the best strategy to run: warm-up grids, then reuse the frozen grids for production (cf. I17) | `Vegas/`, `cluster_run` | ❌ |
 
 ## 2. NLO (done; remaining loose ends)
 
@@ -236,7 +237,7 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 | C4.2 | Pole check (`-checkpoles`) for `_gen` one-loop wrappers | ❌ |
 | C4.3 | Z regression: `OLDCODE=true` vs `false` builds and old published numbers after every change; script it (I11) | manual |
 | C4.4 | Scale logs: RGE test of all S sectors (`f90/tests/rge/`, CHECKS), slope in log mu^2 against splitting functions times lower orders. W+, W-: gq, aq, ag, q qb close at the per-mille level (noise limited); Z: gq, q qb | ✅ 2026-11-15 |
-| C4.4b | Independence of technical parameters: `buff*`, damping exponents, partition choice | ❌ |
+| C4.4b | Independence of technical parameters: `buff*`, damping exponents, partition choice, Emax (soft energy bound) | ❌ |
 | C4.5 | W+ vs W- consistency: charge conjugation relates partonic W- to W+ with q <-> qb | ❌ |
 | C4.6 | `qa` = mirror of `aq`, `ga` = mirror of `ag`, `qg` = mirror of `gq` (automated diff test with x1 <-> x2) | ❌ |
 | C4.7 | Inclusive mixed corrections vs literature for on-shell/off-shell W where available | ❌ |
