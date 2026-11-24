@@ -31,7 +31,8 @@ Momentum convention everywhere: `q(1) q'(2) -> l(3) l'(4) [+ parton 5] [+ parton
 | `f90/aux/`, `f90/bin/` | Histogram combiners (`nsc-hsummer`, `nsc-combine_histos`, `rrsummer`, `cbsummer`) |
 | `f90/cluster_run/`, `cluster_KIT/`, `cluster_results/` | Batch scripts and old logs |
 | `f90/sectors_list.dat` | Static list of all `-corr/-ch/-sec` combinations (139 lines; not fully in sync with the chooser) |
-| `math/` | `DY0_qq.wl`, `DY+_qq.wl`: analytic finite remainders (ns channel); `validate_DYp7.wl`, `run_validate.wls`: symbolic Fortran-vs-notebook check; `tex/DYp_implementation.tex`: term-by-term map |
+| `math/qqchannel_human/` | `DY0_qq.wl`, `DY+_qq.wl`: analytic finite remainders (ns channel); `validate_DYp7.wl`, `run_validate.wls`: symbolic Fortran-vs-notebook check; `tex/DYp_implementation.tex`: term-by-term map |
+| `math/subtraction-notebooks/` | `W.nb`: NNLO subtraction, q qb', general charges; `Z.nb`: Z finite remainders per channel; `aux/`: splittings, soft functions; `checks/`: Fortran-vs-notebook scripts |
 | `notes/` | Derivation notes (Chiara/Federica: aq, ag, 4q channels; Fabrizio: Z subtraction notebook and pheno numbers; phase space) |
 | `old_code/` | Reference Z-only code from Chiara, Fabrizio, Raoul |
 | `2L/` | Two-loop amplitude material (Z) |
@@ -189,7 +190,7 @@ Files with no `_oldcode` and no `Vcharge` branch are untouched Z code.
 | `-check` | `mod_checks.f90`, `icheck=6` hard-coded -> only the nf amplitude check | Z |
 | `-checkpoles` | pole cancellation in legacy loop routines | Z only |
 | old vs new code | two builds (`OLDCODE=true/false`), `-boson z`, same seed (section 8) | manual |
-| `math/run_validate.wls` | symbolic check of W+ `fin_ns_v7_cc`, `genGnloQCD_cc`, `legfinalcalG_cc` | W+, ns `s_12` term [7] only |
+| `math/qqchannel_human/run_validate.wls` | symbolic check of W+ `fin_ns_v7_cc`, `genGnloQCD_cc`, `legfinalcalG_cc` | W+, ns `s_12` term [7] only |
 
 ## 10. Analyses
 

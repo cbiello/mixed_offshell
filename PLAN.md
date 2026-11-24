@@ -133,8 +133,8 @@ General amplitudes exist for every channel with g + gamma or q + gamma in the fi
 
 ## 6. Integrated subtraction ("S" sectors)
 
-Mathematica input: `math/DY+_qq.wl` (W+, ns). Subtraction formulae for W+ and W- in all
-channels are to be provided by Christian.
+Mathematica input: `math/subtraction-notebooks/W.nb` (q qb', general charges), `Z.nb` (Z, all
+channels); older `math/qqchannel_human/DY+_qq.wl` (W+, ns). Missing for W: see M1.
 
 ### 6a. ns channel
 
@@ -143,7 +143,7 @@ channels are to be provided by Christian.
 | S1 | `s_12`, `s_vqcd`, `s_vewk` for W+: **validated against `math/subtraction-notebooks/W.nb`** (2026-11-12). The notebook derivation was re-run (all poles vanish) and the Fortran W+ branches, the elastic functions (`fin_ns_vqcd_cc`, `genGnloQCD_cc`, `legfinalcalG_cc`, `fin_ns_v7_cc`) and the HOPPET kernels, transcribed to Mathematica, reproduce the full finite remainder in every structure (FLVqcd, FLVew, FLM double boost, two single boosts, elastic). Script: `math/subtraction-notebooks/checks/` | `mod_xsects_nnlo_s_ns.f90`, `IntSub/` | ✅ symbolic |
 | S2 | `s_12`, `s_vqcd`, `s_vewk` for **W-**: done with one W branch for both signs (`ilept_chg`, `Qlept_chg`); CP test against W+ with antiproton PDFs passes (CHECKS.md) | idem | ✅ 2026-11-13 |
 | S3 | `s_oqcd` W±: `calG_ONLOQCD_ns` had the wrong sign of the `Qlept*Q_IS` terms (with Qlept = Q1 + Q2 the `log(E_C/E_l) log(mu)` terms must cancel, they do only in `genGnloQCD_cc`). `ns s_oqcd` now uses `genGnloQCD_cc`, `calG_ONLOQCD_ns` removed. Shift of the l l' + jet rate: W+ +4.50 fb, W- +2.58 fb (1.4% of the q qb' LO); agreement with POWHEG after the fix (C3.7) | `mod_xsects_nnlo_s_ns.f90`, `mod_int_sub_nnlo.f90` | ✅ 2026-11-13 |
-| S4 | `s_oewk_is`: the routine wired to `-sec s_oewk_is` is an unfinished draft (broken for Z too); the working one is `_raoul` under `s_oewk_is_ra`. Rewire, delete the draft | :1531-2491, :3181-4216; `Chooser/mod_run_proc_s_ns.f90` | 🔧 |
+| S4 | `s_oewk_is`: the routine wired to `-sec s_oewk_is` is an unfinished draft (broken for Z too); the working one is `_raoul` under `s_oewk_is_ra`. Rewire, delete the draft. For W it stops (lepton ids not set) but is still in `sectors_list_wp/wm.dat` | :1531-2491, :3181-4216; `Chooser/mod_run_proc_s_ns.f90` | 🔧 |
 | S5 | `s_oewk_fs_53/54` (`_raoul`): general. Scan passes for Z, W+, W- (C1.6); in the POWHEG l l' gamma sum (C3.6). Legacy `oewk_fs_5i` deleted (Z, W+, W- regressions unchanged); `Q_lep2` only in `_oldcode` branches | `mod_xsects_nnlo_s_ns.f90` | ✅ 2026-11-16 |
 | S6 | `s_qqb`, `s_qq` for W: Born `_gen` times the squared charge of the convoluted leg, `get_respdf_hoppet_gen`. The same code run for Z reproduces the legacy `s_qqb` to 14 digits. Legacy Z `s_qq`: the leg-1 term swapped quark and antiquark in the Born although `xPij` is already built from the conjugate PDF (per-leg mirror test with a charge-asymmetric cut: -2.707e-3 vs -0.703e-3 fb before, -2.716e-3 vs -2.711e-3 after); totals with symmetric cuts unaffected. Fixed. W: CP test and leg mirror pass. Z and W share one code path (RR counterterm and S; old Z branches removed after agreement to 12-14 digits); kernels equal `Z.nb` (`checks/verify_4q_fortran.wls`). The derivation of the kernels is not in the notebooks | `mod_xsects_nnlo_s_ns.f90` | ✅ 2026-11-14 |
 | S7 | `s_vewknf` (see V2) | :3111 | ⏸ |
@@ -186,13 +186,13 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 | C1.3 | Extend `xsect_selector` beyond RR `ns_ga`: RR gq/qg/aq/qa/ag/ga/4q, all RV, all ONLO | ❌ |
 | C1.4 | Make it W-aware (which limits are singular per sector: no lepton-collinear pole on the neutrino; no gamma gamma TC) | 🔧 |
 | C1.5 | Output one table per sector (limit, slope, grade); store reference tables for Z, W+, W- | ❌ |
-| C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Four-quark RR and `s_qqb`, `s_qq` pass for W+, W- (2026-11-14). `rvewk` and all S sectors with a resolved parton pass for Z, W+, W- (2026-11-16, CHECKS) | ✅ |
+| C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Four-quark RR and `s_qqb`, `s_qq` pass for W+, W- (2026-11-14). `rvewk` and all S sectors with a resolved parton pass for Z, W+, W- (2026-11-16, CHECKS); repeated after 1e183c5 for W+, W- (`rvewk_is` ns and the S sectors of all channels, 25 each): all pass (2026-11-24) | ✅ |
 | C1.7 | Priority targets for W (cannot be seen in Z): RV6a, RV6b, RV7a, RV7b, RV3, N2, RR5, RR8. Each needs a recorded scaling table for W+ and W- before it is ticked | ❌ |
 
 ### C2. Integrated counterterm left-over, Fortran vs Mathematica
 | ID | Task | Status |
 |---|---|---|
-| C2.1 | Extend `math/validate_DYp7.wl` from term [7] to all of `FINITEDYp[1..7,60]` (symbolic, kernels included) | 🔧 |
+| C2.1 | Extend `math/qqchannel_human/validate_DYp7.wl` from term [7] to all of `FINITEDYp[1..7,60]` (symbolic, kernels included) | 🔧 |
 | C2.2 | Kernels read from the Fortran and compared with the notebooks at fixed z: four-quark (`verify_4q_fortran.wls`), gq, photon-quark, photon-gluon (`verify_Z_gq_aq_ag_fortran.wls`); assembly transcribed. q qb' for W+ is symbolic (`verify_Wp_qq_fortran.wls`). Terms with a resolved parton of the photon channels: `derive_aq_ag_general_charges.wls` | ✅ 2026-11-15 |
 | C2.3 | Resolve S3 (`calG_ONLOQCD_ns` vs `genGnloQCD_cc`) and S9: settled by the POWHEG comparison C3.7 | ✅ 2026-11-13 |
 | C2.4 | W: photon channels and four-quark use the Z kernels with one squared charge (covered by C2.2). gq, qg `s_12`: derivation with general charges, `derive_gq_general_charges.wls`. W- q qb': CP test only | ✅ 2026-11-15 |
