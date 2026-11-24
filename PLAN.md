@@ -29,13 +29,13 @@ Legend: ✅ done and checked · 🟡 code exists, not validated · 🔧 partial 
 | S ns: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
 | S ns: `s_qqb`, `s_qq` | ✅ | ✅ same code as Z | ✅ same code as Z |
 | S gq, qg: `s_oqcd`, `s_oewk_*` | ✅ | ✅ POWHEG | ✅ POWHEG |
-| S gq, qg: `s_12`, `s_vewk` | ✅ | 🟡 `s_12` formula not derived (S10) | same |
-| S aq, qa, ag, ga (all) | ✅ | 🟡 symmetry checks only | same |
+| S gq, qg: `s_12`, `s_vewk` | ✅ | ✅ derived with general charges, RGE | same |
+| S aq, qa, ag, ga (all) | ✅ | ✅ `Z.nb` kernels (`s_12`, `s_vqcd`), derivation with general charges (`s_oqcd`, `s_oewk`), RGE | same |
 | Limit-scaling checks usable on all sectors | 🔧 | 🔧 | 🔧 |
-| Fortran vs Mathematica integrated CT check | – | 🔧 (one term) | ❌ |
+| Fortran vs Mathematica integrated CT check (terms without a resolved parton) | ✅ gq, photon channels, four-quark (`Z.nb`) | ✅ q qb' (`W.nb`), photon channels, four-quark (Z kernels); gq derived with general charges (`subtraction_f.wl`) | as W+ (CP test) |
 
 Sectors that are still Z-only stop for W (I3).
-Missing for W: VV and the `nf` pieces (out of scope for now). No benchmark yet for the S sectors of gq/qg (`s_12`, `s_vewk`) and of the photon-induced channels.
+Missing for W: VV and the `nf` pieces (out of scope for now). The resolved-parton S sectors (`s_oqcd`, `s_oewk`) of the photon-induced channels are checked against the derivation, not against an independent generator.
 
 ## 1. Infrastructure and hygiene (do first)
 
@@ -89,10 +89,10 @@ Missing for W: VV and the `nf` pieces (out of scope for now). No benchmark yet f
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| RV1 | `rvewk_is` ns generalised for W± (2026-11-12): Hard, C1, C2 with `_gen` amplitudes, `get_respdf_gen`, `lep_ids`, per-leg charges (RV3); legacy under `_oldcode`; W guard removed. Z: new -0.71454867610 vs old -0.71454867562 fb (7e-10). W limits (`-checklim`, ~300 W_ATLAS points per leg): median \|H+CT\|/H 2e-3, 2e-4, 2e-5 at depth 1e-4, 1e-6, 1e-8 (W- and W+, C1 and C2), ~sqrt(depth); with the new charge logs switched off it stays at 9e-3. **Finite parts not validated**: matching with the integrated counterterm (W+ `s_12` term B has `-2 Qlept Q_IS log(s14/s12)`, same structure) still to check; W- integrated sectors missing (S2) | `mod_xsects_nnlo_rvewk.f90`, `mod_limits_rv.f90` | 🟡 limits ✅, finite ❌ |
+| RV1 | `rvewk_is` ns generalised for W± (2026-11-12): Hard, C1, C2 with `_gen` amplitudes, `get_respdf_gen`, `lep_ids`, per-leg charges (RV3); legacy under `_oldcode`; W guard removed. Z: new -0.71454867610 vs old -0.71454867562 fb (7e-10). W limits (`-checklim`, ~300 W_ATLAS points per leg): median \|H+CT\|/H 2e-3, 2e-4, 2e-5 at depth 1e-4, 1e-6, 1e-8 (W- and W+, C1 and C2), ~sqrt(depth); with the new charge logs switched off it stays at 9e-3. Finite part validated by C3.7 (POWHEG l l' + jet); integrability scan passes (C1.6) | `mod_xsects_nnlo_rvewk.f90`, `mod_limits_rv.f90` | ✅ 2026-11-13 |
 | RV2 | `rvewk_is` gq, qg for W: done (`res_ewkloop_g_gq_gen`, `_g_qg_gen`, `col_rvewk_is_qg_gen`); integrability scan passes for W+ and W-; Z new = old at 1e-7 (gq). The old Z `qg` code used `qg_lumi_splitb` with the quark and antiquark rows swapped (totals with charge-symmetric cuts unaffected, charge-asymmetric distributions wrong): fixed. Finite part validated by C3.7 | `mod_xsects_nnlo_rvewk.f90`, `mod_aux_sectors.f90` | ✅ 2026-11-13 |
 | RV3 | One-loop collinear limits with general charges, ns: `col_rvewk_is_ns_gen`. The C1 (C2) counterterm is c_i^2 (splitting part) + 2 log(1-z) c_i [c3 log(s_i3/s12) + c4 log(s_i4/s12)], c = incoming charges (c3=-Q3, c4=-Q4), from the mismatch of the I operator between 5-point and reduced kinematics; reduces to the Z form for Q2=-Q1, Q4=-Q3. C2 uses the leg-2 charge (cf. RV6a). gq/qg: `col_rvewk_is_qg_gen`, same structure plus -2 pi^2 c_i (Q3+Q4): the collinear quark is outgoing in the 5-point amplitude and incoming in the reduced one (zero for Z) | `SingLimits/mod_limits_rv.f90` | ✅ ns (2026-11-12), gq/qg (2026-11-13) |
-| RV4 | OpenLoops ids: W registers ids 3-4 only; the Z code reads `OL_id(j+3)`. Check the W+ ordering (`register_red_qcd` vs `register_red_ew` differ) | `OpenLoops/mod_ol_interface.f90` | 🟡 |
+| RV4 | OpenLoops ids: W registers ids 3-4 only; the Z code reads `OL_id(j+3)`. The W+ order of the two processes differs between `register_red_qcd` and `register_red_ew`. The flavour assignment is right in both: the limits (RV1 pointwise, RV6, RV7 scan) compare the OpenLoops result with the tree counterterms flavour by flavour and close for W+ and W-. Totals with symmetric cuts (C3.6, C3.7) would not see a swap | `OpenLoops/mod_ol_interface.f90` | ✅ |
 | RV5 | `rvewknf_is` for W (see V2) | – | ⏸ |
 
 ### 4b. QCD one-loop x real photon
@@ -117,15 +117,15 @@ General amplitudes exist for every channel with g + gamma or q + gamma in the fi
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| RR1 | `ns_ga`, all 10 sectors: general code for W±. Fix ids (:995). Legacy branch of 5161a/5262a is broken (:433, :533 use an uninitialised array), so `oldcode=T` is not a valid reference there | `mod_xsects_nnlo_rr_ns.f90` :217-2637 | 🟡 |
-| RR2 | `gq`, 7 sectors: general matrix elements and charges, but no `Vcharge` branch; ids are Z; `%part` unset. "agrees with oldcode=T", limits unchecked for W | `mod_xsects_nnlo_rr_gq.f90` | 🟡 |
-| RR3 | `qg`, 7 sectors: as RR2; `pause` in 5262b/d and 5263/5264; ids Z in 526k | `mod_xsects_nnlo_rr_qg.f90` | 🟡 |
+| RR1 | `ns_ga`, all 10 sectors: general code for W±. Ids fixed (I7), legacy branch repaired (I16c). Limits close (C1.6), sum of sectors agrees with POWHEG (C3.6, C3.7) | `mod_xsects_nnlo_rr_ns.f90` :217-2637 | ✅ |
+| RR2 | `gq`, 7 sectors: general matrix elements and charges; ids per boson (I7), `%part` removed (I7b). Limits close for W+ and W- (C1.6), POWHEG (C3.6, C3.7) | `mod_xsects_nnlo_rr_gq.f90` | ✅ |
+| RR3 | `qg`, 7 sectors: as RR2; debug `pause` removed (I4) | `mod_xsects_nnlo_rr_qg.f90` | ✅ |
 | RR4 | Scale-variation weights: `respdf = respdf_tmp(1,1)+respdf_tmp(1,2)` gave the central value to all weights in `gq`, `qg`, `aq`, `qa` (two sectors each); now `respdf_tmp(:,1)+respdf_tmp(:,2)`. Central values unchanged | idem | ✅ 2026-11-12 |
 | RR5 | Neutrino partition (5164/5264 for W-, 5163/5263 for W+) in `ns_ga`, `gq`, `qg`: all limits close in the scan for W+ and W- | `ns_ga`, `gq`, `qg` | ✅ limits |
 | RR6 | `aq`, `qa` (10 sectors each) generalised for W± by a scripted conversion: `_gen` amplitudes, `get_respdf_gen`, charge of the quark from the photon splitting, `lep_ids`, W guards removed; legacy under `_oldcode`. Z: all sectors reproduce the old numbers; W+ and W-: all limits close in the scan | `mod_xsects_nnlo_rr_aq.f90`, `_qa.f90` | ✅ limits (2026-11-12) |
 | RR7 | `ag`, `ga` (7 sectors each) generalised for W±: flavour sums per leg with the new `collapse_leg` (quarks or antiquarks of one leg, optionally with their charge). Z reproduces the old numbers (`ag rr_5262a` to 6e-11 without grid adaptation, 2.5e-6 with it: rounding in a strongly cancelling sector); W limits close | `mod_xsects_nnlo_rr_ag.f90`, `_ga.f90`, `mod_aux_sectors.f90` | ✅ limits (2026-11-12) |
 | RR8 | Limits built on gamma gamma -> l l: kept in the code, `res_treeAA_aa_gen` is zero for W, and the scan shows that the W integrand is integrable there without them | RR6, RR7 | ✅ |
-| RR9 | `res_tree_ga_ag_gen`/`_ga_gen` for W: not compared with MadGraph yet, but all their collinear limits (onto validated lower-multiplicity amplitudes) close for W+ and W-. Fixed on the way: `res_tree_ga_aq_gen`/`_qa_gen` filled a spurious photon-photon entry | `Amplitudes/` | 🟡 limits ✅, MG check open |
+| RR9 | `res_tree_ga_ag_gen`/`_ga_gen` for W: agree with MadGraph (`-MGcheck -cm_scheme false`, 20 points, 1e-6; CHECKS), as do all other `_gen` trees; their collinear limits close for W+ and W-. Fixed on the way: `res_tree_ga_aq_gen`/`_qa_gen` filled a spurious photon-photon entry | `Amplitudes/` | ✅ 2026-11-16 |
 | RR10 | Four-quark singular channels for W (`ns_qqb`, `ns_qq`, four sectors each): hard matrix element from OpenLoops (`res_tree_4q_gen`, classes `c4q_qqb`, `c4q_qq`), TC counterterm with the Born `_gen` and the charge of the emitting leg. Pointwise TC limit (`-checklim`) closes as sqrt(depth) in all 16 W+/W- sectors. The integrability scan is not sensitive here (logarithmic singularity only) | `mod_xsects_nnlo_rr_ns.f90`, `OpenLoops/mod_ol_interface.f90` | ✅ 2026-11-14 |
 | RR11 | Four-quark finite channels for W: all other crossings, `ns_qqb_w` (q qb' initial states) and `ns_qqp_w` (q q', qb qb'); `ns_qqpb_w` is not used for W. Channels are generated in `register_4q` (crossings of 0 -> l nu (ub d)(u ub), (ub d)(d db) per generation; every other flavour structure vanishes at this order, checked numerically). Needs the OpenLoops library `pplnjj_ew` | idem | ✅ 2026-11-14 |
 | RR11b | Z finite four-quark channels (`ns_qqb_w`, `ns_qqp_w`, `ns_qqpb_w`, old code): OpenLoops processes registered with u and d exchanged (PDG 2 taken as d), so each amplitude was folded with the luminosity of the other isospin. Fixed; with two jets the channels move by 3 to 6 sigma (C3.10), in the regression setup `ns_qqpb_w` goes from -0.199 to -0.051 fb | `OpenLoops/mod_ol_interface.f90` | ✅ 2026-11-14 |
@@ -144,7 +144,7 @@ channels are to be provided by Christian.
 | S2 | `s_12`, `s_vqcd`, `s_vewk` for **W-**: done with one W branch for both signs (`ilept_chg`, `Qlept_chg`); CP test against W+ with antiproton PDFs passes (CHECKS.md) | idem | ✅ 2026-11-13 |
 | S3 | `s_oqcd` W±: `calG_ONLOQCD_ns` had the wrong sign of the `Qlept*Q_IS` terms (with Qlept = Q1 + Q2 the `log(E_C/E_l) log(mu)` terms must cancel, they do only in `genGnloQCD_cc`). `ns s_oqcd` now uses `genGnloQCD_cc`, `calG_ONLOQCD_ns` removed. Shift of the l l' + jet rate: W+ +4.50 fb, W- +2.58 fb (1.4% of the q qb' LO); agreement with POWHEG after the fix (C3.7) | `mod_xsects_nnlo_s_ns.f90`, `mod_int_sub_nnlo.f90` | ✅ 2026-11-13 |
 | S4 | `s_oewk_is`: the routine wired to `-sec s_oewk_is` is an unfinished draft (broken for Z too); the working one is `_raoul` under `s_oewk_is_ra`. Rewire, delete the draft | :1531-2491, :3181-4216; `Chooser/mod_run_proc_s_ns.f90` | 🔧 |
-| S5 | `s_oewk_fs_53/54` (`_raoul`): general; "limits checked for W- only". Check W+; remove legacy `oewk_fs_5i`; `Q_lep2` left at :4861 | :4220-5019 | 🟡 |
+| S5 | `s_oewk_fs_53/54` (`_raoul`): general. Scan passes for Z, W+, W- (C1.6); in the POWHEG l l' gamma sum (C3.6). Legacy `oewk_fs_5i` deleted (Z, W+, W- regressions unchanged); `Q_lep2` only in `_oldcode` branches | `mod_xsects_nnlo_s_ns.f90` | ✅ 2026-11-16 |
 | S6 | `s_qqb`, `s_qq` for W: Born `_gen` times the squared charge of the convoluted leg, `get_respdf_hoppet_gen`. The same code run for Z reproduces the legacy `s_qqb` to 14 digits. Legacy Z `s_qq`: the leg-1 term swapped quark and antiquark in the Born although `xPij` is already built from the conjugate PDF (per-leg mirror test with a charge-asymmetric cut: -2.707e-3 vs -0.703e-3 fb before, -2.716e-3 vs -2.711e-3 after); totals with symmetric cuts unaffected. Fixed. W: CP test and leg mirror pass. Z and W share one code path (RR counterterm and S; old Z branches removed after agreement to 12-14 digits); kernels equal `Z.nb` (`checks/verify_4q_fortran.wls`). The derivation of the kernels is not in the notebooks | `mod_xsects_nnlo_s_ns.f90` | ✅ 2026-11-14 |
 | S7 | `s_vewknf` (see V2) | :3111 | ⏸ |
 
@@ -152,25 +152,25 @@ channels are to be provided by Christian.
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| S8 | `s_oqcd`, `s_oewk_is`, `s_oewk_fs_53/54`: general; "agreement oldcode T/F for NC, limits work for + and - CC". The W elastic function `calG_ONLOQCD_gq` is never exercised by the NC comparison | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90` | 🟡 |
+| S8 | `s_oqcd`, `s_oewk_is`, `s_oewk_fs_53/54`: general. Scan passes for Z, W+, W- (C1.6); `s_oqcd` in the POWHEG l l' + jet sum (C3.7, after S9), `s_oewk_*` in the l l' gamma sum (C3.6) | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90` | ✅ 2026-11-16 |
 | S9 | `calG_ONLOQCD_gq`: (a) `gq` passed `Lim_Ei(2)` in the scale log, now `Lim_Ei(1)` (energy of the incoming partons) as `qg`; (b) the function filled only the (g,q) element, so the term was missing in `qg s_oqcd` for W. After the fixes gq = qg (W+ 0.3584(9) vs 0.3592(8) fb, l l' + jet setup) and the gluon channels agree with POWHEG (C3.7) | `mod_xsects_nnlo_s_gq.f90`, `mod_int_sub_nnlo.f90` | ✅ 2026-11-13 |
-| S10 | gq, qg `s_12`, `s_vewk` for W. `s_vewk`: P_qg kernel times the finite EW virtual `_gen`. `s_12`: the Z formula (`Z.nb`, `FINITEgq`) with general charges: double boost with the charge of the other leg squared; triple-collinear kernel with the charge of the quark from the gluon splitting squared; boosted term P~gq(z) [genGnloQCD + (3 L - 4 zeta2) Q_i^2 - 2 log(z) Ql Q_i log(s_il/s12)] (`calG_gq_cc`). **Not derived**: the charge structure is taken from the q qb' case (`W.nb`), where the same terms appear with P~qq, and from the I-operator at the boosted kinematics; reduces to the Z formula for Z charges. CP test and gq = qg pass; scale dependence correct (C4.4), which fixes all log mu terms but not the constants. `s_vewknf` still Z only | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90`, `IntSub/mod_int_sub_nnlo.f90` | 🟡 2026-11-15 (constants need derivation or benchmark) |
+| S10 | gq, qg `s_12`, `s_vewk` for W. `s_vewk`: P_qg kernel times the finite EW virtual `_gen`. `s_12`: the Z formula (`Z.nb`, `FINITEgq`) with general charges: double boost with the charge of the other leg squared; triple-collinear kernel with the charge of the quark from the gluon splitting squared; boosted term P~gq(z) [genGnloQCD + (3 L - 4 zeta2) Q_i^2 - 2 log(z) Ql Q_i log(s_il/s12)] (`calG_gq_cc`). Charge structure first taken from the q qb' case (`W.nb`), where the same terms appear with P~qq, and from the I-operator at the boosted kinematics; reduces to the Z formula for Z charges. CP test and gq = qg pass; scale dependence correct (C4.4), which fixes all log mu terms but not the constants. `s_vewknf` still Z only | `mod_xsects_nnlo_s_gq.f90`, `_qg.f90`, `IntSub/mod_int_sub_nnlo.f90` | ✅ 2026-11-15: equal to the derivation of `notes/fabrizio/subtraction_f.wl` evaluated with general charges (`derive_gq_general_charges.wls`, CHECKS) |
 | S10b | `gq s_oewk_fs_53/54` zero at every point: two debug lines set `xx(xE)`, `xx(xRHO)` to fixed values. Removed; Z gq = qg mirror | `mod_xsects_nnlo_s_gq.f90` | ✅ 2026-11-13 |
 
 ### 6c. aq, qa, ag, ga
 
 | ID | Task | Where | Status |
 |---|---|---|---|
-| S11 | `aq` for W: `s_vqcd`, `s_12`, `s_oewk` with the squared charge of the quark from the photon splitting (`multiply_IS_charges_sq`, `transition`), no gamma gamma -> l nu terms; `s_oqcd` was already general. CP test and RGE test (C4.4) pass | `mod_xsects_nnlo_s_aq.f90` | 🟡 2026-11-15 (no benchmark) |
-| S12 | `qa` for W: mirror of S11, all four sectors. CP test, aq = qa and RGE test (C4.4) pass | `mod_xsects_nnlo_s_qa.f90` | 🟡 2026-11-15 (no benchmark) |
-| S13 | `ag`, `ga` for W: `s_12`, `s_oqcd`, `s_oewk` with the charge of the quark from the photon splitting; the gamma gamma -> l l terms are absent. CP test, ag = ga and RGE test (C4.4) pass. `s_ag_oqcd_hppt` (unused) still Z only | `mod_xsects_nnlo_s_ag.f90`, `_ga.f90` | 🟡 2026-11-15 (no benchmark) |
+| S11 | `aq` for W: `s_vqcd`, `s_12`, `s_oewk` with the squared charge of the quark from the photon splitting (`multiply_IS_charges_sq`, `transition`), no gamma gamma -> l nu terms; `s_oqcd` was already general. CP test and RGE test (C4.4) pass | `mod_xsects_nnlo_s_aq.f90` | ✅ 2026-11-16: `s_oqcd`, `s_oewk` equal to the derivation with general charges (`derive_aq_ag_general_charges.wls`), scan passes |
+| S12 | `qa` for W: mirror of S11, all four sectors. CP test, aq = qa and RGE test (C4.4) pass | `mod_xsects_nnlo_s_qa.f90` | ✅ 2026-11-16: `s_oqcd`, `s_oewk` equal to the derivation with general charges (`derive_aq_ag_general_charges.wls`), scan passes |
+| S13 | `ag`, `ga` for W: `s_12`, `s_oqcd`, `s_oewk` with the charge of the quark from the photon splitting; the gamma gamma -> l l terms are absent. CP test, ag = ga and RGE test (C4.4) pass. `s_ag_oqcd_hppt` (unused) still Z only | `mod_xsects_nnlo_s_ag.f90`, `_ga.f90` | ✅ 2026-11-16: `s_oqcd`, `s_oewk` equal to the derivation with general charges (`derive_aq_ag_general_charges.wls`), scan passes |
 | S14 | HOPPET tables `xPij_a` with `Qdn2/Qup2` weights: used only by the gamma gamma Born terms, which do not exist for W. Nothing to do | `IntSub/mod_hoppet_nnlo.f90` | – |
 
 ### 6d. Mathematica side
 
 | ID | Task | Status |
 |---|---|---|
-| M1 | Add to `math/`: W- ns; W± for gq/qg, aq/qa, ag/ga; ONLO functions. Four-quark: nothing to add for W (same kernels as Z, charge of the convoluted leg); the derivation of the Z kernels is missing in `Z.nb` | ❌ (Christian) |
+| M1 | Add to `math/`: W- ns; W± for gq/qg, aq/qa, ag/ga; ONLO functions. Four-quark: nothing to add for W (same kernels as Z, charge of the convoluted leg); the derivation of the Z kernels is missing in `Z.nb` | 🔧 (Christian). `notes/fabrizio/subtraction_f.wl` holds the derivations of all channels with general leg charges; gq and the photon channels are evaluated from it in `checks/derive_gq_general_charges.wls`, `derive_aq_ag_general_charges.wls` |
 | M2 | One notebook convention for charges/legs shared with the Fortran (`Qq, Qqp, Qlept, ilept`) | ❌ |
 
 ## 7. Validation (mandatory for every item above)
@@ -186,17 +186,17 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 | C1.3 | Extend `xsect_selector` beyond RR `ns_ga`: RR gq/qg/aq/qa/ag/ga/4q, all RV, all ONLO | ❌ |
 | C1.4 | Make it W-aware (which limits are singular per sector: no lepton-collinear pole on the neutrino; no gamma gamma TC) | 🔧 |
 | C1.5 | Output one table per sector (limit, slope, grade); store reference tables for Z, W+, W- | ❌ |
-| C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Four-quark RR and `s_qqb`, `s_qq` pass for W+, W- (2026-11-14). Still to run: `rvewk`, other S sectors | 🟡 |
+| C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Four-quark RR and `s_qqb`, `s_qq` pass for W+, W- (2026-11-14). `rvewk` and all S sectors with a resolved parton pass for Z, W+, W- (2026-11-16, CHECKS) | ✅ |
 | C1.7 | Priority targets for W (cannot be seen in Z): RV6a, RV6b, RV7a, RV7b, RV3, N2, RR5, RR8. Each needs a recorded scaling table for W+ and W- before it is ticked | ❌ |
 
 ### C2. Integrated counterterm left-over, Fortran vs Mathematica
 | ID | Task | Status |
 |---|---|---|
 | C2.1 | Extend `math/validate_DYp7.wl` from term [7] to all of `FINITEDYp[1..7,60]` (symbolic, kernels included) | 🔧 |
-| C2.2 | Numerical check: evaluate each finite-remainder term at fixed `(z, eta, mu)` in both codes (Fortran test driver + notebook export), per channel and boson | ❌ |
+| C2.2 | Kernels read from the Fortran and compared with the notebooks at fixed z: four-quark (`verify_4q_fortran.wls`), gq, photon-quark, photon-gluon (`verify_Z_gq_aq_ag_fortran.wls`); assembly transcribed. q qb' for W+ is symbolic (`verify_Wp_qq_fortran.wls`). Terms with a resolved parton of the photon channels: `derive_aq_ag_general_charges.wls` | ✅ 2026-11-15 |
 | C2.3 | Resolve S3 (`calG_ONLOQCD_ns` vs `genGnloQCD_cc`) and S9: settled by the POWHEG comparison C3.7 | ✅ 2026-11-13 |
-| C2.4 | Same for W-, gq/qg, photon-induced once M1 is in. Four-quark: done numerically (kernels of `s_qqb`, `s_qq` against `Z.nb`, CHECKS) | 🟡 |
-| C2.5 | Store logs of the validation runs in the repo | ❌ |
+| C2.4 | W: photon channels and four-quark use the Z kernels with one squared charge (covered by C2.2). gq, qg `s_12`: derivation with general charges, `derive_gq_general_charges.wls`. W- q qb': CP test only | ✅ 2026-11-15 |
+| C2.5 | Logs of the validation runs: `math/subtraction-notebooks/checks/logs/` (gq and photon channels, derivations with general charges) | ✅ |
 
 ### C3. POWHEG benchmarks
 
@@ -229,7 +229,7 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 ### C4. Further checks
 | ID | Task | Status |
 |---|---|---|
-| C4.1 | `-MGcheck` for all `_gen` trees incl. g+gamma and four-quark, W±; add loop amplitudes vs OpenLoops/MadLoop points; the W four-quark amplitudes are OpenLoops, validated by C3.10 | 🔧 |
+| C4.1 | `-MGcheck` passes for all `_gen` trees incl. g+gamma, Z, W± (needs `-cm_scheme false`, CHECKS). Open: add loop amplitudes vs OpenLoops/MadLoop points; the W four-quark amplitudes are OpenLoops, validated by C3.10 | 🔧 |
 | C4.2 | Pole check (`-checkpoles`) for `_gen` one-loop wrappers | ❌ |
 | C4.3 | Z regression: `OLDCODE=true` vs `false` builds and old published numbers after every change; script it (I11) | manual |
 | C4.4 | Scale logs: RGE test of all S sectors (`f90/tests/rge/`, CHECKS), slope in log mu^2 against splitting functions times lower orders. W+, W-: gq, aq, ag, q qb close at the per-mille level (noise limited); Z: gq, q qb | ✅ 2026-11-15 |
@@ -268,14 +268,14 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 | nnlo ns 4q rr (8 + 2) | ✅ | ✅ | – | ✅ | ✅ | – |
 | nnlo ns s_12 / s_vqcd / s_vewk | ✅ | – | ✅ notebook | ✅ | – | ✅ CP test |
 | nnlo ns s_oqcd | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
-| nnlo ns s_oewk_is(_ra) | 🟡 | | | 🟡 | 🟡 | |
-| nnlo ns s_oewk_fs_53/54 | 🟡 | | | 🟡 | 🟡 | |
+| nnlo ns s_oewk_is(_ra) | ✅ | ✅ | ✅ POWHEG (l l' gamma) | ✅ | ✅ | ✅ POWHEG (l l' gamma) |
+| nnlo ns s_oewk_fs_53/54 | ✅ | ✅ | ✅ POWHEG (l l' gamma) | ✅ | ✅ | ✅ POWHEG (l l' gamma) |
 | nnlo ns s_qqb / s_qq | ✅ | – | ✅ | ✅ | – | ✅ |
 | nnlo gq/qg s_oqcd | ✅ | ✅ | ✅ POWHEG | ✅ | ✅ | ✅ POWHEG |
-| nnlo gq/qg s_oewk_* | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) | 🟡 | 🟡 | ✅ POWHEG (l l' gamma) |
-| nnlo gq/qg s_12, s_vewk | 🟡 | – | | 🟡 | – | |
-| nnlo aq/qa s_* | 🟡 | | | 🟡 | | |
-| nnlo ag/ga s_* | 🟡 | | | 🟡 | | |
+| nnlo gq/qg s_oewk_* | ✅ | ✅ | ✅ POWHEG (l l' gamma) | ✅ | ✅ | ✅ POWHEG (l l' gamma) |
+| nnlo gq/qg s_12, s_vewk | ✅ | – | ✅ derivation | ✅ | – | ✅ derivation |
+| nnlo aq/qa s_* | ✅ | ✅ | ✅ `Z.nb` kernels, derivation | ✅ | ✅ | ✅ `Z.nb` kernels, derivation |
+| nnlo ag/ga s_* | ✅ | ✅ | ✅ `Z.nb` kernels, derivation | ✅ | ✅ | ✅ `Z.nb` kernels, derivation |
 
 ## 10. Open questions for the team
 

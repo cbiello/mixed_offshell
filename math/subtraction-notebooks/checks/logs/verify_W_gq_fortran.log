@@ -1,0 +1,6 @@
+q3 = 1 Qe:  Qq^2 terms 0   Qq Qe terms 0
+   lepton-lepton function X depends on {L, E3, E4, EC, eta[3, 4]}
+   X = 3*L - (2*Pi^2)/3 + Log[E3]^2 - 3*Log[E4] - 2*L*Log[E4] + Log[E4]^2 + 6*Log[EC] + 4*L*Log[EC] - 4*Log[E4]*Log[EC] + 4*Log[EC]^2 - Log[E3]*(3 + 2*L - 2*Log[E4] + 4*Log[EC] - 2*Log[eta[3, 4]]) - 3*Log[eta[3, 4]] + 2*Log[E4]*Log[eta[3, 4]] - 4*Log[EC]*Log[eta[3, 4]] - 2*PolyLog[2, 1 - eta[3, 4]]
+q3 = -1 Qe:  Qq^2 terms 0   Qq Qe terms -4.20777360123642214146667469895949327117`20.
+   lepton-lepton function X depends on {L, E3, E4, EC, eta[3, 4]}
+   X = 3*L - (2*Pi^2)/3 + Log[E3]^2 - 3*Log[E4] - 2*L*Log[E4] + Log[E4]^2 + 6*Log[EC] + 4*L*Log[EC] - 4*Log[E4]*Log[EC] + 4*Log[EC]^2 - Log[E3]*(3 + 2*L - 2*Log[E4] + 4*Log[EC] - 2*Log[eta[3, 4]]) - 3*Log[eta[3, 4]] + 2*Log[E4]*Log[eta[3, 4]] - 4*Log[EC]*Log[eta[3, 4]] - 2*PolyLog[2, 1 - eta[3, 4]]

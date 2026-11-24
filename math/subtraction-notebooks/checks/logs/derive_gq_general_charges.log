@@ -1,0 +1,6 @@
+poles of the F(z.p1,p2) coefficient, general charges: {0, 0, 0, 0}
+double boost: charges {q2},  virtual term: charges {}
+Z  (q1,q2,q3,q4) = (-Qq,Qq,Ql,-Ql):          derivation - Fortran = 0
+W  charged lepton on leg 4, any q1, q2:        derivation - Fortran = 0
+W  charged lepton on leg 3, any q1, q2:        derivation - Fortran = 0
+W  same with the -4 zeta2 Q1^2 term removed:     derivation - Fortran = 20.0989272015891850303`6.

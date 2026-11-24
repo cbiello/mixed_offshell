@@ -286,3 +286,83 @@ What it tests: all coefficients of log mu in the S sectors, including the produc
 and virtual functions at boosted kinematics. For gq/qg `s_12` of W this includes the W-specific term of `calG_gq_cc`
 (lepton-quark charge correlation), which enters r0 through the NLO EW sectors convolved with P_qg.
 What it does not test: terms without log mu (constants such as the zeta2 terms, the finite parts of the triple-collinear kernels).
+
+## Integrated subtraction of gq and of the photon channels: Fortran against `Z.nb` (2026-11-15)
+
+Scripts in `math/subtraction-notebooks/checks/`, logs in `checks/logs/`.
+
+1. `verify_Z_gq_aq_ag_fortran.wls` (Z). The kernels `mySub_gq*`, `mySub_TCgq*`, `mySub_TCaa*`, `mySub_TCag*` are read from
+   `mod_hoppet_nnlo.f90` by `extract_kernels_fortran.py`; the assembly of `s_12`, `s_vewk`, `s_vqcd` and `calG_QqQl` are
+   transcribed. Compared with `FINITEgq`, `FINITEγq`, `FINITEγg` of `Z.nb`, all terms without a resolved parton,
+   at six values of z (40 digits). Every difference is 0:
+
+   | Channel | Terms |
+   |---|---|
+   | gq | `s_vewk` kernel; `s_12` double boost, triple-collinear kernel with its log and log^2 parts, soft-photon term |
+   | photon-quark | `s_vqcd` kernel; `s_12` double boost, single boost q qb, single boost gamma gamma |
+   | photon-gluon | `s_12` double boost, single boost gamma gamma |
+
+   No term of the notebook is left unassigned. The terms with a resolved parton (`s_oqcd`, `s_oewk*`) are in item 5.
+
+2. What this means for W. Photon channels: the W code uses the same kernel tables, with the squared charge of the quark
+   from the photon splitting and without the gamma gamma terms; no other charge enters these terms, so `s_12` and `s_vqcd`
+   of aq, qa, ag, ga are covered. gq, qg: `s_vewk`, the double boost and the triple-collinear kernel are covered in the
+   same way (charge of one quark line squared). The soft-photon term is the only W-specific formula.
+
+3. `verify_W_gq_fortran.wls`: the W soft-photon term (`calG_gq_cc`) written for two charged leptons and reduced to Z
+   charges reproduces the `Z.nb` single boost: the Qq^2 and Qq Qe terms agree identically, log(z) term included, and what
+   is left is a function of E3, E4, eta34, L only (the lepton-lepton correlation, absent for W). With the opposite sign of
+   the lepton charge the Qq Qe terms do not close.
+
+4. `derive_gq_general_charges.wls`: the gq derivation of `notes/fabrizio/subtraction_f.wl` (RR, RV and PDF counterterms of the
+   nested subtraction, written with the charges q1..q4 of the four legs) is evaluated without specifying the charges,
+   only q1 + q2 + q3 + q4 = 0.
+   - All poles of the F(z.p1,p2) coefficient cancel for general charges.
+   - Z charges: the finite part equals the Fortran single boost (`calG_QqQl` and the `mySub_TCgq` kernels), difference 0.
+   - W charges (charged lepton on leg 4 or on leg 3, any q1, q2): the finite part equals the Fortran W formula
+     (`calG_gq_cc` and the same kernels), difference 0 in each of the structures q1^2, q1 q2, q2^2 at five values of z.
+   - The double boost carries q2^2 only and the virtual term no charge, as in the code.
+   - Sensitivity: without the -4 zeta2 Q_i^2 term of `calG_gq_cc` the difference is of order 20.
+
+   This closes PLAN S10: the W formula of gq/qg `s_12` is derived, constants included. The derivation uses the charges of
+   the external legs only (soft and collinear photon emission, Catani operator), which is all that enters for W as well.
+
+5. `derive_aq_ag_general_charges.wls`: the photon-quark and photon-gluon derivations of the same file, charges left general.
+   - All poles cancel, in the terms with a resolved parton and in the others.
+   - Charges: the terms with a resolved quark from the photon (`s_oewk`) carry no charge besides the amplitude; the terms
+     with the photon splitting integrated (`s_oqcd`, single and double boost, QCD virtual) carry only the squared charge of
+     the quark from the photon splitting; the gamma gamma term is the only one with another charge (absent for W).
+   - Finite parts of the resolved-parton terms against the Fortran (transcribed), each difference 0:
+
+   | Sector | Term | Fortran |
+   |---|---|---|
+   | aq `s_oqcd` | P~_qg(z) with the damped log(eta15/2), times Nc Q^2 | `intsub` of `xsect_nnlo_s_aq_oqcd` |
+   | aq `s_oewk`, boosted | CF [P~_qq(z) with the damped log(eta25/2)], plus distributions included | `Pqq_NLO`, `PqqAP_0_R` |
+   | aq `s_oewk`, elastic | CF [G - 3/2 log(mu^2/E^2)] | `calG_CF_hard` |
+   | ag `s_oqcd` | Nc Q^2 P~_qg(z) | `tildePqgNLO` |
+   | ag `s_oewk` | TR [P~_qg(z) with the damped log(eta25/2)] | `intsub` of `xsect_nnlo_s_ag_oewk` |
+
+   Sensitivity: 13/2 -> 6 in the elastic function gives a difference of 2/3. qa, ga are the mirrors (aq = qa, ag = ga tests).
+   Not in this comparison: the local counterterms of the resolved parton inside these sectors (covered by the scan below).
+
+## Integrability scan of `rvewk` and of the S sectors with a resolved parton (2026-11-16)
+
+`-checkint -vegasIt0 3 -vegasNc0 30000` on `rvewk_is` (ns, gq, qg), ns `s_oqcd`, `s_oewk_is_ra`, `s_oewk_fs_53/54`,
+gq/qg `s_oqcd`, `s_oewk_is`, `s_oewk_fs_53/54`, aq/qa/ag/ga `s_oqcd`, `s_oewk`: 23 sectors for Z, W+, W-.
+All 69 runs pass (10 to 14 limits each closing, no FAIL; the remaining lines have too few non-zero points to judge).
+This completes PLAN C1.6.
+
+## Tree amplitudes against MadGraph (2026-11-16)
+
+`./mixed_ll -boson <z|wp|wm> -corr <lo|nloqcd|nloew|qcdew> -ch ns -sec na -MGcheck -cm_scheme false`, 20 phase-space
+points per channel, tolerance 1e-6.
+
+| Boson | lo | nloqcd | nloew | qcdew (g + photon, all crossings incl. ag, ga) |
+|---|---|---|---|---|
+| W+ | 40/40 | 120/120 | 120/120 | 240/240 |
+| W- | 40/40 | 120/120 | 120/120 | 240/240 |
+| Z | 80/80 | 240/240 | 240/240 | 440/440 |
+
+The stored MadGraph points were made with real couplings. With the default complex-mass scheme every W entry is off by
+the same factor (0.99931470 = 1/(1 + Gamma_W^2/M_W^2) at lo and nloqcd, 0.99885166 with a photon, spread 1.5e-9), which is
+the coupling normalisation only. This closes PLAN RR9.

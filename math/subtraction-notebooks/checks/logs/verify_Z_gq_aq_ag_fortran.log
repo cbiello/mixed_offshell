@@ -1,0 +1,11 @@
+gq  s_vewk   FLVew(z.p1,p2): 0
+gq  s_12     double boost: 0
+gq  s_12     single boost, triple-collinear kernel (Qq^2): 0
+gq  s_12     single boost, soft-photon term (Q_lep = Qe): 0
+aq  s_vqcd   FLVqcd(z.p1,p2): 0
+aq  s_12     double boost: 0
+aq  s_12     single boost, q qb: 0
+aq  s_12     single boost, gamma gamma: 0
+ag  s_12     double boost (each of the two flavour orderings): 0
+ag  s_12     single boost, gamma gamma: 0
+terms left unassigned: {0, 0, 0}

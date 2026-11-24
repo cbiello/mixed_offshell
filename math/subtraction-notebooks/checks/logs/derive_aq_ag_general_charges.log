@@ -1,0 +1,23 @@
+photon-quark: poles of the resolved-parton terms {0, 0, 0, 0}, of the other terms {0, 0, 0, 0}
+   charges in FLM[a, qb, l, lb, qb][1, 2, 3, 4, 5]: {}
+   charges in FLM[a, qb, l, lb, qb][1, zb, 3, 4, 5]: {}
+   charges in FLM[q, qb, l, lb, g][z, 2, 3, 4, 5]: {q1}
+   charges in FLVfin[a, qb, l, lb, qb][QCD, 1, 2, 3, 4, 5]: {}
+   charges in FLM[a, a, l, lb][1, zb, 3, 4]: {q2}
+   charges in FLM[q, qb, l, lb][z, 2, 3, 4]: {q1}
+   charges in FLM[q, qb, l, lb][z, zb, 3, 4]: {q1}
+   charges in FLVfin[q, qb, l, lb][QCD, z, 2, 3, 4]: {q1}
+photon-gluon: poles of the resolved-parton terms {0, 0, 0, 0}, of the other terms {0, 0, 0, 0}
+   charges in FLM[a, q, l, lb, q][1, zb, 3, 4, 5]: {}
+   charges in FLM[a, qb, l, lb, qb][1, zb, 3, 4, 5]: {}
+   charges in FLM[q, g, l, lb, q][z, 2, 3, 4, 5]: {q1}
+   charges in FLM[qb, g, l, lb, qb][z, 2, 3, 4, 5]: {q1}
+   charges in FLM[a, a, l, lb][1, zb, 3, 4]: {q1}
+   charges in FLM[q, qb, l, lb][z, zb, 3, 4]: {q1}
+   charges in FLM[qb, q, l, lb][z, zb, 3, 4]: {q1}
+aq s_oqcd (resolved gluon):         derivation - Fortran = 0
+aq s_oewk (resolved quark), boosted: derivation - Fortran = 0
+aq s_oewk (resolved quark), elastic: derivation - Fortran = 0
+ag s_oqcd (resolved quark, q g):    derivation - Fortran = 0
+ag s_oewk (resolved quark, a q):    derivation - Fortran = 0
+sensitivity, aq elastic with 13/2 -> 6: 0.6666666666666666667`6.
