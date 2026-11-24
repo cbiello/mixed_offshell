@@ -287,6 +287,7 @@ contains
     limval_nlo_is = FintNLO_ns
     limval_nlo_is(2) = FintNLO_ns(4)  ! soft
     limval_nlo_is(3:4) = FintNLO_ns(2:3)  ! coll
+    FintNLO_ew = FintNLO_ns           !-- H, C1, C2, S, SC1, SC2 for -checklim (xsect_checklim_nlo6)
 #endif
 
   end function xsect_nloewk_r_is_ns

@@ -182,7 +182,7 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 | ID | Task | Status |
 |---|---|---|
 | C1.1 | New `-checkint`: integrability scan of any sector (takes points from a Vegas warm-up, sends subsets of the variables to the edge, prints the median of \|f\| d^k at three depths). Works for every integrand without wiring. Tested with planted bugs: detects a wrong charge and 1% errors, also in nested counterterms. `lim_proc` (pairwise scaling) still has no caller | ✅ scan (2026-11-12) |
-| C1.2 | Fix wiring: `xsect_nloewk_r_is_ns` fills `limval_nlo_is` but the checker reads `FintNLO_ew`; `nloqcd r_is` routed to the wrong reader; `rr_qg` fills no `limval_nnlo` | 🔧 |
+| C1.2 | Fix wiring: (a) `xsect_nloewk_r_is_ns` filled `limval_nlo_is` but `-checklim` reads `FintNLO_ew` (Hard = 0 at every point): fixed, `FintNLO_ew = FintNLO_ns`; W+ at depth 1e-6 all limits close (\|H+CT\|/H ~6e-4 collinear and soft-collinear, ~2e-6 soft). (b) `nloqcd r_is` routed to the wrong reader, (c) `rr_qg` fills no `limval_nnlo`: only in the old pairwise checker (`lim_proc`, never called) | (a) ✅ 2026-11-24, (b, c) 🔧 |
 | C1.3 | Extend `xsect_selector` beyond RR `ns_ga`: RR gq/qg/aq/qa/ag/ga/4q, all RV, all ONLO | ❌ |
 | C1.4 | Make it W-aware (which limits are singular per sector: no lepton-collinear pole on the neutrino; no gamma gamma TC) | 🔧 |
 | C1.5 | Output one table per sector (limit, slope, grade); store reference tables for Z, W+, W- | ❌ |
