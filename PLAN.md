@@ -189,6 +189,7 @@ For each RR, RV and ONLO sector and each limit (S, C, SC, TC, double soft, ...):
 | C1.6 | Scan run for all RV and RR sectors with a photon or from photon-induced channels (63 sectors: `ns` rvqcd, `aq`/`qa` rvqcd, RR `ns_ga`, `gq`, `qg`, `aq`, `qa`, `ag`, `ga`), Z, W+, W-: all pass. Four-quark RR and `s_qqb`, `s_qq` pass for W+, W- (2026-11-14). `rvewk` and all S sectors with a resolved parton pass for Z, W+, W- (2026-11-16, CHECKS); repeated after 1e183c5 for W+, W- (`rvewk_is` ns and the S sectors of all channels, 25 each): all pass (2026-11-24) | ✅ |
 | C1.7 | Priority targets for W (cannot be seen in Z): RV6a, RV6b, RV7a, RV7b, RV3, N2, RR5, RR8. Each needs a recorded scaling table for W+ and W- before it is ticked | ❌ |
 | C1.8 | Intensive limit checks needed: all sectors, Z, W+, W-, many points per sector (not one), depth scans recorded per limit | ❌ |
+| C1.9 | `qg s_oewk_fs_54` (W+): the C1 limit does not drop correctly in the C1.3 table (4e-4 at depth 1e-3 -> 2e-4 at 1e-6, not sqrt x; mirror `gq s_oewk_fs_54`: 8e-2 -> 1e-3). One rerun (2026-11-24, two points): \|H/C1 - 1\| = 1.2e-3, 4.8e-4, 1.6e-4, 5e-5, 1.7e-5 at depth 1e-4..1e-8, so the small value at 1e-3 may be a sign crossing. To do: many points, W+ and W-, C1 and SC1, side by side with the gq mirror; tick only if every point falls as sqrt x | ❌ |
 
 ### C2. Integrated counterterm left-over, Fortran vs Mathematica
 | ID | Task | Status |
