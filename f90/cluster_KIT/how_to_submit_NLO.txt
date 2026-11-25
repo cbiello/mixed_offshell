@@ -1,0 +1,6 @@
+for b in wp wm; do
+  for s in "ns v" "ns s" "ns r_is" "gq s" "gq r_is" "qg s" "qg r_is"; do
+    set -- $s
+    PART=empire cluster_KIT/submit.sh $b nloqcd $1 $2 10 10000000 10 100000000 5
+  done
+done
