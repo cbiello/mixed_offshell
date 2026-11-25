@@ -36,6 +36,7 @@ Momentum convention everywhere: `q(1) q'(2) -> l(3) l'(4) [+ parton 5] [+ parton
 | `notes/` | Derivation notes (Chiara/Federica: aq, ag, 4q channels; Fabrizio: Z subtraction notebook and pheno numbers; phase space) |
 | `old_code/` | Reference Z-only code from Chiara, Fabrizio, Raoul |
 | `2L/` | Two-loop amplitude material (Z) |
+| `NSCplots/` | Plots of `mixed_ll` against POWHEG and paper plots (gnuplot, PDF); guide in `AI-plotting.md` |
 | `Analysis/`, `plots/`, `setup/` | Misc. older analyses, gnuplot, setup note |
 
 ## 3. Build and run

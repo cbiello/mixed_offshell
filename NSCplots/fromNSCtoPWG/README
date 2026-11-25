@@ -1,0 +1,4 @@
+CB(3Apr26):
+
+fromHISTOtoTOP.py -> script to convert in top files a single run file from NSC
+fromavHISTOtoTOP.py -> script to convert in top files a result from a rrsummer output in NSC. It supposes the order of observables according to CB W_ATLAS analysis. Modify the string of observables according to your analysis
