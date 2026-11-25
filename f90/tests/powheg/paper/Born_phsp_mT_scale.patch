@@ -1,0 +1,100 @@
+diff --git a/NSC-lnuQCD/Born_phsp.f b/NSC-lnuQCD/Born_phsp.f
+index ac47a81..d28e57e 100644
+--- a/NSC-lnuQCD/Born_phsp.f
++++ b/NSC-lnuQCD/Born_phsp.f
+@@ -119,15 +119,41 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccc
+       if(fixedscale) then ! fixedscale: mu0 = ph_zmass
+         mu0 = 91.1876d0
+       else
+-c     set dynamical scale
+-         print*, 'dynamical scale still to be set'
+-         stop
+-
++c     mT/2 of the charged lepton and the neutrino (floor 50 GeV, below any analysis cut), on the
++c     kinematics of the term: real term on the real one (needs btlscalereal 1; with btlscalect 1
++c     the counterterms stay on the Born), everything else on the Born
++         if(flg_btildepart.eq.'r') then
++            mu0 = max(0.5d0*nsc_mt(kn_preal,nlegreal,.false.),50d0)
++         else
++            mu0 = max(0.5d0*nsc_mt(kn_pborn,nlegborn,.false.),50d0)
++         endif
+       endif
+       muf = mu0
+       mur = mu0
+ 
+       contains
++      real * 8 function nsc_mt(p,n,dress)
++      integer n,il,inu,j
++      real * 8 p(0:3,n),pl(0:3),pn(0:3),dy,c
++      logical dress
++c     charged lepton and neutrino by flavour (the Born list may contain the W); radiation = last leg
++      do j=3,nlegborn
++         if(abs(flst_born(j,1)).eq.11) il = j
++         if(abs(flst_born(j,1)).eq.12) inu = j
++      enddo
++      pl = p(:,il)
++      pn = p(:,inu)
++c     a photon within R = 0.1 of the charged lepton is added to it
++      if(dress .and. n.eq.nlegreal) then
++         if(p(0,n).gt.abs(p(3,n))) then
++            dy = 0.5d0*log((pl(0)+pl(3))/(pl(0)-pl(3))*(p(0,n)-p(3,n))/(p(0,n)+p(3,n)))
++            c = (pl(1)*p(1,n)+pl(2)*p(2,n))/sqrt((pl(1)**2+pl(2)**2)*(p(1,n)**2+p(2,n)**2))
++            if(dy**2+acos(max(-1d0,min(1d0,c)))**2.lt.0.1d0**2) pl = pl + p(:,n)
++         endif
++      endif
++      c = (pl(1)*pn(1)+pl(2)*pn(2))/sqrt((pl(1)**2+pl(2)**2)*(pn(1)**2+pn(2)**2))
++      nsc_mt = sqrt(2d0*sqrt((pl(1)**2+pl(2)**2)*(pn(1)**2+pn(2)**2))*(1d0-max(-1d0,min(1d0,c))))
++      end function nsc_mt
+       subroutine no_scales
+       write(*,*) "Error in scale setting, exiting ..."
+       call pwhg_exit(-1)
+diff --git a/NSC-lnuEW/Born_phsp.f b/NSC-lnuEW/Born_phsp.f
+index 58d8398..254313d 100644
+--- a/NSC-lnuEW/Born_phsp.f
++++ b/NSC-lnuEW/Born_phsp.f
+@@ -122,15 +122,41 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccc
+       if(fixedscale) then ! fixedscale: mu0 = ph_zmass
+         mu0 = 91.1876d0
+       else
+-c     set dynamical scale
+-         print*, 'dynamical scale still to be set'
+-         stop
+-
++c     mT/2 of the charged lepton and the neutrino (floor 50 GeV, below any analysis cut), on the
++c     kinematics of the term: real term on the real one (needs btlscalereal 1; with btlscalect 1
++c     the counterterms stay on the Born), everything else on the Born
++         if(flg_btildepart.eq.'r') then
++            mu0 = max(0.5d0*nsc_mt(kn_preal,nlegreal,.true.),50d0)
++         else
++            mu0 = max(0.5d0*nsc_mt(kn_pborn,nlegborn,.false.),50d0)
++         endif
+       endif
+       muf = mu0
+       mur = mu0
+ 
+       contains
++      real * 8 function nsc_mt(p,n,dress)
++      integer n,il,inu,j
++      real * 8 p(0:3,n),pl(0:3),pn(0:3),dy,c
++      logical dress
++c     charged lepton and neutrino by flavour (the Born list may contain the W); radiation = last leg
++      do j=3,nlegborn
++         if(abs(flst_born(j,1)).eq.11) il = j
++         if(abs(flst_born(j,1)).eq.12) inu = j
++      enddo
++      pl = p(:,il)
++      pn = p(:,inu)
++c     a photon within R = 0.1 of the charged lepton is added to it
++      if(dress .and. n.eq.nlegreal) then
++         if(p(0,n).gt.abs(p(3,n))) then
++            dy = 0.5d0*log((pl(0)+pl(3))/(pl(0)-pl(3))*(p(0,n)-p(3,n))/(p(0,n)+p(3,n)))
++            c = (pl(1)*p(1,n)+pl(2)*p(2,n))/sqrt((pl(1)**2+pl(2)**2)*(p(1,n)**2+p(2,n)**2))
++            if(dy**2+acos(max(-1d0,min(1d0,c)))**2.lt.0.1d0**2) pl = pl + p(:,n)
++         endif
++      endif
++      c = (pl(1)*pn(1)+pl(2)*pn(2))/sqrt((pl(1)**2+pl(2)**2)*(pn(1)**2+pn(2)**2))
++      nsc_mt = sqrt(2d0*sqrt((pl(1)**2+pl(2)**2)*(pn(1)**2+pn(2)**2))*(1d0-max(-1d0,min(1d0,c))))
++      end function nsc_mt
+       subroutine no_scales
+       write(*,*) "Error in scale setting, exiting ..."
+       call pwhg_exit(-1)
