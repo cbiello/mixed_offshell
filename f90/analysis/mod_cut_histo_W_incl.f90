@@ -24,10 +24,11 @@ contains
     call new_histo('mlnu',200._dp,1000._dp,20._dp)         !-- 5
     call new_histo('mlnu_high',1000._dp,3000._dp,100._dp)  !-- 6
     call new_histo('ptl',0._dp,1000._dp,20._dp)            !-- 7
-    call new_histo('yl',-5._dp,5._dp,0.2_dp)               !-- 8
+    call new_histo('yl',-5._dp,5._dp,0.2_dp)               !-- 8: rapidity of the charged lepton
     call new_histo('ptlnu',0._dp,500._dp,10._dp)           !-- 9
     call new_histo('costhCS',-one,one,0.05_dp)             !-- 10: Collins-Soper angle of the charged lepton
-    call new_histo_required()                              !-- 11: pta or ptj with -require photon/jet
+    call new_histo('etal',-5._dp,5._dp,0.2_dp)             !-- 11: pseudorapidity of the charged lepton
+    call new_histo_required()                              !-- 12: pta or ptj with -require photon/jet
   end subroutine init_user_histo
 
   subroutine cut_histo(event)
@@ -58,13 +59,14 @@ contains
     if (mT > 1500._dp) obs(2) = 4
     obs(3:4) = mT
     obs(5:6) = sqrt(scr(pl+pnu,pl+pnu))
+    call boostz(event%PartFrac(1),event%PartFrac(2),1,pl,pl_lab)      !-- lab frame: y and eta of the dressed
+    call boostz(event%PartFrac(1),event%PartFrac(2),1,pnu,pnu_lab)    !-- lepton, sign of p_z(l nu) for costhCS
     obs(7) = get_pt(pl)
-    obs(8) = get_y(pl) + half*log(event%PartFrac(1)/event%PartFrac(2))   !-- lab frame
+    obs(8) = get_y(pl_lab)
     obs(9) = get_pt(pl+pnu)
-    call boostz(event%PartFrac(1),event%PartFrac(2),1,pl,pl_lab)      !-- lab frame: the sign of p_z(l nu)
-    call boostz(event%PartFrac(1),event%PartFrac(2),1,pnu,pnu_lab)    !-- orients the angle
     obs(10) = get_costh_star(pl_lab,pnu_lab)
-    if (require /= 'none') obs(11) = ptobj
+    obs(11) = get_eta(pl_lab)
+    if (require /= 'none') obs(12) = ptobj
 
   end subroutine cut_histo
 

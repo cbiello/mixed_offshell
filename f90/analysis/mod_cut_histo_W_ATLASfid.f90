@@ -28,12 +28,15 @@ contains
     call new_histo('ptl',0._dp,2500._dp,10._dp)             !-- 8
     call new_histo('ptnu',0._dp,2500._dp,10._dp)            !-- 9
     call new_histo('etal',-2.4_dp,2.4_dp,0.1_dp)            !-- 10
-    call new_histo_required()                               !-- 11: pta or ptj with -require photon/jet
+    call new_histo('mT_ATLAS',0.5_dp,12.5_dp,1._dp)         !-- 11: bin i = ATLAS mT bin i (HEPData edges below)
+    call new_histo_required()                               !-- 12: pta or ptj with -require photon/jet
   end subroutine init_user_histo
 
   subroutine cut_histo(event)
     type(KinConfig), intent(inout) :: event
     real(dp), parameter :: mTbin(6) = [200._dp, 300._dp, 425._dp, 600._dp, 900._dp, 2000._dp]
+    real(dp), parameter :: mTatlas(12) = [200._dp, 250._dp, 300._dp, 350._dp, 425._dp, 500._dp, &   !-- lower edges, HEPData
+         600._dp, 750._dp, 900._dp, 1100._dp, 1400._dp, 2000._dp]                                   !-- ins2895869; last bin to 5000
     real(dp) :: pl(4),pnu(4),pl_lab(4),mT,ptl,ptnu,etal,ptobj
     integer  :: i
     logical  :: pass
@@ -68,7 +71,8 @@ contains
     obs(8)  = ptl
     obs(9)  = ptnu
     obs(10) = etal
-    if (require /= 'none') obs(11) = ptobj
+    obs(11) = count(mT > mTatlas)
+    if (require /= 'none') obs(12) = ptobj
 
   end subroutine cut_histo
 

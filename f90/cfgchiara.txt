@@ -29,7 +29,8 @@ With2L=false
 
 #Analysis
 #analysis=PC_ATLAS_160601736
-analysis=W_ATLAS
+#analysis=W_ATLAS
+analysis=W_incl
 
 #---------------------------------
 # Mandatory configuration options
