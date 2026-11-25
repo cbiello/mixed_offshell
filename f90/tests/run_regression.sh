@@ -6,7 +6,7 @@ boson=${1:?usage: tests/run_regression.sh z|wm|wp [update]}
 T=$(dirname "$0"); ref=$T/ref_$boson.txt; new=$T/new_$boson.txt
 list=sectors_list.dat; [ $boson != z ] && list=sectors_list_$boson.dat
 tmp=tests/tmp_$boson; mkdir -p $tmp
-run() { out=$(timeout 900 ./mixed_ll $* -boson $boson -histodir $tmp -pref reg_ \
+run() { out=$(timeout 900 ./mixed_ll $* -ecoll 14000 -pdfset NNPDF31_nnlo_as_0118_luxqed -boson $boson -histodir $tmp -pref reg_ \
           -vegasIt0 2 -vegasNc0 20000 -vegasIt1 1 -vegasNc1 20000 < /dev/null 2>&1)
   r=$(echo "$out" | grep -aE "# Result:|STOP|runtime error" | head -1 | sed 's/# Result: *//' | tr -s ' ')
   [ -z "$r" ] && r=$(echo "$out" | grep -av '^ *$' | tail -1 | tr -s ' ' | cut -c1-80)
