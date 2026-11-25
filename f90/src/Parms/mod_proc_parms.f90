@@ -87,11 +87,11 @@ contains
     histodir = trim(histodir)//'/'
 
     !-- collider energy
-    ecoll = real_val_opt('-ecoll',14000._dp)
+    ecoll = real_val_opt('-ecoll',13000._dp)
     sh = ecoll**2
 
     !-- PDFs
-    pdfset = trim(string_val_opt('-pdfset','NNPDF31_nnlo_as_0118_luxqed'))
+    pdfset = trim(string_val_opt('-pdfset','NNPDF40_nnlo_as_01180_qed'))
     pdfmem = int_val_opt('-pdfmem',0)
     
     !-- scale
@@ -175,9 +175,9 @@ contains
     integer, intent(in) :: idev
 
     write(idev,*) ''
-    write(idev,*) ' -coll 14000'
+    write(idev,*) ' -ecoll 13000'
     write(idev,*) ''
-    write(idev,*) ' -pdfset NNPDF31_nnlo_as_0118_luxqed'
+    write(idev,*) ' -pdfset NNPDF40_nnlo_as_01180_qed'
     write(idev,*) ' -pdfmem 0'
     write(idev,*) ''
     write(idev,*) ' -dynscale     --> runs with mu = mll/2'
@@ -190,7 +190,7 @@ contains
     write(idev,*) ' -qmin_rsc 20'
     write(idev,*) ' -qmax_rsc 20'
     write(idev,*) ' -qmin 300'
-    write(idev,*) ' -qmax 14000'
+    write(idev,*) ' -qmax 13000 (= ecoll)'
     write(idev,*) ' -ptlep_cut 20'
     write(idev,*) ' -ylep_cut 2.5'
     write(idev,*) ' -R_phot 0.1_dp'
