@@ -110,7 +110,7 @@ contains
     
     allocate(temp)
 
-    nbin = floor((up-low)/step) !-- approximate by closest lower integer
+    nbin = floor((up-low)/step + 1E-9_dp) !-- closest lower integer; the shift protects exact divisions (2.4/0.2)
 
     temp%name=trim(namein)
     !

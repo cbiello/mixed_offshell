@@ -27,25 +27,20 @@ contains
     call new_histo('yl',-5._dp,5._dp,0.2_dp)               !-- 8
     call new_histo('ptlnu',0._dp,500._dp,10._dp)           !-- 9
     call new_histo('costhCS',-one,one,0.05_dp)             !-- 10: Collins-Soper angle of the charged lepton
+    call new_histo_required()                              !-- 11: pta or ptj with -require photon/jet
   end subroutine init_user_histo
 
   subroutine cut_histo(event)
     type(KinConfig), intent(inout) :: event
-    real(dp) :: rec_mom(4,4),pl(4),pnu(4),pl_lab(4),pnu_lab(4),mT
-    integer  :: nreco,ids(4)
-    logical  :: lept_recomb
+    real(dp) :: pl(4),pnu(4),pl_lab(4),pnu_lab(4),mT,ptobj
+    logical  :: pass
 
     if (Vcharge == 0) stop 'W_incl: W only'
     event%makecut = .true.
-    lept_recomb = .false.
     if (event%flag) return
 
-    call recombine_photons(event,rec_mom,nreco,ids,lept_recomb)   !-- dresses the charged lepton
-    if (mod(event%ids(3),2) == 0) then                            !-- leg 3 is the neutrino
-       pnu = rec_mom(:,1); pl = rec_mom(:,2)
-    else
-       pl = rec_mom(:,1); pnu = rec_mom(:,2)
-    endif
+    call W_leptons(event,pl,pnu,pass,ptobj)                       !-- dressed charged lepton, neutrino, -require
+    if (.not. pass) return
 
     mT = sqrt(2*get_pt(pl)*get_pt(pnu)*(one-cos(get_dphi(pl,pnu))))
     if (mT <= 200._dp) return
@@ -69,6 +64,7 @@ contains
     call boostz(event%PartFrac(1),event%PartFrac(2),1,pl,pl_lab)      !-- lab frame: the sign of p_z(l nu)
     call boostz(event%PartFrac(1),event%PartFrac(2),1,pnu,pnu_lab)    !-- orients the angle
     obs(10) = get_costh_star(pl_lab,pnu_lab)
+    if (require /= 'none') obs(11) = ptobj
 
   end subroutine cut_histo
 

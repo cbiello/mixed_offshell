@@ -86,7 +86,7 @@ sigma = sigma^(0,0) + d sigma^(1,0) + d sigma^(0,1) + d sigma^(1,1), with (i,j) 
 | Transverse mass | mT > 200 GeV (dressed lepton) |
 | Lepton pT, rapidity, missing pT, m_lnu | none |
 | Generation cut | `-qmin 200 -qmax 13000` (m_lnu >= mT; to be confirmed, see 5.4) |
-| Analysis | new `analysis/mod_cut_histo_W_incl.f90` (to be written, 5.3) |
+| Analysis | `analysis/mod_cut_histo_W_incl.f90` |
 
 Transverse-mass windows for tables (as [Z] eq. 4.5, with mT in place of the mass):
 
@@ -118,7 +118,7 @@ Distributions:
 | Jets, isolation | none |
 | Lepton charge | part of the fiducial definition: W+ and W- separately |
 | Generation cut | `-qmin 200` (m_lnu >= mT; to be confirmed, see 5.4) |
-| Analysis | `analysis/mod_cut_histo_W_ATLAS.f90` after the fixes in 5.1 |
+| Analysis | `analysis/mod_cut_histo_W_ATLASfid.f90` |
 
 Distributions ([ATLAS] Sec. 6, Table 1, Sec. 8.4):
 
@@ -135,7 +135,8 @@ The ATLAS mT bins of the double-differential grouping are read off Table 1; conf
 ## 4. POWHEG distribution benchmarks
 
 Fixed-order POWHEG-BOX-RES (`testplots 1`), same input as section 1 and the same analysis (setup A or B).
-Recipe and base input: `f90/tests/powheg/README.md`, `f90/tests/powheg/base.input`.
+Recipe and base input: `f90/tests/powheg/paper/`. `mixed_ll`: analyses `W_incl` (A) and `W_ATLASfid` (B) with
+`-require none|photon|jet`. POWHEG: `pwhg_analysis-NSCpaper.f` with `nscsetup 1|2` (A, B) and `nscrequire 0|1|2`.
 
 | Benchmark | POWHEG code | `mixed_ll` sectors | Analysis | Extra settings |
 |---|---|---|---|---|
@@ -147,15 +148,14 @@ Recipe and base input: `f90/tests/powheg/README.md`, `f90/tests/powheg/base.inpu
 
 The photon and jet definitions of the validation runs (table above) are kept; no ATLAS-like objects.
 
-## 5. Changes needed in the code before production
+## 5. Open points before production
 
-1. **Neutrino rapidity cut.** `W_ATLAS`, `V_lla_nloqcd`, `V_llj_nloew` (and the POWHEG twin `pwhg_analysis-NSC.f`) apply \|y\| < 2.4 to *both* legs 3 and 4, i.e. also to the neutrino. [ATLAS] cuts only the charged lepton. The benchmarks so far are consistent between the two codes, but not the ATLAS fiducial region. Also: [ATLAS] cuts on pseudorapidity; the dressed lepton is massive, use eta, not y.
-2. **Scale for W.** With `-dynscale`, the W analyses already set mu = mT/2. The POWHEG codes must use the same scale (`runningscales`; check which scale the `NSC-*` codes use: the benchmarks so far used a fixed mu = mZ).
-3. **Inclusive analysis.** No W analysis covers setup A (`w_dflt` is the resonance region, mT 60 – 100 GeV): add `W_incl` (mT > 200 GeV only) with the histograms of section 2, and its POWHEG twin.
-4. **Generation cut.** With mT > 200 GeV the result must not depend on `-qmin`. First check at NLO: run `-qmin 100` and `-qmin 200` and compare (PLAN C4.8).
-5. **Redundant cut.** `W_ATLAS` keeps the product cut pT_l pT_nu > 35^2 GeV^2 from the Z analysis; it never acts (65 x 85 > 35^2). Remove it for clarity.
-6. **Default energy.** `-ecoll` defaults to 14000: always pass `-ecoll 13000`.
-7. **PDF.** The default set is still `NNPDF31_nnlo_as_0118_luxqed`: always pass `-pdfset NNPDF40_nnlo_as_01180_qed`, and install the set where it is missing (`lhapdf install NNPDF40_nnlo_as_01180_qed`).
+1. **Scale in POWHEG.** The `NSC-*` codes only have the fixed scale mu = mZ: mT/2 has to be added there.
+2. **Generation cut.** With mT > 200 GeV the result must not depend on `-qmin`. First check at NLO: run `-qmin 100` and `-qmin 200` and compare (PLAN C4.8).
+3. **mT bins of [ATLAS].** `W_ATLASfid` books mT in 10 GeV bins; the 12 ATLAS edges come from HEPData.
+
+Done: `W_incl` and `W_ATLASfid` (no neutrino rapidity cut, pseudorapidity of the lepton, no product cut);
+13 TeV and `NNPDF40_nnlo_as_01180_qed` are the defaults (install the set where it is missing).
 
 ## 6. Decisions (2026-11-25)
 

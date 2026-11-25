@@ -36,6 +36,7 @@ Momentum convention everywhere: `q(1) q'(2) -> l(3) l'(4) [+ parton 5] [+ parton
 | `notes/` | Derivation notes (Chiara/Federica: aq, ag, 4q channels; Fabrizio: Z subtraction notebook and pheno numbers; phase space) |
 | `old_code/` | Reference Z-only code from Chiara, Fabrizio, Raoul |
 | `2L/` | Two-loop amplitude material (Z) |
+| `f90/tests/powheg/paper/` | POWHEG twin of `W_incl`, `W_ATLASfid` and base input for the paper benchmarks |
 | `NSCplots/` | Plots of `mixed_ll` against POWHEG and paper plots (gnuplot, PDF); guide in `AI-plotting.md` |
 | `Analysis/`, `plots/`, `setup/` | Misc. older analyses, gnuplot, setup note |
 
@@ -54,6 +55,8 @@ make remove && make -j16            # clean rebuild only when the analysis or fl
   `ppllj` is required by `nloqcd v` but missing from `README.md`).
 - Each run integrates one sector with Vegas and writes `histo/<analysis>_<corr>_<ch>_<sec>_...histo`.
   A physical result is the sum of all sectors, combined with the tools in `bin/`.
+- Paper analyses `W_incl`, `W_ATLASfid`: `-require none|photon|jet` asks for a resolved photon or a jet
+  (`W_leptons` in `analysis/mod_cut_histo_aux.f90`); used for the POWHEG benchmarks of `SETUP.md` section 4.
 - Compile flags: `_oldcode` (section 8), `_withchecks` (extra limit bookkeeping), `_MPIbuild`, `_with2L` (two-loop Z amplitudes).
 
 ## 4. Source tree (`f90/src`)

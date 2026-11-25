@@ -64,6 +64,7 @@ module mod_proc_parms
 
   real(dp), public, save :: R_phot
   logical, public, save :: rec_phot_beam !-- whether collinear photons should be recombined in beam
+  character(len=6), public, save :: require !-- object asked by the W analyses: none, photon, jet
 
   integer, public, save :: taumode = 1
 
@@ -128,6 +129,8 @@ contains
     R_phot = real_val_opt('-R_phot',0.1_dp)
     !
     rec_phot_beam = log_val_opt_witharg('-phot_beam',.false.)
+    require = trim(string_val_opt('-require','none'))
+    if (require /= 'none' .and. require /= 'photon' .and. require /= 'jet') stop '-require: none, photon or jet'
 
     !-- units
     str_units = trim(string_val_opt('-units','fb'))
@@ -194,6 +197,7 @@ contains
     write(idev,*) ' -ptlep_cut 20'
     write(idev,*) ' -ylep_cut 2.5'
     write(idev,*) ' -R_phot 0.1_dp'
+    write(idev,*) ' -require none/photon/jet   --> W_incl, W_ATLASfid: resolved photon or jet (POWHEG benchmarks)'
     write(idev,*) ''
     write(idev,*) ' -units fb/pb/nb'
     write(idev,*) ''
@@ -436,6 +440,7 @@ contains
     write(outdev,*) '# ylep_cut  = ',ylep_cut
     write(outdev,*) '#'
     write(outdev,*) '# R_phot =', R_phot, '# for isolation'
+    write(outdev,*) '# require = ', require
     write(outdev,*) '#'
     write(outdev,*) '# buff =      ', buff
     write(outdev,*) '# buff_rr =      ', buff_rr

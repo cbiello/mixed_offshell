@@ -6,13 +6,91 @@ module mod_cut_histo_aux
   use mod_auxfunctions
   use mod_kinfunctions
   use mod_process
+  use mod_histo
   implicit none
   private
 
-  public :: recombine_photons
+  public :: recombine_photons,W_leptons,new_histo_required
 
 contains
-  
+
+  !-- W -> l nu: charged lepton and neutrino after the photon treatment chosen by -require
+  !-- none:   a photon within R_phot of the charged lepton is added to it
+  !-- photon: resolved photon (POWHEG NSC-lnuaEW): pT > 50, |y| < 2.5, R(photon,l) > R_phot, R(photon,quark) > 0.4,
+  !--         pT(l nu) > 30; ptobj = pT of the photon
+  !-- jet:    (POWHEG NSC-lnujQCD) a photon within R_phot is added to the nearest of charged lepton and final quark;
+  !--         jet = final quark or gluon with pT > 30; ptobj = pT of the hardest one
+  subroutine W_leptons(event,pl,pnu,pass,ptobj)
+    type(KinConfig), intent(in) :: event
+    real(dp), intent(out) :: pl(4),pnu(4),ptobj
+    logical,  intent(out) :: pass
+    real(dp) :: p(4,6),r,rmin,rap_boost
+    integer  :: i,il,inu,ia,imin
+    logical  :: charged(6)
+    real(dp), parameter :: pta_cut = 50._dp, ya_cut = 2.5_dp, R_iso = 0.4_dp, ptlnu_cut = 30._dp, ptj_cut = 30._dp
+
+    if (event%ids(3) <= 0) stop 'W_leptons: lepton ids not set'
+    inu = merge(3,4,mod(event%ids(3),2) == 0)
+    il  = 7 - inu
+    p(:,1:event%npart) = event%AmpMom(:,1:event%npart)
+    rap_boost = half*log(event%PartFrac(1)/event%PartFrac(2))
+    pass  = .false.
+    ptobj = zero
+    pl    = p(:,il)
+    pnu   = p(:,inu)
+
+    ia = 0
+    charged = .false.
+    charged(il) = .true.
+    do i = 5,event%npart
+       if (event%ids(i) == id_a) ia = i
+       if (event%ids(i) == id_q .and. require == 'jet') charged(i) = .true.
+    enddo
+
+    imin = 0                                  !-- nearest charged particle within R_phot of the photon
+    if (ia > 0) then
+       rmin = R_phot
+       do i = 3,event%npart
+          if (.not. charged(i)) cycle
+          r = get_r(p(:,i),p(:,ia))
+          if (r < rmin) then
+             rmin = r
+             imin = i
+          endif
+       enddo
+       if (rec_phot_beam .and. abs(get_y(p(:,ia)) + rap_boost) > ya_beam) imin = 0
+    endif
+
+    if (require == 'photon') then
+       if (ia == 0 .or. imin > 0) return
+       if (get_pt(p(:,ia)) <= pta_cut .or. abs(get_y(p(:,ia)) + rap_boost) >= ya_cut) return
+       do i = 5,event%npart
+          if (event%ids(i) == id_q) then
+             if (get_r(p(:,i),p(:,ia)) < R_iso) return
+          endif
+       enddo
+       if (get_pt(pl+pnu) <= ptlnu_cut) return
+       ptobj = get_pt(p(:,ia))
+    else
+       if (imin > 0) p(:,imin) = p(:,imin) + p(:,ia)
+       pl = p(:,il)
+       if (require == 'jet') then
+          do i = 5,event%npart
+             if (event%ids(i) == id_q .or. event%ids(i) == id_g) ptobj = max(ptobj,get_pt(p(:,i)))
+          enddo
+          if (ptobj <= ptj_cut) return
+       endif
+    endif
+    pass = .true.
+
+  end subroutine W_leptons
+
+  !-- histogram of the object asked by -require; booked last, filled with ptobj of W_leptons
+  subroutine new_histo_required()
+    if (require == 'photon') call new_histo('pta',50._dp,1000._dp,25._dp)
+    if (require == 'jet')    call new_histo('ptj',30._dp,1030._dp,25._dp)
+  end subroutine new_histo_required
+
   !-- recombine photons, return list of final state momenta and the number of
   !-- total reconstructed particles
   !-- only works with up to 1 extra photon
