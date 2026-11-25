@@ -299,3 +299,29 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
    within 0.1 of the lepton, H dresses the lepton (pT_l = 135 GeV, passes), while the C56 counterterm merges the photon
    into the quark (pT_l = 11.5 GeV, cut): a 1/x left over, a log divergence in a small corner. Fix in the analysis:
    recombine the photon with the nearer of lepton and quark, or require the lepton isolated from partons?
+11. Combining the seed histograms: `nsc-hsummer ad3` (sums all three column pairs: central scale and two variations;
+   divide by the number of seeds) or `nsc-hsummer avg` (weights the files by 1/σ² instead of equally)? The latter keeps
+   only the first (central) column, so the scale variations are lost and the output cannot go back into `ad3`.
+
+## 11. Benchmark
+
+Production runs on the KIT cluster (`f90/cluster_KIT/submit.sh`, SLURM partition `empire`): one warm-up job per sector
+writes the Vegas grid (`-writegrid -gridfile <boson>_<corr>_<ch>_<sec>`), then a job array of seeds reads it
+(`-readgrid`, same `-gridfile`). Seeds combined with `nsc-hsummer ad3` (all three scale columns) divided by the number
+of seeds; the warm-up's `_s00000` histogram is left out. Analysis `W_ATLAS`, dynamic scale mu = m_T/2, mu_R = mu_F.
+
+### LO (2026-11-24)
+
+| Run | Seeds | Iterations x points |
+|---|---|---|
+| Warm-up | 1 (default seed) | 10 x 1,000,000 |
+| Production | 10 (`-seed 1..10`) | 5 x 10,000,000 each, about 25 min per seed |
+
+| Boson | sigma(mu) | sigma(mu/2) | sigma(2mu) |
+|---|---|---|---|
+| W+ | 1538.6 ± 0.08 fb | 1463.3 fb (−4.9%) | 1599.1 fb (+3.9%) |
+| W- | 1097.0 ± 0.06 fb | 1041.8 fb (−5.0%) | 1140.8 fb (+4.0%) |
+
+Spread between seeds: 0.08 fb for both bosons. Histograms: `f90/histo/comb/W_ATLAS_<boson>_lo_sum10.histo`, plot
+`f90/histo/comb/lo_mT.png` (m_T from 200 to 3000 GeV; MC error per 10 GeV bin 0.02% at 200 GeV, 1.6% (W+) and 2%
+(W-) at 3000 GeV).
