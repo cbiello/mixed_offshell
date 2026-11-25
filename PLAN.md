@@ -310,6 +310,17 @@ writes the Vegas grid (`-writegrid -gridfile <boson>_<corr>_<ch>_<sec>`), then a
 (`-readgrid`, same `-gridfile`). Seeds combined with `nsc-hsummer ad3` (all three scale columns) divided by the number
 of seeds; the warm-up's `_s00000` histogram is left out. Analysis `W_ATLAS`, dynamic scale mu = m_T/2, mu_R = mu_F.
 
+How to run, from `f90/` (logs in `logs/<boson>/`, histograms in `f90/histo/`, results in `f90/histo/comb/`):
+
+    PART=empire cluster_KIT/submit.sh wp nloqcd ns v 10 10000000 10 100000000 5   # one sector: warm-up, then seeds 1..10
+    python3 cluster_KIT/plot_lo.py                  # LO: sums the seeds, plot lo_mT.png (scale band, W-/W+, MC error)
+    python3 cluster_KIT/combine_nlo.py nloqcd       # NLO QCD (or nloewk): sums seeds and sectors, writes the tables
+                                                    # <corr>_rates.md and the plots <corr>_<boson>_lo_nlo.png
+                                                    # (LO, LO + dNLO, K factor), <corr>_<boson>_sectors.png
+                                                    # (|d sigma/d m_T| per sector, sector / total)
+
+`combine_nlo.py` uses a sector only when all its seeds finished their iterations; `--partial` takes what is there.
+
 ### LO (2026-11-24)
 
 | Run | Seeds | Iterations x points |
