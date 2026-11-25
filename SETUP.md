@@ -150,7 +150,7 @@ The photon and jet definitions of the validation runs (table above) are kept; no
 
 ## 5. Open points before production
 
-1. **Scale in POWHEG.** The `NSC-*` codes only have the fixed scale mu = mZ: mT/2 has to be added there.
+1. **Scale in POWHEG.** mT/2 is added to `NSC-lnuQCD` and `NSC-lnuEW` (`f90/tests/powheg/paper/Born_phsp_mT_scale.patch`); `NSC-lnuaEW`, `NSC-lnujQCD` still have only mu = mZ.
 2. **Generation cut.** With mT > 200 GeV the result must not depend on `-qmin`. First check at NLO: run `-qmin 100` and `-qmin 200` and compare (PLAN C4.8).
 3. **mT bins of [ATLAS].** `W_ATLASfid` books mT in 10 GeV bins; the 12 ATLAS edges come from HEPData.
 

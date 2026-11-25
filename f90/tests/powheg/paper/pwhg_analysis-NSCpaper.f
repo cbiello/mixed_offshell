@@ -2,7 +2,8 @@ c     Fixed-order analysis for the paper benchmarks (SETUP.md section 4): twin o
 c     analyses W_incl (setup A) and W_ATLASfid (setup B) with -require none/photon/jet.
 c     Codes: NSC-lnuQCD, NSC-lnuEW (nscrequire 0), NSC-lnuaEW (1), NSC-lnujQCD (2).  Needs detailedNLO 1.
 c     powheg.input keys:
-c     nscsetup   1: mT > 200 (default);  2: pT(l) > 65, |eta(l)| < 2.4, pT(nu) > 85, 200 < mT < 5000
+c     nscsetup   1: mT > 200 (default);  2: pT(l) > 65, |eta(l)| < 2.4, pT(nu) > 85, 200 < mT < 5000;
+c                3: both in one run, the histograms of setup 2 with the prefix B_
 c     nscrequire 0: a photon within 0.1 of the charged lepton is added to it (default)
 c                1: photon pT > 50, |y| < 2.5, R(photon,l) > 0.1, R(photon,final quark) > 0.4, pT(l nu) > 30
 c                2: a photon within 0.1 is added to the nearest of charged lepton and final quark;
@@ -10,11 +11,14 @@ c                   jet = final quark or gluon with pT > 30
 
       subroutine init_hist
       implicit none
+      integer setup
+      character * 2 pre
       integer, external :: nsc_key
       call inihists
       call bookupeqbins('total',1d0,0d0,1d0)
       call bookupeqbins('rate',1d0,0d0,1d0)
-      if(nsc_key('#nscsetup',1).eq.1) then
+      setup = nsc_key('#nscsetup',1)
+      if(setup.ne.2) then
          call bookupeqbins('rate_window',1d0,0.5d0,4.5d0)
          call bookupeqbins('mT',20d0,200d0,1000d0)
          call bookupeqbins('mT_high',100d0,1000d0,3000d0)
@@ -24,16 +28,20 @@ c                   jet = final quark or gluon with pT > 30
          call bookupeqbins('yl',0.2d0,-5d0,5d0)
          call bookupeqbins('ptlnu',10d0,0d0,500d0)
          call bookupeqbins('costhCS',0.05d0,-1d0,1d0)
-      else
-         call bookupeqbins('mT',10d0,200d0,5000d0)
-         call bookupeqbins('etal_mT200-300',0.2d0,0d0,2.4d0)
-         call bookupeqbins('etal_mT300-425',0.2d0,0d0,2.4d0)
-         call bookupeqbins('etal_mT425-600',0.4d0,0d0,2.4d0)
-         call bookupeqbins('etal_mT600-900',0.4d0,0d0,2.4d0)
-         call bookupeqbins('etal_mT900-2000',0.6d0,0d0,2.4d0)
-         call bookupeqbins('ptl',10d0,0d0,2500d0)
-         call bookupeqbins('ptnu',10d0,0d0,2500d0)
-         call bookupeqbins('etal',0.1d0,-2.4d0,2.4d0)
+      endif
+      if(setup.ne.1) then
+         pre = ''
+         if(setup.eq.3) pre = 'B_'
+         if(setup.eq.3) call bookupeqbins('B_rate',1d0,0d0,1d0)
+         call bookupeqbins(trim(pre)//'mT',10d0,200d0,5000d0)
+         call bookupeqbins(trim(pre)//'etal_mT200-300',0.2d0,0d0,2.4d0)
+         call bookupeqbins(trim(pre)//'etal_mT300-425',0.2d0,0d0,2.4d0)
+         call bookupeqbins(trim(pre)//'etal_mT425-600',0.4d0,0d0,2.4d0)
+         call bookupeqbins(trim(pre)//'etal_mT600-900',0.4d0,0d0,2.4d0)
+         call bookupeqbins(trim(pre)//'etal_mT900-2000',0.6d0,0d0,2.4d0)
+         call bookupeqbins(trim(pre)//'ptl',10d0,0d0,2500d0)
+         call bookupeqbins(trim(pre)//'ptnu',10d0,0d0,2500d0)
+         call bookupeqbins(trim(pre)//'etal',0.1d0,-2.4d0,2.4d0)
       endif
       if(nsc_key('#nscrequire',0).eq.1) call bookupeqbins('pta',25d0,50d0,1000d0)
       if(nsc_key('#nscrequire',0).eq.2) call bookupeqbins('ptj',25d0,30d0,1030d0)
@@ -52,7 +60,8 @@ c                   jet = final quark or gluon with pT > 30
       integer, save :: setup,require
       integer ihep,il,inu,ia,ip,kmin,i
       real * 8 pl(4),pnu(4),pa(4),pj(4),pv(4),r,rmin,ptobj,ptl,ptnu,mT,etal,mlnu
-      logical isq
+      logical isq,inB
+      character * 2 pre
       integer, external :: nsc_key
       real * 8, external :: nsc_pt,nsc_y,nsc_eta,nsc_r,nsc_dphi,nsc_costh
       real * 8, parameter :: rphot=0.1d0,riso=0.4d0,ptacut=50d0,yacut=2.5d0,ptlnucut=30d0,ptjcut=30d0
@@ -141,33 +150,38 @@ c     nearest charged particle within rphot of the photon: 1 lepton, 2 final qua
       mT   = sqrt(2d0*ptl*ptnu*(1d0-cos(nsc_dphi(pl,pnu))))
       etal = nsc_eta(pl)
       if(mT.le.200d0) return
-      if(setup.eq.2) then
-         if(ptl.le.65d0 .or. abs(etal).ge.2.4d0 .or. ptnu.le.85d0 .or. mT.ge.5000d0) return
-      endif
+      inB = ptl.gt.65d0 .and. abs(etal).lt.2.4d0 .and. ptnu.gt.85d0 .and. mT.lt.5000d0
+      if(setup.eq.2 .and. .not.inB) return
 
-      call filld('rate',0.5d0,dsig)
-      call filld('mT',mT,dsig)
-      call filld('ptl',ptl,dsig)
-      if(setup.eq.1) then
+      if(setup.ne.2) then
          i = 1
          if(mT.gt.300d0)  i = 2
          if(mT.gt.500d0)  i = 3
          if(mT.gt.1500d0) i = 4
          pv = pl + pnu
          mlnu = sqrt(pv(4)**2-pv(1)**2-pv(2)**2-pv(3)**2)
+         call filld('rate',0.5d0,dsig)
          call filld('rate_window',dble(i),dsig)
+         call filld('mT',mT,dsig)
          call filld('mT_high',mT,dsig)
          call filld('mlnu',mlnu,dsig)
          call filld('mlnu_high',mlnu,dsig)
+         call filld('ptl',ptl,dsig)
          call filld('yl',nsc_y(pl),dsig)
          call filld('ptlnu',nsc_pt(pv),dsig)
          call filld('costhCS',nsc_costh(pl,pnu),dsig)
-      else
+      endif
+      if(setup.ne.1 .and. inB) then
+         pre = ''
+         if(setup.eq.3) pre = 'B_'
+         call filld(trim(pre)//'rate',0.5d0,dsig)
+         call filld(trim(pre)//'mT',mT,dsig)
          do i=1,5
-            if(mT.gt.mTbin(i) .and. mT.le.mTbin(i+1)) call filld(trim(etaname(i)),abs(etal),dsig)
+            if(mT.gt.mTbin(i) .and. mT.le.mTbin(i+1)) call filld(trim(pre)//trim(etaname(i)),abs(etal),dsig)
          enddo
-         call filld('ptnu',ptnu,dsig)
-         call filld('etal',etal,dsig)
+         call filld(trim(pre)//'ptl',ptl,dsig)
+         call filld(trim(pre)//'ptnu',ptnu,dsig)
+         call filld(trim(pre)//'etal',etal,dsig)
       endif
       if(require.eq.1) call filld('pta',ptobj,dsig)
       if(require.eq.2) call filld('ptj',ptobj,dsig)
