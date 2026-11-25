@@ -4,7 +4,7 @@ Common input for the production runs of `mixed_ll` and for the final POWHEG dist
 benchmarks (NLO QCD, NLO EW, NLO QCD l nu + photon, NLO EW l nu + jet). Every number below must be
 identical in both codes. Status of the code: [PLAN.md](PLAN.md); checks: [CHECKS.md](CHECKS.md).
 
-**Status: proposal (2026-11-24), to be agreed.** Open decisions are listed in section 6.
+**Status: updated 2026-11-25** (energy, PDF, scale, cuts and benchmark objects decided). No open decision left (section 6).
 
 Sources:
 - [Z] Buccioni et al., *Mixed QCD-electroweak corrections to dilepton production at the LHC in the high invariant mass region*,
@@ -13,18 +13,18 @@ Sources:
   collisions at sqrt(s) = 13 TeV*, [arXiv:2502.21088](https://arxiv.org/abs/2502.21088), JHEP 07 (2025) 026, Sec. 6.1, Table 1.
 
 Two setups:
-- **A — inclusive**: no cuts on the leptons apart from a lower cut on the l nu invariant mass (the analogue of [Z] without its lepton cuts).
+- **A — inclusive**: no cuts on the leptons apart from a lower cut on the l nu transverse mass.
 - **B — ATLAS**: the fiducial region of [ATLAS] (high mT, W -> l nu, charges separately).
 
 ## 1. Common parameters (A and B)
 
-Values follow [Z], so the W results can be put next to the published Z ones. They are already the `mixed_ll` defaults.
+The EW input follows [Z] and is the `mixed_ll` default. Energy and PDF differ from [Z] and must be passed explicitly.
 
 | Parameter | Value | `mixed_ll` option (default) | POWHEG (`NSC-*`) |
 |---|---|---|---|
-| Collider | pp, sqrt(s) = **13 TeV** ([ATLAS]; [Z] used 13.6 TeV, see 6.1) | `-ecoll 13000` (default 14000!) | `ebeam1 = ebeam2 = 6500` |
+| Collider | pp, sqrt(s) = **13 TeV** ([ATLAS]; [Z] used 13.6 TeV) | `-ecoll 13000` (default 14000!) | `ebeam1 = ebeam2 = 6500` |
 | Boson | W+ -> nu e+, W- -> e- nubar; one lepton flavour, massless leptons | `-boson wp` / `-boson wm` | `chooseDY 1` / `-1` |
-| PDF | `NNPDF31_nnlo_as_0118_luxqed`, member 0, LHAPDF **325100**, for all orders (LO included) | `-pdfset NNPDF31_nnlo_as_0118_luxqed -pdfmem 0` (default) | `lhans1 = lhans2 = 325100` |
+| PDF | `NNPDF40_nnlo_as_01180_qed`, member 0, LHAPDF **336100**, for all orders (LO included); [Z] used `NNPDF31_nnlo_as_0118_luxqed` | `-pdfset NNPDF40_nnlo_as_01180_qed -pdfmem 0` (not the default, see 5.7) | `lhans1 = lhans2 = 336100` |
 | alpha_s | from the PDF set, alpha_s(mZ) = 0.118 | – | from the PDF |
 | Flavours | 5 light flavours in the PDF, mb = 0; b-initiated W channels excluded (unit CKM) | `-mb 0` (default); `is_W_quark` | b excluded in the flavour lists |
 | CKM | unit matrix | – | unit |
@@ -45,6 +45,7 @@ Values follow [Z], so the W results can be put next to the published Z ones. The
 | Distance | R = sqrt(dy^2 + dphi^2) (rapidity) | – |
 | Beam photons | no special treatment | `-phot_beam false` (default) |
 | All cuts and observables | in terms of the dressed lepton and the neutrino | – |
+| Transverse mass | mT = sqrt(2 pT_l pT_nu (1 - cos dphi(l, nu))) | – |
 
 [ATLAS] unfolds to Born level and provides `C_fsr` = dressed/Born (Delta R < 0.1) in HEPData: we compare dressed with dressed.
 
@@ -52,9 +53,8 @@ Values follow [Z], so the W results can be put next to the published Z ones. The
 
 | | Value | Option |
 |---|---|---|
-| Central | mu_R = mu_F = **m_lnu / 2**, m_lnu of the dressed lepton and the neutrino (analogue of m_ll/2 in [Z]) | `-dynscale true` — **needs a change for W**, see 5.2 |
-| Variation | mu_R = mu_F = mu x {1/2, 2}, envelope (as [Z]) | `-xmuR`, `-xmuF` |
-| Optional | 7-point variation (mu_R, mu_F independent, 1/2 <= mu_R/mu_F <= 2) | idem |
+| Central | mu_R = mu_F = **mT / 2**, mT of the dressed lepton and the neutrino | `-dynscale true` (already mT/2 in the W analyses, see 5.2) |
+| Variation | three points: mu_R = mu_F = mu x {1/2, 1, 2}, envelope (as [Z]) | `-xmuR`, `-xmuF` |
 | Input-scheme variation | alpha(mZ) scheme with alpha(mZ) = 1/128, combined with the scale variation (as [Z]) | `-ew_scheme amz -alpha_mz 0.0078125` |
 
 ### Orders and channels
@@ -66,8 +66,8 @@ sigma = sigma^(0,0) + d sigma^(1,0) + d sigma^(0,1) + d sigma^(1,1), with (i,j) 
 | LO (0,0) | q qb' | no gamma gamma channel for W |
 | NLO QCD (1,0) | q qb', g q, q g | |
 | NLO EW (0,1) | q qb', gamma q, q gamma | photon-induced included |
-| mixed (1,1) | q qb', g q, q g, gamma q, q gamma, gamma g, g gamma, four-quark (q qb', q q') | **VV (two-loop) missing for W**: PLAN.md section 3 |
-| not included | NNLO QCD (2,0), nf pieces | see 6.4 |
+| mixed (1,1) | q qb', g q, q g, gamma q, q gamma, gamma g, g gamma, four-quark (q qb', q q') | VV (two-loop) not yet in the code for W (PLAN.md section 3): the exact one will be added, no approximation in its place |
+| not included | NNLO QCD (2,0), nf pieces | – |
 
 ### Technical settings (production)
 
@@ -83,14 +83,14 @@ sigma = sigma^(0,0) + d sigma^(1,0) + d sigma^(0,1) + d sigma^(1,1), with (i,j) 
 
 | Cut | Value |
 |---|---|
-| l nu invariant mass | m_lnu > 200 GeV (dressed lepton) — same threshold as [Z] |
-| Lepton pT, rapidity, missing pT, mT | none |
-| Generation cut | `-qmin 200 -qmax 13000` (must not cut harder than the analysis, see 5.4) |
+| Transverse mass | mT > 200 GeV (dressed lepton) |
+| Lepton pT, rapidity, missing pT, m_lnu | none |
+| Generation cut | `-qmin 200 -qmax 13000` (m_lnu >= mT; to be confirmed, see 5.4) |
 | Analysis | new `analysis/mod_cut_histo_W_incl.f90` (to be written, 5.3) |
 
-Mass windows for tables (as [Z] eq. 4.5):
+Transverse-mass windows for tables (as [Z] eq. 4.5, with mT in place of the mass):
 
-| Window | m_lnu |
+| Window | mT |
 |---|---|
 | Phi(1) | 200 – 300 GeV |
 | Phi(2) | 300 – 500 GeV |
@@ -103,10 +103,9 @@ Distributions:
 |---|---|
 | `rate` (total and per window) | – |
 | `mlnu` | 200 – 1000 GeV, 20 GeV; 1000 – 3000 GeV, 100 GeV |
-| `mT` | 0 – 1000 GeV, 20 GeV |
+| `mT` | 200 – 1000 GeV, 20 GeV; 1000 – 3000 GeV, 100 GeV |
 | `ptl` (charged lepton) | 0 – 1000 GeV, 20 GeV |
 | `yl` (charged lepton) | -5 – 5, 0.2 |
-| `ylnu` | -5 – 5, 0.2 |
 | `ptlnu` | 0 – 500 GeV, 10 GeV |
 
 ## 3. Setup B — ATLAS fiducial ([ATLAS] Sec. 6.1)
@@ -116,10 +115,9 @@ Distributions:
 | Charged lepton | pT_l > 65 GeV, \|eta_l\| < 2.4 (no crack exclusion at particle level) |
 | Neutrino | pT_nu > 85 GeV (no rapidity cut) |
 | Transverse mass | 200 < mT < 5000 GeV (single-differential); 200 < mT < 2000 GeV (double-differential) |
-| mT | sqrt(2 pT_l pT_nu (1 - cos dphi(l, nu))) |
 | Jets, isolation | none |
 | Lepton charge | part of the fiducial definition: W+ and W- separately |
-| Generation cut | `-qmin 200` is safe (m_lnu >= mT for massless leptons), see 5.4 |
+| Generation cut | `-qmin 200` (m_lnu >= mT; to be confirmed, see 5.4) |
 | Analysis | `analysis/mod_cut_histo_W_ATLAS.f90` after the fixes in 5.1 |
 
 Distributions ([ATLAS] Sec. 6, Table 1, Sec. 8.4):
@@ -147,29 +145,27 @@ Recipe and base input: `f90/tests/powheg/README.md`, `f90/tests/powheg/base.inpu
 | NLO EW l nu + jet | `NSC-lnujQCD` | 33 sectors (C3.7) | A / B + jet | jet = final quark (dressed) or gluon with pT_j > 30 GeV; photon never a jet (as `V_llj_nloew`) |
 | four-quark (optional) | `NSC-lnujjMIX` | four-quark RR | A / B + 2 jets | as `V_lljj_4q` |
 
-Proposed for the paper (6.5): ATLAS-like jets, anti-kt R = 0.4, pT_j > 30 GeV, \|eta_j\| < 2.5 (at this order one parton: the cut reduces to pT and eta).
+The photon and jet definitions of the validation runs (table above) are kept; no ATLAS-like objects.
 
 ## 5. Changes needed in the code before production
 
 1. **Neutrino rapidity cut.** `W_ATLAS`, `V_lla_nloqcd`, `V_llj_nloew` (and the POWHEG twin `pwhg_analysis-NSC.f`) apply \|y\| < 2.4 to *both* legs 3 and 4, i.e. also to the neutrino. [ATLAS] cuts only the charged lepton. The benchmarks so far are consistent between the two codes, but not the ATLAS fiducial region. Also: [ATLAS] cuts on pseudorapidity; the dressed lepton is massive, use eta, not y.
-2. **Scale for W.** With `-dynscale`, the W analyses set mu = mT/2. mT has no lower cut in setup A; use m_lnu/2 (dressed) in all W analyses and in the POWHEG codes (`runningscales`, check which scale the `NSC-*` codes use; the benchmarks so far used a fixed mu = mZ).
-3. **Inclusive analysis.** No W analysis covers setup A (`w_dflt` is the resonance region, mT 60 – 100 GeV): add `W_incl` with the histograms of section 2, and its POWHEG twin.
-4. **Generation cut.** Check that `-qmin` acts on a mass that is always >= the dressed m_lnu (with a final-state photon the dressed m_lnu can be below the generated one if the photon is not recombined): if not, lower `-qmin` (e.g. 150 GeV) and confirm that the result does not change.
+2. **Scale for W.** With `-dynscale`, the W analyses already set mu = mT/2. The POWHEG codes must use the same scale (`runningscales`; check which scale the `NSC-*` codes use: the benchmarks so far used a fixed mu = mZ).
+3. **Inclusive analysis.** No W analysis covers setup A (`w_dflt` is the resonance region, mT 60 – 100 GeV): add `W_incl` (mT > 200 GeV only) with the histograms of section 2, and its POWHEG twin.
+4. **Generation cut.** With mT > 200 GeV the result must not depend on `-qmin`. First check at NLO: run `-qmin 100` and `-qmin 200` and compare (PLAN C4.8).
 5. **Redundant cut.** `W_ATLAS` keeps the product cut pT_l pT_nu > 35^2 GeV^2 from the Z analysis; it never acts (65 x 85 > 35^2). Remove it for clarity.
 6. **Default energy.** `-ecoll` defaults to 14000: always pass `-ecoll 13000`.
+7. **PDF.** The default set is still `NNPDF31_nnlo_as_0118_luxqed`: always pass `-pdfset NNPDF40_nnlo_as_01180_qed`, and install the set where it is missing (`lhapdf install NNPDF40_nnlo_as_01180_qed`).
 
-## 6. Open decisions
+## 6. Decisions (2026-11-25)
 
-1. **Energy**: 13 TeV (ATLAS data) for both setups, or 13.6 TeV for A to compare with the Z numbers of [Z]?
-2. **Setup A mass range**: m_lnu > 200 GeV (proposed, off-shell high mass as [Z]), or also a resonance-region inclusive run (m_lnu > ~50 GeV)?
-3. **PDF**: keep `NNPDF31_nnlo_as_0118_luxqed` (as [Z]) or a newer QED set (NNPDF4.0 QED, CT18qed as in [ATLAS] variations)?
-4. **Missing pieces**: how to present results without VV (and nf) for W — leave out, or approximate (e.g. factorised NLO QCD x NLO EW, as [Z] above 1 TeV)?
-5. **Jet / photon definitions** for the l nu + photon and l nu + jet distributions: keep the validation cuts of section 4 or switch to ATLAS-like objects.
-6. **Scale**: m_lnu/2 (proposed, as [Z]) or another choice (e.g. sqrt(m_lnu^2 + pT_lnu^2)/2)?
+No open decision. 13 TeV for both setups; `NNPDF40_nnlo_as_01180_qed`; mu = mT/2 with the three-point variation;
+setup A with mT > 200 GeV only, no resonance-region run; no approximate VV (the exact one will be added);
+validation cuts kept for the POWHEG benchmarks.
 
 ## 7. Reference numbers
 
-[Z] at 13.6 TeV, mu = m_ll/2, its fiducial cuts (m_ll > 200, pT_l > 30, sqrt(pT_l- pT_l+) > 35, \|y_l\| < 2.5), fb:
+[Z] at 13.6 TeV, `NNPDF31_nnlo_as_0118_luxqed`, mu = m_ll/2, its fiducial cuts (m_ll > 200, pT_l > 30, sqrt(pT_l- pT_l+) > 35, \|y_l\| < 2.5), fb:
 
 | | sigma^(0,0) | d sigma^(1,0) | d sigma^(0,1) | d sigma^(2,0) | d sigma^(1,1) |
 |---|---|---|---|---|---|

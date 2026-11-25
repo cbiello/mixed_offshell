@@ -241,6 +241,7 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 | C4.5 | W+ vs W- consistency: charge conjugation relates partonic W- to W+ with q <-> qb | ❌ |
 | C4.6 | `qa` = mirror of `aq`, `ga` = mirror of `ag`, `qg` = mirror of `gq` (automated diff test with x1 <-> x2) | ❌ |
 | C4.7 | Inclusive mixed corrections vs literature for on-shell/off-shell W where available | ❌ |
+| C4.8 | Generation cut (`SETUP.md` 5.4): with mT > 200 GeV the cross section must not depend on `-qmin` (m_lnu >= mT). First check at NLO (QCD and EW, W+ and W-): run `-qmin 100` and `-qmin 200` and compare rate and mT histogram. The NLO EW `ns r_is` sector also tests `-qmin_rsc 1`: with a recombined photon the dressed mT can exceed the generated mass | ❌ |
 
 ## 8. Suggested order
 
