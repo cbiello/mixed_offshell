@@ -13,9 +13,9 @@ module mod_histo
   private
   integer, parameter :: nkin_max = 18 !-- how many different kinematics points per event
   integer, parameter :: nstring  = 15 !-- length of observable name
-  real(dp), parameter :: tiny=1.0e-30_dp
   integer, save :: n_histo   = 0 !-- total number of histograms
   integer, save :: evalcount = 0 !-- old code -> set to 1, I think it was a bug
+  real(dp), save :: acc_wgt = zero !-- sum of the weights of the iterations accumulated so far
   logical, public, save :: nohistos = .false. !-- to avoid during histograms during warmup etc
   integer, public, parameter :: nweights = 3 !TODO: do this at the preprocessor level, with #define myweights = 3; neweights = myweights
   !--
@@ -164,6 +164,8 @@ contains
 
     enddo
 
+    acc_wgt = zero
+
   end subroutine clear_histo
 
   !-- 
@@ -266,8 +268,7 @@ contains
     logical, parameter :: writetofile = .true.
     !
     integer :: i,j,k
-    real(dp) :: res(nweights),err(nweights),tmp(nweights)
-    real(dp) :: acc_res(nweights),acc_err(nweights),tmp_err(nweights)
+    real(dp) :: res(nweights),err(nweights),tmp(nweights),wgt,w
 
     if (nohistos) return
  
@@ -276,6 +277,8 @@ contains
     if (.not.root_process) return
 #endif   
     
+    wgt = one/real(it_err,dp)**2
+
     current => head
 
     do i = 1,n_histo
@@ -287,34 +290,14 @@ contains
           res(:) = current%res(:,j)
           err(:) = current%err(:,j)
 
-          if (err(1) == 0) cycle !-- nothing to do if everything was untouched, take the first weight as a driver
-
-          !-- do the same as vegas
+          !-- do the same as vegas; an untouched bin is a zero
           tmp = sqrt(err*evalcount)
-          err = sqrt((tmp-res)*(tmp+res)/(evalcount-1))
+          err = sqrt(max((tmp-res)*(tmp+res),zero)/(evalcount-1))
 
-          if (err(1) <= zero) err = tiny
-
-          acc_res(:) = current%acc_res(:,j)
-          acc_err(:) = current%acc_err(:,j)
-
-          !-- the first time, there is no existing error
-          if (acc_err(1) == 0) then
-
-             acc_res = res
-             acc_err = err
-
-          else
-          
-             tmp_err = one/acc_err**2 + one/err**2
-             acc_res = (acc_res/acc_err**2 + res/err**2)/tmp_err
-             
-             acc_err = one/sqrt(tmp_err)
-
-          endif
-
-          current%acc_res(:,j) = acc_res
-          current%acc_err(:,j) = acc_err
+          !-- iterations weighted as in vegas, with the error of the integral: a weight from the error of the bin biases sparse bins
+          w = wgt/(acc_wgt+wgt)
+          current%acc_res(:,j) = (one-w)*current%acc_res(:,j) + w*res
+          current%acc_err(:,j) = sqrt(((one-w)*current%acc_err(:,j))**2 + (w*err)**2)
           
        enddo
        !
@@ -322,6 +305,8 @@ contains
        current%err = zero
        !
     enddo
+
+    acc_wgt = acc_wgt + wgt
     
     !-- write to file
     if (writetofile) open(unit=idev,file=outputfile,status='unknown')

@@ -75,7 +75,7 @@ make remove && make -j16            # clean rebuild only when the analysis or fl
 | `SingLimits` | `mod_splittings_bare`, `mod_eikonals`, `mod_limits_rv` | splitting functions, QED/QCD eikonals (`get_qed_eik_gen` is charge-general), one-loop collinear limits (Z-specific charges) |
 | `IntSub` | `mod_hoppet_nlo`, `mod_hoppet_nnlo`, `mod_int_sub_nnlo` | integrated subtraction: convolution tables `xPij*` and soft/elastic functions `calG*`, `fin_*` |
 | `Sectors` | `mod_xsects_*`, `mod_aux_sectors`, `mod_partitions` | **the integrands** (section 5), luminosity helpers, damping/partition functions |
-| `Histograms` | `mod_histo`, `mod_proc_histo` | binning, 3 scale weights |
+| `Histograms` | `mod_histo`, `mod_proc_histo` | binning, 3 scale weights; iterations averaged with the VEGAS weights |
 | `Vegas` | `mod_my_vegas`, `mod_vegas_mpi`, ... | integrator |
 | `Chooser` | `mod_run_proc*`, `mod_sects_list`, `mod_lim_proc*` | maps `(corr,ch,sec)` to an integrand |
 | `Checks` | `mod_checks`, `mod_check_amp`, `mod_check_lim`, `MG_output/` | amplitude and limit checks (section 9) |

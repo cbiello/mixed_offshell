@@ -578,3 +578,25 @@ collinear limits; int = limits without own counterterm, graded integrable):
 In RV7a/b the neutrino sector (`fs_53` for W+, `fs_54` for W-) has no C1 counterterm and is integrable; the charged-lepton
 sector converges as sqrt x. In RR5 the pairs S5 = S5C5 in the C5 limit agree to 2e-16 at every depth (slope 0, passing).
 RR8: the lowest rows (97.7-99.5%) are TC with three or four variables at the edge, where double precision runs out.
+
+## Histograms: average over the iterations (2026-11-26)
+
+`prepare_and_write` averaged the iterations bin by bin with weights 1/error^2 of the bin and skipped the iterations where
+the bin was empty. A sparse bin was pulled towards zero: an iteration that fluctuates low also has a small error.
+Now every bin takes the VEGAS weight of the iteration (1/error^2 of the integral) and an empty bin counts as zero, so
+the `rate` bin is the VEGAS result. Test: LO, W+, `W_ATLASfid`, mu = mT/2, 50M points, one seed; mT in 10 GeV bins
+summed over a range (POWHEG, 16 seeds: 1.51e-4 +- 0.03e-4 fb in the last one).
+
+| Iterations x points | Before, 2-5 TeV [fb] | Before, 4.5-5 TeV [fb] | Now, 2-5 TeV [fb] | Now, 4.5-5 TeV [fb] |
+|---|---|---|---|---|
+| 1 x 50M | 0.13957 | 1.49e-4 | | |
+| 10 x 5M | 0.13440 | 0.86e-4 | 0.14035 | 1.44e-4 |
+| 100 x 0.5M | 0.12252 | 0.07e-4 | 0.13954 | 1.51e-4 |
+
+Now the 10 GeV bins sum to the `mT_ATLAS` bin of the same run (2-5 TeV: 0.14035 and 0.13954 fb). Bias before, 10 x 5M,
+against the relative error of the bin in one seed: -0.02% below 1%, -0.3% at 1-2%, -1.6% at 2-5%, -9% at 5-10%, -29% at
+10-20%. It does not average out over the seeds. The VEGAS result is not affected.
+Equal weights for the iterations (first attempt) are also unbiased, but keep the iterations with a rare large weight
+that VEGAS suppresses: W+ `nloewk ns r_is`, `W_incl`, seed 3 has two such iterations and gave a rate bin of
+-2.03 +- 0.21 fb against -2.258 +- 0.005 fb from VEGAS; with the VEGAS weights the rate bin is -2.25817 fb = VEGAS.
+Histograms made before this date have the bias in their sparse bins.
