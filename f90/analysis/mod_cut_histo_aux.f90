@@ -15,7 +15,8 @@ module mod_cut_histo_aux
 contains
 
   !-- W -> l nu: charged lepton and neutrino after the photon treatment chosen by -require
-  !-- none:   a photon within R_phot of the charged lepton is added to it
+  !-- none:   a photon within R_phot is added to the nearest of charged lepton and final quark (collinear safe: a photon
+  !--         collinear to a quark goes to the quark, PLAN team question 10)
   !-- photon: resolved photon (POWHEG NSC-lnuaEW): pT > 50, |y| < 2.5, R(photon,l) > R_phot, R(photon,quark) > 0.4,
   !--         pT(l nu) > 30; ptobj = pT of the photon
   !-- jet:    (POWHEG NSC-lnujQCD) a photon within R_phot is added to the nearest of charged lepton and final quark;
@@ -44,7 +45,7 @@ contains
     charged(il) = .true.
     do i = 5,event%npart
        if (event%ids(i) == id_a) ia = i
-       if (event%ids(i) == id_q .and. require == 'jet') charged(i) = .true.
+       if (event%ids(i) == id_q .and. require /= 'photon') charged(i) = .true.
     enddo
 
     imin = 0                                  !-- nearest charged particle within R_phot of the photon

@@ -299,11 +299,23 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 9. Please run the intensive limit checks (PLAN C1.5, manual `f90/tests/CHECKLIM.md`), from `f90/`:
    `tests/checklim_run.sh wp 200 csv` and `python3 tests/checklim_analyse.py csv ref`, then look at `ref/wp/checklim_wp.pdf`
    (page 1: heatmap of the fraction of points passing, sectors x limits; then per sector the convergence bands and slopes).
-10. Lepton dressing is not collinear safe (found by C1.5, W- `qg rr_5262d`, C56 limit, point 73): `recombine_la` adds a
+10. ~~Lepton dressing is not collinear safe (found by C1.5, W- `qg rr_5262d`, C56 limit, point 73): `recombine_la` adds a
    photon within `R_phot` of the lepton even when a quark lies next to it. With the quark and photon collinear and both
    within 0.1 of the lepton, H dresses the lepton (pT_l = 135 GeV, passes), while the C56 counterterm merges the photon
    into the quark (pT_l = 11.5 GeV, cut): a 1/x left over, a log divergence in a small corner. Fix in the analysis:
-   recombine the photon with the nearer of lepton and quark, or require the lepton isolated from partons?
+   recombine the photon with the nearer of lepton and quark, or require the lepton isolated from partons?~~
+   **Resolved 2026-11-26: the photon is recombined with the nearest of charged lepton and final quark** (`W_leptons`,
+   `-require none`, used by `W_incl` and `W_ATLASfid`; the rule of `-require jet` and of POWHEG `nscrequire 2`).
+   Why: ATLAS (arXiv:2502.21088) defines the dressed lepton as "Born-level leptons merged with any prompt photons within
+   Delta R < 0.1", with no particle-level isolation; isolation and the overlap removal (electrons within 0.4 of a jet
+   removed) act at reconstruction level only. Taken literally at fixed order this rule is not collinear safe; the new rule
+   differs from it only when the photon is closer to a quark that is itself within about 0.2 of the lepton, a region
+   ATLAS removes at reconstruction. A lepton-parton isolation cut would instead remove events ATLAS's unfolded numbers
+   include. Checks: point 73 no longer leaves a 1/x term (H and the C56 counterterm are now cut together); the gq/qg RR
+   limit scans (W+, W-, 200 points per sector) change in 15 of 135736 lines, all still converging and integrable.
+   Affects only sectors with a final quark and a photon (gq/qg RR and their counterterms): LO, NLO and the q qbar' NNLO
+   results are unchanged. Not changed: the Z analyses (`recombine_photons`, lepton-only dressing since the first version
+   of the code: same corner for Z) and POWHEG `nscrequire 0` (no event there has both a quark and a photon).
 11. Combining the seed histograms: `nsc-hsummer ad3` (sums all three column pairs: central scale and two variations;
    divide by the number of seeds) or `nsc-hsummer avg` (weights the files by 1/σ² instead of equally)? The latter keeps
    only the first (central) column, so the scale variations are lost and the output cannot go back into `ad3`.
