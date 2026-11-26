@@ -348,7 +348,13 @@ local changes (`bin/mixed_ll_20261124`, LO; `bin/mixed_ll_20261125`, NLO). Histo
 | W+ | 1538.615 ± 0.025 | 1463.27 | 1599.09 | +308.491 ± 0.018 | +400.39 | +241.76 |
 | W- | 1096.985 ± 0.025 | 1041.82 | 1140.80 | +207.649 ± 0.008 | +273.11 | +161.04 |
 
-LO + NLO QCD: W+ 1847.11 fb (+0.90% / −0.34% for mu/2, 2 mu), K = 1.200; W- 1304.63 fb (+0.79% / −0.21%), K = 1.189.
+| Boson | sigma_LO+NLO QCD(mu) | mu/2 | 2 mu | K |
+|---|---|---|---|---|
+| W+ | 1847.106 ± 0.031 | 1863.66 (+0.90%) | 1840.85 (−0.34%) | 1.200 |
+| W- | 1304.634 ± 0.026 | 1314.93 (+0.79%) | 1301.84 (−0.21%) | 1.189 |
+
+Statistical error of LO + NLO QCD: LO and NLO errors in quadrature (independent runs), from the seed spread; from the
+histogram errors (conservative) ± 0.084 (W+), ± 0.058 fb (W-). The mu/2, 2 mu values come from the same events.
 
 | d sigma_NLO QCD [fb] | `ns v` | `ns s` | `ns r_is` | `gq s` | `gq r_is` | `qg s` | `qg r_is` |
 |---|---|---|---|---|---|---|---|
@@ -389,7 +395,13 @@ the `W_incl` changes committed in `668d178` (`bin/mixed_ll_a738e000`).
 | W+ | 2046.077 ± 0.062 | 1971.03 | 2102.69 | +441.063 ± 0.036 | +544.32 | +368.80 |
 | W- | 1275.814 ± 0.027 | 1225.65 | 1313.55 | +269.804 ± 0.016 | +337.11 | +223.42 |
 
-LO + NLO QCD: W+ 2487.14 fb (+1.13% / −0.63%), K = 1.216; W- 1545.62 fb (+1.11% / −0.56%), K = 1.211.
+| Boson | sigma_LO+NLO QCD(mu) | mu/2 | 2 mu | K |
+|---|---|---|---|---|
+| W+ | 2487.140 ± 0.072 | 2515.35 (+1.13%) | 2471.49 (−0.63%) | 1.216 |
+| W- | 1545.618 ± 0.031 | 1562.76 (+1.11%) | 1536.97 (−0.56%) | 1.211 |
+
+Statistical error of LO + NLO QCD: LO and NLO errors in quadrature (independent runs), from the seed spread; from the
+histogram errors (conservative) ± 0.117 (W+), ± 0.070 fb (W-). The mu/2, 2 mu values come from the same events.
 
 | d sigma_NLO QCD [fb] | `ns v` | `ns s` | `ns r_is` | `gq s` | `gq r_is` | `qg s` | `qg r_is` |
 |---|---|---|---|---|---|---|---|
