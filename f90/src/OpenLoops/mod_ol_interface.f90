@@ -43,7 +43,7 @@ contains
     call set_parameter("mass(24)",real(mw_in,dp15))  ! W
     call set_parameter("mass(25)",real(mh,dp15))     ! H
     
-    call set_parameter("width(5)",real(0._dp,dp15))   ! top
+    call set_parameter("width(6)",real(0._dp,dp15))   ! top
     call set_parameter("width(23)",real(GaZ,dp15))    ! Z
     call set_parameter("width(24)",real(GaW,dp15))    ! W
     call set_parameter("width(25)",real(0._dp,dp15))  ! H
