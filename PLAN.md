@@ -303,6 +303,9 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 11. Combining the seed histograms: `nsc-hsummer ad3` (sums all three column pairs: central scale and two variations;
    divide by the number of seeds) or `nsc-hsummer avg` (weights the files by 1/σ² instead of equally)? The latter keeps
    only the first (central) column, so the scale variations are lost and the output cannot go back into `ad3`.
+12. Do we want to use product cuts? In the NCDY we explicitly say that we use them even if they are not imposed in the
+   experimental analysis. Now: `W_incl` and `W_ATLASfid` have none; `W_ATLAS` keeps pT_l pT_nu > 35^2 GeV^2, which never
+   acts there (pT_l > 65, pT_nu > 85 GeV).
 
 ## 11. Benchmark
 
