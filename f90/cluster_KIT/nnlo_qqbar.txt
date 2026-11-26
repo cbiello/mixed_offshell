@@ -1,0 +1,23 @@
+# NNLO mixed QCD x EW, q qbar' channel for W (no VV: not implemented for W; s_qq, s_qqb belong to the four-quark channels)
+# ch sec nseeds Nc0 It0 Nc1 It1   (cluster_KIT/submit.sh arguments after boson and corr)
+ns rvewk_is      10 1000000 10 2000000 5
+ns s_vewk        10 1000000 10 2000000 5
+ns rvqcd_is      10 2000000 10 10000000 5
+ns rvqcd_fs_53   10 2000000 10 10000000 5
+ns rvqcd_fs_54   10 2000000 10 10000000 5
+ns s_12          10 2000000 10 10000000 5
+ns s_vqcd        10 2000000 10 10000000 5
+ns s_oqcd        10 2000000 10 10000000 5
+ns s_oewk_is     10 2000000 10 10000000 5
+ns s_oewk_fs_53  10 2000000 10 10000000 5
+ns s_oewk_fs_54  10 2000000 10 10000000 5
+ns_ga rr_5161a   10 2000000 10 10000000 5
+ns_ga rr_5161c   10 2000000 10 10000000 5
+ns_ga rr_5162    10 2000000 10 10000000 5
+ns_ga rr_5163    10 2000000 10 10000000 5
+ns_ga rr_5164    10 2000000 10 10000000 5
+ns_ga rr_5261    10 2000000 10 10000000 5
+ns_ga rr_5262a   10 2000000 10 10000000 5
+ns_ga rr_5262c   10 2000000 10 10000000 5
+ns_ga rr_5263    10 2000000 10 10000000 5
+ns_ga rr_5264    10 2000000 10 10000000 5

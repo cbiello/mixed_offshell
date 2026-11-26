@@ -16,6 +16,6 @@ aq) lhs "aq qa" "s_vqcd s_12 s_oqcd s_oewk"
     rhs A nloqcd ns "r_is s v" qa; rhs B nloewk "aq qa" "r_is s" qqs; rhs D lo ns na qa11;;
 ag) lhs "ag ga" "s_12 s_oqcd s_oewk"
     rhs A nloqcd "gq qg" "r_is s" qa; rhs B nloewk "aq qa" "r_is s" qg;;
-ns) lhs ns "s_12 s_vqcd s_vewk s_oqcd s_oewk_is_ra s_oewk_fs_53 s_oewk_fs_54 s_qqb s_qq"
+ns) lhs ns "s_12 s_vqcd s_vewk s_oqcd s_oewk_is s_oewk_fs_53 s_oewk_fs_54 s_qqb s_qq"
     rhs A nloewk ns "r_is s v r_fs_53 r_fs_54" qqs; rhs B nloqcd ns "r_is s v" qq; rhs D lo ns na qq11; rhs E lo ns na qb11; rhs V lo ns na qq11d;;
 esac | xargs -P $(nproc) -L 1 bash -c 'run "$@"' _

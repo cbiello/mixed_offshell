@@ -80,8 +80,7 @@ nnlo ns rvqcd_is :  2.9083437385751960 fb
 nnlo ns s_12 :  9.9402000355654643 fb
 nnlo ns s_oewk_fs_53 :  -7.0075067241663582 fb
 nnlo ns s_oewk_fs_54 :  -7.3376205083597137 fb
-nnlo ns s_oewk_is :  -1214568.6775284831 fb
-nnlo ns s_oewk_is_ra :  -3.2698030546805912 fb
+nnlo ns s_oewk_is :  -3.2698030546805912 fb
 nnlo ns s_oqcd :  -0.10551078533741462 fb
 nnlo ns s_qq :  -6.7872102756112050E-003 fb
 nnlo ns s_qqb :  0.26874051952488653 fb

@@ -34,7 +34,6 @@
  -corr nnlo -ch ns -sec s_vqcd              
  -corr nnlo -ch ns -sec s_oqcd              
  -corr nnlo -ch ns -sec s_oewk_is           
- -corr nnlo -ch ns -sec s_oewk_is_ra        
  -corr nnlo -ch ns -sec s_oewk_fs_53        
  -corr nnlo -ch ns -sec s_oewk_fs_54        
  -corr nnlo -ch ns -sec s_12                

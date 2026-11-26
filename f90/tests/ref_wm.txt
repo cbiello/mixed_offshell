@@ -75,8 +75,7 @@ nnlo ns rvqcd_is :  4.5485910658288633 fb
 nnlo ns s_12 :  -1.7441267829569913 fb
 nnlo ns s_oewk_fs_53 :  -2.1043417928917520 fb
 nnlo ns s_oewk_fs_54 :  -0.94638083587169564 fb
-nnlo ns s_oewk_is : STOP W_ATLAS: lepton ids not set
-nnlo ns s_oewk_is_ra :  -1.5593015525201197 fb
+nnlo ns s_oewk_is :  -1.5593015525201197 fb
 nnlo ns s_oqcd :  1.7164130333412363E-002 fb
 nnlo ns s_qq :  -4.4947875664527034E-003 fb
 nnlo ns s_qqb :  0.13985297358061782 fb

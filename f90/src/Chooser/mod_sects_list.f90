@@ -214,7 +214,7 @@ contains
       ns_nloewk = [character(len=20) :: 'r_is','s','v','r_fs_53','r_fs_54']
       ns_nnlo   = [character(len=20) :: 'vvnf','vvfc','vvxf','vvnf_full', &
         'rvewk_is','rvewknf_is','rvqcd_is','rvqcd_fs_53','rvqcd_fs_54', &
-        's_vewk','s_vewknf','s_vqcd','s_oqcd','s_oewk_is','s_oewk_is_ra','s_oewk_fs_53','s_oewk_fs_54','s_12','s_qqb','s_qq']
+        's_vewk','s_vewknf','s_vqcd','s_oqcd','s_oewk_is','s_oewk_fs_53','s_oewk_fs_54','s_12','s_qqb','s_qq']
 
       if (tag == '') then
          aa_lo     = [character(len=20) :: 'na']
