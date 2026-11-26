@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Combine the NLO seed histograms of the cluster runs (cluster_KIT/submit.sh), from f90/:
-    python3 cluster_KIT/combine_nlo.py [nloqcd|nloewk ...] [--analysis W_ATLAS|W_incl|W_ATLASfid] [--seeds 10] [--its 5] [--partial]
+    python3 cluster_KIT/combine_nlo.py [nloqcd|nloewk|nnlo ...] [--analysis W_ATLAS|W_incl|W_ATLASfid] [--seeds 10] [--its 5] [--partial]
 Per sector: nsc-hsummer ad3 of the seeds 1..n (s00000 = warm-up, left out), divided by n. Per correction: nsc-hsummer ad3
 of the sectors. Writes to histo/comb/ (W_ATLAS) or histo/comb_<analysis>/: <b>_<corr>_<ch>_<sec>_sum<n>.histo,
 <b>_<corr>_total.histo, <corr>_rates.md (total and per-sector rates, error from the histograms and from the seed spread),
@@ -16,8 +16,10 @@ NS, ITS, PARTIAL, ANALYSIS = opt('--seeds', 10), opt('--its', 5), '--partial' in
 MT = {'W_ATLAS': ([2], 3000), 'W_incl': ([3, 4], 3000), 'W_ATLASfid': ([2], 5000)}[ANALYSIS]   #-- m_T histograms, upper end
 OUT = 'comb' if ANALYSIS == 'W_ATLAS' else f'comb_{ANALYSIS}'
 SECS = {'nloqcd': ['ns v', 'ns s', 'ns r_is', 'gq s', 'gq r_is', 'qg s', 'qg r_is'],
-        'nloewk': ['ns v', 'ns s', 'ns r_is', 'ns r_fs_53', 'ns r_fs_54', 'aq s', 'aq r_is', 'qa s', 'qa r_is']}
-TITLE = {'nloqcd': 'NLO QCD', 'nloewk': 'NLO EW'}; BOS = {'wp': 'W$^+$', 'wm': 'W$^-$'}
+        'nloewk': ['ns v', 'ns s', 'ns r_is', 'ns r_fs_53', 'ns r_fs_54', 'aq s', 'aq r_is', 'qa s', 'qa r_is'],
+        'nnlo': [' '.join(l.split()[:2]) for l in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nnlo_qqbar.txt'))
+                 if l.strip() and not l.startswith('#')]}   #-- the sectors run so far: q qbar' channel
+TITLE = {'nloqcd': 'NLO QCD', 'nloewk': 'NLO EW', 'nnlo': "NNLO q qbar'"}; BOS = {'wp': 'W$^+$', 'wm': 'W$^-$'}
 PAL = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6', '#e34948', '#52514e']
 INK, INK2, GRID = '#0b0b0b', '#52514e', '#e4e3df'
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'histo')); os.makedirs(OUT, exist_ok=True)

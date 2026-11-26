@@ -309,34 +309,117 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 
 ## 11. Benchmark
 
-Production runs on the KIT cluster (`f90/cluster_KIT/submit.sh`, SLURM partition `empire`): one warm-up job per sector
-writes the Vegas grid (`-writegrid -gridfile <boson>_<corr>_<ch>_<sec>`), then a job array of seeds reads it
-(`-readgrid`, same `-gridfile`). Seeds combined with `nsc-hsummer ad3` (all three scale columns) divided by the number
-of seeds; the warm-up's `_s00000` histogram is left out. Analysis `W_ATLAS`, dynamic scale mu = m_T/2, mu_R = mu_F.
+Cluster runs for comparison with independent runs (POWHEG, other `mixed_ll` productions). Results are cross sections in
+fb, sigma at mu_R = mu_F = mu = m_T/2 (m_T of the dressed lepton and the neutrino) with the columns mu/2 and 2 mu of the
+same run. MC errors: from the spread of the seeds (error of the mean); the histogram error is given where it differs.
 
-How to run, from `f90/` (logs in `logs/<boson>/`, histograms in `f90/histo/`, results in `f90/histo/comb/`):
+### Method (all runs)
 
-    PART=empire cluster_KIT/submit.sh wp nloqcd ns v 10 10000000 10 100000000 5   # one sector: warm-up, then seeds 1..10
-    python3 cluster_KIT/plot_lo.py                  # LO: sums the seeds, plot lo_mT.png (scale band, W-/W+, MC error)
-    python3 cluster_KIT/combine_nlo.py nloqcd       # NLO QCD (or nloewk): sums seeds and sectors, writes the tables
-                                                    # <corr>_rates.md and the plots <corr>_<boson>_lo_nlo.png
-                                                    # (LO, LO + dNLO, K factor), <corr>_<boson>_sectors.png
-                                                    # (|d sigma/d m_T| per sector, sector / total)
+- KIT cluster, SLURM partition `empire`, one job per seed, `f90/cluster_KIT/submit.sh`: per sector a warm-up job adapts
+  the Vegas grid and writes it (`-writegrid -gridfile <analysis>_<boson>_<corr>_<ch>_<sec>`), then a job array of seeds
+  1..n reads it (`-readgrid`, same grid; the array starts when the warm-up has finished). The binary is a copy in
+  `f90/bin/`, so a rebuild does not change queued jobs. Logs in `logs/[<analysis>/]<boson>/`.
+- Combination: per sector `nsc-hsummer ad3` of the seeds 1..n divided by n (the three scale columns kept; the warm-up's
+  `_s00000` histogram left out), per correction `nsc-hsummer ad3` of the sectors. From `f90/`:
 
-`combine_nlo.py` uses a sector only when all its seeds finished their iterations; `--partial` takes what is there.
+      PART=empire cluster_KIT/submit.sh <boson> <corr> <ch> <sec> <nseeds> <Nc0> <It0> <Nc1> <It1>
+      python3 cluster_KIT/plot_lo.py [--analysis W_incl]                  # LO: lo_mT.png
+      python3 cluster_KIT/combine_nlo.py nloqcd nloewk [--analysis W_incl] # tables <corr>_rates.md, plots
 
-### LO (2026-11-24)
+  Output in `f90/histo/comb/` (W_ATLAS) or `f90/histo/comb_<analysis>/`; `--partial` combines unfinished runs.
+- Common settings: G_mu complex-mass scheme and the EW input of `SETUP.md` (code defaults), `-dynscale` (mu = m_T/2),
+  photons within R = 0.1 (rapidity) of the charged lepton added to it (`-R_phot 0.1`), all cuts and observables on the
+  dressed lepton and the neutrino, `-qmin 200` (generation cut on m_lnu), `-qmin_rsc 20` (default).
 
-| Run | Seeds | Iterations x points |
-|---|---|---|
-| Warm-up | 1 (default seed) | 10 x 1,000,000 |
-| Production | 10 (`-seed 1..10`) | 5 x 10,000,000 each, about 25 min per seed |
+### A. Technical benchmark: `W_ATLAS`, 14 TeV, NNPDF3.1 luxQED (2026-11-24/25)
 
-| Boson | sigma(mu) | sigma(mu/2) | sigma(2mu) |
-|---|---|---|---|
-| W+ | 1538.6 ± 0.08 fb | 1463.3 fb (−4.9%) | 1599.1 fb (+3.9%) |
-| W- | 1097.0 ± 0.06 fb | 1041.8 fb (−5.0%) | 1140.8 fb (+4.0%) |
+Settings: `-ecoll 14000`, `NNPDF31_nnlo_as_0118_luxqed` (the defaults before 2026-11-25), analysis `W_ATLAS`: dressed
+p_T,l > 65 GeV, p_T,nu > 85 GeV, |y| < 2.4 on the charged lepton *and* the neutrino (not the ATLAS fiducial region, see
+`W_ATLASfid`), 200 < m_T < 5000 GeV, product cut p_T,l p_T,nu > 35^2 GeV^2 (never acts). Binary: git `5f3d909` plus
+local changes (`bin/mixed_ll_20261124`, LO; `bin/mixed_ll_20261125`, NLO). Histogram `massT`: 10 GeV bins.
 
-Spread between seeds: 0.08 fb for both bosons. Histograms: `f90/histo/comb/W_ATLAS_<boson>_lo_sum10.histo`, plot
-`f90/histo/comb/lo_mT.png` (m_T from 200 to 3000 GeV; MC error per 10 GeV bin 0.02% at 200 GeV, 1.6% (W+) and 2%
-(W-) at 3000 GeV).
+| Run | Sectors per boson | Warm-up | Production per seed | Seeds |
+|---|---|---|---|---|
+| LO | `lo ns na` | 10 x 10^6 | 5 x 10^7 | 10 |
+| NLO QCD | `ns v`, `ns s`, `ns r_is`, `gq s`, `gq r_is`, `qg s`, `qg r_is` | 10 x 10^7 | 5 x 10^8 | 10 |
+
+| Boson | sigma_LO(mu) | mu/2 | 2 mu | d sigma_NLO QCD(mu) | mu/2 | 2 mu |
+|---|---|---|---|---|---|---|
+| W+ | 1538.615 ± 0.025 | 1463.27 | 1599.09 | +308.491 ± 0.018 | +400.39 | +241.76 |
+| W- | 1096.985 ± 0.025 | 1041.82 | 1140.80 | +207.649 ± 0.008 | +273.11 | +161.04 |
+
+LO + NLO QCD: W+ 1847.11 fb (+0.90% / −0.34% for mu/2, 2 mu), K = 1.200; W- 1304.63 fb (+0.79% / −0.21%), K = 1.189.
+
+| d sigma_NLO QCD [fb] | `ns v` | `ns s` | `ns r_is` | `gq s` | `gq r_is` | `qg s` | `qg r_is` |
+|---|---|---|---|---|---|---|---|
+| W+ | −291.0972 | 626.0074 | −29.5988 | −40.0107 | 41.5998 | −40.0109 | 41.6010 |
+| W- | −208.2326 | 449.2159 | −18.6350 | −33.8702 | 26.5209 | −33.8702 | 26.5196 |
+
+![W_ATLAS LO](plots/benchmark/W_ATLAS/lo_mT.png)
+![W_ATLAS W+ LO and LO + NLO QCD](plots/benchmark/W_ATLAS/nloqcd_wp_lo_nlo.png)
+![W_ATLAS W- LO and LO + NLO QCD](plots/benchmark/W_ATLAS/nloqcd_wm_lo_nlo.png)
+![W_ATLAS W+ NLO QCD per sector](plots/benchmark/W_ATLAS/nloqcd_wp_sectors.png)
+![W_ATLAS W- NLO QCD per sector](plots/benchmark/W_ATLAS/nloqcd_wm_sectors.png)
+
+Consistency checks:
+- LO seeds: spread 0.079 (W+) and 0.078 fb (W-) per seed, matching Vegas' error per seed (0.097, 0.063); the
+  histogram error per seed is about 3 times larger (iterations combined in the histograms), so the histogram errors of
+  the combined files are conservative. Warm-up agrees: 1538.2 ± 0.3, 1096.8 ± 0.2 fb.
+- NLO QCD: histogram errors 1.2–2 times the seed-spread errors (W+ 0.023 against 0.018 fb). gq = qg to five digits
+  (mirror), `ns r_is` from the seeds (−29.60 ± 0.02) agrees with its warm-up (−29.61). The sum is dominated by the
+  cancellation `ns s` (+2 x total) against `ns v` (−0.9 x total): above 1.5 TeV the K factor scatters by 2–3% per bin.
+- Scale: the band shrinks from LO (+3.9% / −4.9%) to NLO QCD (+0.9% / −0.3%); at LO only mu_F acts and the two
+  variations cross at m_T ≈ 500 GeV (PDF evolution changes sign).
+- Every histogram sums to the total rate; the 10 seeds of each sector read the same warm-up grid.
+
+### B. Setup A: `W_incl`, 13 TeV, NNPDF4.0 QED (2026-11-25/26)
+
+Settings: the `SETUP.md` setup A: `-ecoll 13000`, `NNPDF40_nnlo_as_01180_qed` (the defaults since 2026-11-25), analysis
+`W_incl`: m_T > 200 GeV only (dressed lepton), histograms `rate`, `rate_window` (Phi(1–4)), `mT` (20 GeV to 1 TeV),
+`mT_high` (100 GeV, 1–3 TeV), `mlnu`, `mlnu_high`, `ptl`, `yl`, `etal`, `ptlnu`, `costhCS`. Binary: git `72b48a8` plus
+the `W_incl` changes committed in `668d178` (`bin/mixed_ll_a738e000`).
+
+| Run | Sectors per boson | Warm-up | Production per seed | Seeds |
+|---|---|---|---|---|
+| LO | `lo ns na` | 10 x 10^6 | 5 x 10^7 | 10 |
+| NLO QCD | `ns v`, `ns s`, `ns r_is`, `gq s`, `gq r_is`, `qg s`, `qg r_is` | 10 x 10^7 | 5 x 5·10^7 | 10 |
+
+| Boson | sigma_LO(mu) | mu/2 | 2 mu | d sigma_NLO QCD(mu) | mu/2 | 2 mu |
+|---|---|---|---|---|---|---|
+| W+ | 2046.077 ± 0.062 | 1971.03 | 2102.69 | +441.063 ± 0.036 | +544.32 | +368.80 |
+| W- | 1275.814 ± 0.027 | 1225.65 | 1313.55 | +269.804 ± 0.016 | +337.11 | +223.42 |
+
+LO + NLO QCD: W+ 2487.14 fb (+1.13% / −0.63%), K = 1.216; W- 1545.62 fb (+1.11% / −0.56%), K = 1.211.
+
+| d sigma_NLO QCD [fb] | `ns v` | `ns s` | `ns r_is` | `gq s` | `gq r_is` | `qg s` | `qg r_is` |
+|---|---|---|---|---|---|---|---|
+| W+ | −388.5424 | 843.8917 | −23.7268 | −43.5381 | 48.2589 | −43.5386 | 48.2589 |
+| W- | −242.8185 | 529.1993 | −13.1911 | −34.8232 | 33.1331 | −34.8235 | 33.1275 |
+
+![W_incl LO](plots/benchmark/W_incl/lo_mT.png)
+![W_incl W+ LO and LO + NLO QCD](plots/benchmark/W_incl/nloqcd_wp_lo_nlo.png)
+![W_incl W- LO and LO + NLO QCD](plots/benchmark/W_incl/nloqcd_wm_lo_nlo.png)
+![W_incl W+ NLO QCD per sector](plots/benchmark/W_incl/nloqcd_wp_sectors.png)
+![W_incl W- NLO QCD per sector](plots/benchmark/W_incl/nloqcd_wm_sectors.png)
+
+All observables of `W_incl`, LO and LO + NLO QCD with scale bands, ratio to LO (`cluster_KIT/plot_obs.py nloqcd --analysis
+W_incl`): K = 1.22, 1.20, 1.18, 1.18 in the windows Phi(1–4); p_T,l starts at 100 GeV at LO (m_T > 200 GeV without
+recoil), NLO fills below and K rises to 1.4 (W+), 1.6 (W-) at high p_T,l; y_l and eta_l nearly equal; p_T,lnu is a
+single LO bin, its band (about ±20%) is the leading-order one; cos theta*_CS peaks at −0.25 (W+) and +0.25 (W-), the
+mirror image expected from V−A with the charged lepton e+ / e-.
+
+![W_incl W+ observables, NLO QCD](plots/benchmark/W_incl/nloqcd_wp_observables.png)
+![W_incl W- observables, NLO QCD](plots/benchmark/W_incl/nloqcd_wm_observables.png)
+
+Consistency checks:
+- Errors: LO seed spread 0.062 (W+), 0.027 fb (W-) against histogram 0.111, 0.067; NLO QCD seed spread 0.036, 0.016
+  against histogram 0.037, 0.021. gq = qg to five or six digits (mirror).
+- Histograms: every histogram (`rate_window`, `mT` + `mT_high`, `mlnu` + `mlnu_high`, `ptl`, `yl`, `etal`, `ptlnu`,
+  `costhCS`) sums to the total rate; the 20 and 100 GeV m_T bins join continuously at 1 TeV; `ptlnu` is a single bin
+  at LO. LO per window Phi(1–4): W+ 1554.08, 413.63, 77.67, 0.70 fb; W- 995.52, 241.59, 38.48, 0.22 fb.
+- Scale: band LO +2.8% / −3.7% (W+), NLO QCD +1.1% / −0.6%; the LO variations cross at m_T ≈ 440 GeV.
+- K factor: 1.23 at 200 GeV, 1.17 near 1 TeV, 1.22 at 3 TeV, smooth with the wider bins.
+- Isolation from the running `W_ATLAS` jobs: grids, logs and histograms named after the analysis; the 34 `W_ATLAS` grids
+  kept their checksums after the `W_incl` warm-ups (checked 2026-11-26).
+
+NLO EW of both runs: to be added when the `ns v` seeds have finished.
