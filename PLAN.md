@@ -242,6 +242,10 @@ The analysis is the twin of `analysis/mod_cut_histo_W_ATLAS.f90`: mT in [200,500
 | C4.6 | `qa` = mirror of `aq`, `ga` = mirror of `ag`, `qg` = mirror of `gq` (automated diff test with x1 <-> x2) | ❌ |
 | C4.7 | Inclusive mixed corrections vs literature for on-shell/off-shell W where available | ❌ |
 | C4.8 | Generation cut (`SETUP.md` 5.4): with mT > 200 GeV the cross section must not depend on `-qmin` (m_lnu >= mT). First check at NLO (QCD and EW, W+ and W-): run `-qmin 100` and `-qmin 200` and compare rate and mT histogram. The NLO EW `ns r_is` sector also tests `-qmin_rsc 1`: with a recombined photon the dressed mT can exceed the generated mass | ❌ |
+| C4.9 | Top width in OpenLoops: `mod_ol_interface.f90:46` sets `width(5)` with the comment "top". PDG number 5 is the b quark, the top is 6, so the top width we pass may never reach OpenLoops, and OpenLoops keeps its own default. `SETUP.md` asks for Gamma_t = 0. With complex masses a non-zero top width slightly changes the EW one-loop amplitude in all runs (top in the loops). Same in all runs, so NLO and NNLO stay consistent with each other, but it may not match `SETUP.md` or POWHEG | ❌ |
+| C4.10 | Q^4 instead of Q^2: six lines in `s_oewk_fs_5i` (`mod_xsects_nnlo_s_ns.f90` 2656, 2723, 2850, 2918, 3062, 3136) multiply by the lepton charge to the fourth power (`Qsq_FS(icoll-2)**2`, `Qsq_FS` = squared charges). Same result only because the charges are 0 or ±1 | ❌ |
+| C4.11 | Extra `Q_lep2` factor: `mod_xsects_nnlo_s_ns.f90` line 3089 multiplies by it on top of the charge already applied. Harmless, since `Q_lep2` = 1 | ❌ |
+| C4.12 | Sector count: the code has four photon sectors and `W.nb` three, because the notebook substitutes ω̃{γ1,g1} = 1 − ω̃{γ2} − ω̃{γ4}. The code uses the form before that substitution, which is the correct one. Copying the notebook's form into the code would lose the leg-3 sector | note |
 
 ## 8. Suggested order
 
