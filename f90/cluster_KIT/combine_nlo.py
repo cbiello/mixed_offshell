@@ -19,6 +19,12 @@ SECS = {'nloqcd': ['ns v', 'ns s', 'ns r_is', 'gq s', 'gq r_is', 'qg s', 'qg r_i
         'nloewk': ['ns v', 'ns s', 'ns r_is', 'ns r_fs_53', 'ns r_fs_54', 'aq s', 'aq r_is', 'qa s', 'qa r_is'],
         'nnlo': [' '.join(l.split()[:2]) for l in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nnlo_qqbar.txt'))
                  if l.strip() and not l.startswith('#')]}   #-- the sectors run so far: q qbar' channel
+GROUPS = {'nnlo': {'s_vewk (EW virtual x int. QCD)': ['ns s_vewk'], 's_vqcd (QCD virtual x int. QED)': ['ns s_vqcd'],
+                   's_12 (double integrated)': ['ns s_12'], 's_oqcd (gluon resolved)': ['ns s_oqcd'],
+                   's_oewk (photon resolved)': ['ns s_oewk_is', 'ns s_oewk_fs_53', 'ns s_oewk_fs_54'],
+                   'rvqcd (QCD loop + photon)': ['ns rvqcd_is', 'ns rvqcd_fs_53', 'ns rvqcd_fs_54'],
+                   'rvewk (EW loop + gluon)': ['ns rvewk_is'], 'RR ns_ga (gluon + photon)': [f'ns_ga {x}' for x in
+                   ['rr_5161a', 'rr_5161c', 'rr_5162', 'rr_5163', 'rr_5164', 'rr_5261', 'rr_5262a', 'rr_5262c', 'rr_5263', 'rr_5264']]}}
 TITLE = {'nloqcd': 'NLO QCD', 'nloewk': 'NLO EW', 'nnlo': "NNLO q qbar'"}; BOS = {'wp': 'W$^+$', 'wm': 'W$^-$'}
 PAL = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6', '#e34948', '#52514e']
 INK, INK2, GRID = '#0b0b0b', '#52514e', '#e4e3df'
@@ -89,6 +95,16 @@ for corr in args or ['nloqcd', 'nloewk']:
             fig.savefig(f'{OUT}/{corr}_{b}_lo_nlo.png', dpi=200, bbox_inches='tight', facecolor='#fcfcfb'); plt.close(fig)
         fig, ax = plt.subplots(2, 1, figsize=(7.5, 7.5), sharex=True, gridspec_kw={'height_ratios': [3, 2], 'hspace': 0.08})
         stairs(ax[0], e, D, color=INK, lw=1.8, label=f'total   {T:.2f} fb')     #-- plot 4: sectors and sector / total
+        if corr in GROUPS:                      #-- many sectors: one curve per contribution (values add, errors in quadrature)
+            hs = {cs: h for cs, _, h in secs}; grouped = []
+            for g, members in GROUPS[corr].items():
+                m = [hs[x] for x in members if x in hs]
+                if not m: continue
+                gh = {k: np.array(m[0][k]) for k in m[0]}
+                for k in gh:
+                    gh[k][:, 1::2] = sum(x[k][:, 1::2] for x in m); gh[k][:, 2::2] = np.sqrt(sum(x[k][:, 2::2]**2 for x in m))
+                grouped.append((g, None, gh))
+            secs = grouped
         for i, (cs, _, h) in enumerate(secs):
             _, y, ey = mt(h); c = PAL[i % len(PAL)]
             stairs(ax[0], e, y, color=c, lw=1.2, label=f'{cs}   {h[1][0, 1]:.2f} fb')
@@ -97,7 +113,7 @@ for corr in args or ['nloqcd', 'nloewk']:
             ax[1].stairs(r, e, baseline=None, color=c, lw=1.2); ax[1].stairs(r + er, e, baseline=r - er, fill=True, color=c, alpha=0.2, lw=0)
         ax[1].axhline(0, color=INK2, lw=0.8); ax[1].axhline(1, color=INK2, lw=0.8, ls=':')
         ax[0].set_yscale('log'); ax[0].set_ylabel(r'|d$\sigma$/d$m_T$|  [fb/GeV]'); ax[0].legend(frameon=False, fontsize=8, ncol=2)
-        ax[0].set_title(f'{BOS[b]}, {TITLE[corr]} ({ANALYSIS}) per sector (dashed: negative), band = MC error', loc='left', color=INK, fontsize=10)
-        ax[1].set_ylabel(f'sector / total δ{TITLE[corr]}'); style(ax)
+        ax[0].set_title(f'{BOS[b]}, {TITLE[corr]} ({ANALYSIS}) per {"contribution" if corr in GROUPS else "sector"} (dashed: negative), band = MC error', loc='left', color=INK, fontsize=10)
+        ax[1].set_ylabel(f'{"contribution" if corr in GROUPS else "sector"} / total δ{TITLE[corr]}'); style(ax)
         fig.savefig(f'{OUT}/{corr}_{b}_sectors.png', dpi=200, bbox_inches='tight', facecolor='#fcfcfb'); plt.close(fig)
     open(f'{OUT}/{corr}_rates.md', 'w').write('\n'.join(md) + '\n')

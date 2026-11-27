@@ -450,7 +450,64 @@ Consistency checks:
 - Isolation from the running `W_ATLAS` jobs: grids, logs and histograms named after the analysis; the 34 `W_ATLAS` grids
   kept their checksums after the `W_incl` warm-ups (checked 2026-11-26).
 
-NLO EW of both runs: to be added when the `ns v` seeds have finished.
+#### NLO EW (`W_incl`, finished 2026-11-27)
+
+Same settings and binary as LO and NLO QCD above (`bin/mixed_ll_a738e000`, histogram line `Git version:
+72b48a8...-dirty`), partition empire, 10 seeds per sector:
+
+| Sectors per boson | Warm-up | Production per seed | Time per seed |
+|---|---|---|---|
+| `ns v` | 10 x 10^6 | 5 x 2·10^7 | 31 h |
+| `ns s`, `aq s`, `qa s` | 10 x 10^7 | 5 x 5·10^7 | 1.5–4.6 h |
+| `ns r_is`, `ns r_fs_53`, `ns r_fs_54`, `aq r_is`, `qa r_is` | 10 x 10^7 | 5 x 4·10^7 | 3.7–7.8 h |
+
+    PART=empire cluster_KIT/submit.sh <boson> nloewk <ch> <sec> 10 <Nc0> 10 <Nc1> 5
+    python3 cluster_KIT/combine_nlo.py nloewk --analysis W_incl       # histo/comb_W_incl/nloewk_rates.md, plots
+    python3 cluster_KIT/plot_obs.py nloewk --analysis W_incl          # all observables
+
+| Boson | d sigma_NLO EW(mu) | mu/2 | 2 mu | d sigma / sigma_LO | sigma_LO+NLO QCD+NLO EW(mu) |
+|---|---|---|---|---|---|
+| W+ | −126.567 ± 0.002 | −124.10 | −127.72 | −6.19% | 2360.573 ± 0.072 |
+| W- | −78.059 ± 0.002 | −76.38 | −78.86 | −6.12% | 1467.559 ± 0.031 |
+
+Errors from the seed spread (histogram errors: ± 0.0045, ± 0.0027 fb). The last column adds LO, d NLO QCD and d NLO EW
+(no mixed term).
+
+| d sigma_NLO EW [fb] | `ns v` | `ns s` | `ns r_is` | `ns r_fs_53` | `ns r_fs_54` | `aq s` | `aq r_is` | `qa s` | `qa r_is` |
+|---|---|---|---|---|---|---|---|---|---|
+| W+ | −104.9302 | −7.0326 | −2.2525 | −4.1299 | −12.0260 | −0.0239 | 1.9262 | −0.0239 | 1.9261 |
+| W- | −63.9465 | −4.3486 | −1.3346 | −7.9795 | −2.6241 | −0.0254 | 1.1125 | −0.0254 | 1.1125 |
+
+d sigma_NLO EW / sigma_LO per window Phi(1–4): W+ −5.51%, −7.63%, −11.86%, −24.10%; W- −5.53%, −7.65%, −11.74%,
+−23.94%. Per m_T bin (W+): −5.0% at 200 GeV, −9.9% at 500 GeV, −16.8% at 1 TeV, −26.2% at 2 TeV, −32.8% at 2.9 TeV.
+
+![W_incl W+ LO and LO + NLO EW](plots/benchmark/W_incl/nloewk_wp_lo_nlo.png)
+![W_incl W- LO and LO + NLO EW](plots/benchmark/W_incl/nloewk_wm_lo_nlo.png)
+![W_incl W+ NLO EW per sector](plots/benchmark/W_incl/nloewk_wp_sectors.png)
+![W_incl W- NLO EW per sector](plots/benchmark/W_incl/nloewk_wm_sectors.png)
+![W_incl W+ observables, NLO EW](plots/benchmark/W_incl/nloewk_wp_observables.png)
+![W_incl W- observables, NLO EW](plots/benchmark/W_incl/nloewk_wm_observables.png)
+
+Consistency checks:
+- Errors: seed spread 0.0023 (W+), 0.0015 fb (W-) against histogram 0.0045, 0.0027; per sector the seed spread is
+  below or close to the histogram error (largest ratio 1.2, W- `r_fs_54`).
+- Mirror symmetry: `aq` = `qa` to four or five digits (`r_is` 1.9262 / 1.9261, `s` −0.0239 / −0.0239).
+- Final-state photon sector larger on the charged-lepton leg: `r_fs_54` (W+, e+ is leg 4) −12.03 against `r_fs_53`
+  −4.13; `r_fs_53` (W-, e- is leg 3) −7.98 against `r_fs_54` −2.62.
+- Histograms: every histogram sums to the total rate (W+ −126.567, W- −78.059 fb, within 10^-5 relative); `mT` and
+  `mT_high` join at 1 TeV (d sigma_EW / d sigma_LO = −16.1% in 980–1000 GeV, −16.8% in 1000–1100 GeV).
+- Scale: the correction changes by −1.9% / +0.9% (W+), −2.1% / +1.0% (W-) of itself, against the LO band +2.8% / −3.7%:
+  nearly scale independent, as expected for an EW correction.
+- Sudakov: the correction grows negative with m_T, from −5% at 200 GeV to −33% at 2.9 TeV, the same for W+ and W-.
+- `ns v` dominates (83% of the total); `ns s` is small and of the same sign (−7.03, −4.35 fb), unlike NLO QCD where
+  `ns v` and `ns s` cancel.
+- Partial against complete `ns v`: 1–2 iterations gave W+ −104.9319, W- −63.9463 fb; complete −104.9302 ± 0.0039,
+  −63.9465 ± 0.0023.
+- Isolation: the 34 `W_ATLAS` grids keep their checksums (`md5sum -c grids_before.md5`, 34 OK, 2026-11-27).
+- The seeds (5 iterations each) predate the histogram fix `299146b` (iterations averaged with the Vegas weights):
+  totals unaffected, sparse bins in the distribution tails may be biased low; the same holds for LO and NLO QCD above.
+
+NLO EW of `W_ATLAS`: `ns v` still running (2–3 of 5 iterations after 45 h on 2026-11-27).
 
 ### Planned: full NNLO run (`W_incl`, all channels)
 
