@@ -1,0 +1,35 @@
+#!/bin/bash
+
+source ./identity.mk
+
+if [ $Iam == fabrizio ]; then
+SEDcmd=sed
+elif [ $Iam == kirill ]; then
+SEDcmd=gsed
+elif [ $Iam == raoul ]; then
+SEDcmd=sed
+elif [ $Iam == lxplus ]; then
+SEDcmd=sed
+fi
+
+#$SEDcmd -n '/subroutine init_histo/,/end subroutine cut_histo/p' ./Histograms/mod_histograms.f90 > dump_cut.f90
+cp $1  dump_cut.f90
+$SEDcmd -i'.original' -e 's/\"/\"\"/g;s/^/   write(12,A) "\#/;s/$/\"/' dump_cut.f90
+$SEDcmd -i'.original' -e "s/A/\'(A)\'/" dump_cut.f90
+mv dump_cut.f90 Histograms/dump_cut.f90
+rm -f dump_cut.f90.original
+
+cp BasicDef/mod_consts_dp.f90 dump_const.f90
+$SEDcmd -i'.original' -e 's/\"/\"\"/g;s/^/   write(12,A) "\#/;s/$/\"/' dump_const.f90
+$SEDcmd -i'.original' -e "s/A/\'(A)\'/" dump_const.f90
+mv dump_const.f90 Histograms/dump_const.f90
+rm -f dump_const.f90.original
+
+#now write the Nobs
+Nobs=`cat $1 | grep Nobs | awk '{print $4}'`
+Nnoncum=`cat $1 | grep Nnoncum | awk '{print $4}'`
+cutname=`cat $1 | grep cutname | awk '{print $4}'`
+echo "  integer, public, parameter :: Nobs = $Nobs  ! total number of observabels MUST BE SMALLER THAN NOBS_MAX = 60" > include_nobs.f90
+echo "  integer, public, parameter :: Nnoncum = $Nnoncum ! total number of non cumulative histograms (must be in the first position)" >> include_nobs.f90
+echo "  character :: cut_id*(50) = $cutname" >> include_nobs.f90
+mv include_nobs.f90 Histograms/include_nobs.f90

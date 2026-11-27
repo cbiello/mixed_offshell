@@ -1,0 +1,40 @@
+  print *, 'allocate NNLO rv'
+
+  allocate(MyKinSet%AllKinConfig(8))
+
+  allocate(MyKinSet%AllKinConfig(1)%LimMom(4,5))    
+  allocate(MyKinSet%AllKinConfig(1)%AmpMom(4,5))    
+  allocate(MyKinSet%AllKinConfig(1)%KinInv(3))
+  !
+  allocate(MyKinSet%AllKinConfig(2)%LimMom(4,5))  
+  allocate(MyKinSet%AllKinConfig(2)%AmpMom(4,4))  
+  allocate(MyKinSet%AllKinConfig(2)%KinInv(3))
+  !
+  allocate(MyKinSet%AllKinConfig(3)%LimMom(4,5))    
+  allocate(MyKinSet%AllKinConfig(3)%AmpMom(4,4))    
+  allocate(MyKinSet%AllKinConfig(3)%KinInv(3))
+  !
+  allocate(MyKinSet%AllKinConfig(4)%LimMom(4,5))
+  allocate(MyKinSet%AllKinConfig(4)%AmpMom(4,4))
+  allocate(MyKinSet%AllKinConfig(4)%KinInv(3))
+  !
+  allocate(MyKinSet%AllKinConfig(5)%LimMom(4,5))    
+  allocate(MyKinSet%AllKinConfig(5)%AmpMom(4,5))    
+  allocate(MyKinSet%AllKinConfig(5)%KinInv(3))
+  !
+  allocate(MyKinSet%AllKinConfig(6)%LimMom(4,5))  
+  allocate(MyKinSet%AllKinConfig(6)%AmpMom(4,4))  
+  allocate(MyKinSet%AllKinConfig(6)%KinInv(3))
+  !
+  allocate(MyKinSet%AllKinConfig(7)%LimMom(4,5))    
+  allocate(MyKinSet%AllKinConfig(7)%AmpMom(4,4))    
+  allocate(MyKinSet%AllKinConfig(7)%KinInv(3))
+  !
+  allocate(MyKinSet%AllKinConfig(8)%LimMom(4,5))
+  allocate(MyKinSet%AllKinConfig(8)%AmpMom(4,4))
+  allocate(MyKinSet%AllKinConfig(8)%KinInv(3))
+
+  do j=1,8
+     MyKinSet%AllKinConfig(j)%NumLept=2
+  enddo
+

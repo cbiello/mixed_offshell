@@ -1,0 +1,786 @@
+!-- amplitudes with extra jet: factor out gs**2 per extra emission
+
+module mod_amplitudes_tree_wp
+  use mod_types; use mod_consts_dp
+  use mod_auxfunctions
+  implicit none
+  private
+
+  public :: restree, restree_j
+  public :: restree_2q_jj, restree_gg_jj, restree_qg_jj, restree_gq_jj, restree_qqb_jj
+
+contains
+
+  !----------------------------------------------------------------------------!
+  !-- LO                                                                     --!
+  !----------------------------------------------------------------------------!
+
+  !-- f(1) + f(2) --> X
+  !-- summed / averaged
+  subroutine restree(p,res)
+    real(dp), intent(in)  :: p(4,4)
+    real(dp), intent(out) :: res(2)
+    real(dp)              :: propsq_w,prefac
+
+    propsq_w = one/((two*scr(p(:,3),p(:,4))-mwsq)**2+mwsq*gaw**2)
+    prefac = gwsq**2*propsq_w*xn
+
+    !--u dx > nu ep, c sx > nu ep
+    res(1) = four*scr(p(:,2),p(:,3))*scr(p(:,1),p(:,4))
+
+    !--dx u > nu ep, sx c > nu ep MIRROR
+    res(2) = four*scr(p(:,2),p(:,4))*scr(p(:,1),p(:,3))
+
+    res = res  * aveqq * prefac
+
+
+#if (_CheckAmps == 1)
+    include './CheckAmps/checkmad_w_LO.f90'
+#endif
+
+    return
+
+  end subroutine restree
+
+  !----------------------------------------------------------------------------!
+  !-- NLO                                                                    --!
+  !----------------------------------------------------------------------------!
+
+  !-- f(1) + f(2) --> f(3) X
+  !-- summed / averaged
+  subroutine restree_j(p,res_sping_j,res_j)
+    real(dp), intent(in) :: p(4,5)
+    complex(dp), intent(out) :: res_sping_j(6,-1:1,-1:1)
+    real(dp), intent(out) :: res_j(6)
+    real(dp)              :: prefac,propsq_w
+    real(dp) :: sprod(5,5)
+    complex(dp) :: za(5,5),zb(5,5)
+    integer :: part_conf(3,6),i,ii,jj
+    complex(dp) :: amp(-1:1)
+    real(dp), parameter :: avecol_qq = aveqq * half * xn * Cf 
+    real(dp), parameter :: avecol_qg = aveqg * half * xn * Cf 
+
+    call spinoru(5,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5)/),za,zb,sprod)
+
+    propsq_w = one/((two*scr(p(:,4),p(:,5))-mwsq)**2+mwsq*gaw**2)
+    prefac = propsq_w * gwsq**2 * four
+
+
+    !-- amplitude is for 0 -> q(1) g(2) qb(3) [V --> l(4) lb(5)]
+    part_conf(1:3,1) = (/2,3,1/) !-- q qx -> g
+    part_conf(1:3,2) = (/3,1,2/) !-- g q -> q
+    part_conf(1:3,3) = (/2,1,3/) !-- g qx -> qx
+    !
+    part_conf(1:3,4) = (/1,3,2/) !-- qx q -> g
+    part_conf(1:3,5) = (/3,2,1/) !-- q g -> q
+    part_conf(1:3,6) = (/1,2,3/) !-- qx g -> qx
+
+
+    res_j = zero
+    res_sping_j = zero
+
+    do i = 1,6
+
+       call master_amp_qgqbV_w(part_conf(1,i),part_conf(2,i),part_conf(3,i),4,5,za,zb,sprod,amp)
+
+       do ii = -1,1,2
+       do jj = -1,1,2
+
+          res_sping_j(i,ii,jj) = res_sping_j(i,ii,jj) + amp(ii)*conjg(amp(jj))
+
+       enddo
+       enddo
+
+    enddo
+
+    res_sping_j = res_sping_j * prefac
+
+    !--u dx > g nu ep, c sx > g nu ep
+    res_sping_j(1,:,:) = res_sping_j(1,:,:) * avecol_qq
+
+    !--g u > d nu ep, g c > s nu ep
+    res_sping_j(2,:,:) = res_sping_j(2,:,:) * avecol_qg
+
+    !--g dx > ux nu ep, g sx > cx nu ep
+    res_sping_j(3,:,:) = res_sping_j(3,:,:) * avecol_qg
+
+    !--dx u > g nu ep, sx c > g nu ep MIRROR
+    res_sping_j(4,:,:) = res_sping_j(4,:,:) * avecol_qq
+
+    !--u g > d nu ep, c g > s nu ep MIRROR
+    res_sping_j(5,:,:) = res_sping_j(5,:,:) * avecol_qg
+
+    !--dx g > ux nu ep, sx g > cx nu ep MIRROR
+    res_sping_j(6,:,:) = res_sping_j(6,:,:) * avecol_qg
+
+    res_j(:) = res_sping_j(:,+1,+1)+res_sping_j(:,-1,-1)
+
+
+
+#if (_CheckAmps == 1)
+    include './CheckAmps/checkmad_w_NLO.f90'
+#endif
+
+    return
+
+  end subroutine restree_j
+
+  !----------------------------------------------------------------------------!
+  !-- NNLO                                                                   --!
+  !----------------------------------------------------------------------------!
+
+  !-- f(1) + f(2) -> f(3) + f(4) + X
+  !-- summed/averaged
+  subroutine restree_2q_jj(p,res_jj)
+    real(dp), intent(in) :: p(4,6)
+    real(dp), intent(out) :: res_jj(30)
+    complex(dp) :: za(6,6),zb(6,6)
+    real(dp) :: sprod(6,6)
+    real(dp) :: propsq_w,prefac
+    integer :: part_conf(4,6,4) !-- particle ordering, a-f amplitude, (qqb,qbq,qq,qbqb)
+    complex(dp) :: amp_a(-1:1) !-- hel index
+    complex(dp) :: amp_b(-1:1)
+    complex(dp) :: amp_c(-1:1)
+    complex(dp) :: amp_d(-1:1)
+    complex(dp) :: amp_e(-1:1)
+    complex(dp) :: amp_f(-1:1)
+    real(dp) :: res_a(1:2) !-- qqb/qbq
+    real(dp) :: res_b(1:2)
+    real(dp) :: res_ac(1:2),res_ad(1:2)
+    real(dp) :: res_bc(1:2),res_bd(1:2)
+    real(dp) :: res_c(1:4) !-- qqb/qbq/qq/qbqb
+    real(dp) :: res_d(1:4),res_e(1:4),res_f(1:4) 
+    real(dp) :: res_ce(1:4),res_cf(1:4)
+    real(dp) :: res_de(1:4),res_df(1:4)
+    real(dp), parameter :: pref1 = xn*Cf*tr*aveqq
+    real(dp), parameter :: pref2 = xn*half*Cf*(Ca-two*Cf)*aveqq
+    integer :: i,j
+
+    call spinoru(6,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5),p(:,6)/),za,zb,sprod)
+    propsq_w = one/((two*scr(p(:,5),p(:,6))-mwsq)**2+mwsq*gaw**2)
+    prefac = propsq_w * gwsq**2 * four
+
+    !--
+
+    part_conf(1:4,1,1) = (/2,1,3,4/) !-- a,qqb
+    part_conf(1:4,2,1) = (/3,4,2,1/) !-- b,qqb
+    part_conf(1:4,3,1) = (/3,1,2,4/) !-- c,qqb
+    part_conf(1:4,4,1) = (/2,4,3,1/) !-- d,qqb
+
+    part_conf(1:4,1,2) = (/1,2,3,4/) !-- a,qbq
+    part_conf(1:4,2,2) = (/3,4,1,2/) !-- b,qbq
+    part_conf(1:4,3,2) = (/3,2,1,4/) !-- c,qbq
+    part_conf(1:4,4,2) = (/1,4,3,2/) !-- d,qbq
+
+    part_conf(1:4,3,3) = (/3,1,4,2/) !-- c,qq
+    part_conf(1:4,4,3) = (/4,2,3,1/) !-- d,qq
+    part_conf(1:4,5,3) = (/3,2,4,1/) !-- e,qq
+    part_conf(1:4,6,3) = (/4,1,3,2/) !-- f,qq
+
+    part_conf(1:4,3,4) = (/1,3,2,4/) !-- c,qbqb
+    part_conf(1:4,4,4) = (/2,4,1,3/) !-- d,qbqb
+    part_conf(1:4,5,4) = (/2,3,1,4/) !-- e,qbqb
+    part_conf(1:4,6,4) = (/1,4,2,3/) !-- f,qbqb
+
+
+    res_a = zero
+    res_b = zero
+    res_c = zero
+    res_d = zero
+    res_e = zero
+    res_f = zero
+
+    res_ac = zero
+    res_ad = zero
+
+    res_bc = zero
+    res_bd = zero
+    
+    res_ce = zero
+    res_cf = zero
+    
+    res_de = zero
+    res_df = zero
+
+    !-- qqb + qbq
+
+    do i = 1,2
+    
+       call master_amp_qqbQQBV_w(part_conf(1,1,i),part_conf(2,1,i),part_conf(3,1,i),part_conf(4,1,i),5,6,za,zb,sprod,amp_a)
+       call master_amp_qqbQQBV_w(part_conf(1,2,i),part_conf(2,2,i),part_conf(3,2,i),part_conf(4,2,i),5,6,za,zb,sprod,amp_b)
+       call master_amp_qqbQQBV_w(part_conf(1,3,i),part_conf(2,3,i),part_conf(3,3,i),part_conf(4,3,i),5,6,za,zb,sprod,amp_c)
+       call master_amp_qqbQQBV_w(part_conf(1,4,i),part_conf(2,4,i),part_conf(3,4,i),part_conf(4,4,i),5,6,za,zb,sprod,amp_d)
+
+       do j = -1,1,2
+
+          res_a(i) = res_a(i) + abs(amp_a(j))**2
+          res_b(i) = res_b(i) + abs(amp_b(j))**2
+          res_c(i) = res_c(i) + abs(amp_c(j))**2
+          res_d(i) = res_d(i) + abs(amp_d(j))**2
+          
+       enddo
+
+       res_ac(i) = res_ac(i) + two*real(amp_a(-1)*conjg(amp_c(-1)),kind=dp)
+       res_ad(i) = res_ad(i) + two*real(amp_a(-1)*conjg(amp_d(-1)),kind=dp)
+
+       res_bc(i) = res_bc(i) + two*real(amp_b(-1)*conjg(amp_c(-1)),kind=dp)
+       res_bd(i) = res_bd(i) + two*real(amp_b(-1)*conjg(amp_d(-1)),kind=dp)
+
+    enddo
+
+    !-- qq + qbqb
+
+    do i = 3,4
+    
+       call master_amp_qqbQQBV_w(part_conf(1,3,i),part_conf(2,3,i),part_conf(3,3,i),part_conf(4,3,i),5,6,za,zb,sprod,amp_c)
+       call master_amp_qqbQQBV_w(part_conf(1,4,i),part_conf(2,4,i),part_conf(3,4,i),part_conf(4,4,i),5,6,za,zb,sprod,amp_d)
+       call master_amp_qqbQQBV_w(part_conf(1,5,i),part_conf(2,5,i),part_conf(3,5,i),part_conf(4,5,i),5,6,za,zb,sprod,amp_e)
+       call master_amp_qqbQQBV_w(part_conf(1,6,i),part_conf(2,6,i),part_conf(3,6,i),part_conf(4,6,i),5,6,za,zb,sprod,amp_f)
+
+       do j = -1,1,2
+
+          res_c(i) = res_c(i) + abs(amp_c(j))**2
+          res_d(i) = res_d(i) + abs(amp_d(j))**2
+          res_e(i) = res_e(i) + abs(amp_e(j))**2
+          res_f(i) = res_f(i) + abs(amp_f(j))**2
+          
+       enddo
+
+       res_ce(i) = res_ce(i) + two*real(amp_c(-1)*conjg(amp_e(-1)),kind=dp)
+       res_cf(i) = res_cf(i) + two*real(amp_c(-1)*conjg(amp_f(-1)),kind=dp)
+
+       res_de(i) = res_de(i) + two*real(amp_d(-1)*conjg(amp_e(-1)),kind=dp)
+       res_df(i) = res_df(i) + two*real(amp_d(-1)*conjg(amp_f(-1)),kind=dp)
+    
+    enddo
+
+    !---
+
+    !-- color and symmetry factors
+    res_a = res_a * pref1 * vn_taga
+    res_b = res_b * pref1 * vn_tagb
+    res_c = res_c * pref1 * vn_tagc
+    res_d = res_d * pref1 * vn_tagc
+    res_e = res_e * pref1 * vn_tagc
+    res_f = res_f * pref1 * vn_tagc
+    
+    res_ac = res_ac * pref2 * vn_tagac
+    res_ad = res_ad * pref2 * vn_tagac
+
+    res_bc = res_bc * pref2 * vn_tagbc
+    res_bd = res_bd * pref2 * vn_tagbc
+
+    res_ce = res_ce * pref2 * vn_tagcf
+    res_cf = res_cf * pref2 * vn_tagce
+
+    res_de = res_de * pref2 * vn_tagce
+    res_df = res_df * pref2 * vn_tagcf
+
+
+
+
+    !--u d > u u nu ep, c s > c c nu ep 
+    res_jj(1) = (res_d(3)+res_e(3)+res_de(3))*half
+
+    !--u ux > u dx nu ep, c cx > c sx nu ep 
+    res_jj(2) = res_b(1)+res_d(1)+res_bd(1)
+
+    !--d d > u d nu ep, s s > c s nu ep 
+    res_jj(3) = res_c(3)+res_e(3)+res_ce(3)
+
+    !--d ux > u ux nu ep, s cx > c cx nu ep 
+    res_jj(4) = res_a(1)+res_c(1)+res_ac(1)
+
+    !--d ux > d dx nu ep, s cx > s sx nu ep 
+    res_jj(5) = res_a(1)+res_d(1)+res_ad(1)
+
+    !--d dx > u dx nu ep, s sx > c sx nu ep 
+    res_jj(6) = res_b(1)+res_c(1)+res_bc(1)
+
+    !--ux ux > ux dx nu ep, cx cx > cx sx nu ep 
+    res_jj(7) = res_d(4)+res_f(4)+res_df(4)
+
+    !--ux dx > dx dx nu ep, cx sx > sx sx nu ep 
+    res_jj(8) = (res_c(4)+res_f(4)+res_cf(4))*half
+
+    !--u s > u c nu ep, c d > c u nu ep, d s > d c nu ep 
+    res_jj(9) = res_d(3)
+
+    !--u ux > c sx nu ep, c cx > u dx nu ep, d dx > c sx nu ep, s sx > u dx nu ep 
+    res_jj(10) = res_b(1)
+
+    !--u cx > u sx nu ep, c ux > c dx nu ep, d cx > d sx nu ep, s ux > s dx nu ep 
+    res_jj(11) = res_d(1)
+
+    !--d s > u s nu ep 
+    res_jj(12) = res_c(3)
+
+    !--d ux > c cx nu ep, d ux > s sx nu ep, s cx > u ux nu ep, s cx > d dx nu ep 
+    res_jj(13) = res_a(1)
+
+    !--d cx > u cx nu ep, d sx > u sx nu ep, s ux > c ux nu ep, s dx > c dx nu ep 
+    res_jj(14) = res_c(1)
+
+    !--ux cx > ux sx nu ep 
+    res_jj(15) = res_d(4)
+
+    !--ux cx > cx dx nu ep, ux sx > sx dx nu ep, cx dx > dx sx nu ep 
+    res_jj(16) = res_f(4)
+
+    !--d u > u u nu ep, s c > c c nu ep  MIRROR
+    res_jj(17) = (res_c(3)+res_f(3)+res_cf(3))*half
+
+    !--ux u > u dx nu ep, cx c > c sx nu ep  MIRROR
+    res_jj(18) = res_b(2)+res_d(2)+res_bd(2)
+
+    !--ux d > u ux nu ep, cx s > c cx nu ep  MIRROR
+    res_jj(19) = res_a(2)+res_c(2)+res_ac(2)
+
+    !--ux d > d dx nu ep, cx s > s sx nu ep  MIRROR
+    res_jj(20) = res_a(2)+res_d(2)+res_ad(2)
+
+    !--dx d > u dx nu ep, sx s > c sx nu ep  MIRROR
+    res_jj(21) = res_b(2)+res_c(2)+res_bc(2)
+
+    !--dx ux > dx dx nu ep, sx cx > sx sx nu ep  MIRROR
+    res_jj(22) = (res_d(4)+res_e(4)+res_de(4))*half
+
+    !--s u > u c nu ep, d c > c u nu ep, s d > d c nu ep  MIRROR
+    res_jj(23) = res_f(3)
+
+    !--ux u > c sx nu ep, cx c > u dx nu ep, dx d > c sx nu ep, sx s > u dx nu ep  MIRROR
+    res_jj(24) = res_b(2)
+
+    !--cx u > u sx nu ep, ux c > c dx nu ep, cx d > d sx nu ep, ux s > s dx nu ep  MIRROR
+    res_jj(25) = res_d(2)
+
+    !--s d > u s nu ep  MIRROR
+    res_jj(26) = res_e(3)
+
+    !--ux d > c cx nu ep, ux d > s sx nu ep, cx s > u ux nu ep, cx s > d dx nu ep  MIRROR
+    res_jj(27) = res_a(2)
+
+    !--cx d > u cx nu ep, sx d > u sx nu ep, ux s > c ux nu ep, dx s > c dx nu ep  MIRROR
+    res_jj(28) = res_c(2)
+
+    !--cx ux > ux sx nu ep  MIRROR
+    res_jj(29) = res_f(4)
+
+    !--cx ux > cx dx nu ep, sx ux > sx dx nu ep, dx cx > dx sx nu ep  MIRROR
+    res_jj(30) = res_d(4)
+
+
+    res_jj = res_jj * prefac
+
+
+
+#if (_CheckAmps == 1)
+    include './CheckAmps/checkmad_w_2q.f90'
+#endif
+
+    return
+
+  end subroutine restree_2q_jj
+
+
+  !-- g(1) + g(2) -> q(3) + qb(4) + X
+  subroutine restree_gg_jj(p,res_jj)
+    real(dp), intent(in) :: p(4,6)
+    real(dp), intent(out) :: res_jj(1)
+   complex(dp) :: za(6,6),zb(6,6)
+    real(dp) :: sprod(6,6)
+    real(dp) :: propsq_w,prefac
+    real(dp) :: res_a,res_b
+    integer :: h1,h2
+    complex(dp) :: amp1(-1:1,-1:1),amp2(-1:1,-1:1)
+
+    call spinoru(6,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5),p(:,6)/),za,zb,sprod)
+
+
+    propsq_w = one/((two*scr(p(:,5),p(:,6))-mwsq)**2+mwsq*gaw**2)
+    prefac = propsq_w * gwsq**2 * four
+
+    !--
+
+    res_a = zero
+    res_b = zero
+
+    call master_amp_qggqbV_w(3,1,2,4,5,6,za,zb,sprod,amp1)
+    call master_amp_qggqbV_w(3,2,1,4,5,6,za,zb,sprod,amp2)
+
+    do h2 = -1,1,2
+    do h1 = -1,1,2
+
+       res_a = res_a + abs(amp1(h1,h2))**2 + abs(amp2(h1,h2))**2
+       res_b = res_b + two * real(amp1(h1,h2)*conjg(amp2(h2,h1)),kind=dp)
+       
+    enddo
+    enddo
+
+    res_a = res_a * Cf**2 * xn * tagab
+    res_b = res_b * Cf*(Cf * tagab - Ca*half*tagnab) * xn
+
+    !--g g > u dx nu ep, g g > c sx nu ep
+    res_jj(1) = (res_a+res_b)*avegg*prefac
+
+
+#if (_CheckAmps == 1)
+    include './CheckAmps/checkmad_w_gg.f90'
+#endif
+
+    return
+
+  end subroutine restree_gg_jj
+
+  !-- q/qb(1) + g(2) -> q/qb(3) + qb(4) + X
+  subroutine restree_qg_jj(p,res_jj)
+    real(dp), intent(in) :: p(4,6)
+    real(dp), intent(out) :: res_jj(2)
+    complex(dp) :: za(6,6),zb(6,6)
+    real(dp) :: sprod(6,6)
+    real(dp) :: propsq_w,prefac
+    real(dp) :: res_a,res_b
+    integer :: h1,h2
+    complex(dp) :: amp1(-1:1,-1:1),amp2(-1:1,-1:1)
+
+
+    call spinoru(6,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5),p(:,6)/),za,zb,sprod)
+
+    propsq_w = one/((two*scr(p(:,5),p(:,6))-mwsq)**2+mwsq*gaw**2)
+
+    prefac = propsq_w * gwsq**2 * four
+
+    !-- q g -> q g
+
+    res_a = zero
+    res_b = zero
+
+    call master_amp_qggqbV_w(3,4,2,1,5,6,za,zb,sprod,amp1)
+    call master_amp_qggqbV_w(3,2,4,1,5,6,za,zb,sprod,amp2)
+
+    do h2 = -1,1,2
+    do h1 = -1,1,2
+
+       res_a = res_a + abs(amp1(h1,h2))**2 + abs(amp2(h1,h2))**2
+       res_b = res_b + two * real(amp1(h1,h2)*conjg(amp2(h2,h1)),kind=dp)
+       
+    enddo
+    enddo
+
+    res_a = res_a * Cf**2 * xn * tagab
+    res_b = res_b * Cf*(Cf * tagab - Ca*half*tagnab) * xn
+
+    !--d g > u g nu ep, s g > c g nu ep
+    res_jj(1) = (res_a+res_b)*aveqg*prefac
+
+   ! --- 
+
+    !-- qx g -> qx g
+
+    res_a = zero
+    res_b = zero
+
+    call master_amp_qggqbV_w(1,4,2,3,5,6,za,zb,sprod,amp1)
+    call master_amp_qggqbV_w(1,2,4,3,5,6,za,zb,sprod,amp2)
+
+    do h2 = -1,1,2
+    do h1 = -1,1,2
+
+       res_a = res_a + abs(amp1(h1,h2))**2 + abs(amp2(h1,h2))**2
+       res_b = res_b + two * real(amp1(h1,h2)*conjg(amp2(h2,h1)),kind=dp)
+       
+    enddo
+    enddo
+
+    res_a = res_a * Cf**2 * xn * tagab
+    res_b = res_b * Cf*(Cf * tagab - Ca*half*tagnab) * xn
+
+
+    !--ux g > dx g nu ep, cx g > sx g nu ep
+    res_jj(2) = (res_a+res_b)*aveqg*prefac
+
+
+
+#if (_CheckAmps == 1)
+    include './CheckAmps/checkmad_w_qg.f90'
+#endif
+
+    return
+
+  end subroutine restree_qg_jj
+
+  !-- g(1) + q/qb(2) -> q/qb(3) + qb(4) + X
+  subroutine restree_gq_jj(p,res_jj)
+    real(dp), intent(in) :: p(4,6)
+    real(dp), intent(out) :: res_jj(2)
+    complex(dp) :: za(6,6),zb(6,6)
+    real(dp) :: sprod(6,6)
+    real(dp) :: propsq_w,prefac
+    real(dp) :: res_a,res_b
+    integer :: h1,h2
+    complex(dp) :: amp1(-1:1,-1:1),amp2(-1:1,-1:1)
+
+    call spinoru(6,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5),p(:,6)/),za,zb,sprod)
+
+    propsq_w = one/((two*scr(p(:,5),p(:,6))-mwsq)**2+mwsq*gaw**2)
+    prefac =  propsq_w * gwsq**2 * four
+
+    !-- g q -> q g
+
+    res_a = zero
+    res_b = zero
+
+    call master_amp_qggqbV_w(3,4,1,2,5,6,za,zb,sprod,amp1)
+    call master_amp_qggqbV_w(3,1,4,2,5,6,za,zb,sprod,amp2)
+
+    do h2 = -1,1,2
+    do h1 = -1,1,2
+
+       res_a = res_a + abs(amp1(h1,h2))**2 + abs(amp2(h1,h2))**2
+       res_b = res_b + two * real(amp1(h1,h2)*conjg(amp2(h2,h1)),kind=dp)
+       
+    enddo
+    enddo
+
+    res_a = res_a * Cf**2 * xn * tagab
+    res_b = res_b * Cf*(Cf * tagab - Ca*half*tagnab) * xn
+
+    !--g d > u g nu ep, g s > c g nu ep
+    res_jj(1) = (res_a+res_b)*aveqg*prefac
+
+    ! --- 
+
+    !-- g qx -> qx g
+
+    res_a = zero
+    res_b = zero
+
+    call master_amp_qggqbV_w(2,4,1,3,5,6,za,zb,sprod,amp1)
+    call master_amp_qggqbV_w(2,1,4,3,5,6,za,zb,sprod,amp2)
+
+    do h2 = -1,1,2
+    do h1 = -1,1,2
+
+       res_a = res_a + abs(amp1(h1,h2))**2 + abs(amp2(h1,h2))**2
+       res_b = res_b + two * real(amp1(h1,h2)*conjg(amp2(h2,h1)),kind=dp)
+       
+    enddo
+    enddo
+
+    res_a = res_a * Cf**2 * xn * tagab
+    res_b = res_b * Cf*(Cf * tagab - Ca*half*tagnab) * xn
+
+    !--g ux > dx g nu ep, g cx > sx g nu ep
+    res_jj(2) = (res_a+res_b)*aveqg*prefac
+
+
+
+#if (_CheckAmps == 1)
+    include './CheckAmps/checkmad_w_gq.f90'
+#endif
+
+    return
+
+  end subroutine restree_gq_jj
+
+
+  !-- q/qb(1) + qb/q(2) -> g(3) + g(4) + X
+  subroutine restree_qqb_jj(p,res_jj)
+    real(dp), intent(in) :: p(4,6)
+    real(dp), intent(out) :: res_jj(2)
+    complex(dp) :: za(6,6),zb(6,6)
+    real(dp) :: sprod(6,6)
+    real(dp) :: propsq_w,prefac
+    real(dp) :: res_a,res_b
+    integer :: h1,h2
+    complex(dp) :: amp1(-1:1,-1:1),amp2(-1:1,-1:1)
+
+    call spinoru(6,(/-p(:,1),-p(:,2),p(:,3),p(:,4),p(:,5),p(:,6)/),za,zb,sprod)
+
+    propsq_w = one/((two*scr(p(:,5),p(:,6))-mwsq)**2+mwsq*gaw**2)
+    prefac = propsq_w * gwsq**2 * four
+
+    !-- q qx > g g
+
+    res_a = zero
+    res_b = zero
+
+    call master_amp_qggqbV_w(2,3,4,1,5,6,za,zb,sprod,amp1)
+    call master_amp_qggqbV_w(2,4,3,1,5,6,za,zb,sprod,amp2)
+
+    do h2 = -1,1,2
+    do h1 = -1,1,2
+
+       res_a = res_a + abs(amp1(h1,h2))**2 + abs(amp2(h1,h2))**2
+       res_b = res_b + two * real(amp1(h1,h2)*conjg(amp2(h2,h1)),kind=dp)
+       
+    enddo
+    enddo
+
+    res_a = res_a * Cf**2 * xn * tagab
+    res_b = res_b * Cf*(Cf * tagab - Ca*half*tagnab) * xn
+
+    !--d ux > g g nu ep, s cx > g g nu ep
+    res_jj(1) = (res_a+res_b)*aveqq*prefac
+
+    ! --- 
+
+    !-- qx q > g g 
+
+    res_a = zero
+    res_b = zero
+
+    call master_amp_qggqbV_w(1,3,4,2,5,6,za,zb,sprod,amp1)
+    call master_amp_qggqbV_w(1,4,3,2,5,6,za,zb,sprod,amp2)
+
+    do h2 = -1,1,2
+    do h1 = -1,1,2
+
+       res_a = res_a + abs(amp1(h1,h2))**2 + abs(amp2(h1,h2))**2
+       res_b = res_b + two * real(amp1(h1,h2)*conjg(amp2(h2,h1)),kind=dp)
+       
+    enddo
+    enddo
+
+    res_a = res_a * Cf**2 * xn * tagab
+    res_b = res_b * Cf*(Cf * tagab - Ca*half*tagnab) * xn
+
+
+    !--ux d > g g nu ep, cx s > g g nu ep MIRROR
+    res_jj(2) = (res_a+res_b)*aveqq*prefac 
+
+
+
+#if (_CheckAmps == 1)
+    include './CheckAmps/checkmad_w_qqb.f90'
+#endif
+
+    return
+
+  end subroutine restree_qqb_jj
+
+
+
+  !-- amplitude for 0 -> q(1) g(2) qb(3) [V --> l(4) lb(5)]
+  !-- index: hg
+  subroutine master_amp_qgqbV_w(i1,i2,i3,i4,i5,za,zb,sprod,amp)
+    integer, intent(in) :: i1,i2,i3,i4,i5
+    complex(dp), intent(in) :: za(5,5),zb(5,5)
+    real(dp), intent(in) :: sprod(5,5)
+    complex(dp), intent(out) :: amp(-1:1)
+    complex(dp) :: zab2
+    integer :: j1,j2,j3,j4
+ 
+  
+    zab2(j1,j2,j3,j4) = za(j1,j2)*zb(j2,j4)+za(j1,j3)*zb(j3,j4)
+
+    amp(+1) = za(i1,i4) * zab2(i1,i2,i3,i5)/(za(i1,i2)*za(i2,i3))
+    amp(-1) = -zab2(i4,i1,i2,i3) * zb(i5,i3)/(zb(i1,i2)*zb(i2,i3))
+   
+!    amp(+1) = two * za(i1,i4)**2 * zb(i5,i4)/(za(i1,i2)*za(i2,i3)) 
+!    amp(-1) = two * za(i4,i5) * zb(i5,i3)**2/(zb(i1,i2)*zb(i2,i3)) 
+
+    return
+
+  end subroutine master_amp_qgqbV_w
+
+
+  !-- amplitude for 0 -> q(1) qb(2) [g* -> Q(3) QB(4)] qb(4) [V --> l(5) lb(6)]
+  !-- V attached to the 12 line
+  !-- index: h1,h3,h5,down/up
+  subroutine master_amp_qqbQQBV_az(coupl,i1,i2,i3,i4,i5,i6,za,zb,sprod,amp)
+    integer, intent(in) :: i1,i2,i3,i4,i5,i6
+    complex(dp), intent(in) :: za(6,6),zb(6,6),coupl(-1:1,-1:1,1:2)
+    real(dp), intent(in) :: sprod(6,6)
+    complex(dp), intent(out) :: amp(-1:1,-1:1,-1:1,1:2)
+    complex(dp) :: zab2
+    real(dp) :: dena,denb
+
+    zab2(i1,i2,i3,i4) = za(i1,i2)*zb(i2,i4)+za(i1,i3)*zb(i3,i4)
+
+    dena = (sprod(i1,i3)+sprod(i1,i4)+sprod(i3,i4))*sprod(i3,i4)*sprod(i5,i6) !-- s134*s34*s56
+    denb = (sprod(i2,i3)+sprod(i2,i4)+sprod(i3,i4))*sprod(i3,i4)*sprod(i5,i6) !-- s234*s34*s56
+
+    amp(-1,-1,-1,:) =  (za(i1,i3)*zb(i6,i2)*zab2(i5,i1,i3,i4)/dena-za(i1,i5)*zb(i4,i2)*zab2(i3,i2,i4,i6)/denb)*&
+         coupl(-1,-1,:)
+    amp(-1,-1,+1,:) =  (za(i1,i3)*zb(i5,i2)*zab2(i6,i1,i3,i4)/dena-za(i1,i6)*zb(i4,i2)*zab2(i3,i2,i4,i5)/denb)*&
+         coupl(-1,+1,:)
+    amp(-1,+1,-1,:) =  (za(i1,i4)*zb(i6,i2)*zab2(i5,i1,i4,i3)/dena-za(i1,i5)*zb(i3,i2)*zab2(i4,i2,i3,i6)/denb)*&
+         coupl(-1,-1,:)
+    amp(-1,+1,+1,:) =  (za(i1,i4)*zb(i5,i2)*zab2(i6,i1,i4,i3)/dena-za(i1,i6)*zb(i3,i2)*zab2(i4,i2,i3,i5)/denb)*&
+         coupl(-1,+1,:)
+    !
+    amp(+1,-1,-1,:) = (-za(i2,i3)*zb(i6,i1)*zab2(i5,i2,i3,i4)/denb+za(i2,i5)*zb(i4,i1)*zab2(i3,i1,i4,i6)/dena)*&
+         coupl(+1,-1,:)
+    amp(+1,-1,+1,:) = (-za(i2,i3)*zb(i5,i1)*zab2(i6,i2,i3,i4)/denb+za(i2,i6)*zb(i4,i1)*zab2(i3,i1,i4,i5)/dena)*&
+         coupl(+1,+1,:)
+    amp(+1,+1,-1,:) = (-za(i2,i4)*zb(i6,i1)*zab2(i5,i2,i4,i3)/denb+za(i2,i5)*zb(i3,i1)*zab2(i4,i1,i3,i6)/dena)*&
+         coupl(+1,-1,:)
+    amp(+1,+1,+1,:) = (-za(i2,i4)*zb(i5,i1)*zab2(i6,i2,i4,i3)/denb+za(i2,i6)*zb(i3,i1)*zab2(i4,i1,i3,i5)/dena)*&
+         coupl(+1,+1,:)
+
+    amp = amp * two
+
+    return
+
+  end subroutine master_amp_qqbQQBV_az
+
+
+  !-- 0 -> q(1) g(2) g(3) qb(4) [V --> l(5) lb(6)
+  !-- index: hg1,hg2
+  !-- does not include coupling / propagator
+  subroutine master_amp_qggqbV_w(i1,i2,i3,i4,i5,i6,za,zb,sprod,amp)
+    integer, intent(in) :: i1,i2,i3,i4,i5,i6
+    complex(dp), intent(in) :: za(6,6),zb(6,6)
+    real(dp), intent(in) :: sprod(6,6)
+    complex(dp), intent(out) :: amp(-1:1,-1:1)
+    complex(dp) :: zab2
+    real(dp) :: s3
+    
+    !-- statement functions
+
+    zab2(i1,i2,i3,i4) = za(i1,i2)*zb(i2,i4) + za(i1,i3)*zb(i3,i4)
+    s3(i1,i2,i3) = sprod(i1,i2) + sprod(i1,i3) + sprod(i2,i3)
+
+    !-- 5- 6+
+    amp(+1,+1) = -za(i1,i5)**2*zb(i6,i5)/(za(i1,i2)*za(i2,i3)*za(i3,i4))
+    amp(-1,+1) = (zb(i1,i3)*zb(i5,i6)*zab2(i5,i1,i2,i3)**2/(s3(i1,i2,i3)*zb(i1,i2)*zb(i2,i3)) + &
+         za(i2,i4)*za(i5,i6)*zab2(i2,i3,i4,i6)**2/(s3(i2,i3,i4)*za(i2,i3)*za(i3,i4)))/zab2(i4,i2,i3,i1)
+    amp(+1,-1) = (zb(i2,i4)**3*za(i1,i5)**2*zb(i5,i6)/(s3(i2,i3,i4)*zb(i2,i3)*zb(i3,i4)) + &
+         za(i1,i3)**3*zb(i6,i4)**2*za(i5,i6)/(s3(i1,i2,i3)*za(i1,i2)*za(i2,i3)))/zab2(i1,i2,i3,i4)
+    amp(-1,-1) = za(i5,i6)*zb(i6,i4)**2/(zb(i1,i2)*zb(i2,i3)*zb(i3,i4)) !-- up to a sign
+
+
+
+    return
+
+  end subroutine master_amp_qggqbV_w
+
+
+  !-- amplitude for 0 -> q(1) qb(2) [g* -> Q(3) QB(4)] qb(4) [V --> l(5) lb(6)]
+  !-- V attached to the 12 line
+  !-- index: h3
+  !-- does not include coupling / propagator
+  subroutine master_amp_qqbQQBV_w(i1,i2,i3,i4,i5,i6,za,zb,sprod,amp)
+    integer, intent(in) :: i1,i2,i3,i4,i5,i6
+    complex(dp), intent(in) :: za(6,6),zb(6,6)
+    real(dp), intent(in) :: sprod(6,6)
+    complex(dp), intent(out) :: amp(-1:1)
+    complex(dp) :: zab2
+    real(dp) :: dena,denb
+
+    zab2(i1,i2,i3,i4) = za(i1,i2)*zb(i2,i4)+za(i1,i3)*zb(i3,i4)
+
+    dena = (sprod(i1,i3)+sprod(i1,i4)+sprod(i3,i4))*sprod(i3,i4) !-- s134*s34
+    denb = (sprod(i2,i3)+sprod(i2,i4)+sprod(i3,i4))*sprod(i3,i4) !-- s234*s34
+
+    amp(-1) =  (za(i1,i3)*zb(i6,i2)*zab2(i5,i1,i3,i4)/dena-za(i1,i5)*zb(i4,i2)*zab2(i3,i2,i4,i6)/denb)
+    amp(+1) =  (za(i1,i4)*zb(i6,i2)*zab2(i5,i1,i4,i3)/dena-za(i1,i5)*zb(i3,i2)*zab2(i4,i2,i3,i6)/denb)
+
+    return
+
+  end subroutine master_amp_qqbQQBV_w
+
+
+
+end module mod_amplitudes_tree_wp
