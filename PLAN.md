@@ -319,9 +319,32 @@ Columns: code generalised / limits scale (C1) / finite part vs math (C2) — for
 11. Combining the seed histograms: `nsc-hsummer ad3` (sums all three column pairs: central scale and two variations;
    divide by the number of seeds) or `nsc-hsummer avg` (weights the files by 1/σ² instead of equally)? The latter keeps
    only the first (central) column, so the scale variations are lost and the output cannot go back into `ad3`.
-12. Do we want to use product cuts? In the NCDY we explicitly say that we use them even if they are not imposed in the
+12. ~~Do we want to use product cuts? In the NCDY we explicitly say that we use them even if they are not imposed in the
    experimental analysis. Now: `W_incl` and `W_ATLASfid` have none; `W_ATLAS` keeps pT_l pT_nu > 35^2 GeV^2, which never
-   acts there (pT_l > 65, pT_nu > 85 GeV).
+   acts there (pT_l > 65, pT_nu > 85 GeV).~~
+   **Resolved 2026-11-27: we don't use product cuts to compare with ATLAS. In a standalone study we would use them.**
+13. (Christian, 2026-11-27) The `W_incl` LO, NLO QCD and NLO EW runs used git `72b48a8`, before the histogram fix
+   `299146b`, with 5 iterations per seed: sparse bins of the real-emission sectors can be biased low in the tails (totals
+   are not affected); the plots look smooth, the effect is not quantified. Proposal: rerun the real-emission sectors with
+   the current binary and one iteration per seed (NLO EW `ns r_is`, `ns r_fs_53/54`, `aq r_is`, `qa r_is`, about 580 CPU-h
+   for both bosons; NLO QCD `r_is` another 270 CPU-h) and compare bin by bin. Do we do it?
+14. (Christian, 2026-11-27) Rare large weights and the Vegas average: `ns r_is` (NLO EW) has rare large positive weights;
+   Vegas combines the iterations weighted by 1/sigma^2, so the iterations that contain them count less and the result
+   comes out too negative, beyond the seed-spread error. Christian's runs (5·10^6 per iteration, 17 such iterations out of
+   160 for W+): W+ −2.2685 ± 0.0019 (Vegas-weighted), −2.234 ± 0.022 (plain mean of the iterations); W- −1.3448 ± 0.0013,
+   −1.3385 ± 0.0026; ours (5 x 4·10^7 per seed): −2.2525, −1.3346 fb, the more reliable ones. The effect is 10^-5 of the
+   cross section here, but the same mechanism is seen in the NNLO warm-ups (`s_oewk_is` in ns, qg, gq: single iterations
+   with 20–44% error and the value shifted by up to 60%, at the m_T cut, from real-photon events and their counterterms on
+   opposite sides of the cut; not from the dressing). Hence the full NNLO production and `W_ATLASfid` use one iteration
+   per seed (the seeds averaged with equal weight, unbiased). Proposal: one iteration per seed for every production
+   from now on. Agreed?
+15. (Christian, 2026-11-27) Outermost y_l and eta_l bins of `W_incl`: the NLO EW ratio to LO jumps to 1.33 for
+   |y_l| > 4.4, where LO is almost zero. Checked per sector (W+): it is the photon-initiated real emission gamma q ->
+   l nu q' (`aq r_is` at y > 0, `qa r_is` at y < 0; in 4.4–4.6: LO 0.0019 fb, `aq r_is` +0.0008, the q qbar' sectors
+   vanish with LO). Kinematic: with m_T > 200 GeV and no recoil the LO lepton needs p_T ≈ 100 GeV, which ends LO near
+   |y_l| ≈ 4.4; the recoiling quark lets the lepton reach larger |y| (NLO QCD does the same, as large as LO there). This
+   does not exclude the PDF difference Christian saw above |y_l| > 4.2. Is that one still open?
+16. (Christian, 2026-11-27) Legend of the ATLAS plot covered the last W+ bin: fixed (legend below the panels).
 
 ## 11. Benchmark
 
