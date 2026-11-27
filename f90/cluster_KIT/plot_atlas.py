@@ -70,7 +70,6 @@ for j, b in enumerate(('wp', 'wm')):
     bot.set_xticks([200, 300, 500, 1000, 2000, 5000], ['200', '300', '500', '1000', '2000', '5000']); bot.minorticks_off()
     for a in (top, bot):
         a.grid(True, color=GRID, lw=0.6); a.set_axisbelow(True); a.spines[['top', 'right']].set_visible(False); a.set_xlim(e[0], e[-1])
-    if j == 0: top.legend(frameon=False, fontsize=9, loc='lower left')
     ew_cols = [(c[2], c[0][:, 0]) for c in curves[2:]]
     table += [f'## {label.replace("$", "")}', '', '| m_T [GeV] | ATLAS | LO | LO + NLO QCD (mu/2, 2mu) | NLO QCD / data | '
               + ''.join(f'{l.replace("LO + NLO QCD + ", "+ ")} / data | ' for l, _ in ew_cols) + 'ATLAS DYTurbo / data |',
@@ -84,6 +83,7 @@ for j, b in enumerate(('wp', 'wm')):
               + f'ATLAS DYTurbo (NNLO QCD + NLO EW without FSR) {sig(dyt):.1f}', '']
 fig.suptitle(f'ATLAS high-$m_T$ W (arXiv:2502.21088) against LO, NLO QCD{" and NLO EW" if len(curves) > 2 else ""}, fiducial region of `W_ATLASfid`; bands: '
              '$\\mu_R = \\mu_F \\in [\\mu/2, 2\\mu]$, $\\mu = m_T/2$', x=0.01, ha='left', fontsize=11)
+fig.legend(*axes[0, 0].get_legend_handles_labels(), loc='upper center', bbox_to_anchor=(0.5, 0.02), ncol=2, frameon=False, fontsize=9.5)
 fig.savefig(os.path.join(OUT, 'atlas_mT.png'), dpi=130, bbox_inches='tight', facecolor='#fcfcfb')
 open(os.path.join(OUT, 'atlas_mT.md'), 'w').write('\n'.join(table) + '\n')
 print(os.path.join(OUT, 'atlas_mT.png'))
