@@ -651,17 +651,22 @@ EW input of the code as imported. Inclusive: the code as imported (`fiducial = 0
 5 x 10^5, production 5 x 10^6; NLO warm-up 5 x 2·10^5, production 3 x 2·10^6; the extra fiducial `r` seeds warm-up
 5 x 5·10^5, production 1 x 5·10^6.
 
-| Quantity | This code | Published |
-|---|---|---|
-| Inclusive sigma_LO | 8811 ± 4 pb | 8810 pb (arXiv:2103.02671 Table 1) |
-| Inclusive d sigma_NLO QCD | 2536 ± 8 pb (`r` 612.2 ± 6.5, `v` −2015.3 ± 1.8, `s` 3939.0 ± 4.0) | 2533 pb (arXiv:2103.02671 Table 1) |
-| Fiducial sigma_LO | 5196 ± 8 pb | 5195.0 pb (arXiv:2009.10386 Table 1) |
-| Fiducial d sigma_NLO QCD | 1154 ± 8 pb, provisional (`r` ≈ 101 ± 7, `v` −1187.0 ± 1.0, `s` 2240.0 ± 2.7) | 1137.0 pb (arXiv:2009.10386 Table 1) |
+| Quantity | This code | Published | Difference |
+|---|---|---|---|
+| Inclusive sigma_LO | 8811.5 ± 1.4 pb | 8810 pb (arXiv:2103.02671 Table 1) | +1.1 sigma |
+| Inclusive d sigma_NLO QCD | 2533.5 ± 1.8 pb (`r` 611.0 ± 1.5, `v` −2014.68 ± 0.29, `s` 3937.17 ± 0.85) | 2533 pb (arXiv:2103.02671 Table 1) | +0.3 sigma |
+| Fiducial sigma_LO | 5193.9 ± 1.4 pb | 5195.0 pb (arXiv:2009.10386 Table 1) | −0.8 sigma |
+| Fiducial d sigma_NLO QCD | 1138.5 ± 1.6 pb (`r` 85.97 ± 1.31 from 12 seeds, `v` −1187.67 ± 0.28, `s` 2240.20 ± 0.84) | 1137.0 pb (arXiv:2009.10386 Table 1) | +1.0 sigma |
 
-The first three agree within the MC errors. The fiducial NLO is about 2 sigma high (1.5% of the correction, 0.3% of
-sigma); its error comes from the real-emission sector `r`, which fluctuates by about 25% per run with the cuts (1%
-without): five runs gave 105.9, 107.0, 117.3, 98.0, 77.0 pb. The paper quotes no MC errors. More seeds of `r` are
-running to settle it.
+All four agree with the published numbers within about one sigma (the papers quote no MC errors). Errors: Vegas
+accumulated error of the production iterations (`fort.15`); for the fiducial `r` the plain mean of 12 seeds of one
+iteration each (seed spread 4.5 pb, quoted error per seed 4.3 pb: the errors are reliable; the first run of 3 iterations
+gave 86.7 ± 2.8 pb).
+
+Reading the output: `Chisto17` in the log and the histogram file are rewritten after every iteration, warm-up included,
+so a run is finished only when `fort.15` has all its lines (warm-up plus production iterations) and the process has
+ended. (A first version of this table, commit `9fa9600`, quoted values read before the runs had finished: fiducial NLO
+"1154 ± 8 pb, about 2 sigma high" and "the real-emission sector fluctuates by 25% per run" were artefacts of that.)
 
 Neither paper gives an NNLO QCD number (arXiv:2009.10386 computes the mixed QCD x EW corrections and cites earlier work
 for NNLO QCD; arXiv:2103.02671 uses them for the W mass). NNLO QCD validation plan:
