@@ -602,3 +602,69 @@ All 111 sectors per boson (no VV, no `nf` pieces), 100 seeds per sector:
 Cost from the cluster times of the small NNLO q qbar' run (2026-11-26; other channels scaled from a local timing test):
 about 4,100 CPU-h of warm-up and 343,000 CPU-h of production, ≈ 348,000 CPU-h and 22,422 jobs for both bosons (≈ 38,000
 CPU-h with 10 seeds); longest single job about 4 days (`ns_ga rr_5262c`, `rvewk_is`). To start after C4.9 (resolved).
+
+## 12. NNLO QCD from the external code (`nnlo_qcd/`)
+
+Goal: the NNLO QCD corrections for the ATLAS comparison (setup B, `W_ATLASfid`), computed with a separate code and added
+to the mixed QCD x EW corrections of `f90/`. The two codes stay separate; what must match is the analysis, the PDF, the
+EW input, the scales and the cuts.
+
+Code: NNLO QCD for pp -> W+ -> e+ nu by R. Röntsch (`git.particle.kit.edu:roentsch/f90_wp`, branch `master`, commit
+`e033944` of 2021-02-13, the only version), used with the authors' permission. Same framework as `f90/`: nested
+soft-collinear subtraction; LO, NLO (`r`, `v`, `s`) and NNLO sectors (`vv`; `rv` in ns, qg, gq; `sub12`, `subv`,
+`sub124` in ns, qg, gq, gg; RR sectors `rr4151a`...`rr4252d` in ns, qg, gq, s, gg); limit checks (`corr=limnlo`,
+`limnnlo`). Aligned in 2021 with the mixed QCD x EW code of arXiv:2009.10386 (same EW parameters and histogramming).
+Options as `key=value`: `corr`, `sec`, `ch`, `mu`, `xMuR`, `xMuF`, `vegasNc0/1`, `vegasIt0/1`, `seed`, `runname`,
+`pdford`; output `histo/<runname>_<corr>[_<sec>][_<ch>]_xMuR_..._xMuF_....histo` in fb (histogram 17 = total rate).
+
+As imported it differs from setup B:
+
+| | `nnlo_qcd/` as imported | Needed (`W_ATLASfid`) |
+|---|---|---|
+| W boson | on shell, narrow width (`_PhaseSpaceType=6`) | off shell, 200 < m_T < 5000 GeV |
+| Charge | W+ only | W+ and W- |
+| EW input | M_W = 80.398, Gamma_W = 2.1054 GeV, G_F, real masses, fixed-width propagator | `SETUP.md`, complex-mass G_mu |
+| PDF | `NNPDF31_nnlo_as_0118_luxqed` | `NNPDF40_nnlo_as_01180_qed` |
+| Scale | fixed (`mu=`) | m_T/2 |
+| Analysis | `Histograms/cut_histo_w.f90`, `fiducial = 0` (no cuts; 1 = arXiv:2009.10386; 4–6 = W-mass cuts) | `W_ATLASfid` cuts, ATLAS bins, our histogram format |
+
+The tree amplitudes already contain the full W propagator and the phase space has a flat (off-shell) option; the loop
+corrections at NNLO QCD act on the quark line only.
+
+| Step | Status |
+|---|---|
+| 1. Import unchanged as `nnlo_qcd/` (`5a2bc34`, `nnlo_qcd/IMPORT.md`; working clone `nnlo_qcd_src/` not in git) | ✅ 2026-11-27 |
+| 2. Build on ttpmarvin: `cd nnlo_qcd; mkdir -p objects modules histo; make Iam=ttpmarvin` (gfortran, LHAPDF 6.2.0; 24 s) (`caac068`) | ✅ 2026-11-27 |
+| 3. Reproduce the published LO and NLO QCD numbers as imported; validate NNLO QCD | 🔧 LO, NLO done; NNLO open |
+| 4. Adapt step by step, each a separate commit checked against `f90/` at LO and NLO QCD: off-shell phase space with `-qmin 200`, EW input and complex-mass scheme, NNPDF4.0, mu = m_T/2, W-, `W_ATLASfid` analysis and histogram format | ❌ |
+| 5. NNLO QCD on the cluster for setup B; combine LO + NLO QCD + NNLO QCD + NLO EW + mixed QCD x EW; compare with ATLAS | ❌ |
+
+Notes on the build: `gen_dump.script` regenerates `Histograms/dump_cut.f90`, `dump_const.f90`, `include_nobs.f90` at every
+build (the imported ones were left from an older analysis with 6 histograms); every run writes the Vegas iteration log
+`fort.15` in the working directory (no longer tracked). Run each job in its own directory with a `histo/` subfolder.
+
+### Step 3: published numbers reproduced (2026-11-27)
+
+pp -> W+ -> e+ nu, on-shell W, 13 TeV, `NNPDF31_nnlo_as_0118_luxqed` at all orders, mu_R = mu_F = M_W/2 = 40.199 GeV,
+EW input of the code as imported. Inclusive: the code as imported (`fiducial = 0`). Fiducial: a scratch copy with
+`fiducial = 1` (p_T,e > 15 GeV, p_T,miss > 15 GeV, |eta_e| < 2.4), not committed. Run on ttpmarvin: LO warm-up
+5 x 10^5, production 5 x 10^6; NLO warm-up 5 x 2·10^5, production 3 x 2·10^6; the extra fiducial `r` seeds warm-up
+5 x 5·10^5, production 1 x 5·10^6.
+
+| Quantity | This code | Published |
+|---|---|---|
+| Inclusive sigma_LO | 8811 ± 4 pb | 8810 pb (arXiv:2103.02671 Table 1) |
+| Inclusive d sigma_NLO QCD | 2536 ± 8 pb (`r` 612.2 ± 6.5, `v` −2015.3 ± 1.8, `s` 3939.0 ± 4.0) | 2533 pb (arXiv:2103.02671 Table 1) |
+| Fiducial sigma_LO | 5196 ± 8 pb | 5195.0 pb (arXiv:2009.10386 Table 1) |
+| Fiducial d sigma_NLO QCD | 1154 ± 8 pb, provisional (`r` ≈ 101 ± 7, `v` −1187.0 ± 1.0, `s` 2240.0 ± 2.7) | 1137.0 pb (arXiv:2009.10386 Table 1) |
+
+The first three agree within the MC errors. The fiducial NLO is about 2 sigma high (1.5% of the correction, 0.3% of
+sigma); its error comes from the real-emission sector `r`, which fluctuates by about 25% per run with the cuts (1%
+without): five runs gave 105.9, 107.0, 117.3, 98.0, 77.0 pb. The paper quotes no MC errors. More seeds of `r` are
+running to settle it.
+
+Neither paper gives an NNLO QCD number (arXiv:2009.10386 computes the mixed QCD x EW corrections and cites earlier work
+for NNLO QCD; arXiv:2103.02671 uses them for the W mass). NNLO QCD validation plan:
+1. the code's limit checks (`corr=limnnlo`) for every NNLO sector, as C1.5 for `f90/`;
+2. an inclusive NNLO run on the cluster (about 30 sectors): scale dependence, stability across seeds;
+3. an independent reference with the same input: DYTurbo or MATRIX, inclusive and fiducial.
