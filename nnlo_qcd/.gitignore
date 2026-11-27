@@ -1,0 +1,7 @@
+# build products and run output (make Iam=ttpmarvin)
+objects/
+modules/
+nnlo_wp_qp
+histo/
+*.log
+fort.15

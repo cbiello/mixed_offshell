@@ -94,6 +94,19 @@ else ifeq ($(Iam),lxplus)
    LHAPDF=/afs/cern.ch/user/r/rarontsc/Lib/Install/Lxplus/LHAPDF-6.2.0/lib
 #   LHAPDF=/afs/cern.ch/user/r/rarontsc/Lib/Install/Lxplus/LHAPDF-6.2.0/lib
 
+else ifeq ($(Iam),ttpmarvin)
+   #-- KIT TTP (ttpmarvin and the SLURM nodes): make Iam=ttpmarvin
+   F95compiler = gfortran -cpp @$(ConfigFile)
+   ifeq ($(Opt),Yes)
+     fcompOpts = -O2 -I $(ModuleDir) -ffree-line-length-1000
+   else
+     fcompOpts = -O0 -I $(ModuleDir) -ffree-line-length-1000
+   endif
+   #
+   SEDcmd=sed
+   LHAPDF=/users/ttp/signorile/Desktop/tools/lhapdf-install/lib64
+   fcompOpts += -Wl,-rpath=$(LHAPDF)
+
 endif
 
 ##################################################################################################
