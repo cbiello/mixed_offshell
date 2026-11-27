@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """ATLAS d sigma/d m_T (arXiv:2502.21088, HEPData ins2895869, e and mu combined, Born level) against LO and LO + NLO QCD
-of the W_ATLASfid run, from the f90 directory of that run:
+(and NLO EW, if combined) of the W_ATLASfid run, from the f90 directory of that run:
     python3 cluster_KIT/plot_atlas.py [--seeds 10]
-Reads histo/comb_W_ATLASfid/W_ATLASfid_<b>_lo_sum10.histo and <b>_nloqcd_total.histo (plot_lo.py, combine_nlo.py),
+Reads histo/comb_W_ATLASfid/W_ATLASfid_<b>_lo_sum10.histo, <b>_nloqcd_total.histo and, if present, <b>_nloewk_total.histo
+and the final-state photon sectors <b>_nloewk_ns_r_fs_5{3,4}_sum<n>.histo (plot_lo.py, combine_nlo.py),
 histogram 11 (mT_ATLAS, bin i = ATLAS bin i), and data/hepdata_ins2895869/lep_physical_{plus,minus}_mtw.csv of the
 repository. Data error: statistical and all systematic sources in quadrature (larger of up/down) and the luminosity
-(0.83%). Also shown: the ATLAS DYTurbo NNLO QCD prediction with NNPDF4.0 (PDF, alpha_s, scale, EW in quadrature).
+(0.83%). NLO EW is shown in full (dressed leptons) and without the final-state photon sectors r_fs_53, r_fs_54
+(closer to the Born-level data, approximate). Also shown: the ATLAS prediction with NNPDF4.0, DYTurbo NNLO QCD plus NLO EW without QED FSR (MCsanc, additive;
+paper section 9), with its PDF, alpha_s, scale and EW uncertainties in quadrature.
 Writes histo/comb_W_ATLASfid/atlas_mT.png and atlas_mT.md (table)."""
 import os, sys, csv, numpy as np, matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 
@@ -13,7 +16,7 @@ NS = int(sys.argv[sys.argv.index('--seeds') + 1]) if '--seeds' in sys.argv else 
 here = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(here, '..', '..', 'data', 'hepdata_ins2895869')
 OUT = os.path.join(here, '..', 'histo', 'comb_W_ATLASfid')
-C = {'lo': '#52514e', 'nlo': '#2a78d6', 'dyt': '#eb6834', 'data': '#0b0b0b'}; GRID = '#e4e3df'
+C = {'lo': '#52514e', 'nlo': '#2a78d6', 'ew': '#1baf7a', 'ewb': '#6250d6', 'dyt': '#eb6834', 'data': '#0b0b0b'}; GRID = '#e4e3df'
 BOS = {'wp': ('plus', 'W$^+ \\to \\ell^+\\nu$'), 'wm': ('minus', 'W$^- \\to \\ell^-\\bar\\nu$')}
 
 def hepdata(name):                              #-- blocks of the csv: [header, rows...]
@@ -42,32 +45,44 @@ for j, b in enumerate(('wp', 'wm')):
     nn = next(x for x in blk if 'NNPDF40' in x[0][3]); t = np.array([[float(v) for v in r] for r in nn[1:]])
     dyt, dyterr = t[:, 3] * 1e3, band(t * 1e3, range(6, t.shape[1], 2))
     lo, _ = histo(f'W_ATLASfid_{b}_lo_sum10.histo', 0.1); nlo, nloerr = histo(f'{b}_nloqcd_total.histo', 1 / NS)
-    lo, nlo, nloerr = lo / w[:, None], (lo + nlo) / w[:, None], nloerr / w
+    curves = [(lo, C['lo'], 'LO'), (lo + nlo, C['nlo'], 'LO + NLO QCD (this code)')]
+    if os.path.exists(os.path.join(OUT, f'{b}_nloewk_total.histo')):
+        ew, _ = histo(f'{b}_nloewk_total.histo', 1 / NS)
+        fs = sum(histo(f'{b}_nloewk_ns_{s}_sum{NS}.histo', 1 / NS)[0] for s in ('r_fs_53', 'r_fs_54'))
+        curves += [(lo + nlo + ew, C['ew'], 'LO + NLO QCD + NLO EW (dressed)'),
+                   (lo + nlo + ew - fs, C['ewb'], 'LO + NLO QCD + NLO EW without FS photons')]
+    curves = [(y / w[:, None], c, l) for y, c, l in curves]; lo, nlo = curves[0][0], curves[1][0]
     top, bot = axes[0, j], axes[1, j]
-    for y, col, lab in ((lo, C['lo'], 'LO'), (nlo, C['nlo'], 'LO + NLO QCD (this code)')):
+    for y, col, lab in curves:
         top.stairs(y[:, 0], e, baseline=None, color=col, lw=1.4, label=lab)
         top.stairs(y.max(1), e, baseline=y.min(1), fill=True, color=col, alpha=0.25, lw=0)
         bot.stairs(y[:, 0] / data, e, baseline=None, color=col, lw=1.3)
         bot.stairs(y.max(1) / data, e, baseline=y.min(1) / data, fill=True, color=col, alpha=0.25, lw=0)
-    top.stairs(dyt, e, baseline=None, color=C['dyt'], lw=1.2, ls='--', label='DYTurbo NNLO QCD, NNPDF4.0 (ATLAS)')
+    top.stairs(dyt, e, baseline=None, color=C['dyt'], lw=1.2, ls='--', label='ATLAS: DYTurbo NNLO QCD + NLO EW without QED FSR, NNPDF4.0')
     bot.stairs(dyt / data, e, baseline=None, color=C['dyt'], lw=1.1, ls='--')
     bot.stairs((dyt + dyterr) / data, e, baseline=(dyt - dyterr) / data, fill=True, color=C['dyt'], alpha=0.18, lw=0)
     xc = np.sqrt(lo_e * hi_e)                   #-- markers at the geometric bin centre (log x axis)
     top.errorbar(xc, data, yerr=derr, fmt='o', ms=4, color=C['data'], lw=1.1, label='ATLAS 140 fb$^{-1}$ (e + $\\mu$)')
     bot.errorbar(xc, np.ones_like(data), yerr=derr / data, fmt='o', ms=4, color=C['data'], lw=1.1)
-    top.set_yscale('log'); top.set_title(label, loc='left', fontsize=12); top.set_ylabel('d$\\sigma$/d$m_T$ [fb/GeV]')
-    bot.set_ylabel('ratio to data'); bot.set_xlabel('$m_T$ [GeV]'); bot.set_xscale('log'); bot.set_ylim(0.7, 1.3)
+    top.set_yscale('log'); top.set_ylim(0.3 * min(data.min(), lo[:, 0].min()), 2 * data.max())
+    top.set_title(label, loc='left', fontsize=12); top.set_ylabel('d$\\sigma$/d$m_T$ [fb/GeV]')
+    bot.set_ylabel('ratio to data'); bot.set_xlabel('$m_T$ [GeV]'); bot.set_xscale('log'); bot.set_ylim(0.6, 1.6)
+    bot.set_xticks([200, 300, 500, 1000, 2000, 5000], ['200', '300', '500', '1000', '2000', '5000']); bot.minorticks_off()
     for a in (top, bot):
         a.grid(True, color=GRID, lw=0.6); a.set_axisbelow(True); a.spines[['top', 'right']].set_visible(False); a.set_xlim(e[0], e[-1])
     if j == 0: top.legend(frameon=False, fontsize=9, loc='lower left')
-    table += [f'## {label.replace("$", "")}', '', '| m_T [GeV] | ATLAS | LO | LO + NLO QCD (mu/2, 2mu) | NLO / data | DYTurbo NNLO / data |',
-              '|---|---|---|---|---|---|']
-    table += [f'| {l:g}–{h:g} | {x:.4g} ± {dx:.2g} | {a[0]:.4g} | {n[0]:.4g} ({n[1]:.4g}, {n[2]:.4g}) | {n[0] / x:.3f} | {y / x:.3f} |'
-              for l, h, x, dx, a, n, y in zip(lo_e, hi_e, data, derr, lo, nlo, dyt)]
+    ew_cols = [(c[2], c[0][:, 0]) for c in curves[2:]]
+    table += [f'## {label.replace("$", "")}', '', '| m_T [GeV] | ATLAS | LO | LO + NLO QCD (mu/2, 2mu) | NLO QCD / data | '
+              + ''.join(f'{l.replace("LO + NLO QCD + ", "+ ")} / data | ' for l, _ in ew_cols) + 'ATLAS DYTurbo / data |',
+              '|---|---|---|---|---|' + '---|' * len(ew_cols) + '---|']
+    table += [f'| {l:g}–{h:g} | {x:.4g} ± {dx:.2g} | {a[0]:.4g} | {n[0]:.4g} ({n[1]:.4g}, {n[2]:.4g}) | {n[0] / x:.3f} | '
+              + ''.join(f'{v[i] / x:.3f} | ' for _, v in ew_cols) + f'{y / x:.3f} |'
+              for i, (l, h, x, dx, a, n, y) in enumerate(zip(lo_e, hi_e, data, derr, lo, nlo, dyt))]
     sig = lambda v: float(np.sum(v * w))
     table += ['', f'Fiducial total: ATLAS {sig(data):.1f} fb, LO {sig(lo[:, 0]):.1f}, LO + NLO QCD {sig(nlo[:, 0]):.1f} '
-              f'({sig(nlo[:, 1]):.1f}, {sig(nlo[:, 2]):.1f}), DYTurbo NNLO {sig(dyt):.1f}', '']
-fig.suptitle('ATLAS high-$m_T$ W (arXiv:2502.21088) against LO and NLO QCD, fiducial region of `W_ATLASfid`; bands: '
+              f'({sig(nlo[:, 1]):.1f}, {sig(nlo[:, 2]):.1f}), ' + ''.join(f'{l} {sig(v):.1f}, ' for l, v in ew_cols)
+              + f'ATLAS DYTurbo (NNLO QCD + NLO EW without FSR) {sig(dyt):.1f}', '']
+fig.suptitle(f'ATLAS high-$m_T$ W (arXiv:2502.21088) against LO, NLO QCD{" and NLO EW" if len(curves) > 2 else ""}, fiducial region of `W_ATLASfid`; bands: '
              '$\\mu_R = \\mu_F \\in [\\mu/2, 2\\mu]$, $\\mu = m_T/2$', x=0.01, ha='left', fontsize=11)
 fig.savefig(os.path.join(OUT, 'atlas_mT.png'), dpi=130, bbox_inches='tight', facecolor='#fcfcfb')
 open(os.path.join(OUT, 'atlas_mT.md'), 'w').write('\n'.join(table) + '\n')

@@ -509,6 +509,65 @@ Consistency checks:
 
 NLO EW of `W_ATLAS`: `ns v` still running (2–3 of 5 iterations after 45 h on 2026-11-27).
 
+### C. Setup B: `W_ATLASfid` against the ATLAS data (2026-11-27)
+
+Data: ATLAS high-m_T charged-current Drell-Yan, arXiv:2502.21088, HEPData ins2895869, tables `lep_physical_plus_mtw`,
+`lep_physical_minus_mtw` (e and mu combined, Born-level leptons, 140 fb^-1, 12 m_T bins from 200 GeV to 5 TeV), stored in
+`data/hepdata_ins2895869/`. Data error: statistical and all systematic sources in quadrature (larger of up/down) and the
+luminosity (0.83%). The same tables hold ATLAS's own prediction, which we only plot: DYTurbo NNLO QCD plus NLO EW
+corrections without QED final-state radiation (MCsanc, additive; paper section 9), here with NNPDF4.0.
+
+Settings: as setup A (13 TeV, `NNPDF40_nnlo_as_01180_qed`, mu = m_T/2, `-qmin 200`, `-qmin_rsc 20`, R_phot 0.1), analysis
+`W_ATLASfid`: dressed p_T,l > 65 GeV, |eta_l| < 2.4, p_T,nu > 85 GeV, 200 < m_T < 5000 GeV; histogram `mT_ATLAS` has the
+12 ATLAS bins. Separate build `f90_W_ATLASfid/` (a copy of `f90/` with `analysis=W_ATLASfid`, not in git), git `696c370`
+(`bin/mixed_ll_d7f4b55e`), partitions sfb, form; one iteration per seed, 10 seeds:
+
+| Run | Sectors per boson | Warm-up | Production per seed | Time per seed |
+|---|---|---|---|---|
+| LO | `lo ns na` | 10 x 10^6 | 1 x 5·10^7 | 0.2 h |
+| NLO QCD | `ns v`, `ns s`, `ns r_is`, `gq s`, `gq r_is`, `qg s`, `qg r_is` | 10 x 10^7 | 1 x 2.5·10^8 | 0.4–2.5 h |
+
+    cd f90_W_ATLASfid; PART=sfb,form cluster_KIT/submit.sh <boson> <corr> <ch> <sec> 10 <Nc0> 10 <Nc1> 1
+    python3 cluster_KIT/plot_lo.py --analysis W_ATLASfid
+    python3 cluster_KIT/combine_nlo.py nloqcd --analysis W_ATLASfid --its 1
+    python3 cluster_KIT/plot_atlas.py          # histo/comb_W_ATLASfid/atlas_mT.png, atlas_mT.md
+
+| Boson | sigma_LO(mu) | mu/2 | 2 mu | sigma_LO+NLO QCD(mu) | mu/2 | 2 mu | K | ATLAS | ATLAS DYTurbo |
+|---|---|---|---|---|---|---|---|---|---|
+| W+ | 1797.491 ± 0.028 | 1727.19 | 1851.46 | 2138.148 ± 0.038 | 2158.34 (+0.94%) | 2129.06 (−0.43%) | 1.190 | 2050.6 | 2058.1 |
+| W- | 1061.331 ± 0.018 | 1014.91 | 1097.10 | 1260.666 ± 0.022 | 1272.26 (+0.92%) | 1256.34 (−0.34%) | 1.188 | 1225.1 | 1209.1 |
+
+Cross sections in fb; errors from the seed spread. ATLAS totals are the sums over the 12 bins.
+
+| LO + NLO QCD / data, m_T [GeV] | 200–250 | 250–300 | 300–350 | 350–425 | 425–500 | 500–600 | 600–750 | 750–900 | 900–1100 | 1100–1400 | 1400–2000 | 2000–5000 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| W+ | 1.030 | 1.041 | 1.049 | 1.065 | 1.092 | 1.081 | 1.119 | 1.208 | 1.212 | 1.230 | 1.384 | 1.480 |
+| W- | 1.021 | 1.029 | 1.044 | 1.053 | 1.036 | 1.064 | 1.064 | 1.063 | 1.017 | 1.145 | 1.191 | 1.336 |
+| data error (W+) | 2.3% | 2.1% | 2.1% | 2.1% | 2.2% | 2.3% | 2.6% | 3.6% | 4.6% | 6.0% | 10.7% | 24% |
+
+The ATLAS DYTurbo prediction is within 0–3% of the data up to 600 GeV. Without NLO EW our LO + NLO QCD lies 2–5% above
+the data at low m_T and increasingly above at high m_T, about what the NLO EW correction of setup A (−5% at 200 GeV,
+−17% at 1 TeV, −26% at 2 TeV) and NNLO QCD would remove. NLO EW for `W_ATLASfid` (9 sectors per boson, 10 seeds) was
+submitted on 2026-11-27; it will be shown in full (dressed leptons) and without the final-state photon sectors `ns r_fs_53/54`,
+which is closer to the Born-level data and to ATLAS's EW correction without QED final-state radiation.
+
+![W_ATLASfid against ATLAS](plots/benchmark/W_ATLASfid/atlas_mT.png)
+![W_ATLASfid W+ LO and LO + NLO QCD](plots/benchmark/W_ATLASfid/nloqcd_wp_lo_nlo.png)
+![W_ATLASfid W- LO and LO + NLO QCD](plots/benchmark/W_ATLASfid/nloqcd_wm_lo_nlo.png)
+
+The comparison with ATLAS uses the 12 ATLAS bins (histogram `mT_ATLAS`); the two LO / NLO QCD plots use the 10 GeV
+bins of histogram `mT` (same events, same totals).
+
+Consistency checks:
+- Errors: NLO QCD seed spread 0.025 (W+), 0.013 fb (W-) against histogram 0.039, 0.022.
+- gq = qg: `s` −39.6163 both (W+), −32.2472 / −32.2473 (W-); `r_is` 33.8986 / 33.8922 (W+), 23.8328 / 23.8379 (W-),
+  within the errors (0.006, 0.003).
+- Histograms: every histogram sums to the total rate (to 10^-13 relative); the five |eta_l| histograms (one per m_T bin
+  of ATLAS Table 1) add up to the rate between 200 and 2000 GeV.
+- Acceptance of the fiducial cuts at LO: 87.9% (W+), 83.2% (W-) of setup A.
+- K factor 1.19 for both bosons; `ns v` and `ns s` cancel to a large extent (−340.75 and +729.82 fb for W+), as in setup A.
+- The ATLAS bin edges and the |eta_l| binning are those of HEPData (checked when the analysis was written).
+
 ### Planned: full NNLO run (`W_incl`, all channels)
 
 All 111 sectors per boson (no VV, no `nf` pieces), 100 seeds per sector:
