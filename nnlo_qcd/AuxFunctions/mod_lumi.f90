@@ -14,6 +14,7 @@ contains
 
     f1 = zero
     f2 = zero
+    if (z1 >= one .or. z2 >= one) return   !-- unphysical momentum fraction (e.g. boosted xi = x/z > 1): no PDF
 
     x1 = real(z1,kind=dp15)
     x2 = real(z2,kind=dp15)
