@@ -1,6 +1,6 @@
 !-- observables and cumulative observables. Format must be !-- xxx = number, with these spaces
-!-- Nobs = 17
-!-- Nnoncum = 16
+!-- Nobs = 22
+!-- Nnoncum = 21
 !-- cutname = 'fid1' !-- maximum 50 characters
 
 subroutine init_histo_w()
@@ -123,7 +123,42 @@ subroutine init_histo_w()
 
   !-- cumulative below
 
-  !#17
+  !#17: validation cut set B (bin 1 passes, bin 2 fails), PLAN 12
+  nhisto = nhisto + 1
+  Histo(nhisto)%obs_code="cutset_B"
+  Histo(nhisto)%LowLimit=zero
+  Histo(nhisto)%UpLimit=two
+  Histo(nhisto)%Step=one
+
+  !#18: validation cut set C (bin 1 passes, bin 2 fails), PLAN 12
+  nhisto = nhisto + 1
+  Histo(nhisto)%obs_code="cutset_C"
+  Histo(nhisto)%LowLimit=zero
+  Histo(nhisto)%UpLimit=two
+  Histo(nhisto)%Step=one
+
+  !#19: validation cut set D (bin 1 passes, bin 2 fails), PLAN 12
+  nhisto = nhisto + 1
+  Histo(nhisto)%obs_code="cutset_D"
+  Histo(nhisto)%LowLimit=zero
+  Histo(nhisto)%UpLimit=two
+  Histo(nhisto)%Step=one
+
+  !#20: validation cut set E (bin 1 passes, bin 2 fails), PLAN 12
+  nhisto = nhisto + 1
+  Histo(nhisto)%obs_code="cutset_E"
+  Histo(nhisto)%LowLimit=zero
+  Histo(nhisto)%UpLimit=two
+  Histo(nhisto)%Step=one
+
+  !#21: validation cut set F (bin 1 passes, bin 2 fails), PLAN 12
+  nhisto = nhisto + 1
+  Histo(nhisto)%obs_code="cutset_F"
+  Histo(nhisto)%LowLimit=zero
+  Histo(nhisto)%UpLimit=two
+  Histo(nhisto)%Step=one
+
+  !#22
   nhisto = nhisto + 1
   Histo(nhisto)%obs_code="c_pT(W)"
   Histo(nhisto)%LowLimit=zero
@@ -369,8 +404,15 @@ subroutine cut_histo_w(xa,xb,nprod,pprod,makecut,binarray,weightarray,mu,partid)
   Obs(14)  = 0.5_dp
   Obs(15)  = ptl
   Obs(16)  = ptl
+  !-- validation cut sets (PLAN 12): 0.5 = passes, 1.5 = fails
+  Obs(17) = merge(0.5_dp, 1.5_dp, ptl > 15._dp .and. ptmiss > 15._dp .and. abs(etal) < 2.4_dp)
+  Obs(18) = merge(0.5_dp, 1.5_dp, ptl > 45._dp)
+  Obs(19) = merge(0.5_dp, 1.5_dp, ptmiss > 45._dp .and. abs(etal) < 2.4_dp)
+  Obs(20) = merge(0.5_dp, 1.5_dp, ptl > 30._dp .and. ptmiss > 20._dp .and. abs(etal) < 2.4_dp .and. &
+                  (abs(etal) < 0.8_dp .or. abs(etal) > 1.6_dp) .and. mtw > 55._dp)
+  Obs(21) = merge(0.5_dp, 1.5_dp, ptl > 25._dp .and. ptmiss > 25._dp .and. abs(etal) > 2._dp .and. abs(etal) < 2.4_dp)
   !-- cumulative
-  Obs(17) = ptll ! new since phton tag rv check
+  Obs(22) = ptlnu ! new since phton tag rv check (was the unset ptll)
 
   call find_bin(Obs,binarray,weightarray)
 
