@@ -256,7 +256,7 @@ contains
        call cut_histo_w(xi1,xi2,4,VProc%AmpMom,makecut,binarray,weightarray,mu)
        if (makecut) return
 
-       call setscale(mu,muR,muF)
+       call setscale(mu,muF,muR)
        call get_pdf(xi1,xi2,muF,f1,f2)
        call get_prefactor(muR,1,pref)
 
@@ -315,7 +315,7 @@ contains
     call cut_histo_w(xi1,xi2,4,SubProc%AmpMom,makecut,binarray,weightarray,mu)
     if (makecut) return
 
-    call setscale(mu,muR,muF)
+    call setscale(mu,muF,muR)
     call get_prefactor(muR,1,pref)
     muFsq = muF**2
     if (do_nlo_qqb .eq. 1) then
