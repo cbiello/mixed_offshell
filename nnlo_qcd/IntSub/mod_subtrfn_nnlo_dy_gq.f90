@@ -393,8 +393,8 @@ contains
     seca0 = PTC_A_g_qg_qstar(z,zmin,xx,zero)
     secc0 = PTC_C_g_qg_qstar(z,zmin,xx,zero)
     if (withmax) then
-       seca = PTC_A_g_qg_qstar(z,zmin,xx,x3)
-       secc = PTC_C_g_qg_qstar(z,zmin,xx,x3)
+       seca = PTC_A_g_qg_qstar(z,zmin,xx,xx3)
+       secc = PTC_C_g_qg_qstar(z,zmin,xx,xx3)
     endif
 
 
@@ -410,8 +410,8 @@ contains
     secd0 = PTC_D_g_qg_qstar(z,zmin,xx,zero)
 
     if (withmax) then
-       secb = PTC_B_g_qg_qstar(z,zmin,xx,x3)
-       secd = PTC_D_g_qg_qstar(z,zmin,xx,x3)
+       secb = PTC_B_g_qg_qstar(z,zmin,xx,xx3)
+       secd = PTC_D_g_qg_qstar(z,zmin,xx,xx3)
     endif
 
     wghtbd = -one/x1/x2*two

@@ -63,8 +63,8 @@ contains
     secc0 = PTC_C_q_qqb_qst(z,zmin,xx,zero)
 
     if (withmax) then
-       seca = PTC_A_q_qqb_qst(z,zmin,xx,x3)
-       secc = PTC_C_q_qqb_qst(z,zmin,xx,x3)
+       seca = PTC_A_q_qqb_qst(z,zmin,xx,xx3)
+       secc = PTC_C_q_qqb_qst(z,zmin,xx,xx3)
     endif
 
     wghtac = -one/x1/x2
@@ -74,8 +74,8 @@ contains
     secb0 = PTC_B_q_qqb_qst(z,zmin,xx,zero)
     secd0 = PTC_D_q_qqb_qst(z,zmin,xx,zero)
     if (withmax) then
-       secb = PTC_B_q_qqb_qst(z,zmin,xx,x3)
-       secd = PTC_D_q_qqb_qst(z,zmin,xx,x3)
+       secb = PTC_B_q_qqb_qst(z,zmin,xx,xx3)
+       secd = PTC_D_q_qqb_qst(z,zmin,xx,xx3)
     endif
 
     ! debug
