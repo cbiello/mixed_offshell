@@ -143,7 +143,7 @@ contains
     call random_seed(size=sizeseed)
     allocate (iseed(sizeseed))
     iseed = 0
-    iseed(1) = 123456789
+    iseed(1) = 123456789 + seed   !-- follows seed=, so runs with different seeds are independent (seed 0 unchanged)
     call random_seed(put=iseed)
     deallocate(iseed)
 
