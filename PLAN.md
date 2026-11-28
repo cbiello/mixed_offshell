@@ -573,6 +573,8 @@ the data at low m_T and increasingly above at high m_T, about what the NLO EW co
 −17% at 1 TeV, −26% at 2 TeV) and NNLO QCD would remove. NLO EW for `W_ATLASfid` (9 sectors per boson, 10 seeds) was
 submitted on 2026-11-27; it will be shown in full (dressed leptons) and without the final-state photon sectors `ns r_fs_53/54`,
 which is closer to the Born-level data and to ATLAS's EW correction without QED final-state radiation.
+Status 2026-11-28 15:40: all 18 warm-ups done (grids written, no NaN points); the 180 seeds are queued (priority,
+behind the full NNLO run).
 
 ![W_ATLASfid against ATLAS](plots/benchmark/W_ATLASfid/atlas_mT.png)
 ![W_ATLASfid W+ LO and LO + NLO QCD](plots/benchmark/W_ATLASfid/nloqcd_wp_lo_nlo.png)
@@ -603,6 +605,13 @@ Cost from the cluster times of the small NNLO q qbar' run (2026-11-26; other cha
 about 4,100 CPU-h of warm-up and 343,000 CPU-h of production, ≈ 348,000 CPU-h and 22,422 jobs for both bosons (≈ 38,000
 CPU-h with 10 seeds); longest single job about 4 days (`ns_ga rr_5262c`, `rvewk_is`). To start after C4.9 (resolved).
 
+Status (`RUN=nnlo_full`): all 222 warm-ups done (2026-11-27/28); production with one iteration of 10 times the listed
+points per seed (the iteration weighting of Vegas is biased by rare large weights, as seen in the `s_oewk_is`
+warm-ups), 100 seeds per sector, submitted for all 222 sectors. On 2026-11-28 15:42: 11,530 of 22,200 seeds done,
+3,331 running (albatros, hpc, moon, empire), the rest pending; 87 sectors complete; no failed job, no STOP or runtime
+error; NaN points only in W+ `ns_qqb` `rr_5161a` (248 points in 85 seeds), `rr_5161c`, `rr_5262a`, `rr_5262c`
+(negligible). Expected to finish on 2026-11-29.
+
 ## 12. NNLO QCD from the external code (`nnlo_qcd/`)
 
 Goal: the NNLO QCD corrections for the ATLAS comparison (setup B, `W_ATLASfid`), computed with a separate code and added
@@ -615,7 +624,8 @@ soft-collinear subtraction; LO, NLO (`r`, `v`, `s`) and NNLO sectors (`vv`; `rv`
 `sub124` in ns, qg, gq, gg; RR sectors `rr4151a`...`rr4252d` in ns, qg, gq, s, gg); limit checks (`corr=limnlo`,
 `limnnlo`). Aligned in 2021 with the mixed QCD x EW code of arXiv:2009.10386 (same EW parameters and histogramming).
 Options as `key=value`: `corr`, `sec`, `ch`, `mu`, `xMuR`, `xMuF`, `vegasNc0/1`, `vegasIt0/1`, `seed`, `runname`,
-`pdford`; output `histo/<runname>_<corr>[_<sec>][_<ch>]_xMuR_..._xMuF_....histo` in fb (histogram 17 = total rate).
+`pdford`; output `histo/<runname>_<corr>[_<sec>][_<ch>]_xMuR_..._xMuF_....histo` in fb (histogram 1 = total rate;
+since `49a2f3f` histograms 17–21 are the validation cut sets B–F below and 22 is the cumulative p_T(W)).
 
 As imported it differs from setup B:
 
@@ -635,7 +645,7 @@ corrections at NNLO QCD act on the quark line only.
 |---|---|
 | 1. Import unchanged as `nnlo_qcd/` (`5a2bc34`, `nnlo_qcd/IMPORT.md`; working clone `nnlo_qcd_src/` not in git) | ✅ 2026-11-27 |
 | 2. Build on ttpmarvin: `cd nnlo_qcd; mkdir -p objects modules histo; make Iam=ttpmarvin` (gfortran, LHAPDF 6.2.0; 24 s) (`caac068`) | ✅ 2026-11-27 |
-| 3. Reproduce the published LO and NLO QCD numbers as imported; validate NNLO QCD | 🔧 LO, NLO done; NNLO open |
+| 3. Reproduce the published LO and NLO QCD numbers as imported; validate NNLO QCD | ✅ 2026-11-28: published LO, NLO reproduced; NNLO QCD validated against MCFM (below) |
 | 4. Adapt step by step, each a separate commit checked against `f90/` at LO and NLO QCD: off-shell phase space with `-qmin 200`, EW input and complex-mass scheme, NNPDF4.0, mu = m_T/2, W-, `W_ATLASfid` analysis and histogram format | ❌ |
 | 5. NNLO QCD on the cluster for setup B; combine LO + NLO QCD + NNLO QCD + NLO EW + mixed QCD x EW; compare with ATLAS | ❌ |
 
@@ -663,13 +673,156 @@ accumulated error of the production iterations (`fort.15`); for the fiducial `r`
 iteration each (seed spread 4.5 pb, quoted error per seed 4.3 pb: the errors are reliable; the first run of 3 iterations
 gave 86.7 ± 2.8 pb).
 
-Reading the output: `Chisto17` in the log and the histogram file are rewritten after every iteration, warm-up included,
+Reading the output: `Chisto17` (now `Chisto22`) in the log and the histogram file are rewritten after every iteration, warm-up included,
 so a run is finished only when `fort.15` has all its lines (warm-up plus production iterations) and the process has
 ended. (A first version of this table, commit `9fa9600`, quoted values read before the runs had finished: fiducial NLO
 "1154 ± 8 pb, about 2 sigma high" and "the real-emission sector fluctuates by 25% per run" were artefacts of that.)
 
 Neither paper gives an NNLO QCD number (arXiv:2009.10386 computes the mixed QCD x EW corrections and cites earlier work
-for NNLO QCD; arXiv:2103.02671 uses them for the W mass). NNLO QCD validation plan:
-1. the code's limit checks (`corr=limnnlo`) for every NNLO sector, as C1.5 for `f90/`;
-2. an inclusive NNLO run on the cluster (about 30 sectors): scale dependence, stability across seeds;
-3. an independent reference with the same input: DYTurbo or MATRIX, inclusive and fiducial.
+for NNLO QCD; arXiv:2103.02671 uses them for the W mass), so NNLO QCD is validated below.
+
+### NNLO QCD validation (2026-11-28)
+
+Done as asked: a review of the code; an independent reference code, freshly downloaded and unmodified; benchmarks in
+exclusive, invented cuts; internal checks of the limits and of the technical cut-offs. Everything ran on ttpmarvin with
+at most 4 cores (nothing on the cluster). Setups A and B follow in step 4, once the code is off shell.
+
+**Code review** (four parallel reviews: integrated counterterms, amplitudes and luminosities, the RR/RV/VV sectors, phase
+space). No physics error in the paths used in production:
+- the integrated counterterms (`IntSub/`) agree with arXiv:1902.02081 to 8 digits or better;
+- the amplitudes, luminosities, constants, RV and VV are correct;
+- the double-real phase space reproduces the analytic volume, and every limit configuration matches its real one.
+
+Fixes, none of which changes the published numbers of step 3 (rechecked with the same seed where it could matter):
+
+| Commit | Fix |
+|---|---|
+| `d8efe01` | the lepton-decay random numbers follow `seed=` (they had a fixed seed, so runs with different seeds were correlated; seed 0 unchanged) |
+| `9b2a1e5` | NLO `v` and `s` called `setscale(mu,muR,muF)`, swapping mu_R and mu_F; no effect for xMuR = xMuF |
+| `d8561e0` | `get_pdf` returns zero for x >= 1 (boosted x/z > 1 in gg `sub12`; LHAPDF 6.2 already returned zero) |
+| `bc9e795` | the numerical triple-collinear check path passed `x3` instead of `xx3`; production uses the analytic forms |
+| `49a2f3f` | the cumulative p_T(W) histogram is filled with `ptlnu` (was the unset `ptll`); cut sets B–F as histograms 17–21 |
+
+For step 4:
+- NNLO is consistent only for mu_R = mu_F (the integrated counterterms use mu_F only), so both scales vary together;
+- off shell: with `_PhaseSpaceType=2` the m_lnu range differs between pieces, the Breit-Wigner sampling uses `mz`,
+  `gaz`, and the luminosities exist for W+ only;
+- the makefile does not track module dependencies: always rebuild from empty `objects/` and `modules/`;
+- the options `buff=`, `buffrr=`, `bufftc=`, `buffrv=` take the base-10 exponent (`buffrr=-7` is 10^-7); a value such as
+  `buff=1e-7` gives buff ≈ 1 and NaN momenta, and the run stops with exit code 0 ("th-v0 NaN");
+- `buff` restricts every Vegas variable to [buff, 1 − buff]; for the lepton angle this leaves a bias of order sqrt(buff)
+  (measured below).
+
+**Limit checks** (`corr=limnlo`, `limnnlo`): NLO `r`, `sub124` and `rv` in ns, qg, gq, the ten RR sectors in ns, qg,
+gq, s and `rr` gg, 48 checks at limcheck = 10^-3 ... 10^-7 with 20 points each (240 runs).
+- Every counterterm approaches its real: the median deviation falls like limcheck in the soft limits (slope 0.85–1.2)
+  and like sqrt(limcheck) in the collinear ones (0.4–0.7); in the b and d sectors the C54 counterterm matches to about
+  5·10^-8.
+- The nested triple-collinear limits (`tcc5`, `tcc5s5`, `dstcc5`, `dstcc5s5`) converge down to 10^-5 or 10^-6 and then
+  lose precision: real and counterterms grow like a high power of 1/limcheck and cancel to double precision, so the
+  subtracted integrand there is round-off.
+- 62 limit points print no counterterm while the real grows (slope −0.9 to −2.1). All are in qg, gq and s and involve
+  parton 5, a quark there: a soft quark needs no counterterm. No ns point is affected.
+- These checks cannot decide integrability at the multi-variable points; the integrations below do (no dependence on
+  the cut-offs, agreement with MCFM in the cut sets where only real emission contributes).
+
+**Reference: MCFM 10.3.1** (jettiness slicing), downloaded on 2026-11-27 from `mcfm.fnal.gov` (sha256
+`db52a8d8...4913fd`), built unmodified with its bundled LHAPDF 6.5.1 in `/x/signorile/validation/mcfm/`. Process 1
+(W+ -> nu e+) from MCFM's `input_W+.ini` with the input of `nnlo_qcd/`: 13 TeV, narrow on-shell W (`zerowidth`), G_mu
+scheme (`ewscheme = 1`) with M_W = 80.398, Gamma_W = 2.1054, M_Z = 91.1876 GeV, diagonal CKM, `NNPDF31_nnlo_as_0118_luxqed`
+at all orders, mu_R = mu_F = 40.199 GeV. (With the full CKM MCFM gives 5217.9 pb for LO B, so the diagonal CKM is what
+`nnlo_qcd/` uses.) Precision goals 2·10^-3 (NLO), 10^-2 (NNLO coefficient), default tau cut; 2 threads. Inputs and
+logs in `/x/signorile/validation/runs/mcfm/` (`mkini.py`, `run_mcfm.sh`).
+
+**Cut sets** (lepton = e+, missing p_T = neutrino):
+
+| Set | Cuts |
+|---|---|
+| A | none |
+| B | p_T,l > 15 GeV, p_T,miss > 15 GeV, abs(eta_l) < 2.4 (arXiv:2009.10386) |
+| C | p_T,l > 45 GeV |
+| D | p_T,miss > 45 GeV, abs(eta_l) < 2.4 |
+| E | p_T,l > 30 GeV, p_T,miss > 20 GeV, abs(eta_l) < 2.4 outside 0.8 < abs(eta_l) < 1.6, m_T > 55 GeV |
+| F | p_T,l > 25 GeV, p_T,miss > 25 GeV, 2 < abs(eta_l) < 2.4 |
+
+C and D vanish at LO (an on-shell W without recoil gives p_T <= M_W/2 = 40.2 GeV), so there NLO is W + jet at LO and
+NNLO is W + jet at NLO: a direct test of the RR, RV and `sub124` sectors away from the Born kinematics (`vv`, `subv`,
+`sub12` are exactly zero there). `nnlo_qcd/` ran with builds that apply a cut set as the global cut so that Vegas
+adapts to it (`/x/signorile/validation/builds/`: `nnlo_qcd_cutB`, `_cutC`, `_cutCD` = C or D; one or two changed
+lines in `Histograms/cut_histo_w.f90` of `49a2f3f`), otherwise the inclusive build; per sector a warm-up and one
+production iteration per seed, plain mean over the seeds (section 11). Runs in `/x/signorile/validation/runs/nnloqcd/`.
+
+**Results** (pb; NLO and NNLO are the coefficients, i.e. the corrections; difference in combined sigma; tables from
+`runs/val_summary.py`):
+
+| LO | nnlo_qcd | MCFM | Difference |
+|---|---|---|---|
+| A | 8811.08 ± 3.79 | 8810.64 ± 1.71 | +0.1 |
+| B | 5193.73 ± 1.03 | 5194.32 ± 2.56 | -0.2 |
+| C | 0 (exact) | 0 (exact) | — |
+| D | 0 (exact) | 0 (exact) | — |
+| E | 2116.02 ± 1.16 | 2115.48 ± 0.99 | +0.4 |
+| F | 677.22 ± 0.52 | 677.11 ± 0.31 | +0.2 |
+
+| NLO | nnlo_qcd | MCFM | Difference |
+|---|---|---|---|
+| A | 2533.97 ± 2.96 | 2533.12 ± 2.43 (not final) | +0.2 |
+| B | 1138.39 ± 1.57 | 1137.32 ± 1.21 | +0.5 |
+| C | 799.62 ± 1.22 | 799.59 ± 0.34 | +0.0 |
+| D | 633.03 ± 1.82 | 632.41 ± 0.32 | +0.3 |
+| E | 447.10 ± 2.91 | 446.15 ± 0.87 | +0.3 |
+| F | 65.59 ± 1.64 | 65.98 ± 0.17 (not final) | -0.2 |
+
+| NNLO | nnlo_qcd | MCFM, default tau cut | MCFM, tau-cut fit to 0 | Difference (default; fit) |
+|---|---|---|---|---|
+| C | 329.09 ± 3.91 | 331.24 ± 1.03 | 329.72 ± 1.07 | -0.5; -0.2 |
+| D | 270.10 ± 4.15 | 265.81 ± 0.90 | 264.59 ± 0.91 | +1.0; +1.3 |
+
+Sources of the `nnlo_qcd/` numbers: LO A with the inclusive build, B, E, F with the cut-B build (2·10^7 points); NLO A,
+C, D with the inclusive build (C, D: real emission only), B, E, F with the cut-B build (`r` 12 seeds, `s` 4, `v` 2);
+NNLO with the C-or-D build, all 48 non-zero sectors (231 runs on 2026-11-28 15:46; 132 more seeds of the sectors with
+the largest variance are running, the D difference may still move). MCFM "(not final)": the latest intermediate
+result (A: the warm-up of an earlier run; F: still integrating towards its 2·10^-3 goal). MCFM's tau-cut fit is its
+own extrapolation of the tau-cut dependence to zero (−1.52 ± 0.29 pb for C, −1.22 ± 0.18 pb for D); below the cut
+both sets are exactly zero.
+
+Heavy tails: single production iterations occasionally catch a large weight. For example, `rr4251` gq seed 3 gives
++12.7 ± 48.8 pb, against −34 to −42 ± 3 pb for the other seeds; it is one point that passes D but not C. As in
+production (section 11), the plain mean over many seeds keeps these unbiased; the sectors with the largest variance get
+up to 18 seeds, `rr4251` gq 60.
+
+**Technical cut-offs.**
+- `buffrr` (lower cut on the product E4·E5·rho1·rho2 of the RR variables): the defaults are small (10^-10 to 10^-11)
+  except in the b (10^-6) and d (10^-7) sectors, so these were varied, 10^-2 to 10^2 times the default, inclusive
+  build, 2 seeds each (`runs/nnloqcd/scan_summ.py`). Sum of `rr4151b`, `rr4252b`, `rr4151d`, `rr4252d`, in pb:
+
+  | buffrr / default | 10^-2 | 10^-1 | 1 | 10 | 10^2 |
+  |---|---|---|---|---|---|
+  | gq + qg + s | −261.62 ± 0.64 | −261.54 ± 0.56 | −261.53 ± 0.55 | −261.07 ± 0.54 | −258.30 ± 0.53 |
+  | ns | −53.8 ± 100.7 | −20.0 ± 3.9 | −25.20 ± 0.34 | −24.92 ± 0.17 | −25.08 ± 0.16 |
+
+  Same seeds, so the differences are much more precise than the errors. In gq, qg, s the result moves like a power of
+  about 0.85 of buffrr, +0.46 pb at 10 times the default; the bias left at the default is about +0.1 pb (0.04% of these
+  sectors), as the smaller values confirm. In ns there is no visible dependence (0.3 pb) above the default, while below
+  it the variance explodes (single seeds off by up to 50 pb) and at 10^-2 times the default double precision fails
+  (weights of 10^13 fb, NaN and Inf in `rr4151d` ns): the defaults sit just above the round-off region. No NaN or Inf
+  at the defaults, none in the C/D runs either.
+- `buff` (every Vegas variable in [buff, 1 − buff], default 10^-9), inclusive build, same seed, in pb:
+
+  | buff | 10^-9 | 10^-7 | 10^-5 |
+  |---|---|---|---|
+  | LO | 8810.0 ± 2.5 | 8808.0 ± 2.6 | 8782.0 ± 2.7 |
+  | NLO `r` | 611.0 ± 2.2 | 610.2 ± 2.0 | 606.1 ± 2.0 |
+  | NNLO `sub124` gq | 809.3 ± 3.7 | 809.6 ± 3.6 | 806.1 ± 3.4 |
+  | NNLO `sub124` ns | 514.5 ± 2.0 | 514.0 ± 1.9 | 512.4 ± 1.8 |
+
+  The shift grows like sqrt(buff) (LO: −2 pb at 10^-7, −28 pb at 10^-5), so at the default it is about −3·10^-5 of
+  the result (−0.3 pb at LO), as the review estimated from the lepton angle; negligible.
+- `bufftc` and `buffrv` are not used in the production paths; E_max is not a parameter of this code (the energies are
+  E4 = x1·sqrt(s)/2 and E5 = x1·x2·sqrt(s)/2, so E_max = sqrt(s)/2).
+
+**Conclusion.** For on-shell W+ with the input of the code, `nnlo_qcd/` agrees with MCFM in all six cut sets at LO and
+NLO (within 0.5 sigma, at 0.1–0.4% precision) and at NNLO in C and D, where the NNLO coefficient is W + jet at NLO and
+tests the RR, RV and `sub124` sectors directly (C 0.2 sigma at 1.2% precision; D 1.3 sigma at 1.6%, being refined). The technical cut-offs bias the cross section by a
+few 10^-5 at most. The NNLO QCD of `nnlo_qcd/` is validated for the on-shell process;
+step 4 (off shell, input of setups A and B) is checked at LO and NLO against `f90/` and at NNLO against these numbers.
